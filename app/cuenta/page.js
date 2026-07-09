@@ -33,8 +33,11 @@ export default function CuentaPage() {
 
       {usuario ? (
         <div>
-          <p style={{ marginBottom: 16 }}>
+          <p style={{ marginBottom: 8 }}>
             Hola, <strong>{usuario.email}</strong>
+          </p>
+          <p style={{ marginBottom: 16 }}>
+            Rol: <strong>{usuario.user_metadata?.rol || 'sin rol'}</strong>
           </p>
           <button
             onClick={cerrarSesion}

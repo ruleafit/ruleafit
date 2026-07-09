@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabaseClient'
 export default function RegistroPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rol, setRol] = useState('cliente')
   const [mensaje, setMensaje] = useState('')
 
   async function handleRegistro(e) {
@@ -15,12 +16,15 @@ export default function RegistroPage() {
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
+      options: {
+        data: { rol: rol },
+      },
     })
 
     if (error) {
       setMensaje('Error: ' + error.message)
     } else {
-      setMensaje('¡Cuenta creada! Revisa tu email para confirmar.')
+      setMensaje('¡Cuenta creada como ' + rol + '!')
     }
   }
 
@@ -31,6 +35,24 @@ export default function RegistroPage() {
       </h1>
 
       <form onSubmit={handleRegistro}>
+        <p style={{ fontWeight: 'bold', marginBottom: 8 }}>Quiero usar Openfit como:</p>
+        <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+          <button
+            type="button"
+            onClick={() => setRol('cliente')}
+            style={{ flex: 1, padding: 12, borderRadius: 8, cursor: 'pointer', border: rol === 'cliente' ? '2px solid #B5E600' : '1px solid #ccc', background: rol === 'cliente' ? '#f5fbe0' : 'white', fontWeight: 'bold' }}
+          >
+            Cliente
+          </button>
+          <button
+            type="button"
+            onClick={() => setRol('entrenador')}
+            style={{ flex: 1, padding: 12, borderRadius: 8, cursor: 'pointer', border: rol === 'entrenador' ? '2px solid #B5E600' : '1px solid #ccc', background: rol === 'entrenador' ? '#f5fbe0' : 'white', fontWeight: 'bold' }}
+          >
+            Entrenador
+          </button>
+        </div>
+
         <input
           type="email"
           placeholder="Tu email"
