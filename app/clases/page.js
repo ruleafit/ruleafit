@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { supabase } from '../../lib/supabaseClient'
+import BotonReservar from '../../components/BotonReservar'
 
 const MapaClases = dynamic(() => import('../../components/MapaClases'), {
   ssr: false,
@@ -76,6 +77,12 @@ export default function ClasesPage() {
   const [filtroCategoria, setFiltroCategoria] = useState('Todas')
   const [filtroCuando, setFiltroCuando] = useState('Todas')
   const [filtroFranja, setFiltroFranja] = useState('Todas')
+
+  function handleReservado(claseId, nuevasPlazasOcupadas) {
+    setClases((prev) =>
+      prev.map((c) => (c.id === claseId ? { ...c, plazas_ocupadas: nuevasPlazasOcupadas } : c))
+    )
+  }
 
   async function copiarCoordenadas(id, texto) {
     try {
@@ -243,6 +250,10 @@ export default function ClasesPage() {
                           style={{ width: `${porcentajeOcupado}%` }}
                         />
                       </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <BotonReservar clase={clase} onReservado={(nuevasPlazasOcupadas) => handleReservado(clase.id, nuevasPlazasOcupadas)} />
                     </div>
 
                     <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">

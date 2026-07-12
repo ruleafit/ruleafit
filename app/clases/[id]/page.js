@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { supabase } from '../../../lib/supabaseClient'
+import BotonReservar from '../../../components/BotonReservar'
 
 const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
   ssr: false,
@@ -156,6 +157,16 @@ export default function DetalleClasePage() {
             <p className="text-sm text-zinc-800">{clase.observaciones}</p>
           </section>
         )}
+
+        <section className="border-t border-zinc-200 pt-8">
+          <BotonReservar
+            clase={clase}
+            tamaño="grande"
+            onReservado={(nuevasPlazasOcupadas) =>
+              setClase((prev) => ({ ...prev, plazas_ocupadas: nuevasPlazasOcupadas }))
+            }
+          />
+        </section>
       </div>
     </div>
   )
