@@ -102,6 +102,12 @@ export default function Menu() {
             </Link>
           )}
 
+          {usuario && rol === 'cliente' && (
+            <Link href="/mis-reservas" className={enlaceClass('/mis-reservas')}>
+              Mis reservas
+            </Link>
+          )}
+
           {usuario && (
             <>
               <Link href="/cuenta" className={enlaceClass('/cuenta')}>
