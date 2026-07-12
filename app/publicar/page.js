@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { supabase } from '../../lib/supabaseClient'
 
@@ -27,7 +26,6 @@ const inputStyle = { display: 'block', width: '100%', padding: 10, marginBottom:
 const labelStyle = { fontWeight: 'bold', marginBottom: 4, display: 'block' }
 
 export default function PublicarPage() {
-  const router = useRouter()
   const [usuario, setUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)
 
@@ -52,18 +50,24 @@ export default function PublicarPage() {
   useEffect(() => {
     async function comprobarSesion() {
       const { data } = await supabase.auth.getUser()
-      if (!data.user) {
-        router.push('/login')
-        return
-      }
-      setUsuario(data.user)
+      setUsuario(data.user || null)
       setCargando(false)
     }
     comprobarSesion()
-  }, [router])
+  }, [])
+
+  const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
 
   async function handlePublicar(e) {
     e.preventDefault()
+
+    const { data } = await supabase.auth.getUser()
+    const usuarioActual = data.user
+
+    if (!usuarioActual || usuarioActual.user_metadata?.rol !== 'entrenador') {
+      setMensaje('Solo los entrenadores pueden publicar clases.')
+      return
+    }
 
     if (lat == null || lng == null) {
       setMensaje('Selecciona una ubicación en el mapa antes de publicar.')
@@ -73,7 +77,7 @@ export default function PublicarPage() {
     setMensaje('Publicando...')
 
     const { error } = await supabase.from('clases').insert({
-      trainer_id: usuario.id,
+      trainer_id: usuarioActual.id,
       titulo,
       categoria,
       modalidad,
@@ -116,6 +120,31 @@ export default function PublicarPage() {
 
   if (cargando) {
     return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
+  }
+
+  if (!usuario) {
+    return (
+      <div style={{ maxWidth: 480, margin: '60px auto', padding: 20 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20 }}>
+          Publicar una clase
+        </h1>
+        <p>
+          Debes iniciar sesión para publicar clases. Ve a{' '}
+          <a href="/login" style={{ color: '#16a34a', fontWeight: 'bold' }}>iniciar sesión</a>.
+        </p>
+      </div>
+    )
+  }
+
+  if (!esEntrenador) {
+    return (
+      <div style={{ maxWidth: 480, margin: '60px auto', padding: 20 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20 }}>
+          Publicar una clase
+        </h1>
+        <p>Solo los entrenadores pueden publicar clases.</p>
+      </div>
+    )
   }
 
   return (
