@@ -24,9 +24,9 @@ Hecho:
 - Menú de navegación (roles, indicador animado bajo enlace activo, botones de acción).
 - Detalles estéticos: formulario de /publicar centrado por secciones, tarjetas de /clases con indicador de plazas libres.
 - Filtros en /clases: por ciudad y categoría, aplicados al instante, con mensaje de estado vacío.
+- Ficha de detalle de cada clase (/clases/[id]) con mapa de solo lectura, gestión de clase no encontrada y enlace "Ver detalle" en las tarjetas.
 
 Falta:
-- [ ] Ficha de detalle de cada clase.
 - [ ] Mapa en /clases con todas las clases + filtros de fecha/franja horaria (marcador por clase, popup resumen, ocultar canceladas/pasadas).
 
 ## Fase 3 · Reservas — pendiente
