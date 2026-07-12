@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { supabase } from '../../lib/supabaseClient'
 
 const CIUDADES_FILTRO = ['Todas', 'Sevilla', 'Málaga']
@@ -163,20 +164,28 @@ export default function ClasesPage() {
                 </div>
               </div>
 
-              {clase.lat != null && clase.lng != null && (
-                <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
-                  <span className="select-all text-xs text-zinc-500">
-                    {clase.lat}, {clase.lng}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
-                    className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
-                  >
-                    {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
-                  </button>
-                </div>
-              )}
+              <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
+                {clase.lat != null && clase.lng != null && (
+                  <>
+                    <span className="select-all text-xs text-zinc-500">
+                      {clase.lat}, {clase.lng}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
+                      className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                    >
+                      {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
+                    </button>
+                  </>
+                )}
+                <Link
+                  href={`/clases/${clase.id}`}
+                  className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                >
+                  Ver detalle
+                </Link>
+              </div>
             </div>
           )
         })}
