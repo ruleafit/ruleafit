@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { supabase } from '../../lib/supabaseClient'
+
+const MapaClases = dynamic(() => import('../../components/MapaClases'), {
+  ssr: false,
+  loading: () => <p>Cargando mapa...</p>,
+})
 
 const CIUDADES_FILTRO = ['Todas', 'Sevilla', 'Málaga']
 
@@ -16,8 +22,50 @@ const CATEGORIAS_FILTRO = [
   'Otra',
 ]
 
-const filtroSelectClass =
+const FRANJAS_FILTRO = [
+  { valor: 'Todas', etiqueta: 'Todas' },
+  { valor: 'Mañana', etiqueta: 'Desde las 00:00 hasta las 13:59' },
+  { valor: 'Tarde', etiqueta: 'Desde las 14:00 hasta las 18:59' },
+  { valor: 'Noche', etiqueta: 'Desde las 19:00 hasta las 23:59' },
+]
+
+const CUANDO_FILTRO = ['Todas', 'Hoy', 'Mañana', 'Próximos 7 días', 'Próximos 30 días']
+
+const filtroCampoClass =
   'block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600] sm:w-auto'
+
+function formatearFecha(fecha) {
+  const anio = fecha.getFullYear()
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const dia = String(fecha.getDate()).padStart(2, '0')
+  return `${anio}-${mes}-${dia}`
+}
+
+function obtenerFechaHoy() {
+  return formatearFecha(new Date())
+}
+
+function sumarDias(fechaBase, dias) {
+  const fecha = new Date(fechaBase + 'T00:00:00')
+  fecha.setDate(fecha.getDate() + dias)
+  return formatearFecha(fecha)
+}
+
+function franjaDeHora(hora) {
+  if (!hora) return null
+  if (hora < '14:00') return 'Mañana'
+  if (hora < '19:00') return 'Tarde'
+  return 'Noche'
+}
+
+function coincideConCuando(fechaClase, cuando, hoy) {
+  if (cuando === 'Todas') return true
+  if (cuando === 'Hoy') return fechaClase === hoy
+  if (cuando === 'Mañana') return fechaClase === sumarDias(hoy, 1)
+  if (cuando === 'Próximos 7 días') return fechaClase >= hoy && fechaClase <= sumarDias(hoy, 6)
+  if (cuando === 'Próximos 30 días') return fechaClase >= hoy && fechaClase <= sumarDias(hoy, 29)
+  return true
+}
 
 export default function ClasesPage() {
   const [clases, setClases] = useState([])
@@ -26,6 +74,8 @@ export default function ClasesPage() {
   const [coordenadasCopiadas, setCoordenadasCopiadas] = useState(null)
   const [filtroCiudad, setFiltroCiudad] = useState('Todas')
   const [filtroCategoria, setFiltroCategoria] = useState('Todas')
+  const [filtroCuando, setFiltroCuando] = useState('Todas')
+  const [filtroFranja, setFiltroFranja] = useState('Todas')
 
   async function copiarCoordenadas(id, texto) {
     try {
@@ -59,14 +109,22 @@ export default function ClasesPage() {
     return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
   }
 
+  const hoy = obtenerFechaHoy()
+
   const clasesFiltradas = clases.filter((clase) => {
+    if (clase.estado !== 'activa') return false
+    if (clase.fecha && clase.fecha < hoy) return false
+
     const coincideCiudad = filtroCiudad === 'Todas' || clase.ciudad === filtroCiudad
     const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
-    return coincideCiudad && coincideCategoria
+    const coincideFecha = coincideConCuando(clase.fecha, filtroCuando, hoy)
+    const coincideFranja = filtroFranja === 'Todas' || franjaDeHora(clase.hora) === filtroFranja
+
+    return coincideCiudad && coincideCategoria && coincideFecha && coincideFranja
   })
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">Clases disponibles</h1>
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
@@ -74,122 +132,148 @@ export default function ClasesPage() {
       {!error && clases.length === 0 && <p className="text-sm text-zinc-500">No hay clases disponibles por ahora.</p>}
 
       {!error && clases.length > 0 && (
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-700">Ciudad</label>
-            <select value={filtroCiudad} onChange={(e) => setFiltroCiudad(e.target.value)} className={filtroSelectClass}>
-              {CIUDADES_FILTRO.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-zinc-700">Categoría</label>
-            <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className={filtroSelectClass}>
-              {CATEGORIAS_FILTRO.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
-
-      {!error && clases.length > 0 && clasesFiltradas.length === 0 && (
-        <p className="py-10 text-center text-sm text-zinc-500">
-          No hay clases que coincidan con estos filtros ahora mismo. Prueba a cambiar la ciudad o la categoría.
-        </p>
-      )}
-
-      <div className="flex flex-col gap-4">
-        {clasesFiltradas.map((clase) => {
-          const plazasMax = clase.plazas_max ?? 0
-          const plazasOcupadas = clase.plazas_ocupadas ?? 0
-          const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
-          const porcentajeOcupado = plazasMax > 0 ? Math.min((plazasOcupadas / plazasMax) * 100, 100) : 0
-
-          return (
-            <div
-              key={clase.id}
-              className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-200 motion-safe:transition-shadow motion-safe:duration-200 hover:shadow-md"
-            >
-              <div className="mb-3 flex items-center justify-between gap-2">
-                {clase.categoria && (
-                  <span className="inline-block rounded-full border border-[#B5E600] bg-[#f5fbe0] px-2.5 py-1 text-xs font-semibold text-zinc-800">
-                    {clase.categoria}
-                  </span>
-                )}
-                <span className="text-xs text-zinc-400">{clase.ciudad}</span>
-              </div>
-
-              <h2 className="mb-1 text-lg font-bold text-black sm:text-xl">{clase.titulo}</h2>
-              {clase.modalidad && <p className="mb-3 text-sm text-zinc-500">{clase.modalidad}</p>}
-
-              <div className="flex flex-col gap-1 text-sm text-zinc-500">
-                <p>
-                  Fecha: <span className="text-zinc-700">{clase.fecha}</span> · Hora:{' '}
-                  <span className="text-zinc-700">{clase.hora}</span>
-                </p>
-                {clase.duracion != null && (
-                  <p>
-                    Duración: <span className="text-zinc-700">{clase.duracion} min</span>
-                  </p>
-                )}
-                <p>
-                  Precio: <span className="font-semibold text-zinc-800">{clase.precio} €</span>
-                </p>
-                {clase.direccion && (
-                  <p>
-                    Dirección: <span className="text-zinc-700">{clase.direccion}</span>
-                  </p>
-                )}
-                {clase.punto_encuentro && (
-                  <p>
-                    Punto de encuentro: <span className="text-zinc-700">{clase.punto_encuentro}</span>
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-4">
-                <div className="mb-1 flex items-center justify-between text-xs font-medium text-zinc-600">
-                  <span>
-                    {plazasLibres}/{plazasMax} plazas libres
-                  </span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
-                  <div
-                    className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
-                    style={{ width: `${porcentajeOcupado}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
-                {clase.lat != null && clase.lng != null && (
-                  <>
-                    <span className="select-all text-xs text-zinc-500">
-                      {clase.lat}, {clase.lng}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
-                      className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
-                    >
-                      {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
-                    </button>
-                  </>
-                )}
-                <Link
-                  href={`/clases/${clase.id}`}
-                  className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
-                >
-                  Ver detalle
-                </Link>
-              </div>
+        <>
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Ciudad</label>
+              <select value={filtroCiudad} onChange={(e) => setFiltroCiudad(e.target.value)} className={filtroCampoClass}>
+                {CIUDADES_FILTRO.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </div>
-          )
-        })}
-      </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Categoría</label>
+              <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className={filtroCampoClass}>
+                {CATEGORIAS_FILTRO.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Cuándo</label>
+              <select value={filtroCuando} onChange={(e) => setFiltroCuando(e.target.value)} className={filtroCampoClass}>
+                {CUANDO_FILTRO.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-zinc-700">Franja horaria</label>
+              <select value={filtroFranja} onChange={(e) => setFiltroFranja(e.target.value)} className={filtroCampoClass}>
+                {FRANJAS_FILTRO.map((f) => (
+                  <option key={f.valor} value={f.valor}>{f.etiqueta}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
+            <div className="md:sticky md:top-24 md:self-start">
+              <MapaClases clases={clasesFiltradas} />
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {clasesFiltradas.length === 0 && (
+                <p className="py-10 text-center text-sm text-zinc-500">
+                  No hay clases que coincidan con estos filtros ahora mismo. Prueba a cambiar la ciudad o la categoría.
+                </p>
+              )}
+
+              {clasesFiltradas.map((clase) => {
+                const plazasMax = clase.plazas_max ?? 0
+                const plazasOcupadas = clase.plazas_ocupadas ?? 0
+                const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
+                const porcentajeOcupado = plazasMax > 0 ? Math.min((plazasOcupadas / plazasMax) * 100, 100) : 0
+
+                return (
+                  <div
+                    key={clase.id}
+                    className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-200 motion-safe:transition-shadow motion-safe:duration-200 hover:shadow-md"
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      {clase.categoria && (
+                        <span className="inline-block rounded-full border border-[#B5E600] bg-[#f5fbe0] px-2.5 py-1 text-xs font-semibold text-zinc-800">
+                          {clase.categoria}
+                        </span>
+                      )}
+                      <span className="text-xs text-zinc-400">{clase.ciudad}</span>
+                    </div>
+
+                    <h2 className="mb-1 text-lg font-bold text-black sm:text-xl">{clase.titulo}</h2>
+                    {clase.modalidad && <p className="mb-3 text-sm text-zinc-500">{clase.modalidad}</p>}
+
+                    <div className="flex flex-col gap-1 text-sm text-zinc-500">
+                      <p>
+                        Fecha: <span className="text-zinc-700">{clase.fecha}</span> · Hora:{' '}
+                        <span className="text-zinc-700">{clase.hora}</span>
+                      </p>
+                      {clase.duracion != null && (
+                        <p>
+                          Duración: <span className="text-zinc-700">{clase.duracion} min</span>
+                        </p>
+                      )}
+                      <p>
+                        Precio: <span className="font-semibold text-zinc-800">{clase.precio} €</span>
+                      </p>
+                      {clase.direccion && (
+                        <p>
+                          Dirección: <span className="text-zinc-700">{clase.direccion}</span>
+                        </p>
+                      )}
+                      {clase.punto_encuentro && (
+                        <p>
+                          Punto de encuentro: <span className="text-zinc-700">{clase.punto_encuentro}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="mb-1 flex items-center justify-between text-xs font-medium text-zinc-600">
+                        <span>
+                          {plazasLibres}/{plazasMax} plazas libres
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+                        <div
+                          className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
+                          style={{ width: `${porcentajeOcupado}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
+                      {clase.lat != null && clase.lng != null && (
+                        <>
+                          <span className="select-all text-xs text-zinc-500">
+                            {clase.lat}, {clase.lng}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
+                            className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                          >
+                            {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
+                          </button>
+                        </>
+                      )}
+                      <Link
+                        href={`/clases/${clase.id}`}
+                        className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                      >
+                        Ver detalle
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
