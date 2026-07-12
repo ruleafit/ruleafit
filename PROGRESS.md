@@ -33,9 +33,9 @@ Falta:
 ## Fase 3 · Reservas — en curso
 Hecho:
 - Tabla reservas con RLS, índice único para evitar reservas duplicadas, y función RPC reservar_clase() con bloqueo de fila para evitar sobreventa (sql/001_reservas.sql, ejecutado en Supabase).
+- Botón Reservar (components/BotonReservar.js) en tarjetas y ficha de detalle, con estados según sesión, rol, aforo, clase pasada/inactiva y reserva ya existente. Llama a la función RPC reservar_clase() y actualiza el contador de plazas al momento.
 
 Falta:
-- [ ] Botón Reservar en la interfaz.
 - [ ] Mis reservas (cliente).
 - [ ] Panel del entrenador: ver quién se apuntó.
 - [ ] Cancelación con umbral de 2h.
