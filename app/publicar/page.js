@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { supabase } from '../../lib/supabaseClient'
+
+const MapaSelector = dynamic(() => import('../../components/MapaSelector'), {
+  ssr: false,
+  loading: () => <p>Cargando mapa...</p>,
+})
 
 const CATEGORIAS = [
   'Fuerza / funcional',
@@ -39,6 +45,8 @@ export default function PublicarPage() {
   const [plazasMax, setPlazasMax] = useState('')
   const [material, setMaterial] = useState('')
   const [observaciones, setObservaciones] = useState('')
+  const [lat, setLat] = useState(null)
+  const [lng, setLng] = useState(null)
   const [mensaje, setMensaje] = useState('')
 
   useEffect(() => {
@@ -56,6 +64,12 @@ export default function PublicarPage() {
 
   async function handlePublicar(e) {
     e.preventDefault()
+
+    if (lat == null || lng == null) {
+      setMensaje('Selecciona una ubicación en el mapa antes de publicar.')
+      return
+    }
+
     setMensaje('Publicando...')
 
     const { error } = await supabase.from('clases').insert({
@@ -76,8 +90,8 @@ export default function PublicarPage() {
       observaciones,
       estado: 'activa',
       plazas_ocupadas: 0,
-      lat: null,
-      lng: null,
+      lat,
+      lng,
     })
 
     if (error) {
@@ -95,6 +109,8 @@ export default function PublicarPage() {
       setPlazasMax('')
       setMaterial('')
       setObservaciones('')
+      setLat(null)
+      setLng(null)
     }
   }
 
@@ -140,6 +156,19 @@ export default function PublicarPage() {
 
         <label style={labelStyle}>Punto de encuentro</label>
         <input type="text" value={puntoEncuentro} onChange={(e) => setPuntoEncuentro(e.target.value)} style={inputStyle} />
+
+        <label style={labelStyle}>Ubicación en el mapa</label>
+        <div style={{ marginBottom: 12 }}>
+          <MapaSelector
+            ciudad={ciudad}
+            lat={lat}
+            lng={lng}
+            onCambiarUbicacion={(nuevaLat, nuevaLng) => {
+              setLat(nuevaLat)
+              setLng(nuevaLng)
+            }}
+          />
+        </div>
 
         <label style={labelStyle}>Fecha</label>
         <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required style={inputStyle} />

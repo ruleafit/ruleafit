@@ -7,6 +7,17 @@ export default function ClasesPage() {
   const [clases, setClases] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
+  const [coordenadasCopiadas, setCoordenadasCopiadas] = useState(null)
+
+  async function copiarCoordenadas(id, texto) {
+    try {
+      await navigator.clipboard.writeText(texto)
+      setCoordenadasCopiadas(id)
+      setTimeout(() => setCoordenadasCopiadas(null), 2000)
+    } catch (err) {
+      setError('No se pudieron copiar las coordenadas.')
+    }
+  }
 
   useEffect(() => {
     async function cargarClases() {
@@ -59,6 +70,36 @@ export default function ClasesPage() {
             <p>
               Plazas: <strong>{clase.plazas_ocupadas}/{clase.plazas_max}</strong>
             </p>
+
+            {clase.direccion && (
+              <p style={{ marginTop: 4 }}>
+                Dirección: <strong>{clase.direccion}</strong>
+              </p>
+            )}
+
+            {clase.punto_encuentro && (
+              <p style={{ marginTop: 4 }}>
+                Punto de encuentro: <strong>{clase.punto_encuentro}</strong>
+              </p>
+            )}
+
+            {clase.lat != null && clase.lng != null && (
+              <div style={{ marginTop: 8 }}>
+                <p style={{ marginBottom: 6 }}>
+                  Coordenadas:{' '}
+                  <span style={{ userSelect: 'all' }}>
+                    {clase.lat}, {clase.lng}
+                  </span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
+                  style={{ padding: '6px 12px', border: '1px solid #ccc', borderRadius: 8, cursor: 'pointer', background: '#f5f5f5' }}
+                >
+                  {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
