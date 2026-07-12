@@ -42,66 +42,93 @@ export default function ClasesPage() {
   }
 
   return (
-    <div style={{ maxWidth: 600, margin: '60px auto', padding: 20 }}>
-      <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20 }}>
-        Clases disponibles
-      </h1>
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">Clases disponibles</h1>
 
-      {error && <p style={{ color: 'crimson', marginBottom: 16 }}>{error}</p>}
+      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      {!error && clases.length === 0 && <p>No hay clases disponibles por ahora.</p>}
+      {!error && clases.length === 0 && <p className="text-sm text-zinc-500">No hay clases disponibles por ahora.</p>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {clases.map((clase) => (
-          <div key={clase.id} style={{ border: '1px solid #ccc', borderRadius: 12, padding: 16 }}>
-            <p style={{ fontSize: 12, fontWeight: 'bold', color: '#7a9900', marginBottom: 4, textTransform: 'uppercase' }}>
-              {clase.modalidad}
-            </p>
-            <h2 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>{clase.titulo}</h2>
-            <p style={{ marginBottom: 4 }}>
-              Ciudad: <strong>{clase.ciudad}</strong>
-            </p>
-            <p style={{ marginBottom: 4 }}>
-              Fecha: <strong>{clase.fecha}</strong> — Hora: <strong>{clase.hora}</strong>
-            </p>
-            <p style={{ marginBottom: 4 }}>
-              Precio: <strong>{clase.precio} €</strong>
-            </p>
-            <p>
-              Plazas: <strong>{clase.plazas_ocupadas}/{clase.plazas_max}</strong>
-            </p>
+      <div className="flex flex-col gap-4">
+        {clases.map((clase) => {
+          const plazasMax = clase.plazas_max ?? 0
+          const plazasOcupadas = clase.plazas_ocupadas ?? 0
+          const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
+          const porcentajeOcupado = plazasMax > 0 ? Math.min((plazasOcupadas / plazasMax) * 100, 100) : 0
 
-            {clase.direccion && (
-              <p style={{ marginTop: 4 }}>
-                Dirección: <strong>{clase.direccion}</strong>
-              </p>
-            )}
+          return (
+            <div
+              key={clase.id}
+              className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-200 motion-safe:transition-shadow motion-safe:duration-200 hover:shadow-md"
+            >
+              <div className="mb-3 flex items-center justify-between gap-2">
+                {clase.categoria && (
+                  <span className="inline-block rounded-full border border-[#B5E600] bg-[#f5fbe0] px-2.5 py-1 text-xs font-semibold text-zinc-800">
+                    {clase.categoria}
+                  </span>
+                )}
+                <span className="text-xs text-zinc-400">{clase.ciudad}</span>
+              </div>
 
-            {clase.punto_encuentro && (
-              <p style={{ marginTop: 4 }}>
-                Punto de encuentro: <strong>{clase.punto_encuentro}</strong>
-              </p>
-            )}
+              <h2 className="mb-1 text-lg font-bold text-black sm:text-xl">{clase.titulo}</h2>
+              {clase.modalidad && <p className="mb-3 text-sm text-zinc-500">{clase.modalidad}</p>}
 
-            {clase.lat != null && clase.lng != null && (
-              <div style={{ marginTop: 8 }}>
-                <p style={{ marginBottom: 6 }}>
-                  Coordenadas:{' '}
-                  <span style={{ userSelect: 'all' }}>
+              <div className="flex flex-col gap-1 text-sm text-zinc-500">
+                <p>
+                  Fecha: <span className="text-zinc-700">{clase.fecha}</span> · Hora:{' '}
+                  <span className="text-zinc-700">{clase.hora}</span>
+                </p>
+                {clase.duracion != null && (
+                  <p>
+                    Duración: <span className="text-zinc-700">{clase.duracion} min</span>
+                  </p>
+                )}
+                <p>
+                  Precio: <span className="font-semibold text-zinc-800">{clase.precio} €</span>
+                </p>
+                {clase.direccion && (
+                  <p>
+                    Dirección: <span className="text-zinc-700">{clase.direccion}</span>
+                  </p>
+                )}
+                {clase.punto_encuentro && (
+                  <p>
+                    Punto de encuentro: <span className="text-zinc-700">{clase.punto_encuentro}</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <div className="mb-1 flex items-center justify-between text-xs font-medium text-zinc-600">
+                  <span>
+                    {plazasLibres}/{plazasMax} plazas libres
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+                  <div
+                    className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
+                    style={{ width: `${porcentajeOcupado}%` }}
+                  />
+                </div>
+              </div>
+
+              {clase.lat != null && clase.lng != null && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
+                  <span className="select-all text-xs text-zinc-500">
                     {clase.lat}, {clase.lng}
                   </span>
-                </p>
-                <button
-                  type="button"
-                  onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
-                  style={{ padding: '6px 12px', border: '1px solid #ccc', borderRadius: 8, cursor: 'pointer', background: '#f5f5f5' }}
-                >
-                  {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+                  <button
+                    type="button"
+                    onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
+                    className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                  >
+                    {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

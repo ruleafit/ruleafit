@@ -22,8 +22,10 @@ const CIUDADES = ['Sevilla', 'Málaga']
 
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado', 'Todos los niveles']
 
-const inputStyle = { display: 'block', width: '100%', padding: 10, marginBottom: 12, border: '1px solid #ccc', borderRadius: 8 }
-const labelStyle = { fontWeight: 'bold', marginBottom: 4, display: 'block' }
+const inputClass =
+  'block w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
+const labelClass = 'mb-1 block text-sm font-medium text-zinc-700'
+const seccionTituloClass = 'mb-4 border-b border-zinc-200 pb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500'
 
 export default function PublicarPage() {
   const [usuario, setUsuario] = useState(null)
@@ -124,122 +126,165 @@ export default function PublicarPage() {
 
   if (!usuario) {
     return (
-      <div style={{ maxWidth: 480, margin: '60px auto', padding: 20 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20 }}>
-          Publicar una clase
-        </h1>
-        <p>
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+        <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">Publicar una clase</h1>
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-700 shadow-sm">
           Debes iniciar sesión para publicar clases. Ve a{' '}
-          <a href="/login" style={{ color: '#16a34a', fontWeight: 'bold' }}>iniciar sesión</a>.
-        </p>
+          <a href="/login" className="font-semibold text-[#7a9900] hover:underline">iniciar sesión</a>.
+        </div>
       </div>
     )
   }
 
   if (!esEntrenador) {
     return (
-      <div style={{ maxWidth: 480, margin: '60px auto', padding: 20 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20 }}>
-          Publicar una clase
-        </h1>
-        <p>Solo los entrenadores pueden publicar clases.</p>
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+        <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">Publicar una clase</h1>
+        <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-700 shadow-sm">
+          Solo los entrenadores pueden publicar clases.
+        </div>
       </div>
     )
   }
 
   return (
-    <div style={{ maxWidth: 480, margin: '60px auto', padding: 20 }}>
-      <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20 }}>
-        Publicar una clase
-      </h1>
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+      <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">Publicar una clase</h1>
 
-      <form onSubmit={handlePublicar}>
-        <label style={labelStyle}>Título</label>
-        <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} required style={inputStyle} />
+      <form onSubmit={handlePublicar} className="flex flex-col gap-10">
+        <section>
+          <h2 className={seccionTituloClass}>Detalles de la clase</h2>
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className={labelClass}>Título</label>
+              <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} required className={inputClass} />
+            </div>
 
-        <label style={labelStyle}>Categoría</label>
-        <select value={categoria} onChange={(e) => setCategoria(e.target.value)} style={inputStyle}>
-          {CATEGORIAS.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+            <div>
+              <label className={labelClass}>Categoría</label>
+              <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className={inputClass}>
+                {CATEGORIAS.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
 
-        <label style={labelStyle}>Modalidad</label>
-        <input
-          type="text"
-          value={modalidad}
-          onChange={(e) => setModalidad(e.target.value)}
-          style={inputStyle}
-          placeholder="Ej: presencial, online..."
-        />
+            <div>
+              <label className={labelClass}>Modalidad</label>
+              <input
+                type="text"
+                value={modalidad}
+                onChange={(e) => setModalidad(e.target.value)}
+                className={inputClass}
+                placeholder="Ej: presencial, online..."
+              />
+            </div>
 
-        <label style={labelStyle}>Ciudad</label>
-        <select value={ciudad} onChange={(e) => setCiudad(e.target.value)} style={inputStyle}>
-          {CIUDADES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+            <div>
+              <label className={labelClass}>Nivel</label>
+              <select value={nivel} onChange={(e) => setNivel(e.target.value)} className={inputClass}>
+                {NIVELES.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </div>
 
-        <label style={labelStyle}>Dirección</label>
-        <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} style={inputStyle} />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Fecha</label>
+                <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required className={inputClass} />
+              </div>
+              <div>
+                <label className={labelClass}>Hora</label>
+                <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} required className={inputClass} />
+              </div>
+            </div>
 
-        <label style={labelStyle}>Punto de encuentro</label>
-        <input type="text" value={puntoEncuentro} onChange={(e) => setPuntoEncuentro(e.target.value)} style={inputStyle} />
+            <div>
+              <label className={labelClass}>Duración (minutos)</label>
+              <input type="number" value={duracion} onChange={(e) => setDuracion(e.target.value)} className={inputClass} min="0" />
+            </div>
+          </div>
+        </section>
 
-        <label style={labelStyle}>Ubicación en el mapa</label>
-        <div style={{ marginBottom: 12 }}>
-          <MapaSelector
-            ciudad={ciudad}
-            lat={lat}
-            lng={lng}
-            onCambiarUbicacion={(nuevaLat, nuevaLng) => {
-              setLat(nuevaLat)
-              setLng(nuevaLng)
-            }}
-          />
-        </div>
+        <section className="border-t border-zinc-200 pt-8">
+          <h2 className={seccionTituloClass}>Ubicación</h2>
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className={labelClass}>Ciudad</label>
+              <select value={ciudad} onChange={(e) => setCiudad(e.target.value)} className={inputClass}>
+                {CIUDADES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
 
-        <label style={labelStyle}>Fecha</label>
-        <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required style={inputStyle} />
+            <div>
+              <label className={labelClass}>Ubicación en el mapa</label>
+              <div className="w-full overflow-hidden rounded-lg border border-zinc-300">
+                <MapaSelector
+                  ciudad={ciudad}
+                  lat={lat}
+                  lng={lng}
+                  onCambiarUbicacion={(nuevaLat, nuevaLng) => {
+                    setLat(nuevaLat)
+                    setLng(nuevaLng)
+                  }}
+                />
+              </div>
+            </div>
 
-        <label style={labelStyle}>Hora</label>
-        <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} required style={inputStyle} />
+            <div>
+              <label className={labelClass}>Dirección</label>
+              <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={inputClass} />
+            </div>
 
-        <label style={labelStyle}>Duración (minutos)</label>
-        <input type="number" value={duracion} onChange={(e) => setDuracion(e.target.value)} style={inputStyle} min="0" />
+            <div>
+              <label className={labelClass}>Punto de encuentro</label>
+              <input type="text" value={puntoEncuentro} onChange={(e) => setPuntoEncuentro(e.target.value)} className={inputClass} />
+            </div>
+          </div>
+        </section>
 
-        <label style={labelStyle}>Nivel</label>
-        <select value={nivel} onChange={(e) => setNivel(e.target.value)} style={inputStyle}>
-          {NIVELES.map((n) => (
-            <option key={n} value={n}>{n}</option>
-          ))}
-        </select>
+        <section className="border-t border-zinc-200 pt-8">
+          <h2 className={seccionTituloClass}>Precio y plazas</h2>
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Precio (€)</label>
+                <input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} className={inputClass} min="0" step="0.01" />
+              </div>
+              <div>
+                <label className={labelClass}>Plazas máximas</label>
+                <input type="number" value={plazasMax} onChange={(e) => setPlazasMax(e.target.value)} required className={inputClass} min="1" />
+              </div>
+            </div>
 
-        <label style={labelStyle}>Precio (€)</label>
-        <input type="number" value={precio} onChange={(e) => setPrecio(e.target.value)} style={inputStyle} min="0" step="0.01" />
+            <div>
+              <label className={labelClass}>Material necesario</label>
+              <input type="text" value={material} onChange={(e) => setMaterial(e.target.value)} className={inputClass} />
+            </div>
 
-        <label style={labelStyle}>Plazas máximas</label>
-        <input type="number" value={plazasMax} onChange={(e) => setPlazasMax(e.target.value)} required style={inputStyle} min="1" />
-
-        <label style={labelStyle}>Material necesario</label>
-        <input type="text" value={material} onChange={(e) => setMaterial(e.target.value)} style={inputStyle} />
-
-        <label style={labelStyle}>Observaciones</label>
-        <textarea
-          value={observaciones}
-          onChange={(e) => setObservaciones(e.target.value)}
-          style={{ ...inputStyle, minHeight: 80 }}
-        />
+            <div>
+              <label className={labelClass}>Observaciones</label>
+              <textarea
+                value={observaciones}
+                onChange={(e) => setObservaciones(e.target.value)}
+                className={`${inputClass} min-h-[100px]`}
+              />
+            </div>
+          </div>
+        </section>
 
         <button
           type="submit"
-          style={{ width: '100%', padding: 12, background: '#B5E600', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer', marginTop: 8 }}
+          className="mt-2 w-full rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-black transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
         >
           Publicar clase
         </button>
       </form>
 
-      {mensaje && <p style={{ marginTop: 16 }}>{mensaje}</p>}
+      {mensaje && <p className="mt-4 text-sm text-zinc-700">{mensaje}</p>}
     </div>
   )
 }
