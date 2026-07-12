@@ -21,9 +21,9 @@ Hecho:
 - /publicar: formulario con mapa real (Leaflet) para lat/lng.
 - /clases: listado en tarjetas (dirección, punto de encuentro, coordenadas).
 - Restricción "solo entrenadores publican" (interfaz + política RLS).
+- Menú de navegación (roles, indicador animado bajo enlace activo, botones de acción).
 
 Falta:
-- [ ] Menú de navegación.
 - [ ] Detalles estéticos (formulario, tarjetas con marca lima #B5E600).
 - [ ] Filtros en /clases (ciudad, categoría).
 - [ ] Ficha de detalle de cada clase.
