@@ -22,9 +22,9 @@ Hecho:
 - /clases: listado en tarjetas (dirección, punto de encuentro, coordenadas).
 - Restricción "solo entrenadores publican" (interfaz + política RLS).
 - Menú de navegación (roles, indicador animado bajo enlace activo, botones de acción).
+- Detalles estéticos: formulario de /publicar centrado por secciones, tarjetas de /clases con indicador de plazas libres.
 
 Falta:
-- [ ] Detalles estéticos (formulario, tarjetas con marca lima #B5E600).
 - [ ] Filtros en /clases (ciudad, categoría).
 - [ ] Ficha de detalle de cada clase.
 - [ ] Mapa en /clases con todas las clases + filtros de fecha/franja horaria (marcador por clase, popup resumen, ocultar canceladas/pasadas).
