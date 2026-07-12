@@ -15,7 +15,7 @@
 - Conector lib/supabaseClient.js, claves en .env.local.
 - Home personalizada con botones a login/registro.
 
-## Fase 2 · Clases — en curso
+## Fase 2 · Clases — completada
 Hecho:
 - Tabla clases en Supabase con RLS.
 - /publicar: formulario con mapa real (Leaflet) para lat/lng.
@@ -25,9 +25,10 @@ Hecho:
 - Detalles estéticos: formulario de /publicar centrado por secciones, tarjetas de /clases con indicador de plazas libres.
 - Filtros en /clases: por ciudad y categoría, aplicados al instante, con mensaje de estado vacío.
 - Ficha de detalle de cada clase (/clases/[id]) con mapa de solo lectura, gestión de clase no encontrada y enlace "Ver detalle" en las tarjetas.
+- Mapa en /clases con marcador por clase y popup resumen, filtros de ciudad/categoría/cuándo (hoy, mañana, próximos 7 y 30 días)/franja horaria, exclusión permanente de clases canceladas o con fecha pasada.
 
 Falta:
-- [ ] Mapa en /clases con todas las clases + filtros de fecha/franja horaria (marcador por clase, popup resumen, ocultar canceladas/pasadas).
+- Ninguno.
 
 ## Fase 3 · Reservas — pendiente
 - [ ] Botón reservar + aumento de plazas_ocupadas.
