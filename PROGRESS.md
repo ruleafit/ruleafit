@@ -30,10 +30,13 @@ Hecho:
 Falta:
 - Ninguno.
 
-## Fase 3 · Reservas — pendiente
-- [ ] Botón reservar + aumento de plazas_ocupadas.
-- [ ] Desactivar botón si la clase está llena (sin lista de espera).
-- [ ] "Mis reservas" para el cliente.
+## Fase 3 · Reservas — en curso
+Hecho:
+- Tabla reservas con RLS, índice único para evitar reservas duplicadas, y función RPC reservar_clase() con bloqueo de fila para evitar sobreventa (sql/001_reservas.sql, ejecutado en Supabase).
+
+Falta:
+- [ ] Botón Reservar en la interfaz.
+- [ ] Mis reservas (cliente).
 - [ ] Panel del entrenador: ver quién se apuntó.
 - [ ] Cancelación con umbral de 2h.
 

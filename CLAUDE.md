@@ -26,5 +26,10 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. Stripe más adelante (fuer
 - No arrancar el servidor de desarrollo (npm run dev), eso se hace manualmente aparte. npm run build sí se puede usar para verificar.
 - Cambios mínimos: no refactorizar código que no se ha pedido tocar.
 
+## Base de datos: reservas
+- La tabla public.reservas existe con RLS activo.
+- Las escrituras solo se hacen a través de la función reservar_clase(p_clase_id uuid) (nunca insert/update directo desde el cliente).
+- El criterio de "clase pasada" es fecha+hora exacta en zona horaria Europe/Madrid.
+
 ## Estado actual
 Ver PROGRESS.md para saber qué fases y bloques están completados y cuáles faltan.
