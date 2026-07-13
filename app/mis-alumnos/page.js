@@ -26,7 +26,7 @@ function agruparPorClase(filas) {
     }
     grupo.alumnos.push({
       reserva_id: fila.reserva_id,
-      cliente_email: fila.cliente_email,
+      cliente_username: fila.cliente_username,
       reservado_en: fila.reservado_en,
     })
   }
@@ -142,7 +142,7 @@ export default function MisAlumnosPage() {
             <div className="mt-4 flex flex-col gap-2 border-t border-zinc-100 pt-3">
               {clase.alumnos.map((alumno) => (
                 <div key={alumno.reserva_id} className="text-xs text-zinc-500">
-                  <span className="text-zinc-700">{alumno.cliente_email}</span>{' '}
+                  <span className="text-zinc-700">{alumno.cliente_username}</span>{' '}
                   · reservó el {new Date(alumno.reservado_en).toLocaleString('es-ES')}
                 </div>
               ))}
