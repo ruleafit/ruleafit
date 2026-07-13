@@ -97,6 +97,12 @@ export default function Menu() {
           )}
 
           {usuario && rol === 'entrenador' && (
+            <Link href="/mis-alumnos" className={enlaceClass('/mis-alumnos')}>
+              Mis alumnos
+            </Link>
+          )}
+
+          {usuario && rol === 'entrenador' && (
             <Link href="/publicar" className={botonClass}>
               Publicar
             </Link>
