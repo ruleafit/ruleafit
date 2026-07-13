@@ -12,6 +12,9 @@ export default function MisReservasPage() {
   const [reservas, setReservas] = useState([])
   const [cargandoReservas, setCargandoReservas] = useState(true)
   const [error, setError] = useState('')
+  const [mensaje, setMensaje] = useState('')
+  const [cancelandoId, setCancelandoId] = useState(null)
+  const [erroresCancelacion, setErroresCancelacion] = useState({})
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -58,6 +61,37 @@ export default function MisReservasPage() {
     cargarReservas()
   }, [usuario, esCliente])
 
+  async function handleCancelar(reserva, clase) {
+    const confirmado = window.confirm(
+      `¿Seguro que quieres cancelar tu reserva de ${clase.titulo}? Esta acción no se puede deshacer.`
+    )
+    if (!confirmado) return
+
+    setCancelandoId(reserva.id)
+    setErroresCancelacion((prev) => {
+      const siguiente = { ...prev }
+      delete siguiente[reserva.id]
+      return siguiente
+    })
+
+    const { data, error } = await supabase.rpc('cancelar_reserva', { p_reserva_id: reserva.id })
+
+    if (error) {
+      setErroresCancelacion((prev) => ({ ...prev, [reserva.id]: error.message }))
+      setCancelandoId(null)
+      return
+    }
+
+    setReservas((prev) => prev.filter((r) => r.id !== reserva.id))
+    setMensaje(
+      data?.reembolso_aplicable
+        ? 'Reserva cancelada correctamente.'
+        : 'Reserva cancelada. Al ser con menos de 2 horas de antelación, no habría devolución cuando exista la cartera virtual (todavía no aplica ningún cargo real).'
+    )
+    setCancelandoId(null)
+    setTimeout(() => setMensaje(''), 6000)
+  }
+
   if (cargandoSesion) {
     return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
   }
@@ -84,6 +118,12 @@ export default function MisReservasPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">Mis reservas</h1>
+
+      {mensaje && (
+        <div className="mb-4 rounded-lg border border-[#B5E600] bg-[#f5fbe0] px-4 py-2.5 text-sm font-medium text-zinc-800">
+          {mensaje}
+        </div>
+      )}
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
@@ -151,14 +191,27 @@ export default function MisReservasPage() {
                 )}
               </div>
 
-              <div className="mt-4 border-t border-zinc-100 pt-3">
+              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3">
                 <Link
                   href={`/clases/${clase.id}`}
                   className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                 >
                   Ver detalle
                 </Link>
+
+                <button
+                  type="button"
+                  onClick={() => handleCancelar(reserva, clase)}
+                  disabled={cancelandoId === reserva.id}
+                  className="rounded-md border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 motion-safe:transition-colors motion-safe:duration-200 hover:border-red-300 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {cancelandoId === reserva.id ? 'Cancelando...' : 'Cancelar reserva'}
+                </button>
               </div>
+
+              {erroresCancelacion[reserva.id] && (
+                <p className="mt-2 text-xs text-red-600">{erroresCancelacion[reserva.id]}</p>
+              )}
             </div>
           )
         })}
