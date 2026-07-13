@@ -31,6 +31,13 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. Stripe más adelante (fuer
 - Las escrituras solo se hacen a través de la función reservar_clase(p_clase_id uuid) (nunca insert/update directo desde el cliente).
 - El criterio de "clase pasada" es fecha+hora exacta en zona horaria Europe/Madrid.
 - La función reservas_de_mis_clases() (sql/002_panel_entrenador.sql) permite al entrenador autenticado ver, de forma segura, las reservas activas de sus propias clases (incluye email del cliente), sin acceso a clases de otros entrenadores.
+- La función cancelar_reserva(p_reserva_id uuid) (sql/003_cancelaciones.sql) permite al cliente cancelar su propia reserva si la clase no ha pasado, calcula si quedaban 2h o más (reembolso_aplicable) para uso futuro de la cartera, y de momento no aplica ningún cargo o devolución real.
+
+## Base de datos: perfiles y nombres de usuario
+- Existe la tabla public.perfiles (username público, 3-20 caracteres, formato letras ASCII/números/guion bajo, único sin distinguir mayúsculas/minúsculas).
+- Se crea automáticamente al registrarse mediante un trigger en auth.users.
+- Hay una función username_disponible(p_username) de solo lectura, accesible sin sesión, para comprobar disponibilidad antes de registrarse o al cambiar de nombre.
+- reservas_de_mis_clases() ahora devuelve cliente_username en vez de cliente_email.
 
 ## Estado actual
 Ver PROGRESS.md para saber qué fases y bloques están completados y cuáles faltan.
