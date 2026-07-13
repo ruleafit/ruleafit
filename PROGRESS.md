@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 12 julio 2026
+Última actualización: 13 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -35,9 +35,9 @@ Hecho:
 - Tabla reservas con RLS, índice único para evitar reservas duplicadas, y función RPC reservar_clase() con bloqueo de fila para evitar sobreventa (sql/001_reservas.sql, ejecutado en Supabase).
 - Botón Reservar (components/BotonReservar.js) en tarjetas y ficha de detalle, con estados según sesión, rol, aforo, clase pasada/inactiva y reserva ya existente. Llama a la función RPC reservar_clase() y actualiza el contador de plazas al momento.
 - Página /mis-reservas: lista de reservas activas del cliente ordenadas por fecha, restringida por rol, con enlace en el menú visible solo para clientes.
+- Panel del entrenador (/mis-alumnos): función RPC segura reservas_de_mis_clases() y página que agrupa las reservas por clase, con email y fecha de reserva de cada cliente.
 
 Falta:
-- [ ] Panel del entrenador: ver quién se apuntó.
 - [ ] Cancelación con umbral de 2h.
 
 ## Fase 4 · Cartera virtual (simulada) — pendiente

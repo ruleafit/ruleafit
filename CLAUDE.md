@@ -30,6 +30,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. Stripe más adelante (fuer
 - La tabla public.reservas existe con RLS activo.
 - Las escrituras solo se hacen a través de la función reservar_clase(p_clase_id uuid) (nunca insert/update directo desde el cliente).
 - El criterio de "clase pasada" es fecha+hora exacta en zona horaria Europe/Madrid.
+- La función reservas_de_mis_clases() (sql/002_panel_entrenador.sql) permite al entrenador autenticado ver, de forma segura, las reservas activas de sus propias clases (incluye email del cliente), sin acceso a clases de otros entrenadores.
 
 ## Estado actual
 Ver PROGRESS.md para saber qué fases y bloques están completados y cuáles faltan.
