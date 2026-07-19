@@ -14,6 +14,9 @@ export default function CuentaPage() {
   const [errorUsername, setErrorUsername] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [confirmacion, setConfirmacion] = useState('')
+  const [openSaldo, setOpenSaldo] = useState(0)
+  const [openMovimientos, setOpenMovimientos] = useState([])
+  const [openMotivos, setOpenMotivos] = useState({})
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -28,6 +31,30 @@ export default function CuentaPage() {
           .single()
 
         setUsername(perfil?.username || null)
+
+        const { data: saldoFila } = await supabase
+          .from('open_saldos')
+          .select('saldo')
+          .eq('usuario_id', data.user.id)
+          .maybeSingle()
+
+        setOpenSaldo(saldoFila?.saldo ?? 0)
+
+        const { data: movimientos } = await supabase
+          .from('open_movimientos')
+          .select('id, cantidad, motivo, nota, created_at')
+          .eq('usuario_id', data.user.id)
+          .order('created_at', { ascending: false })
+
+        setOpenMovimientos(movimientos || [])
+
+        const { data: motivos } = await supabase.from('open_motivos').select('codigo, descripcion')
+
+        const mapaMotivos = {}
+        for (const motivo of motivos || []) {
+          mapaMotivos[motivo.codigo] = motivo.descripcion
+        }
+        setOpenMotivos(mapaMotivos)
       }
       setCargando(false)
     }
@@ -181,6 +208,64 @@ export default function CuentaPage() {
               </div>
             </form>
           )}
+
+          <div style={{ marginBottom: 24, paddingTop: 20, borderTop: '1px solid #e5e5e5' }}>
+            <h2 style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Mis Open</h2>
+
+            <div
+              style={{
+                display: 'inline-block',
+                padding: '10px 18px',
+                marginBottom: 16,
+                border: '2px solid #B5E600',
+                borderRadius: 12,
+                background: '#f5fbe0',
+              }}
+            >
+              <span style={{ fontSize: 24, fontWeight: 'bold', color: '#16231B' }}>{openSaldo}</span>{' '}
+              <span style={{ fontSize: 16, fontWeight: 'bold', color: '#7a9900' }}>Open</span>
+            </div>
+
+            {openMovimientos.length === 0 ? (
+              <p style={{ fontSize: 13, color: '#71717a' }}>Todavía no tienes movimientos de Open.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {openMovimientos.map((mov) => (
+                  <div
+                    key={mov.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'baseline',
+                      gap: 12,
+                      paddingBottom: 6,
+                      borderBottom: '1px solid #f4f4f5',
+                    }}
+                  >
+                    <div>
+                      <p style={{ fontSize: 13, color: '#27272a', marginBottom: 2 }}>
+                        {mov.nota || openMotivos[mov.motivo] || mov.motivo}
+                      </p>
+                      <p style={{ fontSize: 11, color: '#a1a1aa' }}>
+                        {new Date(mov.created_at).toLocaleString('es-ES')}
+                      </p>
+                    </div>
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        color: mov.cantidad > 0 ? '#16a34a' : '#7f1d1d',
+                      }}
+                    >
+                      {mov.cantidad > 0 ? '+' : ''}
+                      {mov.cantidad} Open
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           <button
             onClick={cerrarSesion}
