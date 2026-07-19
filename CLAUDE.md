@@ -15,7 +15,9 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. Stripe más adelante (fuer
 ## Decisiones de producto (MVP)
 - Sin lista de espera: clase llena = botón de reservar desactivado.
 - Cancelación con umbral de 2h: gratis antes, sin devolución después.
-- Cartera virtual simulada (recargas ficticias, sin Stripe todavía).
+- Moneda "Open" (puntos de fidelización, no es una cartera de dinero):
+  - MVP: los Open se ganan mediante retos, promociones, bienvenida o asistencia confirmada; implementado hasta ahora: bienvenida automática de 20 Open al registrarse, y asistencia confirmada de 5 Open por clase, concedida (y corregible mediante movimiento compensatorio) por el entrenador vía marcar_asistencia(); retos y promociones quedan fuera de esta fase. No se pueden comprar, recargar con dinero, retirar ni transferir; no se usan para reservar ni pagar clases. Las clases se siguen pagando directamente al entrenador, fuera de la app. Sin recargas simuladas ni descuentos de Open al reservar.
+  - Visión futura (no implementado todavía, solo de referencia): cuando Openfit integre pagos reales, el usuario podrá recargar dinero y convertirlo en Open (equivalencia inicial de referencia 1€ = 10 Open, revisable); a partir de entonces los Open podrán usarse para reservar clases dentro de la app. Antes de esa fase habrá que definir cómo se compensa al entrenador cuando se usen Open ganados gratuitamente, y revisar requisitos legales y técnicos.
 - Ubicación: mapa real (Leaflet + OpenStreetMap) + dirección libre + punto de encuentro.
 - Modalidad: texto libre escrito por el entrenador (se muestra al cliente) + categoría general para filtros. Categorías: Fuerza / funcional, Baile / coreografiado, Yoga / movilidad, Cardio / running, Combate / boxeo, Otra.
 

@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 13 julio 2026
+Última actualización: 19 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -45,11 +45,12 @@ Falta:
 Hecho:
 - Tabla perfiles con generación automática al registrarse (trigger), backfill de cuentas existentes, comprobación de disponibilidad antes de registrarse o cambiar de nombre (username_disponible), campo de nombre de usuario en /registro, edición desde /cuenta, y panel del entrenador (Mis alumnos) mostrando nombre de usuario en vez de email por privacidad.
 
-## Fase 4 · Cartera virtual (simulada) — pendiente
-- [ ] Saldo por usuario.
-- [ ] Recarga simulada.
-- [ ] Descuento de saldo al reservar.
-- [ ] Historial de movimientos.
+## Fase 4 · Open (puntos de fidelización) — completada
+Hecho:
+- Sistema de Open completo: tablas open_saldos/open_movimientos/open_motivos con RLS, bienvenida automática (20 Open) al registrarse, asistencia confirmada (5 Open) marcada por el entrenador vía marcar_asistencia() con corrección mediante movimiento compensatorio, saldo e historial visibles en /cuenta, botones de asistencia en /mis-alumnos.
+
+Falta:
+- Ninguno.
 
 ## Fase 5 · Pulido y lanzamiento — pendiente
 - [ ] Coherencia visual con la marca.
