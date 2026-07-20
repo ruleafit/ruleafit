@@ -4,7 +4,7 @@
 Marketplace de entrenamientos deportivos al aire libre, clases sueltas (sin gimnasio ni cuota), en Sevilla (principal) y Málaga. Dos perfiles: cliente y entrenador. Color de marca: lima #B5E600.
 
 ## Stack
-Next.js 16 + React 19 + Tailwind + Supabase + Vercel. Stripe más adelante (fuera del MVP).
+Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. Stripe más adelante (fuera del MVP).
 
 ## Estructura y cuentas
 - Proyecto en C:\proyectos\openfit.
@@ -21,6 +21,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. Stripe más adelante (fuer
 - Ubicación: mapa real (Leaflet + OpenStreetMap) + dirección libre + punto de encuentro.
 - Modalidad: texto libre escrito por el entrenador (se muestra al cliente) + categoría general para filtros. Categorías: Fuerza / funcional, Baile / coreografiado, Yoga / movilidad, Cardio / running, Combate / boxeo, Otra.
 - Las clases pueden tener un mínimo de plazas (plazas_min) opcional; por debajo del mínimo se muestra un aviso de "pendiente de confirmación". El entrenador puede cancelar una clase entera (cancelar_clase()), lo que cancela también todas sus reservas activas y las marca con cancelada_por_entrenador = true, para que el cliente vea un aviso claro en /mis-reservas en vez de que la reserva desaparezca sin explicación.
+- Tras iniciar sesión o registrarse, la app lleva a una pantalla de inicio (/) con botones grandes según el rol del usuario, en vez de dejar al usuario en la pantalla de login/registro.
 
 ## Reglas de trabajo en este proyecto
 - Trabajo en "manual mode on": cada cambio se aprueba a mano (nunca "allow all" salvo bloque acotado).

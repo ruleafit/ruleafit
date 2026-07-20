@@ -59,6 +59,12 @@ Hecho:
 - Aviso claro en /mis-reservas cuando una reserva fue cancelada por el entrenador (cancelada_por_entrenador), en sección separada.
 - Corregido un bucle de recursión en las políticas RLS de clases/reservas surgido al implementar esto (sql/010_arreglo_recursion_rls.sql).
 
+## Pantalla de inicio tras login/registro (post Fase 4)
+Hecho:
+- Home (/) muestra botones grandes con iconos según rol (entrenador: Clases/Mis alumnos/Publicar/Mi cuenta; cliente: Clases/Mis reservas/Mi cuenta) cuando hay sesión iniciada.
+- Login y registro redirigen automáticamente a esta pantalla.
+- Enlace "Inicio" añadido al menú de navegación.
+
 ## Fase 5 · Pulido y lanzamiento — pendiente
 - [ ] Coherencia visual con la marca.
 - [ ] Responsive (móvil).
