@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { Home } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 
 export default function Menu() {
@@ -81,6 +82,13 @@ export default function Menu() {
         </Link>
 
         <div className="flex flex-wrap items-center gap-5">
+          {usuario && (
+            <Link href="/" className={`inline-flex items-center gap-1.5 ${enlaceClass('/')}`}>
+              <Home className="h-4 w-4" strokeWidth={1.75} />
+              Inicio
+            </Link>
+          )}
+
           <Link href="/clases" className={enlaceClass('/clases')}>
             Clases
           </Link>

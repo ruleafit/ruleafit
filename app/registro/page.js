@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabaseClient'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
 export default function RegistroPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
@@ -57,6 +59,7 @@ export default function RegistroPage() {
       }
     } else {
       setMensaje('¡Cuenta creada como ' + rol + '!')
+      router.push('/')
     }
   }
 
