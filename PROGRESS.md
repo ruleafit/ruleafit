@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 19 julio 2026
+Última actualización: 20 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -51,6 +51,13 @@ Hecho:
 
 Falta:
 - Ninguno.
+
+## Mínimo de plazas y cancelación de clase (post Fase 4)
+Hecho:
+- Campo plazas_min en /publicar y aviso visual de "pendiente de confirmación" en tarjetas/ficha.
+- Botón "Cancelar esta clase" para el entrenador en /mis-alumnos (función cancelar_clase, cancela la clase y todas sus reservas activas).
+- Aviso claro en /mis-reservas cuando una reserva fue cancelada por el entrenador (cancelada_por_entrenador), en sección separada.
+- Corregido un bucle de recursión en las políticas RLS de clases/reservas surgido al implementar esto (sql/010_arreglo_recursion_rls.sql).
 
 ## Fase 5 · Pulido y lanzamiento — pendiente
 - [ ] Coherencia visual con la marca.

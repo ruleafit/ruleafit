@@ -20,6 +20,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. Stripe más adelante (fuer
   - Visión futura (no implementado todavía, solo de referencia): cuando Openfit integre pagos reales, el usuario podrá recargar dinero y convertirlo en Open (equivalencia inicial de referencia 1€ = 10 Open, revisable); a partir de entonces los Open podrán usarse para reservar clases dentro de la app. Antes de esa fase habrá que definir cómo se compensa al entrenador cuando se usen Open ganados gratuitamente, y revisar requisitos legales y técnicos.
 - Ubicación: mapa real (Leaflet + OpenStreetMap) + dirección libre + punto de encuentro.
 - Modalidad: texto libre escrito por el entrenador (se muestra al cliente) + categoría general para filtros. Categorías: Fuerza / funcional, Baile / coreografiado, Yoga / movilidad, Cardio / running, Combate / boxeo, Otra.
+- Las clases pueden tener un mínimo de plazas (plazas_min) opcional; por debajo del mínimo se muestra un aviso de "pendiente de confirmación". El entrenador puede cancelar una clase entera (cancelar_clase()), lo que cancela también todas sus reservas activas y las marca con cancelada_por_entrenador = true, para que el cliente vea un aviso claro en /mis-reservas en vez de que la reserva desaparezca sin explicación.
 
 ## Reglas de trabajo en este proyecto
 - Trabajo en "manual mode on": cada cambio se aprueba a mano (nunca "allow all" salvo bloque acotado).
