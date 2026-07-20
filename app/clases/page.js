@@ -193,8 +193,10 @@ export default function ClasesPage() {
               {clasesFiltradas.map((clase) => {
                 const plazasMax = clase.plazas_max ?? 0
                 const plazasOcupadas = clase.plazas_ocupadas ?? 0
+                const plazasMin = clase.plazas_min ?? 0
                 const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
                 const porcentajeOcupado = plazasMax > 0 ? Math.min((plazasOcupadas / plazasMax) * 100, 100) : 0
+                const pendienteConfirmacion = plazasMin > 0 && plazasOcupadas < plazasMin
 
                 return (
                   <div
@@ -239,11 +241,17 @@ export default function ClasesPage() {
                     </div>
 
                     <div className="mt-4">
-                      <div className="mb-1 flex items-center justify-between text-xs font-medium text-zinc-600">
-                        <span>
-                          {plazasLibres}/{plazasMax} plazas libres
-                        </span>
-                      </div>
+                      {pendienteConfirmacion ? (
+                        <div className="mb-1 flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800">
+                          <span>Pendiente de confirmación ({plazasOcupadas}/{plazasMin} plazas mínimas)</span>
+                        </div>
+                      ) : (
+                        <div className="mb-1 flex items-center justify-between text-xs font-medium text-zinc-600">
+                          <span>
+                            {plazasLibres}/{plazasMax} plazas libres
+                          </span>
+                        </div>
+                      )}
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
                         <div
                           className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"

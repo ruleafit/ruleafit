@@ -53,6 +53,7 @@ function agruparPorClase(filas) {
         clase_hora: fila.clase_hora,
         plazas_max: fila.plazas_max,
         plazas_ocupadas: fila.plazas_ocupadas,
+        estado: 'activa',
         alumnos: [],
       }
       indicePorClaseId.set(fila.clase_id, grupo)
@@ -78,6 +79,9 @@ export default function MisAlumnosPage() {
   const [error, setError] = useState('')
   const [procesandoAsistenciaId, setProcesandoAsistenciaId] = useState(null)
   const [erroresAsistencia, setErroresAsistencia] = useState({})
+  const [procesandoCancelacionId, setProcesandoCancelacionId] = useState(null)
+  const [erroresCancelacion, setErroresCancelacion] = useState({})
+  const [mensajesCancelacion, setMensajesCancelacion] = useState({})
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -148,6 +152,37 @@ export default function MisAlumnosPage() {
     setProcesandoAsistenciaId(null)
   }
 
+  async function handleCancelarClase(claseId) {
+    const confirmado = window.confirm(
+      '¿Seguro que quieres cancelar esta clase? Se cancelarán también todas las reservas activas de tus alumnos. Esta acción no se puede deshacer.'
+    )
+    if (!confirmado) return
+
+    setProcesandoCancelacionId(claseId)
+    setErroresCancelacion((prev) => {
+      const siguiente = { ...prev }
+      delete siguiente[claseId]
+      return siguiente
+    })
+
+    const { data, error } = await supabase.rpc('cancelar_clase', { p_clase_id: claseId })
+
+    if (error) {
+      setErroresCancelacion((prev) => ({ ...prev, [claseId]: error.message }))
+      setProcesandoCancelacionId(null)
+      return
+    }
+
+    setClasesConAlumnos((prev) =>
+      prev.map((clase) => (clase.clase_id === claseId ? { ...clase, estado: 'cancelada' } : clase))
+    )
+    setMensajesCancelacion((prev) => ({
+      ...prev,
+      [claseId]: `Clase cancelada. Se han cancelado ${data?.reservas_canceladas ?? 0} reservas.`,
+    }))
+    setProcesandoCancelacionId(null)
+  }
+
   if (cargandoSesion) {
     return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
   }
@@ -193,7 +228,32 @@ export default function MisAlumnosPage() {
             key={clase.clase_id}
             className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-200 motion-safe:transition-shadow motion-safe:duration-200 hover:shadow-md"
           >
-            <h2 className="mb-1 text-lg font-bold text-black sm:text-xl">{clase.clase_titulo}</h2>
+            <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-bold text-black sm:text-xl">{clase.clase_titulo}</h2>
+
+              {clase.estado === 'activa' && !claseYaPaso(clase) && (
+                <button
+                  type="button"
+                  onClick={() => handleCancelarClase(clase.clase_id)}
+                  disabled={procesandoCancelacionId === clase.clase_id}
+                  className="rounded-md border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 motion-safe:transition-colors motion-safe:duration-200 hover:border-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {procesandoCancelacionId === clase.clase_id ? 'Cancelando...' : 'Cancelar esta clase'}
+                </button>
+              )}
+
+              {clase.estado === 'cancelada' && (
+                <span className="text-xs font-semibold text-red-700">Clase cancelada</span>
+              )}
+            </div>
+
+            {erroresCancelacion[clase.clase_id] && (
+              <p className="mb-2 text-xs text-red-600">{erroresCancelacion[clase.clase_id]}</p>
+            )}
+
+            {mensajesCancelacion[clase.clase_id] && (
+              <p className="mb-2 text-xs text-zinc-600">{mensajesCancelacion[clase.clase_id]}</p>
+            )}
 
             <div className="flex flex-col gap-1 text-sm text-zinc-500">
               <p>
@@ -229,7 +289,7 @@ export default function MisAlumnosPage() {
                           {ETIQUETAS_ASISTENCIA[alumno.asistencia]}
                         </span>
 
-                        {haPasado && alumno.asistencia === 'pendiente' && (
+                        {clase.estado === 'activa' && haPasado && alumno.asistencia === 'pendiente' && (
                           <>
                             <button
                               type="button"
@@ -250,7 +310,7 @@ export default function MisAlumnosPage() {
                           </>
                         )}
 
-                        {alumno.asistencia !== 'pendiente' && (
+                        {clase.estado === 'activa' && alumno.asistencia !== 'pendiente' && (
                           <button
                             type="button"
                             onClick={() => handleMarcarAsistencia(alumno.reserva_id, alumno.asistencia !== 'asistio')}

@@ -44,10 +44,10 @@ export default function MisReservasPage() {
       const { data, error } = await supabase
         .from('reservas')
         .select(
-          'id, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_ocupadas)'
+          'id, estado, cancelled_at, cancelada_por_entrenador, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_ocupadas)'
         )
         .eq('cliente_id', usuario.id)
-        .eq('estado', 'activa')
+        .or('estado.eq.activa,and(estado.eq.cancelada,cancelada_por_entrenador.eq.true)')
         .order('fecha', { foreignTable: 'clases', ascending: true })
         .order('hora', { foreignTable: 'clases', ascending: true })
 
@@ -115,6 +115,11 @@ export default function MisReservasPage() {
     return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
   }
 
+  const reservasActivas = reservas.filter((r) => r.estado === 'activa')
+  const reservasCanceladasPorEntrenador = reservas.filter(
+    (r) => r.estado === 'cancelada' && r.cancelada_por_entrenador
+  )
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">Mis reservas</h1>
@@ -127,7 +132,7 @@ export default function MisReservasPage() {
 
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-      {!error && reservas.length === 0 && (
+      {!error && reservasActivas.length === 0 && reservasCanceladasPorEntrenador.length === 0 && (
         <p className="text-sm text-zinc-500">
           Todavía no tienes ninguna clase reservada. Ve a{' '}
           <Link href="/clases" className="font-semibold text-[#7a9900] hover:underline">
@@ -138,7 +143,7 @@ export default function MisReservasPage() {
       )}
 
       <div className="flex flex-col gap-4">
-        {reservas.map((reserva) => {
+        {reservasActivas.map((reserva) => {
           const clase = reserva.clases
           if (!clase) return null
 
@@ -216,6 +221,65 @@ export default function MisReservasPage() {
           )
         })}
       </div>
+
+      {reservasCanceladasPorEntrenador.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-4 border-b border-zinc-200 pb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500">
+            Clases canceladas por el entrenador
+          </h2>
+
+          <div className="flex flex-col gap-4">
+            {reservasCanceladasPorEntrenador.map((reserva) => {
+              const clase = reserva.clases
+              if (!clase) return null
+
+              return (
+                <div
+                  key={reserva.id}
+                  className="rounded-2xl bg-zinc-50 p-5 ring-1 ring-zinc-200"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    {clase.categoria && (
+                      <span className="inline-block rounded-full border border-zinc-300 bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-500">
+                        {clase.categoria}
+                      </span>
+                    )}
+                    <span className="text-xs font-semibold text-zinc-500">Cancelada</span>
+                  </div>
+
+                  <h2 className="mb-1 text-lg font-bold text-zinc-500 sm:text-xl">{clase.titulo}</h2>
+
+                  <div className="flex flex-col gap-1 text-sm text-zinc-400">
+                    <p>
+                      Ciudad: <span className="text-zinc-500">{clase.ciudad}</span>
+                    </p>
+                    <p>
+                      Fecha: <span className="text-zinc-500">{clase.fecha}</span> · Hora:{' '}
+                      <span className="text-zinc-500">{clase.hora}</span>
+                    </p>
+                  </div>
+
+                  <p className="mt-3 border-t border-zinc-200 pt-3 text-sm text-zinc-500">
+                    Esta clase fue cancelada por el entrenador.
+                    {reserva.cancelled_at && (
+                      <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>
+                    )}
+                  </p>
+
+                  <div className="mt-3">
+                    <Link
+                      href={`/clases/${clase.id}`}
+                      className="rounded-md border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                    >
+                      Ver detalle
+                    </Link>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

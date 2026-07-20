@@ -43,6 +43,7 @@ export default function PublicarPage() {
   const [nivel, setNivel] = useState(NIVELES[0])
   const [precio, setPrecio] = useState('')
   const [plazasMax, setPlazasMax] = useState('')
+  const [plazasMin, setPlazasMin] = useState('0')
   const [material, setMaterial] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const [lat, setLat] = useState(null)
@@ -76,6 +77,14 @@ export default function PublicarPage() {
       return
     }
 
+    const plazasMaxNum = Number(plazasMax)
+    const plazasMinNum = plazasMin === '' ? 0 : Number(plazasMin)
+
+    if (!Number.isInteger(plazasMinNum) || plazasMinNum < 0 || plazasMinNum > plazasMaxNum) {
+      setMensaje('Las plazas mínimas deben ser un número entero entre 0 y las plazas máximas.')
+      return
+    }
+
     setMensaje('Publicando...')
 
     const { error } = await supabase.from('clases').insert({
@@ -91,7 +100,8 @@ export default function PublicarPage() {
       duracion: duracion === '' ? null : Number(duracion),
       nivel,
       precio: precio === '' ? null : Number(precio),
-      plazas_max: plazasMax === '' ? null : Number(plazasMax),
+      plazas_max: plazasMax === '' ? null : plazasMaxNum,
+      plazas_min: plazasMinNum,
       material,
       observaciones,
       estado: 'activa',
@@ -113,6 +123,7 @@ export default function PublicarPage() {
       setDuracion('')
       setPrecio('')
       setPlazasMax('')
+      setPlazasMin('0')
       setMaterial('')
       setObservaciones('')
       setLat(null)
@@ -258,6 +269,22 @@ export default function PublicarPage() {
                 <label className={labelClass}>Plazas máximas</label>
                 <input type="number" value={plazasMax} onChange={(e) => setPlazasMax(e.target.value)} required className={inputClass} min="1" />
               </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Plazas mínimas</label>
+              <input
+                type="number"
+                value={plazasMin}
+                onChange={(e) => setPlazasMin(e.target.value)}
+                className={inputClass}
+                min="0"
+                step="1"
+                placeholder="0 (sin mínimo)"
+              />
+              <p className="mt-1 text-xs text-zinc-500">
+                Opcional. Si la clase no llega a este número de plazas ocupadas, se mostrará como pendiente de confirmación.
+              </p>
             </div>
 
             <div>
