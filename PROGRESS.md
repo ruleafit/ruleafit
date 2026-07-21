@@ -71,19 +71,31 @@ Hecho:
 - Variables NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY configuradas en Vercel (valores no documentados aquí).
 - En Supabase se añadieron el Site URL y las Redirect URLs de producción, manteniendo también las de localhost.
 - Corregido el título de la pestaña del navegador ("Create Next App" → "Openfit").
+- Rediseño visual completo, responsive desde el principio:
+  - Base visual compartida: paleta de marca en app/globals.css, tipografía de titulares, y animaciones (aparición al hacer scroll vía IntersectionObserver en components/RevelarAlLlegar.js, hover de tarjetas que se elevan, zoom lento de imágenes), todo respetando prefers-reduced-motion.
+  - Portada (/) rehecha: hero a pantalla casi completa con parallax suave, franja de categorías, franja de comunidad y sección de tres puntos con iconos.
+  - /clases rediseñada: cabecera con imagen de fondo, filtros en píldora con acento lima, tarjetas con imagen según categoría, estado vacío con icono y botón para limpiar filtros.
+  - /mis-reservas rediseñada: cabecera propia, imagen por categoría en cada tarjeta, franja de color en el borde izquierdo según estado (próxima en lima, ya pasada en gris, cancelada por el entrenador en rojo suave) y etiqueta de cuenta atrás ("faltan N días" / "es mañana" / "es hoy").
+  - /cuenta rediseñada: cabecera con imagen desenfocada, saldo de Open destacado en tarjeta propia justo debajo de la cabecera, historial de movimientos con el nuevo estilo.
+- Categorías de clase reducidas de seis a cuatro (Fuerza / funcional, Cardio, Yoga / Pilates / movilidad, Otros); los datos de las clases existentes se migraron manualmente en Supabase con UPDATE. El mapa de imagen por categoría vive en lib/imagenesCategoria.js, compartido entre /clases y /mis-reservas.
+- Imágenes del proyecto en public/imagenes (portada, fuerza, running, yoga, combate, comunidad), descargadas de Pexels con licencia gratuita de uso comercial.
+- Giro estratégico de mensajes: los textos ya no prometen exclusivamente entrenamiento al aire libre ni en grupo, de cara a abrirse en el futuro a gimnasios y a entrenamientos individuales o en pareja.
 
-Pendiente para no perder de vista:
-- [ ] Activar 2FA en la cuenta de Vercel antes de invitar a la beta.
-- [ ] Reactivar la confirmación de email en Supabase antes del lanzamiento real.
-- [ ] Valorar fijar la versión de Node con "engines" en package.json.
+Pendiente (en orden):
+1. **PRIORITARIO.** Captación de entrenadores en la portada sin sesión. Hoy la portada solo habla a los clientes, y un entrenador que llega por primera vez no encuentra ninguna razón para registrarse. Decisión tomada: NO dividir el hero en dos columnas (obligaría a elegir bando sin contexto y restaría impacto). En su lugar: mantener el hero único con el mensaje de cliente, y añadir más abajo una sección propia para entrenadores, visualmente diferenciada con fondo oscuro, con el titular "Tú pones las reglas", el cuerpo "Decides qué días trabajas, a qué hora, cuánta gente entra y cuánto cobras. Sin horario fijo, sin jefe. Publicas tu clase en dos minutos y cobras directamente a tus alumnos.", tres puntos de apoyo ("Tu horario, tus normas", "Tú fijas el precio y las plazas", "Cobras directo, sin intermediarios") y un botón que lleve al registro. Añadir además un enlace discreto "¿Eres entrenador?" en el menú de navegación que haga scroll hasta esa sección.
+   Nota: no prometer ganancias concretas ni "sin comisiones" para siempre, porque con Stripe habrá comisión. Hablar de control, no de sueldo.
+2. Diferenciar la portada con sesión de la portada sin sesión: sin sesión el objetivo es convencer, con sesión el objetivo es dar acceso rápido, por lo que el hero puede ser más corto cuando hay sesión iniciada.
+3. Lado del entrenador: rediseño de /publicar y /mis-alumnos, con los mismos mensajes de "tú pones las reglas".
+4. Ficha de detalle de clase (/clases/[id]).
+5. /login y /registro.
+6. Advertencia de mayoría de edad en el registro, para que coincida con lo que exige el aviso legal.
+7. Actualizar el aviso legal (legal/aviso-legal.md y app/aviso-legal/page.js), que todavía describe el servicio como "sesiones de entrenamiento al aire libre".
+8. Activar 2FA en la cuenta de Vercel antes de repartir el enlace de la beta.
+9. Reactivar la confirmación de email en Supabase antes del lanzamiento real.
 
-Falta de Fase 5 (parte 1, antes de la beta):
-- [ ] Responsive (móvil).
-- [ ] Coherencia visual con la marca.
-
-Falta de Fase 5 (parte 2, tras el feedback de la beta):
-- [ ] Mensajes de error claros.
-- [ ] Pulido fino según feedback de usuarios reales.
+Otros pendientes menores (sin prioridad asignada):
+- Valorar fijar la versión de Node con "engines" en package.json.
+- Mensajes de error más claros en general, y pulido fino según el feedback de la beta.
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.

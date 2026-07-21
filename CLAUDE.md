@@ -14,6 +14,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. 
 - Supabase: proyecto "openfit", región Europa (Irlanda).
 - Conector Supabase en lib/supabaseClient.js; claves en .env.local (no se sube a git, protegido por .gitignore).
 - Desplegado en Vercel en https://openfit-five.vercel.app, con despliegue automático al hacer push a la rama main.
+- Imágenes estáticas del proyecto en public/imagenes (portada, fuerza, running, yoga, combate, comunidad). El mapa de imagen por categoría de clase vive en lib/imagenesCategoria.js, compartido entre /clases y /mis-reservas.
 
 ## Decisiones de producto (MVP)
 - Sin lista de espera: clase llena = botón de reservar desactivado.
