@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 20 julio 2026
+Última actualización: 21 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -65,12 +65,25 @@ Hecho:
 - Login y registro redirigen automáticamente a esta pantalla.
 - Enlace "Inicio" añadido al menú de navegación.
 
-## Fase 5 · Pulido y lanzamiento — pendiente
-- [ ] Coherencia visual con la marca.
+## Fase 5 · Pulido y lanzamiento — en curso
+Hecho:
+- Despliegue en Vercel: producción en https://openfit-five.vercel.app.
+- Variables NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY configuradas en Vercel (valores no documentados aquí).
+- En Supabase se añadieron el Site URL y las Redirect URLs de producción, manteniendo también las de localhost.
+- Corregido el título de la pestaña del navegador ("Create Next App" → "Openfit").
+
+Pendiente para no perder de vista:
+- [ ] Activar 2FA en la cuenta de Vercel antes de invitar a la beta.
+- [ ] Reactivar la confirmación de email en Supabase antes del lanzamiento real.
+- [ ] Valorar fijar la versión de Node con "engines" en package.json.
+
+Falta de Fase 5 (parte 1, antes de la beta):
 - [ ] Responsive (móvil).
+- [ ] Coherencia visual con la marca.
+
+Falta de Fase 5 (parte 2, tras el feedback de la beta):
 - [ ] Mensajes de error claros.
-- [ ] Pruebas con usuarios reales.
-- [ ] Despliegue final en Vercel (producción).
+- [ ] Pulido fino según feedback de usuarios reales.
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.

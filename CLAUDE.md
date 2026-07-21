@@ -11,6 +11,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. 
 - Repo privado: github.com/openfit2026/openfit.
 - Supabase: proyecto "openfit", región Europa (Irlanda).
 - Conector Supabase en lib/supabaseClient.js; claves en .env.local (no se sube a git, protegido por .gitignore).
+- Desplegado en Vercel en https://openfit-five.vercel.app, con despliegue automático al hacer push a la rama main.
 
 ## Decisiones de producto (MVP)
 - Sin lista de espera: clase llena = botón de reservar desactivado.
