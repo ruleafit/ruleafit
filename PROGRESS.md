@@ -87,3 +87,29 @@ Falta de Fase 5 (parte 2, tras el feedback de la beta):
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
+
+## Análisis de competencia (21 julio 2026)
+
+Competidor directo detectado: Trainity (trainityapp.com), lanzado en julio de 2026. Misma propuesta que Openfit: entrenamientos en grupo al aire libre en Sevilla, sin cuotas mensuales, precios desde 3 €.
+
+Sus ventajas sobre Openfit:
+- Pagos reales con Stripe (tarjeta, Apple Pay, Google Pay). Cobran al cliente, abonan al entrenador y se quedan una comisión de intermediación.
+- Documentación legal completa: aviso legal, condiciones de contratación, condiciones para entrenadores, privacidad, cookies, consentimiento informado de riesgo, titular identificado con NIF.
+- SEO trabajado, con páginas específicas por búsqueda (entrenador personal en Sevilla, entrenamiento al aire libre, funcional, en grupo, para perder peso).
+- Sistema de valoraciones y reseñas, limitado a quienes reservaron por la plataforma.
+- Reserva sin registro: solo nombre, email y teléfono.
+- Sección de perfiles de entrenador.
+
+Sus debilidades frente a Openfit:
+- No tienen panel de entrenador: el alta se hace por un formulario externo de Google, y el entrenador no puede publicar ni gestionar sus sesiones.
+- La cancelación es manual (formulario o email), no automática.
+- Sin cuentas de usuario, por lo que el cliente no tiene historial ni "mis reservas".
+- Solo operan en Sevilla.
+- Sin sistema de fidelización.
+- Cancelación más rígida: 24 h de antelación frente a las 2 h de Openfit.
+
+Conclusiones para la hoja de ruta:
+- La ventaja diferencial de Openfit es el panel del entrenador (publicar, ver alumnos, marcar asistencia, cancelar clase). Conviene reforzarla para captar entrenadores.
+- Subir la prioridad de los pagos reales (Fase 6): dejan de ser un extra posterior al lanzamiento para ser la diferencia entre producto y demostración.
+- Valorar añadir a la hoja de ruta perfiles públicos de entrenador y valoraciones tras la clase. No dependen de Stripe y son clave para la confianza en un marketplace.
+- Antes de cobrar dinero habrá que preparar la documentación legal correspondiente, con asesoramiento profesional.
