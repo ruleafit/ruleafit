@@ -34,7 +34,7 @@ export default function MapaClases({ clases }) {
   const conCoordenadas = clases.filter((c) => c.lat != null && c.lng != null)
 
   return (
-    <div style={{ height: 500, width: '100%', borderRadius: 8, overflow: 'hidden' }}>
+    <div className="h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
       <MapContainer center={CENTRO_SEVILLA} zoom={12} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

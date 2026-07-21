@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { Coins, History } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
+import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
@@ -135,46 +138,86 @@ export default function CuentaPage() {
   }
 
   if (cargando) {
-    return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
+    return (
+      <div className="flex min-h-[60vh] flex-1 items-center justify-center">
+        <p className="text-[#6B7355]">Cargando...</p>
+      </div>
+    )
   }
 
-  return (
-    <div style={{ maxWidth: 400, margin: '60px auto', padding: 20 }}>
-      <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 20 }}>
-        Mi cuenta
-      </h1>
+  if (!usuario) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-16 text-center">
+        <p className="text-[#6B7355]">
+          No has iniciado sesión. Ve a{' '}
+          <Link href="/login" className="font-semibold text-[#3D4A00] hover:underline">
+            iniciar sesión
+          </Link>
+          .
+        </p>
+      </div>
+    )
+  }
 
-      {usuario ? (
-        <div>
-          <p style={{ marginBottom: 8 }}>
-            Hola, <strong>{usuario.email}</strong>
-          </p>
-          <p style={{ marginBottom: 8 }}>
-            Rol: <strong>{usuario.user_metadata?.rol || 'sin rol'}</strong>
+  const rol = usuario.user_metadata?.rol
+  const rolMostrado = rol === 'entrenador' ? 'Entrenador' : rol === 'cliente' ? 'Cliente' : 'Sin rol'
+  const inicial = (username || usuario.email || '?').charAt(0).toUpperCase()
+
+  return (
+    <div className="flex flex-1 flex-col">
+      <section className="relative isolate flex h-[180px] items-center justify-center overflow-hidden sm:h-[220px]">
+        <div className="absolute inset-0 -z-20 overflow-hidden">
+          <img src="/imagenes/fuerza.jpg" alt="" className="h-full w-full scale-110 object-cover blur-md" />
+        </div>
+        <div className="absolute inset-0 -z-10 bg-black/60" />
+
+        <div className="relative z-10 flex flex-col items-center gap-2 px-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/70 bg-[#B5E600] text-2xl font-extrabold text-[#1F2400] shadow-sm sm:h-20 sm:w-20 sm:text-3xl">
+            {inicial}
+          </div>
+          <p className="text-lg font-bold text-white sm:text-xl">{username || usuario.email}</p>
+          <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+            {rolMostrado}
+          </span>
+        </div>
+      </section>
+
+      <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
+        <RevelarAlLlegar className="mb-8 flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+            <Coins className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{openSaldo}</p>
+            <p className="text-sm font-semibold text-[#3D4A00]">Open acumulados</p>
+          </div>
+        </RevelarAlLlegar>
+
+        <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+          <p className="mb-1 text-sm text-[#6B7355]">
+            Correo: <span className="text-[#1F2400]">{usuario.email}</span>
           </p>
 
           {!editando && (
-            <p style={{ marginBottom: 8 }}>
-              Nombre de usuario: <strong>{username || 'sin nombre'}</strong>
+            <p className="mb-3 text-sm text-[#6B7355]">
+              Nombre de usuario: <span className="font-semibold text-[#1F2400]">{username || 'sin nombre'}</span>
             </p>
           )}
 
-          {confirmacion && (
-            <p style={{ color: '#16a34a', fontSize: 13, marginBottom: 8 }}>{confirmacion}</p>
-          )}
+          {confirmacion && <p className="mb-3 text-sm font-medium text-[#3D4A00]">{confirmacion}</p>}
 
           {!editando && (
             <button
               type="button"
               onClick={empezarEdicion}
-              style={{ background: 'none', border: 'none', padding: 0, marginBottom: 16, color: '#16a34a', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}
+              className="text-sm font-semibold text-[#3D4A00] underline decoration-[#B5E600] decoration-2 underline-offset-2 hover:text-[#1F2400]"
             >
               Cambiar nombre de usuario
             </button>
           )}
 
           {editando && (
-            <form onSubmit={guardarUsername} style={{ marginBottom: 16 }}>
+            <form onSubmit={guardarUsername} className="mt-2">
               <input
                 type="text"
                 placeholder="Nuevo nombre de usuario"
@@ -184,16 +227,14 @@ export default function CuentaPage() {
                   if (errorUsername) setErrorUsername('')
                 }}
                 required
-                style={{ display: 'block', width: '100%', padding: 10, marginBottom: errorUsername ? 4 : 12, border: '1px solid #ccc', borderRadius: 8 }}
+                className="mb-3 block w-full rounded-full border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
               />
-              {errorUsername && (
-                <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 12 }}>{errorUsername}</p>
-              )}
-              <div style={{ display: 'flex', gap: 8 }}>
+              {errorUsername && <p className="mb-3 text-xs text-red-600">{errorUsername}</p>}
+              <div className="flex gap-3">
                 <button
                   type="submit"
                   disabled={guardando}
-                  style={{ flex: 1, padding: 10, background: '#B5E600', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: guardando ? 'default' : 'pointer', opacity: guardando ? 0.7 : 1 }}
+                  className="flex-1 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {guardando ? 'Guardando...' : 'Guardar'}
                 </button>
@@ -201,82 +242,53 @@ export default function CuentaPage() {
                   type="button"
                   onClick={cancelarEdicion}
                   disabled={guardando}
-                  style={{ flex: 1, padding: 10, background: 'white', border: '1px solid #ccc', borderRadius: 8, fontWeight: 'bold', cursor: guardando ? 'default' : 'pointer' }}
+                  className="flex-1 rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:border-[#B5E600] disabled:cursor-not-allowed"
                 >
                   Cancelar
                 </button>
               </div>
             </form>
           )}
-
-          <div style={{ marginBottom: 24, paddingTop: 20, borderTop: '1px solid #e5e5e5' }}>
-            <h2 style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>Mis Open</h2>
-
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '10px 18px',
-                marginBottom: 16,
-                border: '2px solid #B5E600',
-                borderRadius: 12,
-                background: '#f5fbe0',
-              }}
-            >
-              <span style={{ fontSize: 24, fontWeight: 'bold', color: '#16231B' }}>{openSaldo}</span>{' '}
-              <span style={{ fontSize: 16, fontWeight: 'bold', color: '#7a9900' }}>Open</span>
-            </div>
-
-            {openMovimientos.length === 0 ? (
-              <p style={{ fontSize: 13, color: '#71717a' }}>Todavía no tienes movimientos de Open.</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {openMovimientos.map((mov) => (
-                  <div
-                    key={mov.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'baseline',
-                      gap: 12,
-                      paddingBottom: 6,
-                      borderBottom: '1px solid #f4f4f5',
-                    }}
-                  >
-                    <div>
-                      <p style={{ fontSize: 13, color: '#27272a', marginBottom: 2 }}>
-                        {mov.nota || openMotivos[mov.motivo] || mov.motivo}
-                      </p>
-                      <p style={{ fontSize: 11, color: '#a1a1aa' }}>
-                        {new Date(mov.created_at).toLocaleString('es-ES')}
-                      </p>
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 13,
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        color: mov.cantidad > 0 ? '#16a34a' : '#7f1d1d',
-                      }}
-                    >
-                      {mov.cantidad > 0 ? '+' : ''}
-                      {mov.cantidad} Open
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={cerrarSesion}
-            style={{ width: '100%', padding: 12, background: '#16231B', color: 'white', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' }}
-          >
-            Cerrar sesión
-          </button>
         </div>
-      ) : (
-        <p>No has iniciado sesión. Ve a <a href="/login" style={{ color: '#16a34a', fontWeight: 'bold' }}>iniciar sesión</a>.</p>
-      )}
+
+        <div className="mb-8">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1F2400]">
+            <History className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
+            Historial de Open
+          </h2>
+
+          {openMovimientos.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#E2E6CF] px-6 py-8 text-center text-sm text-[#6B7355]">
+              Todavía no tienes movimientos de Open. Cuando reserves o asistas a una clase, aparecerán aquí.
+            </div>
+          ) : (
+            <div className="divide-y divide-[#E2E6CF] overflow-hidden rounded-xl border border-[#E2E6CF] bg-white">
+              {openMovimientos.map((mov) => (
+                <div key={mov.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div>
+                    <p className="text-sm text-[#1F2400]">{mov.nota || openMotivos[mov.motivo] || mov.motivo}</p>
+                    <p className="text-xs text-[#6B7355]">{new Date(mov.created_at).toLocaleString('es-ES')}</p>
+                  </div>
+                  <span
+                    className={`shrink-0 text-sm font-bold ${mov.cantidad > 0 ? 'text-[#3D4A00]' : 'text-red-700'}`}
+                  >
+                    {mov.cantidad > 0 ? '+' : ''}
+                    {mov.cantidad} Open
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={cerrarSesion}
+          className="inline-flex w-full items-center justify-center rounded-full bg-[#1F2400] px-6 py-3 text-sm font-bold text-white transition hover:bg-black sm:w-auto"
+        >
+          Cerrar sesión
+        </button>
+      </div>
     </div>
   )
 }

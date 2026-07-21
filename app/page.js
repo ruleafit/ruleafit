@@ -3,8 +3,19 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Dumbbell, Users, ClipboardList, CircleUserRound, CalendarCheck, LogOut } from 'lucide-react'
+import {
+  Dumbbell,
+  Users,
+  ClipboardList,
+  CircleUserRound,
+  CalendarCheck,
+  LogOut,
+  Wallet,
+  UserRoundSearch,
+  Clock,
+} from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import RevelarAlLlegar from '../components/RevelarAlLlegar'
 
 const ACCESOS_ENTRENADOR = [
   { href: '/clases', label: 'Clases', Icono: Dumbbell },
@@ -19,11 +30,32 @@ const ACCESOS_CLIENTE = [
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
 ]
 
+const CATEGORIAS = [
+  { nombre: 'Fuerza / funcional', imagen: '/imagenes/fuerza.jpg' },
+  { nombre: 'Cardio', imagen: '/imagenes/running.jpg' },
+  { nombre: 'Yoga / Pilates / movilidad', imagen: '/imagenes/yoga.jpg' },
+  { nombre: 'Otros', imagen: '/imagenes/combate.jpg' },
+]
+
+const PUNTOS = [
+  { texto: 'Sin cuota mensual', Icono: Wallet },
+  { texto: 'Elige tu entrenador', Icono: UserRoundSearch },
+  { texto: 'Cancela hasta 2 h antes', Icono: Clock },
+]
+
+const botonPrimarioClass =
+  'inline-flex h-12 items-center justify-center rounded-full bg-[#B5E600] px-8 text-base font-bold text-[#1F2400] shadow-sm transition motion-safe:hover:-translate-y-0.5 hover:bg-[#a3d100] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
+
+const botonSecundarioClass =
+  'inline-flex h-12 items-center justify-center rounded-full border-2 border-white px-8 text-base font-bold text-white transition motion-safe:hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
+
 export default function Home() {
   const router = useRouter()
   const [usuario, setUsuario] = useState(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
   const [username, setUsername] = useState(null)
+  const [scrollY, setScrollY] = useState(0)
+  const [prefiereMenosMovimiento, setPrefiereMenosMovimiento] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -58,74 +90,159 @@ export default function Home() {
     cargarUsername()
   }, [usuario])
 
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefiereMenosMovimiento(media.matches)
+
+    if (media.matches) return
+
+    let frame = null
+    function alHacerScroll() {
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        setScrollY(window.scrollY)
+        frame = null
+      })
+    }
+    window.addEventListener('scroll', alHacerScroll)
+    return () => window.removeEventListener('scroll', alHacerScroll)
+  }, [])
+
   async function handleCerrarSesion() {
     await supabase.auth.signOut()
     router.push('/')
   }
 
   if (cargandoSesion) {
-    return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
-  }
-
-  if (!usuario) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center gap-8 py-32 px-16 text-center">
-          <h1 className="text-5xl font-bold tracking-tight text-black dark:text-zinc-50">
-            Openfit
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Entrena al aire libre, sin gimnasio ni cuota
-          </p>
-          <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-            <Link
-              href="/login"
-              className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:text-zinc-50 dark:hover:bg-[#1a1a1a] sm:w-auto"
-            >
-              Iniciar sesión
-            </Link>
-            <Link
-              href="/registro"
-              className="flex h-12 w-full items-center justify-center rounded-full bg-[#B5E600] px-6 font-bold text-black transition-colors hover:bg-[#a3d100] sm:w-auto"
-            >
-              Crear cuenta
-            </Link>
-          </div>
-        </main>
+      <div className="flex min-h-[60vh] flex-1 items-center justify-center">
+        <p className="text-[#6B7355]">Cargando...</p>
       </div>
     )
   }
 
-  const rol = usuario.user_metadata?.rol
+  const rol = usuario?.user_metadata?.rol
   const accesos = rol === 'entrenador' ? ACCESOS_ENTRENADOR : ACCESOS_CLIENTE
+  const desplazamientoParallax = prefiereMenosMovimiento ? 0 : Math.min(scrollY * 0.2, 80)
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <h1 className="mb-8 text-2xl font-bold text-black sm:text-3xl">
-        Hola, {username || 'usuario'}
-      </h1>
+    <div className="flex flex-1 flex-col">
+      {/* a) Sección principal */}
+      <section className="relative isolate flex min-h-[85vh] w-full items-center justify-center overflow-hidden">
+        <div className="absolute -inset-x-0 -top-20 -bottom-20 -z-20 overflow-hidden">
+          <div
+            className="h-full w-full bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(/imagenes/portada.jpg)',
+              transform: `translateY(${desplazamientoParallax}px)`,
+            }}
+          />
+        </div>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/40 to-black/75" />
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {accesos.map(({ href, label, Icono }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex flex-col items-center gap-3 rounded-2xl bg-white p-8 text-center shadow-sm ring-1 ring-zinc-200 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out hover:shadow-md motion-safe:hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
-          >
-            <Icono className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
-            <span className="text-base font-bold text-black">{label}</span>
+        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-24 text-center">
+          <h1 className="flex flex-col gap-1 text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            <span className="whitespace-nowrap">Tú eliges qué entrenar.</span>
+            <span className="whitespace-nowrap text-[#B5E600]">Sin cuotas.</span>
+          </h1>
+          <p className="max-w-xl text-lg text-white/90 sm:text-xl">
+            Clases sueltas en Sevilla y Málaga. Elige la de hoy, resérvala y ya está. Sin cuota mensual ni permanencia.
+          </p>
+
+          {!usuario && (
+            <div className="mt-2 flex flex-col gap-4 sm:flex-row">
+              <Link href="/registro" className={botonPrimarioClass}>
+                Crear cuenta
+              </Link>
+              <Link href="/login" className={botonSecundarioClass}>
+                Iniciar sesión
+              </Link>
+            </div>
+          )}
+
+          {usuario && (
+            <div className="mt-2 flex w-full flex-col items-center gap-6">
+              <p className="text-lg font-semibold text-white">Hola, {username || 'usuario'}</p>
+
+              <div className="flex flex-wrap justify-center gap-4">
+                {accesos.map(({ href, label, Icono }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border border-[#E2E6CF] bg-white/95 p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px]"
+                  >
+                    <Icono className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
+                    <span className="text-sm font-bold text-[#1F2400]">{label}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCerrarSesion}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+              >
+                <LogOut className="h-4 w-4" strokeWidth={1.75} />
+                Cerrar sesión
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* b) Franja de categorías */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
+        <RevelarAlLlegar as="h2" className="mb-10 text-2xl font-bold tracking-tight text-[#1F2400] sm:text-3xl">
+          Encuentra tu entrenamiento
+        </RevelarAlLlegar>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {CATEGORIAS.map(({ nombre, imagen }, indice) => (
+            <RevelarAlLlegar key={nombre} delayMs={indice * 100}>
+              <Link
+                href="/clases"
+                className="zoom-imagen tarjeta-hover group relative isolate flex h-56 items-end rounded-xl shadow-sm sm:h-64"
+              >
+                <img src={imagen} alt="" className="absolute inset-0 -z-10 h-full w-full rounded-xl object-cover" />
+                <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <span className="relative z-10 p-5 text-lg font-bold text-white">{nombre}</span>
+              </Link>
+            </RevelarAlLlegar>
+          ))}
+        </div>
+      </section>
+
+      {/* c) Franja de comunidad */}
+      <RevelarAlLlegar as="section" className="relative isolate flex min-h-[50vh] items-center justify-center overflow-hidden px-6 py-20 text-center">
+        <img
+          src="/imagenes/comunidad.jpg"
+          alt=""
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-black/60" />
+        <div className="flex flex-col items-center gap-6">
+          <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            Solo, en pareja o en grupo. Pagas solo la clase a la que vas.
+          </p>
+          <Link href="/clases" className={botonPrimarioClass}>
+            Ver clases
           </Link>
-        ))}
-      </div>
+        </div>
+      </RevelarAlLlegar>
 
-      <button
-        type="button"
-        onClick={handleCerrarSesion}
-        className="mt-10 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
-      >
-        <LogOut className="h-4 w-4" strokeWidth={1.75} />
-        Cerrar sesión
-      </button>
+      {/* d) Tres puntos con iconos */}
+      <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+          {PUNTOS.map(({ texto, Icono }, indice) => (
+            <RevelarAlLlegar key={texto} delayMs={indice * 100} className="flex flex-col items-center gap-4 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#EDF5C9]">
+                <Icono className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
+              </div>
+              <p className="text-base font-semibold text-[#1F2400]">{texto}</p>
+            </RevelarAlLlegar>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

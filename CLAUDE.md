@@ -1,7 +1,9 @@
 # Openfit — Contexto del proyecto
 
 ## Qué es
-Marketplace de entrenamientos deportivos al aire libre, clases sueltas (sin gimnasio ni cuota), en Sevilla (principal) y Málaga. Dos perfiles: cliente y entrenador. Color de marca: lima #B5E600.
+Marketplace de clases sueltas de entrenamiento (sin gimnasio ni cuota), en Sevilla (principal) y Málaga. Dos perfiles: cliente y entrenador. Color de marca: lima #B5E600.
+
+Visión a futuro (no implementada todavía, solo de referencia): Openfit contempla abrirse más adelante a gimnasios y a entrenamientos individuales o en pareja, además de al aire libre y en grupo. Por eso, los textos de la interfaz no deben prometer exclusivamente entrenamiento al aire libre ni en grupo.
 
 ## Stack
 Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. Stripe más adelante (fuera del MVP).
@@ -20,7 +22,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. 
   - MVP: los Open se ganan mediante retos, promociones, bienvenida o asistencia confirmada; implementado hasta ahora: bienvenida automática de 20 Open al registrarse, y asistencia confirmada de 5 Open por clase, concedida (y corregible mediante movimiento compensatorio) por el entrenador vía marcar_asistencia(); retos y promociones quedan fuera de esta fase. No se pueden comprar, recargar con dinero, retirar ni transferir; no se usan para reservar ni pagar clases. Las clases se siguen pagando directamente al entrenador, fuera de la app. Sin recargas simuladas ni descuentos de Open al reservar.
   - Visión futura (no implementado todavía, solo de referencia): cuando Openfit integre pagos reales, el usuario podrá recargar dinero y convertirlo en Open (equivalencia inicial de referencia 1€ = 10 Open, revisable); a partir de entonces los Open podrán usarse para reservar clases dentro de la app. Antes de esa fase habrá que definir cómo se compensa al entrenador cuando se usen Open ganados gratuitamente, y revisar requisitos legales y técnicos.
 - Ubicación: mapa real (Leaflet + OpenStreetMap) + dirección libre + punto de encuentro.
-- Modalidad: texto libre escrito por el entrenador (se muestra al cliente) + categoría general para filtros. Categorías: Fuerza / funcional, Baile / coreografiado, Yoga / movilidad, Cardio / running, Combate / boxeo, Otra.
+- Modalidad: texto libre escrito por el entrenador (se muestra al cliente) + categoría general para filtros. Categorías: Fuerza / funcional, Cardio, Yoga / Pilates / movilidad, Otros.
 - Las clases pueden tener un mínimo de plazas (plazas_min) opcional; por debajo del mínimo se muestra un aviso de "pendiente de confirmación". El entrenador puede cancelar una clase entera (cancelar_clase()), lo que cancela también todas sus reservas activas y las marca con cancelada_por_entrenador = true, para que el cliente vea un aviso claro en /mis-reservas en vez de que la reserva desaparezca sin explicación.
 - Tras iniciar sesión o registrarse, la app lleva a una pantalla de inicio (/) con botones grandes según el rol del usuario, en vez de dejar al usuario en la pantalla de login/registro.
 

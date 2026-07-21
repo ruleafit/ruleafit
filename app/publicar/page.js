@@ -11,11 +11,9 @@ const MapaSelector = dynamic(() => import('../../components/MapaSelector'), {
 
 const CATEGORIAS = [
   'Fuerza / funcional',
-  'Baile / coreografiado',
-  'Yoga / movilidad',
-  'Cardio / running',
-  'Combate / boxeo',
-  'Otra',
+  'Cardio',
+  'Yoga / Pilates / movilidad',
+  'Otros',
 ]
 
 const CIUDADES = ['Sevilla', 'Málaga']
