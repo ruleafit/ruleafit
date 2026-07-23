@@ -42,6 +42,15 @@ export default function Menu() {
     router.push('/')
   }
 
+  function handleClickEresEntrenador(evento) {
+    const seccion = document.getElementById('entrenadores')
+    if (seccion) {
+      evento.preventDefault()
+      const prefiereMenosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      seccion.scrollIntoView({ behavior: prefiereMenosMovimiento ? 'auto' : 'smooth' })
+    }
+  }
+
   function subrayadoClass(activo) {
     return [
       "relative inline-block after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-full after:bg-[#B5E600] after:origin-left",
@@ -95,6 +104,13 @@ export default function Menu() {
 
           {!usuario && (
             <>
+              <Link
+                href="/#entrenadores"
+                onClick={handleClickEresEntrenador}
+                className="px-0.5 py-1 text-sm text-[#6B7355] transition-colors hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
+              >
+                ¿Eres entrenador?
+              </Link>
               <Link href="/login" className={enlaceClass('/login')}>
                 Iniciar sesión
               </Link>

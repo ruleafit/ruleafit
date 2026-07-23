@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-export default function RevelarAlLlegar({ children, className = '', as: Componente = 'div', delayMs = 0 }) {
+export default function RevelarAlLlegar({ children, className = '', as: Componente = 'div', delayMs = 0, ...resto }) {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
 
@@ -35,6 +35,7 @@ export default function RevelarAlLlegar({ children, className = '', as: Componen
       ref={ref}
       className={`reveal ${visible ? 'reveal-visible' : ''} ${className}`}
       style={delayMs ? { transitionDelay: `${delayMs}ms` } : undefined}
+      {...resto}
     >
       {children}
     </Componente>

@@ -13,6 +13,9 @@ import {
   Wallet,
   UserRoundSearch,
   Clock,
+  CalendarClock,
+  Tag,
+  HandCoins,
 } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import RevelarAlLlegar from '../components/RevelarAlLlegar'
@@ -41,6 +44,12 @@ const PUNTOS = [
   { texto: 'Sin cuota mensual', Icono: Wallet },
   { texto: 'Elige tu entrenador', Icono: UserRoundSearch },
   { texto: 'Cancela hasta 2 h antes', Icono: Clock },
+]
+
+const PUNTOS_ENTRENADOR = [
+  { texto: 'Tu horario, tus normas', Icono: CalendarClock },
+  { texto: 'Tú fijas el precio y las plazas', Icono: Tag },
+  { texto: 'Cobras directo, sin intermediarios', Icono: HandCoins },
 ]
 
 const botonPrimarioClass =
@@ -128,7 +137,11 @@ export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
       {/* a) Sección principal */}
-      <section className="relative isolate flex min-h-[85vh] w-full items-center justify-center overflow-hidden">
+      <section
+        className={`relative isolate flex w-full items-center justify-center overflow-hidden ${
+          usuario ? 'min-h-[45vh]' : 'min-h-[85vh]'
+        }`}
+      >
         <div className="absolute -inset-x-0 -top-20 -bottom-20 -z-20 overflow-hidden">
           <div
             className="h-full w-full bg-cover bg-center"
@@ -140,29 +153,40 @@ export default function Home() {
         </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/40 to-black/75" />
 
-        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-24 text-center">
-          <h1 className="flex flex-col gap-1 text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            <span className="whitespace-nowrap">Tú eliges qué entrenar.</span>
-            <span className="whitespace-nowrap text-[#B5E600]">Sin cuotas.</span>
-          </h1>
-          <p className="max-w-xl text-lg text-white/90 sm:text-xl">
-            Clases sueltas en Sevilla y Málaga. Elige la de hoy, resérvala y ya está. Sin cuota mensual ni permanencia.
-          </p>
-
+        <div
+          className={`relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 text-center ${
+            usuario ? 'py-14 sm:py-16' : 'py-24'
+          }`}
+        >
           {!usuario && (
-            <div className="mt-2 flex flex-col gap-4 sm:flex-row">
-              <Link href="/registro" className={botonPrimarioClass}>
-                Crear cuenta
-              </Link>
-              <Link href="/login" className={botonSecundarioClass}>
-                Iniciar sesión
-              </Link>
-            </div>
+            <>
+              <h1 className="flex flex-col gap-1 text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                <span className="whitespace-nowrap">Tú eliges qué entrenar.</span>
+                <span className="whitespace-nowrap text-[#B5E600]">Sin cuotas.</span>
+              </h1>
+              <p className="max-w-xl text-lg text-white/90 sm:text-xl">
+                Clases sueltas en Sevilla y Málaga. Elige la de hoy, resérvala y ya está. Sin cuota mensual ni permanencia.
+              </p>
+
+              <div className="mt-2 flex flex-col gap-4 sm:flex-row">
+                <Link href="/registro" className={botonPrimarioClass}>
+                  Crear cuenta
+                </Link>
+                <Link href="/login" className={botonSecundarioClass}>
+                  Iniciar sesión
+                </Link>
+              </div>
+            </>
           )}
 
           {usuario && (
             <div className="mt-2 flex w-full flex-col items-center gap-6">
-              <p className="text-lg font-semibold text-white">Hola, {username || 'usuario'}</p>
+              <div className="flex flex-col gap-1">
+                <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl">
+                  Hola, {username || 'usuario'}
+                </h1>
+                <p className="text-base text-white/85 sm:text-lg">¿Qué entrenas hoy?</p>
+              </div>
 
               <div className="flex flex-wrap justify-center gap-4">
                 {accesos.map(({ href, label, Icono }) => (
@@ -211,6 +235,47 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Captación de entrenadores (solo visible sin sesión) */}
+      {!usuario && (
+        <RevelarAlLlegar
+          as="section"
+          id="entrenadores"
+          className="w-full bg-[#1A1F00] px-6 py-16 sm:py-24"
+        >
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
+            <p className="text-sm font-bold uppercase tracking-wide text-[#B5E600] sm:text-base">
+              ¿Eres entrenador?
+            </p>
+            <h2 className="whitespace-nowrap text-xl font-extrabold tracking-tight text-white sm:text-4xl">
+              <span className="text-[#B5E600]">Tú</span> pones las reglas.
+            </h2>
+            <p className="max-w-xl text-base text-white/85 sm:text-lg">
+              Decides qué días trabajas, a qué hora, cuánta gente entra y cuánto cobras. Sin horario fijo, sin jefe.
+              Publicas tu clase en dos minutos y cobras directamente a tus alumnos.
+            </p>
+
+            <div className="mt-4 grid w-full grid-cols-1 gap-8 sm:grid-cols-3">
+              {PUNTOS_ENTRENADOR.map(({ texto, Icono }, indice) => (
+                <RevelarAlLlegar
+                  key={texto}
+                  delayMs={indice * 100}
+                  className="flex flex-col items-center gap-3 text-center"
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10">
+                    <Icono className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+                  </div>
+                  <p className="text-sm font-semibold text-white">{texto}</p>
+                </RevelarAlLlegar>
+              ))}
+            </div>
+
+            <Link href="/registro" className={`${botonPrimarioClass} mt-4`}>
+              Publica tu primera clase
+            </Link>
+          </div>
+        </RevelarAlLlegar>
+      )}
 
       {/* c) Franja de comunidad */}
       <RevelarAlLlegar as="section" className="relative isolate flex min-h-[50vh] items-center justify-center overflow-hidden px-6 py-20 text-center">
