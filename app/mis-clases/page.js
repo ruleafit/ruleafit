@@ -12,11 +12,13 @@ import {
   CircleX,
   CircleAlert,
   Ban,
+  Pencil,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
+import { motivoNoEditableClase } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const ETIQUETAS_ASISTENCIA = {
@@ -319,6 +321,11 @@ export default function MisClasesPage() {
                   plazasMin: clase.plazas_min,
                   plazasOcupadas: clase.plazas_ocupadas,
                 })
+                const esEditable = !motivoNoEditableClase({
+                  fecha: clase.clase_fecha,
+                  hora: clase.clase_hora,
+                  estado: clase.estado,
+                })
 
                 return (
                   <RevelarAlLlegar key={clase.clase_id} delayMs={Math.min(indice * 60, 240)}>
@@ -453,8 +460,20 @@ export default function MisClasesPage() {
                           </div>
                         )}
 
+                        {esEditable && (
+                          <div className="mt-4 flex justify-end">
+                            <Link
+                              href={`/mis-clases/${clase.clase_id}/editar`}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9]"
+                            >
+                              <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+                              Editar
+                            </Link>
+                          </div>
+                        )}
+
                         {clase.estado === 'activa' && !haPasado && (
-                          <div className="mt-5 flex flex-col items-end gap-1.5 border-t border-[#E2E6CF] pt-3">
+                          <div className="mt-3 flex flex-col items-end gap-1.5 border-t border-[#E2E6CF] pt-3">
                             <button
                               type="button"
                               onClick={() => handleCancelarClase(clase.clase_id)}

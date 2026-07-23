@@ -18,6 +18,7 @@ import {
   HandCoins,
 } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { claseYaPaso } from '../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../components/RevelarAlLlegar'
 
 const ACCESOS_ENTRENADOR = [
@@ -65,6 +66,8 @@ export default function Home() {
   const [username, setUsername] = useState(null)
   const [scrollY, setScrollY] = useState(0)
   const [prefiereMenosMovimiento, setPrefiereMenosMovimiento] = useState(false)
+  const [misClases, setMisClases] = useState(null)
+  const [cargandoMisClases, setCargandoMisClases] = useState(true)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -100,6 +103,37 @@ export default function Home() {
   }, [usuario])
 
   useEffect(() => {
+    async function cargarMisClases() {
+      // Espera a que la sesión esté resuelta antes de decidir nada: si se
+      // entra aquí con usuario todavía sin resolver (primer render),
+      // esEntrenador daría "false" y se marcaría cargandoMisClases en false
+      // prematuramente y para siempre (mismo fallo de condición de carrera
+      // que hubo en app/mis-clases/[id]/editar/page.js).
+      if (cargandoSesion) {
+        return
+      }
+
+      const esEntrenadorActual = usuario?.user_metadata?.rol === 'entrenador'
+
+      if (!usuario || !esEntrenadorActual) {
+        setMisClases(null)
+        setCargandoMisClases(false)
+        return
+      }
+
+      const { data, error } = await supabase.rpc('mis_clases')
+
+      if (error) {
+        setMisClases(null)
+      } else {
+        setMisClases(data || [])
+      }
+      setCargandoMisClases(false)
+    }
+    cargarMisClases()
+  }, [usuario, cargandoSesion])
+
+  useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     setPrefiereMenosMovimiento(media.matches)
 
@@ -131,8 +165,19 @@ export default function Home() {
   }
 
   const rol = usuario?.user_metadata?.rol
-  const accesos = rol === 'entrenador' ? ACCESOS_ENTRENADOR : ACCESOS_CLIENTE
+  const esEntrenador = rol === 'entrenador'
+  const accesos = esEntrenador ? ACCESOS_ENTRENADOR : ACCESOS_CLIENTE
   const desplazamientoParallax = prefiereMenosMovimiento ? 0 : Math.min(scrollY * 0.2, 80)
+  const puntosMostrados = esEntrenador ? PUNTOS_ENTRENADOR : PUNTOS
+
+  const clasesActivasEntrenador = esEntrenador ? (misClases || []).filter((c) => c.estado === 'activa') : []
+  const totalReservasEntrenador = clasesActivasEntrenador.reduce(
+    (total, c) => total + Number(c.reservas_activas || 0),
+    0
+  )
+  const proximaClaseEntrenador =
+    clasesActivasEntrenador.filter((c) => !claseYaPaso({ fecha: c.fecha, hora: c.hora }))[0] || null
+  const sinClasesPublicadas = esEntrenador && (misClases || []).length === 0
 
   return (
     <div className="flex flex-1 flex-col">
@@ -214,27 +259,83 @@ export default function Home() {
         </div>
       </section>
 
-      {/* b) Franja de categorías */}
-      <section className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
-        <RevelarAlLlegar as="h2" className="mb-10 text-2xl font-bold tracking-tight text-[#1F2400] sm:text-3xl">
-          Encuentra tu entrenamiento
-        </RevelarAlLlegar>
-
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {CATEGORIAS.map(({ nombre, imagen }, indice) => (
-            <RevelarAlLlegar key={nombre} delayMs={indice * 100}>
-              <Link
-                href="/clases"
-                className="zoom-imagen tarjeta-hover group relative isolate flex h-56 items-end rounded-xl shadow-sm sm:h-64"
-              >
-                <img src={imagen} alt="" className="absolute inset-0 -z-10 h-full w-full rounded-xl object-cover" />
-                <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                <span className="relative z-10 p-5 text-lg font-bold text-white">{nombre}</span>
+      {/* Cifras del entrenador (solo con sesión de entrenador) */}
+      {esEntrenador && !cargandoMisClases && (
+        <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-20">
+          {sinClasesPublicadas ? (
+            <RevelarAlLlegar className="flex flex-col items-center gap-4 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center shadow-sm">
+              <ClipboardList className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
+              <p className="text-base font-bold text-[#1F2400]">Todavía no has publicado ninguna clase</p>
+              <p className="max-w-md text-sm text-[#6B7355]">
+                Publica tu primera clase y empieza a recibir reservas.
+              </p>
+              <Link href="/publicar" className={botonPrimarioClass}>
+                Publicar mi primera clase
               </Link>
             </RevelarAlLlegar>
-          ))}
-        </div>
-      </section>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
+                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">
+                  {clasesActivasEntrenador.length}
+                </p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Clases activas</p>
+              </RevelarAlLlegar>
+
+              <RevelarAlLlegar delayMs={80} className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
+                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{totalReservasEntrenador}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
+                  Reservas acumuladas
+                </p>
+              </RevelarAlLlegar>
+
+              <RevelarAlLlegar delayMs={160} className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
+                {proximaClaseEntrenador ? (
+                  <>
+                    <p className="truncate text-lg font-extrabold tracking-tight text-[#1F2400]">
+                      {proximaClaseEntrenador.titulo}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
+                      Próxima clase · {proximaClaseEntrenador.fecha}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-extrabold tracking-tight text-[#1F2400]">—</p>
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
+                      Sin clases próximas
+                    </p>
+                  </>
+                )}
+              </RevelarAlLlegar>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* b) Franja de categorías (no se muestra al entrenador con sesión) */}
+      {!esEntrenador && (
+        <section className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
+          <RevelarAlLlegar as="h2" className="mb-10 text-2xl font-bold tracking-tight text-[#1F2400] sm:text-3xl">
+            Encuentra tu entrenamiento
+          </RevelarAlLlegar>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {CATEGORIAS.map(({ nombre, imagen }, indice) => (
+              <RevelarAlLlegar key={nombre} delayMs={indice * 100}>
+                <Link
+                  href="/clases"
+                  className="zoom-imagen tarjeta-hover group relative isolate flex h-56 items-end rounded-xl shadow-sm sm:h-64"
+                >
+                  <img src={imagen} alt="" className="absolute inset-0 -z-10 h-full w-full rounded-xl object-cover" />
+                  <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <span className="relative z-10 p-5 text-lg font-bold text-white">{nombre}</span>
+                </Link>
+              </RevelarAlLlegar>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Captación de entrenadores (solo visible sin sesión) */}
       {!usuario && (
@@ -277,28 +378,47 @@ export default function Home() {
         </RevelarAlLlegar>
       )}
 
-      {/* c) Franja de comunidad */}
-      <RevelarAlLlegar as="section" className="relative isolate flex min-h-[50vh] items-center justify-center overflow-hidden px-6 py-20 text-center">
-        <img
-          src="/imagenes/comunidad.jpg"
-          alt=""
-          className="absolute inset-0 -z-20 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 -z-10 bg-black/60" />
-        <div className="flex flex-col items-center gap-6">
-          <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            Solo, en pareja o en grupo. Pagas solo la clase a la que vas.
-          </p>
-          <Link href="/clases" className={botonPrimarioClass}>
-            Ver clases
-          </Link>
-        </div>
-      </RevelarAlLlegar>
+      {/* c) Franja de comunidad (entrenador ve una llamada a publicar en su lugar) */}
+      {esEntrenador ? (
+        <RevelarAlLlegar as="section" className="relative isolate flex min-h-[50vh] items-center justify-center overflow-hidden px-6 py-20 text-center">
+          <img
+            src="/imagenes/fuerza.jpg"
+            alt=""
+            className="absolute inset-0 -z-20 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 -z-10 bg-black/60" />
+          <div className="flex flex-col items-center gap-6">
+            <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
+              ¿Tienes hueco esta semana? Publica una clase más.
+            </p>
+            <Link href="/publicar" className={botonPrimarioClass}>
+              Publicar clase
+            </Link>
+          </div>
+        </RevelarAlLlegar>
+      ) : (
+        <RevelarAlLlegar as="section" className="relative isolate flex min-h-[50vh] items-center justify-center overflow-hidden px-6 py-20 text-center">
+          <img
+            src="/imagenes/comunidad.jpg"
+            alt=""
+            className="absolute inset-0 -z-20 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 -z-10 bg-black/60" />
+          <div className="flex flex-col items-center gap-6">
+            <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
+              Solo, en pareja o en grupo. Pagas solo la clase a la que vas.
+            </p>
+            <Link href="/clases" className={botonPrimarioClass}>
+              Ver clases
+            </Link>
+          </div>
+        </RevelarAlLlegar>
+      )}
 
-      {/* d) Tres puntos con iconos */}
+      {/* d) Tres puntos con iconos (mensajes según rol) */}
       <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
-          {PUNTOS.map(({ texto, Icono }, indice) => (
+          {puntosMostrados.map(({ texto, Icono }, indice) => (
             <RevelarAlLlegar key={texto} delayMs={indice * 100} className="flex flex-col items-center gap-4 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#EDF5C9]">
                 <Icono className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
