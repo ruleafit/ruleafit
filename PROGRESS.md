@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 21 julio 2026
+Última actualización: 23 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -80,18 +80,30 @@ Hecho:
 - Categorías de clase reducidas de seis a cuatro (Fuerza / funcional, Cardio, Yoga / Pilates / movilidad, Otros); los datos de las clases existentes se migraron manualmente en Supabase con UPDATE. El mapa de imagen por categoría vive en lib/imagenesCategoria.js, compartido entre /clases y /mis-reservas.
 - Imágenes del proyecto en public/imagenes (portada, fuerza, running, yoga, combate, comunidad), descargadas de Pexels con licencia gratuita de uso comercial.
 - Giro estratégico de mensajes: los textos ya no prometen exclusivamente entrenamiento al aire libre ni en grupo, de cara a abrirse en el futuro a gimnasios y a entrenamientos individuales o en pareja.
+- Captación de entrenadores en la portada sin sesión: hero único sin dividir en dos columnas (se descartó por obligar a elegir bando sin contexto y restar impacto); sección propia añadida debajo de la franja de categorías, visualmente diferenciada con fondo verde muy oscuro, línea introductoria "¿Eres entrenador?" en lima, titular "Tú pones las reglas.", cuerpo, tres puntos de apoyo con iconos y botón a /registro, visible solo sin sesión iniciada. Enlace discreto "¿Eres entrenador?" añadido al menú de navegación (solo sin sesión), con scroll suave hasta esa sección (`scroll-behavior: smooth` en app/globals.css, respetando prefers-reduced-motion).
+- Portada diferenciada con sesión iniciada: hero más corto (45vh en vez de 85vh) con saludo "Hola, [usuario]" y "¿Qué entrenas hoy?" en vez del mensaje de venta, manteniendo la rejilla de accesos con el mismo protagonismo; sin sesión el hero queda exactamente igual que antes.
+- Rediseño de /publicar con la misma base visual del resto de la app: cabecera con imagen y degradado, campos agrupados en tarjetas con título (componente TituloBloque: icono + barra lima + texto en verde oscuro), textos de ayuda bajo los campos que lo necesitaban, y mensajes de éxito/error con icono.
+- /mis-alumnos renombrada a /mis-clases (ruta, enlaces del menú y de la portada, y todos los textos visibles), y rediseñada con la misma base visual: cabecera propia, cada clase en su tarjeta con imagen según categoría, lista de alumnos con el estado de asistencia diferenciado visualmente, botón "Cancelar esta clase" separado del resto de acciones y en rojo discreto, y estado vacío con icono y botón a /publicar cuando el entrenador no tiene ninguna clase.
+- Nueva función mis_clases() (sql/011_panel_entrenador_y_contador.sql): el entrenador ve todas sus clases en /mis-clases aunque todavía no tengan ninguna reserva (antes, al depender solo de reservas_de_mis_clases(), una clase recién publicada y sin apuntados no aparecía); reservas_de_mis_clases() se mantiene intacta y sigue siendo la única fuente de la lista de alumnos por clase.
+- Corregido cancelar_clase() (mismo archivo): al cancelar una clase entera, ahora deja plazas_ocupadas a 0 en el mismo UPDATE que marca la clase como cancelada, evitando que el contador quedara desincronizado (antes se cancelaban las reservas pero el contador se quedaba congelado con el valor previo).
+- Las plazas se muestran según quién mira, no según la página: ocupadas ("3/10 plazas ocupadas") para el entrenador, libres ("Quedan 7 plazas") para el cliente o sin sesión, mediante lib/formatoPlazas.js, aplicado en /clases, /clases/[id] y /mis-clases.
+- Aviso de "pendiente de confirmación" (según plazas_min) añadido también en /mis-reservas (antes solo estaba en /clases y /clases/[id]) y en /mis-clases (con confirmación en verde "Mínimo alcanzado" cuando ya se llega al mínimo); la condición se extrajo a lib/confirmacionClase.js para no duplicarla en las cuatro páginas.
+
+Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
 Pendiente (en orden):
-1. **PRIORITARIO.** Captación de entrenadores en la portada sin sesión. Hoy la portada solo habla a los clientes, y un entrenador que llega por primera vez no encuentra ninguna razón para registrarse. Decisión tomada: NO dividir el hero en dos columnas (obligaría a elegir bando sin contexto y restaría impacto). En su lugar: mantener el hero único con el mensaje de cliente, y añadir más abajo una sección propia para entrenadores, visualmente diferenciada con fondo oscuro, con el titular "Tú pones las reglas", el cuerpo "Decides qué días trabajas, a qué hora, cuánta gente entra y cuánto cobras. Sin horario fijo, sin jefe. Publicas tu clase en dos minutos y cobras directamente a tus alumnos.", tres puntos de apoyo ("Tu horario, tus normas", "Tú fijas el precio y las plazas", "Cobras directo, sin intermediarios") y un botón que lleve al registro. Añadir además un enlace discreto "¿Eres entrenador?" en el menú de navegación que haga scroll hasta esa sección.
-   Nota: no prometer ganancias concretas ni "sin comisiones" para siempre, porque con Stripe habrá comisión. Hablar de control, no de sueldo.
-2. Diferenciar la portada con sesión de la portada sin sesión: sin sesión el objetivo es convencer, con sesión el objetivo es dar acceso rápido, por lo que el hero puede ser más corto cuando hay sesión iniciada.
-3. Lado del entrenador: rediseño de /publicar y /mis-clases, con los mismos mensajes de "tú pones las reglas".
-4. Ficha de detalle de clase (/clases/[id]).
-5. /login y /registro.
-6. Advertencia de mayoría de edad en el registro, para que coincida con lo que exige el aviso legal.
-7. Actualizar el aviso legal (legal/aviso-legal.md y app/aviso-legal/page.js), que todavía describe el servicio como "sesiones de entrenamiento al aire libre".
-8. Activar 2FA en la cuenta de Vercel antes de repartir el enlace de la beta.
-9. Reactivar la confirmación de email en Supabase antes del lanzamiento real.
+1. **PRIORITARIO.** Edición de clases publicadas. Hoy un entrenador que se equivoca al publicar solo puede cancelar la clase entera (y con ella, todas las reservas de sus alumnos), no corregirla. Reglas acordadas:
+   - Editables libremente: título, modalidad, categoría, nivel, material, observaciones y punto de encuentro.
+   - plazas_min solo puede bajar (con suelo en 1, nunca a 0 vía edición).
+   - plazas_max solo puede subir.
+   - No editables por ahora: fecha, hora, duración, ubicación (mapa/dirección) y precio.
+   - No se puede editar una clase pasada, cancelada, ni a menos de 2 h de su comienzo.
+2. Ficha de detalle de clase (/clases/[id]).
+3. /login y /registro.
+4. Advertencia de mayoría de edad en el registro, para que coincida con lo que exige el aviso legal.
+5. Actualizar el aviso legal (legal/aviso-legal.md y app/aviso-legal/page.js), que todavía describe el servicio como "sesiones de entrenamiento al aire libre".
+6. Activar 2FA en la cuenta de Vercel antes de repartir el enlace de la beta.
+7. Reactivar la confirmación de email en Supabase antes del lanzamiento real.
 
 Otros pendientes menores (sin prioridad asignada):
 - Valorar fijar la versión de Node con "engines" en package.json.
