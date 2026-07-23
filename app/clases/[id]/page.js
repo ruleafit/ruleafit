@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { supabase } from '../../../lib/supabaseClient'
+import { textoPlazas } from '../../../lib/formatoPlazas'
+import { estadoConfirmacionClase } from '../../../lib/confirmacionClase'
 import BotonReservar from '../../../components/BotonReservar'
 
 const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
@@ -19,6 +21,7 @@ export default function DetalleClasePage() {
   const [clase, setClase] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
+  const [usuario, setUsuario] = useState(null)
 
   useEffect(() => {
     async function cargarClase() {
@@ -33,6 +36,22 @@ export default function DetalleClasePage() {
     }
     if (id) cargarClase()
   }, [id])
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setUsuario(data.session?.user || null)
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUsuario(session?.user || null)
+    })
+
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
 
   if (cargando) {
     return <p style={{ textAlign: 'center', marginTop: 60 }}>Cargando...</p>
@@ -55,9 +74,8 @@ export default function DetalleClasePage() {
   const plazasMax = clase.plazas_max ?? 0
   const plazasOcupadas = clase.plazas_ocupadas ?? 0
   const plazasMin = clase.plazas_min ?? 0
-  const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
   const porcentajeOcupado = plazasMax > 0 ? Math.min((plazasOcupadas / plazasMax) * 100, 100) : 0
-  const pendienteConfirmacion = plazasMin > 0 && plazasOcupadas < plazasMin
+  const { pendienteConfirmacion } = estadoConfirmacionClase({ plazasMin, plazasOcupadas })
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
@@ -137,9 +155,7 @@ export default function DetalleClasePage() {
                 </div>
               ) : (
                 <div className="mb-1 flex items-center justify-between text-xs font-medium text-zinc-600">
-                  <span>
-                    {plazasLibres}/{plazasMax} plazas libres
-                  </span>
+                  <span>{textoPlazas({ esEntrenador, plazasOcupadas, plazasMax })}</span>
                 </div>
               )}
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">

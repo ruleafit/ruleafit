@@ -22,7 +22,7 @@ import RevelarAlLlegar from '../components/RevelarAlLlegar'
 
 const ACCESOS_ENTRENADOR = [
   { href: '/clases', label: 'Clases', Icono: Dumbbell },
-  { href: '/mis-alumnos', label: 'Mis alumnos', Icono: Users },
+  { href: '/mis-clases', label: 'Mis clases', Icono: Users },
   { href: '/publicar', label: 'Publicar', Icono: ClipboardList },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
 ]

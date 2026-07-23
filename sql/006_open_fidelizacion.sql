@@ -117,7 +117,7 @@ create policy "cada usuario ve su propio historial de Open"
 -- authenticated y anon por defecto en cuanto RLS está activo. Solo escribe
 -- public.otorgar_open() (SECURITY DEFINER). El entrenador NO tiene política
 -- de lectura sobre el historial de Open de sus alumnos (decisión de
--- producto: solo ve/gestiona la marca de asistencia en Mis alumnos).
+-- producto: solo ve/gestiona la marca de asistencia en Mis clases).
 
 
 -- ----------------------------------------------------------------------------
@@ -365,7 +365,7 @@ grant execute on function public.marcar_asistencia(uuid, boolean) to authenticat
 
 -- ----------------------------------------------------------------------------
 -- 8) Actualiza reservas_de_mis_clases(): añade la columna "asistencia" para
---    que el panel del entrenador (Mis alumnos) pueda mostrar el estado
+--    que el panel del entrenador (Mis clases) pueda mostrar el estado
 --    actual y decidir cuándo ofrecer marcar_asistencia(). Cambiar las
 --    columnas de salida de una función TABLE no es compatible con CREATE OR
 --    REPLACE, así que hay que borrarla primero (igual que ya hizo

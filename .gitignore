@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# notas locales, no forman parte del proyecto
+legal/instruccion.txt

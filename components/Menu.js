@@ -121,8 +121,8 @@ export default function Menu() {
           )}
 
           {usuario && rol === 'entrenador' && (
-            <Link href="/mis-alumnos" className={enlaceClass('/mis-alumnos')}>
-              Mis alumnos
+            <Link href="/mis-clases" className={enlaceClass('/mis-clases')}>
+              Mis clases
             </Link>
           )}
 

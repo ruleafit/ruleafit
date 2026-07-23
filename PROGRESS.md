@@ -35,7 +35,7 @@ Hecho:
 - Tabla reservas con RLS, índice único para evitar reservas duplicadas, y función RPC reservar_clase() con bloqueo de fila para evitar sobreventa (sql/001_reservas.sql, ejecutado en Supabase).
 - Botón Reservar (components/BotonReservar.js) en tarjetas y ficha de detalle, con estados según sesión, rol, aforo, clase pasada/inactiva y reserva ya existente. Llama a la función RPC reservar_clase() y actualiza el contador de plazas al momento.
 - Página /mis-reservas: lista de reservas activas del cliente ordenadas por fecha, restringida por rol, con enlace en el menú visible solo para clientes.
-- Panel del entrenador (/mis-alumnos): función RPC segura reservas_de_mis_clases() y página que agrupa las reservas por clase, con email y fecha de reserva de cada cliente.
+- Panel del entrenador (/mis-clases): función RPC segura reservas_de_mis_clases() y página que agrupa las reservas por clase, con email y fecha de reserva de cada cliente.
 - Cancelación de reservas (/mis-reservas): función RPC segura cancelar_reserva(), botón con confirmación, mensaje informativo según si quedaban 2h o más (sin cargo real todavía, pendiente de la cartera en Fase 4).
 
 Falta:
@@ -43,11 +43,11 @@ Falta:
 
 ## Nombres de usuario (previo a Fase 4)
 Hecho:
-- Tabla perfiles con generación automática al registrarse (trigger), backfill de cuentas existentes, comprobación de disponibilidad antes de registrarse o cambiar de nombre (username_disponible), campo de nombre de usuario en /registro, edición desde /cuenta, y panel del entrenador (Mis alumnos) mostrando nombre de usuario en vez de email por privacidad.
+- Tabla perfiles con generación automática al registrarse (trigger), backfill de cuentas existentes, comprobación de disponibilidad antes de registrarse o cambiar de nombre (username_disponible), campo de nombre de usuario en /registro, edición desde /cuenta, y panel del entrenador (Mis clases) mostrando nombre de usuario en vez de email por privacidad.
 
 ## Fase 4 · Open (puntos de fidelización) — completada
 Hecho:
-- Sistema de Open completo: tablas open_saldos/open_movimientos/open_motivos con RLS, bienvenida automática (20 Open) al registrarse, asistencia confirmada (5 Open) marcada por el entrenador vía marcar_asistencia() con corrección mediante movimiento compensatorio, saldo e historial visibles en /cuenta, botones de asistencia en /mis-alumnos.
+- Sistema de Open completo: tablas open_saldos/open_movimientos/open_motivos con RLS, bienvenida automática (20 Open) al registrarse, asistencia confirmada (5 Open) marcada por el entrenador vía marcar_asistencia() con corrección mediante movimiento compensatorio, saldo e historial visibles en /cuenta, botones de asistencia en /mis-clases.
 
 Falta:
 - Ninguno.
@@ -55,13 +55,13 @@ Falta:
 ## Mínimo de plazas y cancelación de clase (post Fase 4)
 Hecho:
 - Campo plazas_min en /publicar y aviso visual de "pendiente de confirmación" en tarjetas/ficha.
-- Botón "Cancelar esta clase" para el entrenador en /mis-alumnos (función cancelar_clase, cancela la clase y todas sus reservas activas).
+- Botón "Cancelar esta clase" para el entrenador en /mis-clases (función cancelar_clase, cancela la clase y todas sus reservas activas).
 - Aviso claro en /mis-reservas cuando una reserva fue cancelada por el entrenador (cancelada_por_entrenador), en sección separada.
 - Corregido un bucle de recursión en las políticas RLS de clases/reservas surgido al implementar esto (sql/010_arreglo_recursion_rls.sql).
 
 ## Pantalla de inicio tras login/registro (post Fase 4)
 Hecho:
-- Home (/) muestra botones grandes con iconos según rol (entrenador: Clases/Mis alumnos/Publicar/Mi cuenta; cliente: Clases/Mis reservas/Mi cuenta) cuando hay sesión iniciada.
+- Home (/) muestra botones grandes con iconos según rol (entrenador: Clases/Mis clases/Publicar/Mi cuenta; cliente: Clases/Mis reservas/Mi cuenta) cuando hay sesión iniciada.
 - Login y registro redirigen automáticamente a esta pantalla.
 - Enlace "Inicio" añadido al menú de navegación.
 
@@ -85,7 +85,7 @@ Pendiente (en orden):
 1. **PRIORITARIO.** Captación de entrenadores en la portada sin sesión. Hoy la portada solo habla a los clientes, y un entrenador que llega por primera vez no encuentra ninguna razón para registrarse. Decisión tomada: NO dividir el hero en dos columnas (obligaría a elegir bando sin contexto y restaría impacto). En su lugar: mantener el hero único con el mensaje de cliente, y añadir más abajo una sección propia para entrenadores, visualmente diferenciada con fondo oscuro, con el titular "Tú pones las reglas", el cuerpo "Decides qué días trabajas, a qué hora, cuánta gente entra y cuánto cobras. Sin horario fijo, sin jefe. Publicas tu clase en dos minutos y cobras directamente a tus alumnos.", tres puntos de apoyo ("Tu horario, tus normas", "Tú fijas el precio y las plazas", "Cobras directo, sin intermediarios") y un botón que lleve al registro. Añadir además un enlace discreto "¿Eres entrenador?" en el menú de navegación que haga scroll hasta esa sección.
    Nota: no prometer ganancias concretas ni "sin comisiones" para siempre, porque con Stripe habrá comisión. Hablar de control, no de sueldo.
 2. Diferenciar la portada con sesión de la portada sin sesión: sin sesión el objetivo es convencer, con sesión el objetivo es dar acceso rápido, por lo que el hero puede ser más corto cuando hay sesión iniciada.
-3. Lado del entrenador: rediseño de /publicar y /mis-alumnos, con los mismos mensajes de "tú pones las reglas".
+3. Lado del entrenador: rediseño de /publicar y /mis-clases, con los mismos mensajes de "tú pones las reglas".
 4. Ficha de detalle de clase (/clases/[id]).
 5. /login y /registro.
 6. Advertencia de mayoría de edad en el registro, para que coincida con lo que exige el aviso legal.

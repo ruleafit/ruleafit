@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CalendarSearch, CircleCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
+import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 function obtenerAhoraMadridComoTexto() {
@@ -81,7 +82,7 @@ export default function MisReservasPage() {
       const { data, error } = await supabase
         .from('reservas')
         .select(
-          'id, estado, cancelled_at, cancelada_por_entrenador, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_ocupadas)'
+          'id, estado, cancelled_at, cancelada_por_entrenador, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_min, plazas_ocupadas)'
         )
         .eq('cliente_id', usuario.id)
         .or('estado.eq.activa,and(estado.eq.cancelada,cancelada_por_entrenador.eq.true)')
@@ -200,6 +201,10 @@ export default function MisReservasPage() {
             const cuentaAtras = !pasada ? etiquetaCuentaAtras(clase.fecha) : null
             const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
             const colorBorde = pasada ? 'border-l-zinc-300' : 'border-l-[#B5E600]'
+            const { pendienteConfirmacion, faltanParaConfirmar } = estadoConfirmacionClase({
+              plazasMin: clase.plazas_min,
+              plazasOcupadas: clase.plazas_ocupadas,
+            })
 
             return (
               <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
@@ -229,6 +234,12 @@ export default function MisReservasPage() {
                     </div>
 
                     <h2 className="mb-1 text-lg font-bold text-[#1F2400] sm:text-xl">{clase.titulo}</h2>
+
+                    {pendienteConfirmacion && (
+                      <div className="mb-3 flex items-center justify-between rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                        <span>{textoFaltanParaConfirmar(faltanParaConfirmar)}</span>
+                      </div>
+                    )}
 
                     <div className="flex flex-col gap-1 text-sm text-[#6B7355]">
                       <p>
