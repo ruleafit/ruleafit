@@ -9,6 +9,7 @@ import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCate
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../lib/confirmacionClase'
 import BotonReservar from '../../components/BotonReservar'
+import BotonCopiarCoordenadas from '../../components/BotonCopiarCoordenadas'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const MapaClases = dynamic(() => import('../../components/MapaClases'), {
@@ -77,7 +78,6 @@ export default function ClasesPage() {
   const [clases, setClases] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
-  const [coordenadasCopiadas, setCoordenadasCopiadas] = useState(null)
   const [filtroCiudad, setFiltroCiudad] = useState('Todas')
   const [filtroCategoria, setFiltroCategoria] = useState('Todas')
   const [filtroCuando, setFiltroCuando] = useState('Todas')
@@ -104,16 +104,6 @@ export default function ClasesPage() {
     setClases((prev) =>
       prev.map((c) => (c.id === claseId ? { ...c, plazas_ocupadas: nuevasPlazasOcupadas } : c))
     )
-  }
-
-  async function copiarCoordenadas(id, texto) {
-    try {
-      await navigator.clipboard.writeText(texto)
-      setCoordenadasCopiadas(id)
-      setTimeout(() => setCoordenadasCopiadas(null), 2000)
-    } catch (err) {
-      setError('No se pudieron copiar las coordenadas.')
-    }
   }
 
   function limpiarFiltros() {
@@ -323,13 +313,12 @@ export default function ClasesPage() {
                               <span className="select-all text-xs text-[#6B7355]">
                                 {clase.lat}, {clase.lng}
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => copiarCoordenadas(clase.id, `${clase.lat}, ${clase.lng}`)}
+                              <BotonCopiarCoordenadas
+                                lat={clase.lat}
+                                lng={clase.lng}
+                                onError={() => setError('No se pudieron copiar las coordenadas.')}
                                 className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
-                              >
-                                {coordenadasCopiadas === clase.id ? 'Copiado' : 'Copiar coordenadas'}
-                              </button>
+                              />
                             </>
                           )}
                           <Link
