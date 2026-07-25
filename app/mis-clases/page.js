@@ -22,7 +22,7 @@ import { motivoNoEditableClase } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const ETIQUETAS_ASISTENCIA = {
-  pendiente: 'Pendiente',
+  pendiente: 'Sin marcar',
   asistio: 'Asistió',
   no_asistio: 'No asistió',
 }
@@ -411,12 +411,14 @@ export default function MisClasesPage() {
                                   </div>
 
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <span
-                                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${CLASES_BADGE_ASISTENCIA[alumno.asistencia]}`}
-                                    >
-                                      <IconoAsistencia className="h-3.5 w-3.5" strokeWidth={2} />
-                                      {ETIQUETAS_ASISTENCIA[alumno.asistencia]}
-                                    </span>
+                                    {haPasado && (
+                                      <span
+                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${CLASES_BADGE_ASISTENCIA[alumno.asistencia]}`}
+                                      >
+                                        <IconoAsistencia className="h-3.5 w-3.5" strokeWidth={2} />
+                                        {ETIQUETAS_ASISTENCIA[alumno.asistencia]}
+                                      </span>
+                                    )}
 
                                     {clase.estado === 'activa' && haPasado && alumno.asistencia === 'pendiente' && (
                                       <>

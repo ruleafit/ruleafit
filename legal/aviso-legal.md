@@ -2,7 +2,7 @@
 
 **Sitio web:** https://openfit-five.vercel.app
 
-**Última actualización:** 21 de julio de 2026
+**Última actualización:** 27 de julio de 2026
 
 ## I. INFORMACIÓN GENERAL
 
@@ -15,7 +15,7 @@ La titularidad de este sitio web, https://openfit-five.vercel.app, (en adelante,
 
 ## II. NATURALEZA DEL SERVICIO
 
-Openfit es una plataforma en línea que pone en contacto a entrenadores independientes con personas interesadas en participar en sesiones de entrenamiento al aire libre.
+Openfit es una plataforma en línea que pone en contacto a entrenadores independientes con personas interesadas en participar en sesiones de entrenamiento, ya sea al aire libre o en instalaciones, y de forma individual, en pareja o en grupo.
 
 Openfit **actúa exclusivamente como intermediario tecnológico**. No presta el servicio deportivo, no emplea a los entrenadores ni mantiene con ellos relación laboral alguna. La sesión de entrenamiento se acuerda y se ejecuta entre el Usuario y el entrenador correspondiente, siendo este último el único responsable de su contenido, desarrollo, idoneidad, titulación y aseguramiento.
 

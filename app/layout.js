@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Openfit",
-  description: "Entrena al aire libre, sin gimnasio ni cuota",
+  description: "Entrena cuando quieras, sin cuotas ni permanencia.",
 };
 
 export default function RootLayout({ children }) {
