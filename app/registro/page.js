@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CircleAlert, Loader2 } from 'lucide-react'
+import { CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
@@ -45,6 +45,7 @@ export default function RegistroPage() {
   const [rol, setRol] = useState('cliente')
   const [aceptaMayoria, setAceptaMayoria] = useState(false)
   const [mensaje, setMensaje] = useState('')
+  const [registroExitoso, setRegistroExitoso] = useState(false)
   const [errorUsername, setErrorUsername] = useState('')
   const [errorMayoria, setErrorMayoria] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -85,7 +86,7 @@ export default function RegistroPage() {
       return
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
       options: {
@@ -96,8 +97,11 @@ export default function RegistroPage() {
     if (error) {
       setMensaje(traducirErrorRegistro(error.message))
       setCargando(false)
-    } else {
+    } else if (data.session) {
       router.push('/')
+    } else {
+      setRegistroExitoso(true)
+      setCargando(false)
     }
   }
 
@@ -111,123 +115,135 @@ export default function RegistroPage() {
             Crear cuenta en Openfit
           </h1>
 
-          <form onSubmit={handleRegistro} className="flex flex-col gap-4">
-            <div>
-              <p className={labelClass}>Quiero usar Openfit como:</p>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  aria-pressed={rol === 'cliente'}
-                  onClick={() => setRol('cliente')}
-                  className={rolBotonClass(rol === 'cliente')}
-                >
-                  Cliente
+          {registroExitoso ? (
+            <div className="flex items-start gap-2 rounded-xl border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00]">
+              <CircleCheck className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
+              <p className="font-medium">
+                Te hemos enviado un correo para confirmar tu cuenta. Revisa tu bandeja de entrada y, si no lo ves, la
+                carpeta de spam. Haz clic en el enlace del correo para activar tu cuenta y poder iniciar sesión.
+              </p>
+            </div>
+          ) : (
+            <>
+              <form onSubmit={handleRegistro} className="flex flex-col gap-4">
+                <div>
+                  <p className={labelClass}>Quiero usar Openfit como:</p>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      aria-pressed={rol === 'cliente'}
+                      onClick={() => setRol('cliente')}
+                      className={rolBotonClass(rol === 'cliente')}
+                    >
+                      Cliente
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={rol === 'entrenador'}
+                      onClick={() => setRol('entrenador')}
+                      className={rolBotonClass(rol === 'entrenador')}
+                    >
+                      Entrenador
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Nombre de usuario</label>
+                  <input
+                    type="text"
+                    placeholder="Nombre de usuario"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value)
+                      if (errorUsername) setErrorUsername('')
+                    }}
+                    required
+                    className={inputClass}
+                  />
+                  {errorUsername && (
+                    <p className="mt-1 flex items-start gap-1.5 text-sm text-red-600">
+                      <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
+                      {errorUsername}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className={labelClass}>Email</label>
+                  <input
+                    type="email"
+                    placeholder="Tu email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Contraseña</label>
+                  <input
+                    type="password"
+                    placeholder="Tu contraseña"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={aceptaMayoria}
+                      onChange={(e) => {
+                        setAceptaMayoria(e.target.checked)
+                        if (e.target.checked) setErrorMayoria('')
+                      }}
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#E2E6CF] accent-[#B5E600] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
+                    />
+                    <span className="text-sm text-[#1F2400]">
+                      Declaro ser mayor de 18 años y acepto el{' '}
+                      <a
+                        href="/aviso-legal"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-[#3D4A00] underline hover:text-[#1F2400]"
+                      >
+                        aviso legal
+                      </a>
+                      .
+                    </span>
+                  </label>
+                  {errorMayoria && (
+                    <p className="mt-1 flex items-start gap-1.5 text-sm text-red-600">
+                      <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
+                      {errorMayoria}
+                    </p>
+                  )}
+                </div>
+
+                <button type="submit" disabled={cargando} className={botonPrimarioClass}>
+                  {cargando ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                      Creando cuenta...
+                    </>
+                  ) : (
+                    'Crear cuenta'
+                  )}
                 </button>
-                <button
-                  type="button"
-                  aria-pressed={rol === 'entrenador'}
-                  onClick={() => setRol('entrenador')}
-                  className={rolBotonClass(rol === 'entrenador')}
-                >
-                  Entrenador
-                </button>
-              </div>
-            </div>
+              </form>
 
-            <div>
-              <label className={labelClass}>Nombre de usuario</label>
-              <input
-                type="text"
-                placeholder="Nombre de usuario"
-                value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value)
-                  if (errorUsername) setErrorUsername('')
-                }}
-                required
-                className={inputClass}
-              />
-              {errorUsername && (
-                <p className="mt-1 flex items-start gap-1.5 text-sm text-red-600">
-                  <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
-                  {errorUsername}
-                </p>
+              {mensaje && (
+                <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
+                  <p className="font-medium">{mensaje}</p>
+                </div>
               )}
-            </div>
-
-            <div>
-              <label className={labelClass}>Email</label>
-              <input
-                type="email"
-                placeholder="Tu email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Contraseña</label>
-              <input
-                type="password"
-                placeholder="Tu contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  checked={aceptaMayoria}
-                  onChange={(e) => {
-                    setAceptaMayoria(e.target.checked)
-                    if (e.target.checked) setErrorMayoria('')
-                  }}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#E2E6CF] accent-[#B5E600] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
-                />
-                <span className="text-sm text-[#1F2400]">
-                  Declaro ser mayor de 18 años y acepto el{' '}
-                  <a
-                    href="/aviso-legal"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-[#3D4A00] underline hover:text-[#1F2400]"
-                  >
-                    aviso legal
-                  </a>
-                  .
-                </span>
-              </label>
-              {errorMayoria && (
-                <p className="mt-1 flex items-start gap-1.5 text-sm text-red-600">
-                  <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
-                  {errorMayoria}
-                </p>
-              )}
-            </div>
-
-            <button type="submit" disabled={cargando} className={botonPrimarioClass}>
-              {cargando ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-                  Creando cuenta...
-                </>
-              ) : (
-                'Crear cuenta'
-              )}
-            </button>
-          </form>
-
-          {mensaje && (
-            <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
-              <p className="font-medium">{mensaje}</p>
-            </div>
+            </>
           )}
 
           <p className="mt-6 text-center text-sm text-[#6B7355]">
