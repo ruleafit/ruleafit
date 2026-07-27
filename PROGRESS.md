@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 23 julio 2026
+Última actualización: 27 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -91,22 +91,25 @@ Hecho:
 - Edición de clases publicadas: función RPC editar_clase() (sql/012_editar_clase.sql, corregida en sql/013_arreglo_suelo_plazas_min.sql para que el suelo de 1 en plazas_min no bloquee la edición de clases que se publicaron sin mínimo), página app/mis-clases/[id]/editar/page.js (carga la clase vía mis_clases(), mensaje claro si no se puede editar —no existe/no es tuya, está cancelada, ya ha pasado o falta menos de 2h—, formulario con los campos libremente editables y plazas_min/plazas_max con su restricción de dirección aplicada también en el cliente, resto de campos de solo lectura) y botón "Editar" en las tarjetas de /mis-clases, visible solo cuando la clase es editable.
 - Portada adaptada al entrenador con sesión iniciada: debajo del hero, bloque con sus cifras (clases activas, reservas acumuladas y próxima clase) obtenidas de mis_clases(); si no tiene ninguna clase publicada, un estado vacío con llamada a publicar la primera en su lugar; los tres puntos con iconos pasan a sus mensajes ("Tu horario, tus normas", "Tú fijas el precio y las plazas", "Cobras directo, sin intermediarios"); la franja de categorías y la franja de comunidad (ambas dirigidas al cliente) se ocultan para el entrenador, sustituyendo la segunda por una llamada a publicar una clase nueva.
 - Rediseño de la ficha de detalle de clase (/clases/[id]): cabecera con imagen según categoría y título destacado, información agrupada en bloques con jerarquía clara (fecha/hora/duración primero, precio destacado, plazas con aviso de confirmación, detalles, ubicación), botón de reservar fijo en la parte inferior de la pantalla en móvil, botón "Cómo llegar" que abre Google Maps con las coordenadas de la clase, y el botón de copiar coordenadas extraído a components/BotonCopiarCoordenadas.js, compartido con /clases para no duplicar el comportamiento.
+- Rediseño de /login y /registro con la base visual del resto de la app y una cabecera de marca compartida entre ambas (logo Openfit y frase breve, sin imagen pesada), con enlace claro entre las dos páginas. Sin tocar el flujo de creación de cuenta, la asignación de rol ni el trigger de perfiles/username.
+- Casilla obligatoria de mayoría de edad en /registro, justo antes de "Crear cuenta", con el texto "Declaro ser mayor de 18 años y acepto el aviso legal." ("aviso legal" enlazado a /aviso-legal, se abre en pestaña nueva sin perder lo escrito). El registro se bloquea si no está marcada; el dato no se guarda en Supabase, solo se impide el registro.
+- Errores de Supabase traducidos al español en /login y /registro en lugar del texto crudo en inglés ("Invalid login credentials" -> "El correo o la contraseña no son correctos.", email ya registrado -> "Ya existe una cuenta con este correo.", resto -> mensaje genérico en español). Estado de carga ("Creando cuenta...") diferenciado visualmente del de error.
+- Aviso legal actualizado (legal/aviso-legal.md y app/aviso-legal/page.js): ya no describe el servicio solo como "sesiones de entrenamiento al aire libre", coherente con la apertura futura a gimnasios y a entrenamientos individuales o en pareja.
+- Etiqueta de asistencia en la lista de alumnos de /mis-clases: ahora solo aparece en clases ya pasadas y dice "Sin marcar" (antes se mostraba también en clases futuras y se confundía con el aviso de "pendiente de confirmación" de la clase).
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
 Nota (hallazgo técnico): la tabla public.clases y sus políticas RLS iniciales (SELECT, INSERT) no están versionadas en ningún archivo de sql/ — se crearon directamente en el editor de Supabase antes de empezar a versionar el SQL del proyecto. Las funciones que escriben sobre clases (editar_clase(), cancelar_clase(), etc.) usan SECURITY DEFINER precisamente para no depender de si existe o no una política de UPDATE sobre esa tabla, que no queda documentada aquí.
 
 Pendiente (en orden):
-1. /login y /registro por rediseñar (últimas páginas de cara al usuario que quedan con el estilo antiguo). Incluye añadir, junto con este rediseño, la advertencia de mayoría de edad en el registro, para que coincida con lo que exige el aviso legal.
-2. Actualizar el aviso legal (legal/aviso-legal.md y app/aviso-legal/page.js), que todavía describe el servicio como "sesiones de entrenamiento al aire libre".
-3. Activar 2FA en la cuenta de Vercel antes de repartir el enlace de la beta.
-4. Reactivar la confirmación de email en Supabase antes del lanzamiento real.
+1. Activar 2FA en la cuenta de Vercel antes de repartir el enlace de la beta.
+2. Reactivar la confirmación de email en Supabase antes del lanzamiento real.
 
 Otros pendientes menores (sin prioridad asignada):
 - Valorar fijar la versión de Node con "engines" en package.json.
-- Mensajes de error más claros en general, y pulido fino según el feedback de la beta.
-- Revisar la etiqueta "Pendiente" de la lista de alumnos en /mis-clases: se confunde visualmente con el aviso de "pendiente de confirmación" de la clase, aunque son cosas distintas (asistencia de un alumno concreto vs. mínimo de plazas de la clase entera).
+- Pulido fino según el feedback de la beta.
 - Borrar la clase de prueba titulada "x" de la base de datos antes de la beta.
+- Convertir la web en PWA para poder añadirla a la pantalla de inicio del móvil (requiere preparar un icono cuadrado de Openfit 512x512).
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
