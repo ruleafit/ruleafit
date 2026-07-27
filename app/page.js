@@ -260,9 +260,7 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="flex justify-center px-6 py-8">
-        <BotonInstalarApp className={botonPrimarioClass} />
-      </div>
+      <BotonInstalarApp className={botonPrimarioClass} />
 
       {/* Cifras del entrenador (solo con sesión de entrenador) */}
       {esEntrenador && !cargandoMisClases && (

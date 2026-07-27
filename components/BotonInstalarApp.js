@@ -58,7 +58,7 @@ export default function BotonInstalarApp({ className }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 text-center">
+    <div className="my-8 flex flex-col items-center gap-3 text-center">
       <button type="button" onClick={handlePulsar} className={className}>
         Ten Openfit a mano
       </button>
