@@ -20,6 +20,7 @@ import {
 import { supabase } from '../lib/supabaseClient'
 import { claseYaPaso } from '../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../components/RevelarAlLlegar'
+import BotonInstalarApp from '../components/BotonInstalarApp'
 
 const ACCESOS_ENTRENADOR = [
   { href: '/clases', label: 'Clases', Icono: Dumbbell },
@@ -258,6 +259,10 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      <div className="flex justify-center px-6 py-8">
+        <BotonInstalarApp className={botonPrimarioClass} />
+      </div>
 
       {/* Cifras del entrenador (solo con sesión de entrenador) */}
       {esEntrenador && !cargandoMisClases && (
