@@ -96,20 +96,33 @@ Hecho:
 - Errores de Supabase traducidos al español en /login y /registro en lugar del texto crudo en inglés ("Invalid login credentials" -> "El correo o la contraseña no son correctos.", email ya registrado -> "Ya existe una cuenta con este correo.", resto -> mensaje genérico en español). Estado de carga ("Creando cuenta...") diferenciado visualmente del de error.
 - Aviso legal actualizado (legal/aviso-legal.md y app/aviso-legal/page.js): ya no describe el servicio solo como "sesiones de entrenamiento al aire libre", coherente con la apertura futura a gimnasios y a entrenamientos individuales o en pareja.
 - Etiqueta de asistencia en la lista de alumnos de /mis-clases: ahora solo aparece en clases ya pasadas y dice "Sin marcar" (antes se mostraba también en clases futuras y se confundía con el aviso de "pendiente de confirmación" de la clase).
+- Clase de prueba "x" eliminada de la base de datos: primero un SQL de solo lectura para comprobar si tenía reservas (sql/014_comprobar_clase_x.sql), y después un borrado acotado por IDs exactos de la clase y su reserva, en una transacción (sql/015_borrar_clase_x.sql). Ambos versionados en el repo.
+- Tabla public.clases versionada por fin en sql/016_tabla_clases.sql: definición reproducible (create table if not exists) con las 22 columnas y sus tipos/defaults reales, la PK, el CHECK de plazas_min, la FK a auth.users con on delete cascade, el enable row level security y las tres políticas RLS (crear solo entrenadores, editar las propias, ver activas o reservadas), reflejando el estado real en Supabase a 27 julio 2026. La función usuario_tiene_reserva_en_clase que usa la política ya estaba versionada en sql/010.
+- Versión de Node fijada con "engines": "24.x" en package.json, alineada con la versión que usa Vercel.
+- PWA: la web ya se puede añadir a la pantalla de inicio del móvil. Manifest generado por código en app/manifest.js (nombre, descripción, start_url, display standalone, colores de marca: fondo crema #FBFAF3 y theme lima #B5E600, iconos 192 y 512). export const viewport con themeColor lima en app/layout.js. Iconos openfit-icon-192.png y openfit-icon-512.png en public/ (pin de ubicación sobre una mancuerna, fondo lima).
+- Botón de instalación de la PWA "Ten Openfit a mano" (components/BotonInstalarApp.js), insertado en la portada tras el hero y visible para todos los visitantes en móvil: en Android/Chrome lanza el diálogo nativo de instalación (evento beforeinstallprompt), en iPhone/Safari abre un panel con instrucciones para añadir a pantalla de inicio, y se oculta en ordenador o si la app ya está instalada. El margen vertical vive en el propio componente para no dejar hueco cuando no se muestra.
+- Registro preparado para la confirmación de email (app/registro/page.js): signUp ahora captura data y, si no hay sesión (confirmación activada), muestra un mensaje de éxito pidiendo revisar la bandeja de entrada y la carpeta de spam en lugar de redirigir. Con la confirmación desactivada el comportamiento no cambia (sigue entrando directo). El código queda listo para cuando se active.
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
 Nota (hallazgo técnico): la tabla public.clases y sus políticas RLS iniciales (SELECT, INSERT) no están versionadas en ningún archivo de sql/ — se crearon directamente en el editor de Supabase antes de empezar a versionar el SQL del proyecto. Las funciones que escriben sobre clases (editar_clase(), cancelar_clase(), etc.) usan SECURITY DEFINER precisamente para no depender de si existe o no una política de UPDATE sobre esa tabla, que no queda documentada aquí.
 
 Pendiente (en orden):
-1. Activar 2FA en la cuenta de Vercel antes de repartir el enlace de la beta.
-2. Reactivar la confirmación de email en Supabase antes del lanzamiento real.
+1. Repartir la beta a amigos y familia (círculo cercano, en torno a 30 personas). Se reparte SIN confirmación de email activada, para evitar la fricción y las limitaciones del servidor de correo compartido de Supabase (2-3 correos/hora y riesgo de spam). Conviene repartir por tandas y avisar por WhatsApp.
 
 Otros pendientes menores (sin prioridad asignada):
-- Valorar fijar la versión de Node con "engines" en package.json.
 - Pulido fino según el feedback de la beta.
-- Borrar la clase de prueba titulada "x" de la base de datos antes de la beta.
-- Convertir la web en PWA para poder añadirla a la pantalla de inicio del móvil (requiere preparar un icono cuadrado de Openfit 512x512).
+- Cambiar lang="en" por lang="es" en app/layout.js (toda la interfaz es en español).
+- Subir la longitud mínima de contraseña de 6 a 8 caracteres en Supabase (recomendado para producción).
+
+## Después de la beta (decidido el 27 julio 2026)
+- Confirmación de email en Supabase: reactivarla cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado. Requiere resolver antes el envío de correos (ver siguiente punto).
+- Envío de correos con SMTP propio: el servidor compartido de Supabase no sirve para producción (2-3 correos/hora, cae en spam). Se usará Resend. IMPORTANTE (comprobado el 27 julio 2026): Resend sin un dominio propio verificado solo permite enviar correos a la propia dirección de la cuenta, no a terceros; por tanto Resend exige tener dominio propio.
+- Dominio propio (p. ej. openfit.es): da una URL de marca en vez de openfit-five.vercel.app y es requisito para el SMTP propio con Resend. Comprarlo y configurarlo en Vercel y en Resend.
+- Traducir al español la plantilla del email de confirmación en Supabase: el botón de editar el HTML (Source) está deshabilitado en el plan actual y pide configurar SMTP propio, así que depende de tener Resend con dominio propio.
+- Aviso en /login para usuarios que intenten entrar sin haber confirmado el correo: cuando se active la confirmación, Supabase devuelve un error distinto en ese caso; conviene mostrar un mensaje claro tipo "confirma tu correo antes de entrar".
+- Login con Google (OAuth): se valoró para la beta pero se pospone por ser un montaje aparte (Google Cloud Console, credenciales, pantalla de consentimiento). Ventaja: quien entra con Google no necesita confirmar el email.
+- 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
