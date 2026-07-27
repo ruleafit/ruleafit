@@ -18,6 +18,10 @@ export const metadata = {
   description: "Entrena cuando quieras, sin cuotas ni permanencia.",
 };
 
+export const viewport = {
+  themeColor: "#B5E600",
+};
+
 export default function RootLayout({ children }) {
   return (
     <html
