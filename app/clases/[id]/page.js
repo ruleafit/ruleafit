@@ -185,11 +185,11 @@ export default function DetalleClasePage() {
             </div>
           </RevelarAlLlegar>
 
-          {(clase.modalidad || clase.nivel || clase.material || clase.observaciones) && (
+          {(clase.tipo_actividad || clase.nivel || clase.material || clase.observaciones) && (
             <RevelarAlLlegar delayMs={80} className={tarjetaClass}>
               <TituloBloque Icono={Dumbbell}>Detalles</TituloBloque>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <CampoDetalle etiqueta="Modalidad" valor={clase.modalidad} />
+                <CampoDetalle etiqueta="Tipo de actividad" valor={clase.tipo_actividad} />
                 <CampoDetalle etiqueta="Nivel" valor={clase.nivel} />
                 <CampoDetalle etiqueta="Material necesario" valor={clase.material} />
                 <CampoDetalle etiqueta="Observaciones" valor={clase.observaciones} />

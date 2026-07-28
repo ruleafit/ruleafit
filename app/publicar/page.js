@@ -36,7 +36,7 @@ export default function PublicarPage() {
 
   const [titulo, setTitulo] = useState('')
   const [categoria, setCategoria] = useState(CATEGORIAS[0])
-  const [modalidad, setModalidad] = useState('')
+  const [tipoActividad, setTipoActividad] = useState('')
   const [ciudad, setCiudad] = useState(CIUDADES[0])
   const [direccion, setDireccion] = useState('')
   const [puntoEncuentro, setPuntoEncuentro] = useState('')
@@ -94,7 +94,7 @@ export default function PublicarPage() {
       trainer_id: usuarioActual.id,
       titulo,
       categoria,
-      modalidad,
+      tipo_actividad: tipoActividad,
       ciudad,
       direccion,
       punto_encuentro: puntoEncuentro,
@@ -118,7 +118,7 @@ export default function PublicarPage() {
     } else {
       setMensaje('¡Clase publicada correctamente!')
       setTitulo('')
-      setModalidad('')
+      setTipoActividad('')
       setDireccion('')
       setPuntoEncuentro('')
       setFecha('')
@@ -197,13 +197,13 @@ export default function PublicarPage() {
               </div>
 
               <div>
-                <label className={labelClass}>Modalidad</label>
+                <label className={labelClass}>Tipo de actividad</label>
                 <input
                   type="text"
-                  value={modalidad}
-                  onChange={(e) => setModalidad(e.target.value)}
+                  value={tipoActividad}
+                  onChange={(e) => setTipoActividad(e.target.value)}
                   className={inputClass}
-                  placeholder="Ej: presencial, online..."
+                  placeholder="Ej: Zumba, boxeo, running..."
                 />
                 <p className={ayudaClass}>Esto lo verá el cliente tal cual lo escribas.</p>
               </div>

@@ -11,7 +11,7 @@ create table if not exists public.clases (
   trainer_id uuid not null references auth.users(id) on delete cascade,
   titulo text not null,
   categoria text not null,
-  modalidad text not null,
+  tipo_actividad text not null,
   ciudad text not null,
   direccion text,
   lat double precision,

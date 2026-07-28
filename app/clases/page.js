@@ -258,7 +258,7 @@ export default function ClasesPage() {
                           <h2 className="text-lg font-bold text-[#1F2400] sm:text-xl">{clase.titulo}</h2>
                           <span className="shrink-0 text-xs text-[#6B7355]">{clase.ciudad}</span>
                         </div>
-                        {clase.modalidad && <p className="mb-3 text-sm text-[#6B7355]">{clase.modalidad}</p>}
+                        {clase.tipo_actividad && <p className="mb-3 text-sm text-[#6B7355]">{clase.tipo_actividad}</p>}
 
                         <div className="flex flex-col gap-1 text-sm text-[#6B7355]">
                           <p>

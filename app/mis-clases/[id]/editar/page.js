@@ -65,7 +65,7 @@ export default function EditarClasePage() {
   const [errorCarga, setErrorCarga] = useState('')
 
   const [titulo, setTitulo] = useState('')
-  const [modalidad, setModalidad] = useState('')
+  const [tipoActividad, setTipoActividad] = useState('')
   const [categoria, setCategoria] = useState(CATEGORIAS[0])
   const [nivel, setNivel] = useState(NIVELES[0])
   const [material, setMaterial] = useState('')
@@ -144,7 +144,7 @@ export default function EditarClasePage() {
 
       setClase(filaCompleta)
       setTitulo(filaCompleta.titulo || '')
-      setModalidad(filaCompleta.modalidad || '')
+      setTipoActividad(filaCompleta.tipo_actividad || '')
       setCategoria(filaCompleta.categoria || CATEGORIAS[0])
       setNivel(filaCompleta.nivel || NIVELES[0])
       setMaterial(filaCompleta.material || '')
@@ -201,7 +201,7 @@ export default function EditarClasePage() {
     const { error } = await supabase.rpc('editar_clase', {
       p_clase_id: id,
       p_titulo: titulo,
-      p_modalidad: modalidad,
+      p_tipo_actividad: tipoActividad,
       p_categoria: categoria,
       p_nivel: nivel,
       p_material: material,
@@ -311,13 +311,13 @@ export default function EditarClasePage() {
               </div>
 
               <div>
-                <label className={labelClass}>Modalidad</label>
+                <label className={labelClass}>Tipo de actividad</label>
                 <input
                   type="text"
-                  value={modalidad}
-                  onChange={(e) => setModalidad(e.target.value)}
+                  value={tipoActividad}
+                  onChange={(e) => setTipoActividad(e.target.value)}
                   className={inputClass}
-                  placeholder="Ej: presencial, online..."
+                  placeholder="Ej: Zumba, boxeo, running..."
                 />
                 <p className={ayudaClass}>Esto lo verá el cliente tal cual lo escribas.</p>
               </div>
