@@ -18,7 +18,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
-import { motivoNoEditableClase } from '../../lib/ventanaEdicionClase'
+import { motivoNoEditableClase, claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const ETIQUETAS_ASISTENCIA = {
@@ -45,26 +45,8 @@ const CLASES_FILA_ASISTENCIA = {
   no_asistio: 'bg-red-50/50',
 }
 
-function obtenerAhoraMadridComoTexto() {
-  const formateador = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Madrid',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-  const partes = formateador.formatToParts(new Date())
-  const obtener = (tipo) => partes.find((p) => p.type === tipo)?.value
-  return `${obtener('year')}-${obtener('month')}-${obtener('day')} ${obtener('hour')}:${obtener('minute')}`
-}
-
-function claseYaPaso(clase) {
-  if (!clase.clase_fecha || !clase.clase_hora) return false
-  const horaCorta = String(clase.clase_hora).slice(0, 5)
-  const inicioClase = `${clase.clase_fecha} ${horaCorta}`
-  return inicioClase < obtenerAhoraMadridComoTexto()
+function claveFechaHora(clase) {
+  return `${clase.clase_fecha} ${String(clase.clase_hora).slice(0, 5)}`
 }
 
 function agruparAlumnosPorClase(filas) {
@@ -282,6 +264,206 @@ export default function MisClasesPage() {
     )
   }
 
+  const clasesProximas = clasesConAlumnos
+    .filter((c) => !claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }))
+    .sort((a, b) => (claveFechaHora(a) < claveFechaHora(b) ? -1 : 1))
+
+  const clasesPasadas = clasesConAlumnos
+    .filter((c) => claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }))
+    .sort((a, b) => (claveFechaHora(a) > claveFechaHora(b) ? -1 : 1))
+
+  function renderTarjeta(clase, indice, atenuada) {
+    const haPasado = claseYaPaso({ fecha: clase.clase_fecha, hora: clase.clase_hora })
+    const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
+    const porcentajeOcupado =
+      clase.plazas_max > 0 ? Math.min((clase.plazas_ocupadas / clase.plazas_max) * 100, 100) : 0
+    const { tieneMinimo, pendienteConfirmacion, faltanParaConfirmar } = estadoConfirmacionClase({
+      plazasMin: clase.plazas_min,
+      plazasOcupadas: clase.plazas_ocupadas,
+    })
+    const esEditable = !motivoNoEditableClase({
+      fecha: clase.clase_fecha,
+      hora: clase.clase_hora,
+      estado: clase.estado,
+    })
+
+    const colorTarjeta = atenuada
+      ? 'border-zinc-200 bg-zinc-50'
+      : clase.estado === 'cancelada'
+      ? 'border-red-200 bg-white'
+      : 'border-[#E2E6CF] bg-white'
+    const colorTitulo = atenuada ? 'text-zinc-500' : 'text-[#1F2400]'
+    const colorFecha = atenuada ? 'text-zinc-500' : 'text-[#3D4A00]'
+
+    return (
+      <RevelarAlLlegar key={clase.clase_id} delayMs={Math.min(indice * 60, 240)}>
+        <div className={`tarjeta-hover overflow-hidden rounded-xl border shadow-sm ${colorTarjeta}`}>
+          <div className="zoom-imagen relative h-40 w-full sm:h-44">
+            <img
+              src={imagenClase}
+              alt=""
+              className={`h-full w-full object-cover ${atenuada ? 'opacity-80 grayscale' : ''}`}
+            />
+            {clase.estado === 'cancelada' && (
+              <span className="absolute left-3 top-3 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-700">
+                Clase cancelada
+              </span>
+            )}
+          </div>
+
+          <div className="p-5">
+            <h3 className={`text-lg font-bold sm:text-xl ${colorTitulo}`}>{clase.clase_titulo}</h3>
+
+            <p className={`mt-2 inline-flex items-center gap-1.5 text-sm font-bold ${colorFecha}`}>
+              <CalendarClock className="h-4 w-4" strokeWidth={2} />
+              {clase.clase_fecha} · {clase.clase_hora}
+            </p>
+
+            <div className="mt-3">
+              <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-[#6B7355]">
+                <Users className="h-3.5 w-3.5 text-[#B5E600]" strokeWidth={1.75} />
+                {textoPlazas({
+                  esEntrenador: true,
+                  plazasOcupadas: clase.plazas_ocupadas,
+                  plazasMax: clase.plazas_max,
+                })}
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EDF5C9]">
+                <div
+                  className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
+                  style={{ width: `${porcentajeOcupado}%` }}
+                />
+              </div>
+            </div>
+
+            {tieneMinimo && (
+              <div className="mt-3">
+                {pendienteConfirmacion ? (
+                  <div className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                    {textoFaltanParaConfirmar(faltanParaConfirmar)}
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-1 rounded-full bg-[#EDF5C9] px-3 py-1.5 text-xs font-semibold text-[#3D4A00]">
+                    <CircleCheck className="h-3.5 w-3.5" strokeWidth={2} />
+                    Mínimo alcanzado
+                  </div>
+                )}
+              </div>
+            )}
+
+            {mensajesCancelacion[clase.clase_id] && (
+              <p className="mt-3 text-xs text-[#6B7355]">{mensajesCancelacion[clase.clase_id]}</p>
+            )}
+
+            {clase.alumnos.length === 0 ? (
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-[#E2E6CF] px-4 py-3 text-sm text-[#6B7355]">
+                <Users className="h-4 w-4 shrink-0 text-[#B5E600]" strokeWidth={1.75} />
+                Todavía no se ha apuntado nadie. En cuanto alguien reserve, lo verás aquí.
+              </div>
+            ) : (
+              <div className="mt-4 flex flex-col divide-y divide-[#E2E6CF] overflow-hidden rounded-lg border border-[#E2E6CF]">
+                {clase.alumnos.map((alumno) => {
+                  const procesando = procesandoAsistenciaId === alumno.reserva_id
+                  const IconoAsistencia = ICONOS_ASISTENCIA[alumno.asistencia]
+
+                  return (
+                    <div
+                      key={alumno.reserva_id}
+                      className={`flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between ${CLASES_FILA_ASISTENCIA[alumno.asistencia]}`}
+                    >
+                      <div className="text-sm">
+                        <p className="font-semibold text-[#1F2400]">{alumno.cliente_username}</p>
+                        <p className="text-xs text-[#6B7355]">
+                          Reservó el {new Date(alumno.reservado_en).toLocaleString('es-ES')}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {haPasado && (
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${CLASES_BADGE_ASISTENCIA[alumno.asistencia]}`}
+                          >
+                            <IconoAsistencia className="h-3.5 w-3.5" strokeWidth={2} />
+                            {ETIQUETAS_ASISTENCIA[alumno.asistencia]}
+                          </span>
+                        )}
+
+                        {clase.estado === 'activa' && haPasado && alumno.asistencia === 'pendiente' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleMarcarAsistencia(alumno.reserva_id, true)}
+                              disabled={procesando}
+                              className="rounded-full border border-[#B5E600] px-3 py-1 text-xs font-semibold text-[#3D4A00] transition-colors hover:bg-[#EDF5C9] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {procesando ? '...' : 'Asistió'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMarcarAsistencia(alumno.reserva_id, false)}
+                              disabled={procesando}
+                              className="rounded-full border border-[#E2E6CF] px-3 py-1 text-xs font-semibold text-[#6B7355] transition-colors hover:border-[#6B7355] hover:text-[#1F2400] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {procesando ? '...' : 'No asistió'}
+                            </button>
+                          </>
+                        )}
+
+                        {clase.estado === 'activa' && alumno.asistencia !== 'pendiente' && (
+                          <button
+                            type="button"
+                            onClick={() => handleMarcarAsistencia(alumno.reserva_id, alumno.asistencia !== 'asistio')}
+                            disabled={procesando}
+                            className="text-xs font-medium text-[#6B7355] underline transition-colors hover:text-[#1F2400] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {procesando ? 'Corrigiendo...' : 'Corregir'}
+                          </button>
+                        )}
+                      </div>
+
+                      {erroresAsistencia[alumno.reserva_id] && (
+                        <p className="text-xs text-red-600">{erroresAsistencia[alumno.reserva_id]}</p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {esEditable && (
+              <div className="mt-4 flex justify-end">
+                <Link
+                  href={`/mis-clases/${clase.clase_id}/editar`}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9]"
+                >
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  Editar
+                </Link>
+              </div>
+            )}
+
+            {clase.estado === 'activa' && !haPasado && (
+              <div className="mt-3 flex flex-col items-end gap-1.5 border-t border-[#E2E6CF] pt-3">
+                <button
+                  type="button"
+                  onClick={() => handleCancelarClase(clase.clase_id)}
+                  disabled={procesandoCancelacionId === clase.clase_id}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Ban className="h-3.5 w-3.5" strokeWidth={1.75} />
+                  {procesandoCancelacionId === clase.clase_id ? 'Cancelando...' : 'Cancelar esta clase'}
+                </button>
+                {erroresCancelacion[clase.clase_id] && (
+                  <p className="text-xs text-red-600">{erroresCancelacion[clase.clase_id]}</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </RevelarAlLlegar>
+    )
+  }
+
   return (
     <div className="flex flex-1 flex-col">
       <CabeceraMisClases />
@@ -312,190 +494,20 @@ export default function MisClasesPage() {
             <TituloBloque Icono={ClipboardList}>Tus clases</TituloBloque>
 
             <div className="flex flex-col gap-5">
-              {clasesConAlumnos.map((clase, indice) => {
-                const haPasado = claseYaPaso(clase)
-                const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
-                const porcentajeOcupado =
-                  clase.plazas_max > 0 ? Math.min((clase.plazas_ocupadas / clase.plazas_max) * 100, 100) : 0
-                const { tieneMinimo, pendienteConfirmacion, faltanParaConfirmar } = estadoConfirmacionClase({
-                  plazasMin: clase.plazas_min,
-                  plazasOcupadas: clase.plazas_ocupadas,
-                })
-                const esEditable = !motivoNoEditableClase({
-                  fecha: clase.clase_fecha,
-                  hora: clase.clase_hora,
-                  estado: clase.estado,
-                })
-
-                return (
-                  <RevelarAlLlegar key={clase.clase_id} delayMs={Math.min(indice * 60, 240)}>
-                    <div
-                      className={`tarjeta-hover overflow-hidden rounded-xl border bg-white shadow-sm ${
-                        clase.estado === 'cancelada' ? 'border-red-200' : 'border-[#E2E6CF]'
-                      }`}
-                    >
-                      <div className="zoom-imagen relative h-40 w-full sm:h-44">
-                        <img src={imagenClase} alt="" className="h-full w-full object-cover" />
-                        {clase.estado === 'cancelada' && (
-                          <span className="absolute left-3 top-3 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-700">
-                            Clase cancelada
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="p-5">
-                        <h3 className="text-lg font-bold text-[#1F2400] sm:text-xl">{clase.clase_titulo}</h3>
-
-                        <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-bold text-[#3D4A00]">
-                          <CalendarClock className="h-4 w-4" strokeWidth={2} />
-                          {clase.clase_fecha} · {clase.clase_hora}
-                        </p>
-
-                        <div className="mt-3">
-                          <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-[#6B7355]">
-                            <Users className="h-3.5 w-3.5 text-[#B5E600]" strokeWidth={1.75} />
-                            {textoPlazas({
-                              esEntrenador: true,
-                              plazasOcupadas: clase.plazas_ocupadas,
-                              plazasMax: clase.plazas_max,
-                            })}
-                          </div>
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EDF5C9]">
-                            <div
-                              className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
-                              style={{ width: `${porcentajeOcupado}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        {tieneMinimo && (
-                          <div className="mt-3">
-                            {pendienteConfirmacion ? (
-                              <div className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
-                                {textoFaltanParaConfirmar(faltanParaConfirmar)}
-                              </div>
-                            ) : (
-                              <div className="inline-flex items-center gap-1 rounded-full bg-[#EDF5C9] px-3 py-1.5 text-xs font-semibold text-[#3D4A00]">
-                                <CircleCheck className="h-3.5 w-3.5" strokeWidth={2} />
-                                Mínimo alcanzado
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {mensajesCancelacion[clase.clase_id] && (
-                          <p className="mt-3 text-xs text-[#6B7355]">{mensajesCancelacion[clase.clase_id]}</p>
-                        )}
-
-                        {clase.alumnos.length === 0 ? (
-                          <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-[#E2E6CF] px-4 py-3 text-sm text-[#6B7355]">
-                            <Users className="h-4 w-4 shrink-0 text-[#B5E600]" strokeWidth={1.75} />
-                            Todavía no se ha apuntado nadie. En cuanto alguien reserve, lo verás aquí.
-                          </div>
-                        ) : (
-                          <div className="mt-4 flex flex-col divide-y divide-[#E2E6CF] overflow-hidden rounded-lg border border-[#E2E6CF]">
-                            {clase.alumnos.map((alumno) => {
-                              const procesando = procesandoAsistenciaId === alumno.reserva_id
-                              const IconoAsistencia = ICONOS_ASISTENCIA[alumno.asistencia]
-
-                              return (
-                                <div
-                                  key={alumno.reserva_id}
-                                  className={`flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between ${CLASES_FILA_ASISTENCIA[alumno.asistencia]}`}
-                                >
-                                  <div className="text-sm">
-                                    <p className="font-semibold text-[#1F2400]">{alumno.cliente_username}</p>
-                                    <p className="text-xs text-[#6B7355]">
-                                      Reservó el {new Date(alumno.reservado_en).toLocaleString('es-ES')}
-                                    </p>
-                                  </div>
-
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    {haPasado && (
-                                      <span
-                                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${CLASES_BADGE_ASISTENCIA[alumno.asistencia]}`}
-                                      >
-                                        <IconoAsistencia className="h-3.5 w-3.5" strokeWidth={2} />
-                                        {ETIQUETAS_ASISTENCIA[alumno.asistencia]}
-                                      </span>
-                                    )}
-
-                                    {clase.estado === 'activa' && haPasado && alumno.asistencia === 'pendiente' && (
-                                      <>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleMarcarAsistencia(alumno.reserva_id, true)}
-                                          disabled={procesando}
-                                          className="rounded-full border border-[#B5E600] px-3 py-1 text-xs font-semibold text-[#3D4A00] transition-colors hover:bg-[#EDF5C9] disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                          {procesando ? '...' : 'Asistió'}
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleMarcarAsistencia(alumno.reserva_id, false)}
-                                          disabled={procesando}
-                                          className="rounded-full border border-[#E2E6CF] px-3 py-1 text-xs font-semibold text-[#6B7355] transition-colors hover:border-[#6B7355] hover:text-[#1F2400] disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                          {procesando ? '...' : 'No asistió'}
-                                        </button>
-                                      </>
-                                    )}
-
-                                    {clase.estado === 'activa' && alumno.asistencia !== 'pendiente' && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleMarcarAsistencia(alumno.reserva_id, alumno.asistencia !== 'asistio')}
-                                        disabled={procesando}
-                                        className="text-xs font-medium text-[#6B7355] underline transition-colors hover:text-[#1F2400] disabled:cursor-not-allowed disabled:opacity-60"
-                                      >
-                                        {procesando ? 'Corrigiendo...' : 'Corregir'}
-                                      </button>
-                                    )}
-                                  </div>
-
-                                  {erroresAsistencia[alumno.reserva_id] && (
-                                    <p className="text-xs text-red-600">{erroresAsistencia[alumno.reserva_id]}</p>
-                                  )}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-
-                        {esEditable && (
-                          <div className="mt-4 flex justify-end">
-                            <Link
-                              href={`/mis-clases/${clase.clase_id}/editar`}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9]"
-                            >
-                              <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
-                              Editar
-                            </Link>
-                          </div>
-                        )}
-
-                        {clase.estado === 'activa' && !haPasado && (
-                          <div className="mt-3 flex flex-col items-end gap-1.5 border-t border-[#E2E6CF] pt-3">
-                            <button
-                              type="button"
-                              onClick={() => handleCancelarClase(clase.clase_id)}
-                              disabled={procesandoCancelacionId === clase.clase_id}
-                              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              <Ban className="h-3.5 w-3.5" strokeWidth={1.75} />
-                              {procesandoCancelacionId === clase.clase_id ? 'Cancelando...' : 'Cancelar esta clase'}
-                            </button>
-                            {erroresCancelacion[clase.clase_id] && (
-                              <p className="text-xs text-red-600">{erroresCancelacion[clase.clase_id]}</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </RevelarAlLlegar>
-                )
-              })}
+              {clasesProximas.map((clase, indice) => renderTarjeta(clase, indice, false))}
             </div>
+
+            {clasesPasadas.length > 0 && (
+              <div className="mt-10">
+                <h2 className="mb-4 border-b border-[#E2E6CF] pb-2 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
+                  Historial
+                </h2>
+
+                <div className="flex flex-col gap-5">
+                  {clasesPasadas.map((clase, indice) => renderTarjeta(clase, indice, true))}
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
