@@ -77,7 +77,11 @@ export default function DetalleClasePage() {
 
   useEffect(() => {
     async function cargarClase() {
-      const { data, error } = await supabase.from('clases').select('*').eq('id', id).single()
+      const { data, error } = await supabase
+        .from('clases')
+        .select('*, perfiles(username)')
+        .eq('id', id)
+        .single()
 
       if (error || !data) {
         setError('No se ha encontrado esta clase.')
@@ -144,6 +148,12 @@ export default function DetalleClasePage() {
       <CabeceraDetalle clase={clase} />
 
       <div className="mx-auto w-full max-w-2xl px-4 pb-28 pt-8 sm:px-6 sm:pb-10">
+        {clase.perfiles?.username && (
+          <p className="mb-4 text-lg text-[#6B7355]">
+            Clase impartida por <span className="font-semibold text-[#3D4A00]">@{clase.perfiles.username}</span>
+          </p>
+        )}
+
         <div className="flex flex-col gap-6">
           <RevelarAlLlegar className={tarjetaClass}>
             <TituloBloque Icono={CalendarClock}>Cuándo</TituloBloque>

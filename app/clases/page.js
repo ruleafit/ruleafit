@@ -118,7 +118,7 @@ export default function ClasesPage() {
     async function cargarClases() {
       const { data, error } = await supabase
         .from('clases')
-        .select('*')
+        .select('*, perfiles(username)')
         .eq('estado', 'activa')
         .order('fecha', { ascending: true })
 
@@ -259,7 +259,16 @@ export default function ClasesPage() {
                           <h2 className="text-lg font-bold text-[#1F2400] sm:text-xl">{clase.titulo}</h2>
                           <span className="shrink-0 text-xs text-[#6B7355]">{clase.ciudad}</span>
                         </div>
-                        {clase.tipo_actividad && <p className="mb-3 text-sm text-[#6B7355]">{clase.tipo_actividad}</p>}
+                        {(clase.tipo_actividad || clase.perfiles?.username) && (
+                          <div className="mb-3 text-sm text-[#6B7355]">
+                            {clase.tipo_actividad && <p>{clase.tipo_actividad}</p>}
+                            {clase.perfiles?.username && (
+                              <p className="text-base">
+                                por <span className="font-semibold text-[#3D4A00]">@{clase.perfiles.username}</span>
+                              </p>
+                            )}
+                          </div>
+                        )}
 
                         <div className="flex flex-col gap-1 text-sm text-[#6B7355]">
                           <p>

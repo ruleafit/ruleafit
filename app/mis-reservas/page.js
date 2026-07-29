@@ -65,7 +65,7 @@ export default function MisReservasPage() {
       const { data, error } = await supabase
         .from('reservas')
         .select(
-          'id, estado, cancelled_at, cancelada_por_entrenador, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_min, plazas_ocupadas)'
+          'id, estado, cancelled_at, cancelada_por_entrenador, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_min, plazas_ocupadas, trainer_id, perfiles(username))'
         )
         .eq('cliente_id', usuario.id)
         .or('estado.eq.activa,and(estado.eq.cancelada,cancelada_por_entrenador.eq.true)')
@@ -224,6 +224,12 @@ export default function MisReservasPage() {
 
                     <h2 className="mb-1 text-lg font-bold text-[#1F2400] sm:text-xl">{clase.titulo}</h2>
 
+                    {clase.perfiles?.username && (
+                      <p className="mb-3 text-sm text-[#6B7355]">
+                        Entrenador: <span className="font-semibold text-[#3D4A00]">@{clase.perfiles.username}</span>
+                      </p>
+                    )}
+
                     {pendienteConfirmacion && (
                       <div className="mb-3 flex items-center justify-between rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
                         <span>{textoFaltanParaConfirmar(faltanParaConfirmar)}</span>
@@ -327,7 +333,14 @@ export default function MisReservasPage() {
                         </div>
 
                         <p className="mt-3 border-t border-red-200 pt-3 text-sm text-red-500">
-                          Esta clase fue cancelada por el entrenador.
+                          {clase.perfiles?.username ? (
+                            <>
+                              Cancelada por el entrenador{' '}
+                              <span className="font-semibold">@{clase.perfiles.username}</span>.
+                            </>
+                          ) : (
+                            'Cancelada por el entrenador.'
+                          )}
                           {reserva.cancelled_at && (
                             <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>
                           )}
@@ -379,6 +392,12 @@ export default function MisReservasPage() {
                         </div>
 
                         <h2 className="mb-1 text-lg font-bold text-zinc-500 sm:text-xl">{clase.titulo}</h2>
+
+                        {clase.perfiles?.username && (
+                          <p className="mb-3 text-sm text-zinc-400">
+                            Entrenador: <span className="font-semibold text-zinc-500">@{clase.perfiles.username}</span>
+                          </p>
+                        )}
 
                         <div className="flex flex-col gap-1 text-sm text-zinc-400">
                           <p>
