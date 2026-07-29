@@ -68,9 +68,16 @@ export default function BotonInstalarApp({ className }) {
         <div className="mt-2 max-w-xs rounded-xl border border-[#E2E6CF] bg-white p-5 text-left shadow-sm">
           <p className="text-sm font-bold text-[#1F2400]">Añadir a la pantalla de inicio</p>
           <ol className="mt-2 flex flex-col gap-2 text-sm text-[#1F2400]">
-            <li>1. Toca el botón Compartir (el icono de cuadrado con flecha hacia arriba).</li>
-            <li>2. Baja y toca &quot;Añadir a pantalla de inicio&quot;.</li>
-            <li>3. Confirma con &quot;Añadir&quot;.</li>
+            <li>
+              1. Toca el botón de Compartir (el cuadrado con una flecha hacia arriba). Está en la barra de abajo
+              o, si no lo ves, dentro del menú de los tres puntos &quot;···&quot; abajo a la derecha.
+            </li>
+            <li>2. Si no ves las opciones de compartir, toca &quot;Compartir&quot;.</li>
+            <li>
+              3. Busca &quot;Añadir a pantalla de inicio&quot;. Si no aparece, toca &quot;Ver más&quot; o desliza
+              hacia abajo en la lista.
+            </li>
+            <li>4. Toca &quot;Añadir&quot; (arriba a la derecha).</li>
           </ol>
         </div>
       )}
