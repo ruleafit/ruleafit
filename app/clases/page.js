@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../lib/confirmacionClase'
+import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import BotonReservar from '../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../components/BotonCopiarCoordenadas'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
@@ -143,7 +144,7 @@ export default function ClasesPage() {
 
   const clasesFiltradas = clases.filter((clase) => {
     if (clase.estado !== 'activa') return false
-    if (clase.fecha && clase.fecha < hoy) return false
+    if (claseYaPaso(clase)) return false
 
     const coincideCiudad = filtroCiudad === 'Todas' || clase.ciudad === filtroCiudad
     const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
