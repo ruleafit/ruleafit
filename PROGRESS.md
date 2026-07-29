@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 27 julio 2026
+Última actualización: 29 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -102,13 +102,16 @@ Hecho:
 - PWA: la web ya se puede añadir a la pantalla de inicio del móvil. Manifest generado por código en app/manifest.js (nombre, descripción, start_url, display standalone, colores de marca: fondo crema #FBFAF3 y theme lima #B5E600, iconos 192 y 512). export const viewport con themeColor lima en app/layout.js. Iconos openfit-icon-192.png y openfit-icon-512.png en public/ (pin de ubicación sobre una mancuerna, fondo lima).
 - Botón de instalación de la PWA "Ten Openfit a mano" (components/BotonInstalarApp.js), insertado en la portada tras el hero y visible para todos los visitantes en móvil: en Android/Chrome lanza el diálogo nativo de instalación (evento beforeinstallprompt), en iPhone/Safari abre un panel con instrucciones para añadir a pantalla de inicio, y se oculta en ordenador o si la app ya está instalada. El margen vertical vive en el propio componente para no dejar hueco cuando no se muestra.
 - Registro preparado para la confirmación de email (app/registro/page.js): signUp ahora captura data y, si no hay sesión (confirmación activada), muestra un mensaje de éxito pidiendo revisar la bandeja de entrada y la carpeta de spam en lugar de redirigir. Con la confirmación desactivada el comportamiento no cambia (sigue entrando directo). El código queda listo para cuando se active.
+- Campo "modalidad" renombrado a "tipo_actividad" y cambiado de significado: antes era "presencial/online", ahora es texto libre para el tipo de actividad (zumba, boxeo, running...). Tocó código (publicar, editar, ficha de detalle y tarjetas usan tipo_actividad con la etiqueta "Tipo de actividad") y base de datos: sql/017 renombró la columna, sql/018 recreó editar_clase con el parámetro p_tipo_actividad (hizo falta DROP FUNCTION + CREATE porque Postgres no permite renombrar un parámetro con CREATE OR REPLACE, restaurando después el grant execute a authenticated), y sql/016 actualizado para reflejar la columna renombrada. CLAUDE.md también actualizado.
+- Flujo completo probado de punta a punta en producción (registro como entrenador y como cliente, publicar clase, buscar y filtrar, reservar, cancelar) antes de repartir la beta.
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
 Nota (hallazgo técnico): la tabla public.clases y sus políticas RLS iniciales (SELECT, INSERT) no están versionadas en ningún archivo de sql/ — se crearon directamente en el editor de Supabase antes de empezar a versionar el SQL del proyecto. Las funciones que escriben sobre clases (editar_clase(), cancelar_clase(), etc.) usan SECURITY DEFINER precisamente para no depender de si existe o no una política de UPDATE sobre esa tabla, que no queda documentada aquí.
 
-Pendiente (en orden):
-1. Repartir la beta a amigos y familia (círculo cercano, en torno a 30 personas). Se reparte SIN confirmación de email activada, para evitar la fricción y las limitaciones del servidor de correo compartido de Supabase (2-3 correos/hora y riesgo de spam). Conviene repartir por tandas y avisar por WhatsApp.
+Beta lanzada (en curso):
+- Beta repartida a ~30 personas del círculo cercano (~6 entrenadores, resto clientes), sin confirmación de email, con mensajes de WhatsApp distintos por rol. La app corre en producción (Vercel + Supabase); la gente la está usando durante una semana como si fuera real.
+- Recogiendo errores y sugerencias (estéticas y de funcionalidad) para ir corrigiendo. IMPORTANTE: al haber gente usando la app en vivo, extremar el cuidado con lo que se sube a main.
 
 Otros pendientes menores (sin prioridad asignada):
 - Pulido fino según el feedback de la beta.
