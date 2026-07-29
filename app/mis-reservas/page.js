@@ -7,28 +7,11 @@ import { CalendarSearch, CircleCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
+import { claseYaPaso, horasHastaClase } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
-function obtenerAhoraMadridComoTexto() {
-  const formateador = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Madrid',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-  const partes = formateador.formatToParts(new Date())
-  const obtener = (tipo) => partes.find((p) => p.type === tipo)?.value
-  return `${obtener('year')}-${obtener('month')}-${obtener('day')} ${obtener('hour')}:${obtener('minute')}`
-}
-
-function claseYaPaso(clase) {
-  if (!clase.fecha || !clase.hora) return false
-  const horaCorta = String(clase.hora).slice(0, 5)
-  const inicioClase = `${clase.fecha} ${horaCorta}`
-  return inicioClase < obtenerAhoraMadridComoTexto()
+function claveFechaHora(clase) {
+  return `${clase.fecha} ${String(clase.hora).slice(0, 5)}`
 }
 
 function etiquetaCuentaAtras(fecha) {
@@ -153,11 +136,23 @@ export default function MisReservasPage() {
     )
   }
 
-  const reservasActivas = reservas.filter((r) => r.estado === 'activa')
+  const reservasActivas = reservas.filter((r) => r.estado === 'activa' && r.clases)
   const reservasCanceladasPorEntrenador = reservas.filter(
-    (r) => r.estado === 'cancelada' && r.cancelada_por_entrenador
+    (r) =>
+      r.estado === 'cancelada' &&
+      r.cancelada_por_entrenador &&
+      r.clases &&
+      horasHastaClase(r.clases) > -1
   )
   const sinReservas = reservasActivas.length === 0 && reservasCanceladasPorEntrenador.length === 0
+
+  const reservasProximas = reservasActivas
+    .filter((r) => !claseYaPaso(r.clases))
+    .sort((a, b) => (claveFechaHora(a.clases) < claveFechaHora(b.clases) ? -1 : 1))
+
+  const reservasPasadas = reservasActivas
+    .filter((r) => claseYaPaso(r.clases))
+    .sort((a, b) => (claveFechaHora(a.clases) > claveFechaHora(b.clases) ? -1 : 1))
 
   return (
     <div className="flex flex-1 flex-col">
@@ -193,14 +188,10 @@ export default function MisReservasPage() {
         )}
 
         <div className="flex flex-col gap-4">
-          {reservasActivas.map((reserva, indice) => {
+          {reservasProximas.map((reserva, indice) => {
             const clase = reserva.clases
-            if (!clase) return null
-
-            const pasada = claseYaPaso(clase)
-            const cuentaAtras = !pasada ? etiquetaCuentaAtras(clase.fecha) : null
+            const cuentaAtras = etiquetaCuentaAtras(clase.fecha)
             const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
-            const colorBorde = pasada ? 'border-l-zinc-300' : 'border-l-[#B5E600]'
             const { pendienteConfirmacion, faltanParaConfirmar } = estadoConfirmacionClase({
               plazasMin: clase.plazas_min,
               plazasOcupadas: clase.plazas_ocupadas,
@@ -208,9 +199,7 @@ export default function MisReservasPage() {
 
             return (
               <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
-                <div
-                  className={`tarjeta-hover overflow-hidden rounded-xl border border-[#E2E6CF] border-l-4 bg-white shadow-sm ${colorBorde}`}
-                >
+                <div className="tarjeta-hover overflow-hidden rounded-xl border border-[#E2E6CF] border-l-4 border-l-[#B5E600] bg-white shadow-sm">
                   <div className="zoom-imagen relative h-32 w-full sm:h-36">
                     <img src={imagenClase} alt="" className="h-full w-full object-cover" />
                     {clase.categoria && (
@@ -229,7 +218,7 @@ export default function MisReservasPage() {
                     <div className="mb-3 flex items-center justify-between gap-2">
                       <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D4A00]">
                         <CircleCheck className="h-3.5 w-3.5" strokeWidth={2} />
-                        {pasada ? 'Ya pasada' : 'Reservada'}
+                        Reservada
                       </span>
                     </div>
 
@@ -306,12 +295,75 @@ export default function MisReservasPage() {
             <div className="flex flex-col gap-4">
               {reservasCanceladasPorEntrenador.map((reserva, indice) => {
                 const clase = reserva.clases
-                if (!clase) return null
                 const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
 
                 return (
                   <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
-                    <div className="overflow-hidden rounded-xl border border-[#E2E6CF] border-l-4 border-l-red-200 bg-zinc-50">
+                    <div className="overflow-hidden rounded-xl border border-red-200 border-l-4 border-l-red-300 bg-red-50">
+                      <div className="relative h-32 w-full opacity-80 sm:h-36">
+                        <img src={imagenClase} alt="" className="h-full w-full object-cover grayscale" />
+                        {clase.categoria && (
+                          <span className="absolute left-3 top-3 rounded-full border border-red-200 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-400">
+                            {clase.categoria}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-5">
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-red-500">Cancelada</span>
+                        </div>
+
+                        <h2 className="mb-1 text-lg font-bold text-red-500 sm:text-xl">{clase.titulo}</h2>
+
+                        <div className="flex flex-col gap-1 text-sm text-red-400">
+                          <p>
+                            Ciudad: <span className="text-red-500">{clase.ciudad}</span>
+                          </p>
+                          <p>
+                            Fecha: <span className="text-red-500">{clase.fecha}</span> · Hora:{' '}
+                            <span className="text-red-500">{clase.hora}</span>
+                          </p>
+                        </div>
+
+                        <p className="mt-3 border-t border-red-200 pt-3 text-sm text-red-500">
+                          Esta clase fue cancelada por el entrenador.
+                          {reserva.cancelled_at && (
+                            <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>
+                          )}
+                        </p>
+
+                        <div className="mt-3">
+                          <Link
+                            href={`/clases/${clase.id}`}
+                            className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-medium text-red-400 transition-colors hover:border-red-300 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                          >
+                            Ver detalle
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </RevelarAlLlegar>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {reservasPasadas.length > 0 && (
+          <div className="mt-10">
+            <h2 className="mb-4 border-b border-[#E2E6CF] pb-2 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
+              Historial
+            </h2>
+
+            <div className="flex flex-col gap-4">
+              {reservasPasadas.map((reserva, indice) => {
+                const clase = reserva.clases
+                const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
+
+                return (
+                  <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
+                    <div className="overflow-hidden rounded-xl border border-[#E2E6CF] border-l-4 border-l-zinc-300 bg-zinc-50">
                       <div className="relative h-32 w-full opacity-80 sm:h-36">
                         <img src={imagenClase} alt="" className="h-full w-full object-cover grayscale" />
                         {clase.categoria && (
@@ -323,7 +375,7 @@ export default function MisReservasPage() {
 
                       <div className="p-5">
                         <div className="mb-3 flex items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-red-500">Cancelada</span>
+                          <span className="text-xs font-semibold text-zinc-500">Ya pasada</span>
                         </div>
 
                         <h2 className="mb-1 text-lg font-bold text-zinc-500 sm:text-xl">{clase.titulo}</h2>
@@ -336,16 +388,17 @@ export default function MisReservasPage() {
                             Fecha: <span className="text-zinc-500">{clase.fecha}</span> · Hora:{' '}
                             <span className="text-zinc-500">{clase.hora}</span>
                           </p>
+                          {clase.duracion != null && (
+                            <p>
+                              Duración: <span className="text-zinc-500">{clase.duracion} min</span>
+                            </p>
+                          )}
+                          <p>
+                            Precio: <span className="text-zinc-500">{clase.precio} €</span>
+                          </p>
                         </div>
 
-                        <p className="mt-3 border-t border-[#E2E6CF] pt-3 text-sm text-zinc-500">
-                          Esta clase fue cancelada por el entrenador.
-                          {reserva.cancelled_at && (
-                            <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>
-                          )}
-                        </p>
-
-                        <div className="mt-3">
+                        <div className="mt-3 border-t border-[#E2E6CF] pt-3">
                           <Link
                             href={`/clases/${clase.id}`}
                             className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
