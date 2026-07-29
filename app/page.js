@@ -51,7 +51,7 @@ const PUNTOS = [
 const PUNTOS_ENTRENADOR = [
   { texto: 'Tu horario, tus normas', Icono: CalendarClock },
   { texto: 'Tú fijas el precio y las plazas', Icono: Tag },
-  { texto: 'Cobras directo, sin intermediarios', Icono: HandCoins },
+  { texto: 'Cobros y reservas automáticos', Icono: HandCoins },
 ]
 
 const botonPrimarioClass =
