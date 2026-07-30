@@ -264,7 +264,13 @@ export default function ClasesPage() {
                             {clase.tipo_actividad && <p>{clase.tipo_actividad}</p>}
                             {clase.perfiles?.username && (
                               <p className="text-base">
-                                por <span className="font-semibold text-[#3D4A00]">@{clase.perfiles.username}</span>
+                                por{' '}
+                                <Link
+                                  href={`/entrenador/${clase.perfiles.username}`}
+                                  className="font-semibold text-[#3D4A00] hover:underline"
+                                >
+                                  @{clase.perfiles.username}
+                                </Link>
                               </p>
                             )}
                           </div>
@@ -285,7 +291,7 @@ export default function ClasesPage() {
                           </p>
                           {clase.direccion && (
                             <p>
-                              Dirección: <span className="text-[#1F2400]">{clase.direccion}</span>
+                              Zona: <span className="text-[#1F2400]">{clase.direccion}</span>
                             </p>
                           )}
                           {clase.punto_encuentro && (

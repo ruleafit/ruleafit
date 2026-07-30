@@ -420,7 +420,7 @@ export default function EditarClasePage() {
                 <p className={soloLecturaClass}>{clase.ciudad || '—'}</p>
               </div>
               <div className="sm:col-span-2">
-                <label className={labelClass}>Dirección</label>
+                <label className={labelClass}>Zona</label>
                 <p className={soloLecturaClass}>{clase.direccion || '—'}</p>
               </div>
               <div>

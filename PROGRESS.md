@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 29 julio 2026
+Última actualización: 30 julio 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -111,6 +111,7 @@ Hecho:
 - /mis-clases (entrenador): mismo tratamiento de historial (próximas arriba, pasadas abajo atenuadas bajo "Historial"). La tarjeta se extrajo a renderTarjeta(clase, indice, atenuada); la gestión de asistencia sigue funcionando en las clases pasadas del historial.
 - Se muestra el username del entrenador de cada clase en /clases, en la ficha de detalle /clases/[id] y en /mis-reservas (incluido el bloque de canceladas, que ahora dice "Cancelada por el entrenador @username"). En negrita y verde de marca sobre fondo claro, adaptado al tono del contexto en historial y canceladas. Requirió sql/019: una FK clases.trainer_id -> perfiles.id para habilitar el embed perfiles(username) de Supabase, y ampliar la política RLS de perfiles a lectura pública (to public) porque /clases es pública y el username no es dato sensible. sql/019 ya ejecutado en Supabase.
 - Botón de instalar la PWA: las instrucciones para iPhone del panel de iOS ahora cubren tanto el flujo antiguo (botón Compartir directo) como el nuevo de iOS reciente (tres puntos, Compartir, Ver más, Añadir).
+- Etiqueta visual "Dirección" cambiada a "Zona" en toda la interfaz de clases (formulario de /publicar, con placeholder de ejemplo "Ej: Nervión, o C/ Larios"; ficha de detalle con prefijo "Zona:"; listado /clases; /mis-reservas; edición de clase). Solo cambió el texto visible: la columna de la base de datos y el nombre del campo/estado en el código siguen llamándose "direccion".
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
@@ -119,6 +120,19 @@ Nota (hallazgo técnico): la tabla public.clases y sus políticas RLS iniciales 
 Beta lanzada (en curso):
 - Beta repartida a ~30 personas del círculo cercano (~6 entrenadores, resto clientes), sin confirmación de email, con mensajes de WhatsApp distintos por rol. La app corre en producción (Vercel + Supabase); la gente la está usando durante una semana como si fuera real.
 - Recogiendo errores y sugerencias (estéticas y de funcionalidad) para ir corrigiendo. IMPORTANTE: al haber gente usando la app en vivo, extremar el cuidado con lo que se sube a main.
+
+## Perfil público de entrenador (durante la beta)
+Hecho:
+- Base de datos: columnas descripcion (text, máx. 300 caracteres vía CHECK) y foto_url (text) añadidas a public.perfiles (sql/020_perfiles_descripcion_foto.sql, ya ejecutado en Supabase).
+- Storage: bucket público "avatares" creado en Supabase Storage, con políticas RLS (lectura pública; subir/actualizar/borrar solo el propio archivo, en la ruta {user_id}/avatar.jpg) (sql/021_storage_avatares_politicas.sql, ya ejecutado).
+- /cuenta: los entrenadores (rol === 'entrenador') pueden editar su descripción (textarea con contador X/300) y subir su foto de perfil, guardando ambas con un único botón "Guardar perfil". La foto se comprime en el propio navegador antes de subir (canvas, máx. 800px en el lado mayor, JPEG calidad 0.8, sin librerías externas), se sube a avatares/{user.id}/avatar.jpg con upsert, y se guarda la URL pública con un parámetro de versión para evitar problemas de caché del navegador.
+- /cuenta reorganizada: para entrenadores, un único bloque "Perfil del entrenador" arriba del todo fusiona foto + descripción + correo + nombre de usuario + cambiar nombre de usuario (este último mantiene su propio botón y su lógica intactos); para clientes se mantiene el bloque de correo + username como estaba. El contenido de correo/username se extrajo a un fragmento JSX reutilizable para no duplicarlo entre ambos casos.
+- El avatar circular de la cabecera de /cuenta muestra ahora la foto de perfil si existe, con la inicial como reserva si no la hay.
+- Página pública nueva app/entrenador/[username]/page.js, accesible sin sesión iniciada: busca el perfil por username (insensible a mayúsculas) y muestra foto (o inicial), @username, descripción y número de clases activas (trainer_id + estado 'activa', descartando las ya pasadas con claseYaPaso()). Si el perfil no tiene ni foto ni descripción, muestra "Este entrenador aún no ha completado su perfil."; si el username no existe, pantalla de "Entrenador no encontrado" con enlace de vuelta a /clases. Incluye un hueco {/* TODO: valoraciones */} preparado para el futuro.
+- El @username del entrenador es ahora un enlace a su perfil público en /clases, en la ficha /clases/[id] y en las tres tarjetas de /mis-reservas (próximas, canceladas e historial).
+
+Falta:
+- Sistema de valoraciones del entrenador (diseño ya decidido, sin implementar): 1 a 5 estrellas; solo puede valorar un cliente que haya entrenado con ese entrenador (reservas.asistencia = 'asistio'); un cliente solo puede valorar una vez a cada entrenador, pero puede editar su valoración; opinión escrita corta opcional (~100 caracteres) visible en el perfil público. Irá en el hueco TODO ya preparado en app/entrenador/[username]/page.js.
 
 Otros pendientes menores (sin prioridad asignada):
 - Pulido fino según el feedback de la beta.

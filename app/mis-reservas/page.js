@@ -226,7 +226,13 @@ export default function MisReservasPage() {
 
                     {clase.perfiles?.username && (
                       <p className="mb-3 text-sm text-[#6B7355]">
-                        Entrenador: <span className="font-semibold text-[#3D4A00]">@{clase.perfiles.username}</span>
+                        Entrenador:{' '}
+                        <Link
+                          href={`/entrenador/${clase.perfiles.username}`}
+                          className="font-semibold text-[#3D4A00] hover:underline"
+                        >
+                          @{clase.perfiles.username}
+                        </Link>
                       </p>
                     )}
 
@@ -254,7 +260,7 @@ export default function MisReservasPage() {
                       </p>
                       {clase.direccion && (
                         <p>
-                          Dirección: <span className="text-[#1F2400]">{clase.direccion}</span>
+                          Zona: <span className="text-[#1F2400]">{clase.direccion}</span>
                         </p>
                       )}
                       {clase.punto_encuentro && (
@@ -336,7 +342,13 @@ export default function MisReservasPage() {
                           {clase.perfiles?.username ? (
                             <>
                               Cancelada por el entrenador{' '}
-                              <span className="font-semibold">@{clase.perfiles.username}</span>.
+                              <Link
+                                href={`/entrenador/${clase.perfiles.username}`}
+                                className="font-semibold hover:underline"
+                              >
+                                @{clase.perfiles.username}
+                              </Link>
+                              .
                             </>
                           ) : (
                             'Cancelada por el entrenador.'
@@ -395,7 +407,13 @@ export default function MisReservasPage() {
 
                         {clase.perfiles?.username && (
                           <p className="mb-3 text-sm text-zinc-400">
-                            Entrenador: <span className="font-semibold text-zinc-500">@{clase.perfiles.username}</span>
+                            Entrenador:{' '}
+                            <Link
+                              href={`/entrenador/${clase.perfiles.username}`}
+                              className="font-semibold text-zinc-500 hover:underline"
+                            >
+                              @{clase.perfiles.username}
+                            </Link>
                           </p>
                         )}
 

@@ -150,7 +150,13 @@ export default function DetalleClasePage() {
       <div className="mx-auto w-full max-w-2xl px-4 pb-28 pt-8 sm:px-6 sm:pb-10">
         {clase.perfiles?.username && (
           <p className="mb-4 text-lg text-[#6B7355]">
-            Clase impartida por <span className="font-semibold text-[#3D4A00]">@{clase.perfiles.username}</span>
+            Clase impartida por{' '}
+            <Link
+              href={`/entrenador/${clase.perfiles.username}`}
+              className="font-semibold text-[#3D4A00] hover:underline"
+            >
+              @{clase.perfiles.username}
+            </Link>
           </p>
         )}
 
@@ -212,7 +218,11 @@ export default function DetalleClasePage() {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1 text-sm">
                 <p className="font-semibold text-[#1F2400]">{clase.ciudad}</p>
-                {clase.direccion && <p className="text-[#1F2400]">{clase.direccion}</p>}
+                {clase.direccion && (
+                  <p className="text-[#1F2400]">
+                    Zona: <span className="text-[#1F2400]">{clase.direccion}</span>
+                  </p>
+                )}
                 {clase.punto_encuentro && (
                   <p className="text-[#6B7355]">
                     Punto de encuentro: <span className="text-[#1F2400]">{clase.punto_encuentro}</span>

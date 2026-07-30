@@ -268,8 +268,8 @@ export default function PublicarPage() {
               </div>
 
               <div>
-                <label className={labelClass}>Dirección</label>
-                <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={inputClass} />
+                <label className={labelClass}>Zona</label>
+                <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} placeholder="Ej: Nervión, o C/ Larios" className={inputClass} />
               </div>
 
               <div>
