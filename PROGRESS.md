@@ -110,8 +110,12 @@ Hecho:
 - /mis-reservas rediseñada: reservas próximas arriba (en color), historial de pasadas abajo (en gris atenuado) bajo el título "Historial", y bloque de canceladas por el entrenador movido justo debajo de las próximas y recoloreado en rojo suave. Las canceladas se ocultan pasada 1h de su hora de inicio (horasHastaClase). Eliminadas copias locales duplicadas de claseYaPaso.
 - /mis-clases (entrenador): mismo tratamiento de historial (próximas arriba, pasadas abajo atenuadas bajo "Historial"). La tarjeta se extrajo a renderTarjeta(clase, indice, atenuada); la gestión de asistencia sigue funcionando en las clases pasadas del historial.
 - Se muestra el username del entrenador de cada clase en /clases, en la ficha de detalle /clases/[id] y en /mis-reservas (incluido el bloque de canceladas, que ahora dice "Cancelada por el entrenador @username"). En negrita y verde de marca sobre fondo claro, adaptado al tono del contexto en historial y canceladas. Requirió sql/019: una FK clases.trainer_id -> perfiles.id para habilitar el embed perfiles(username) de Supabase, y ampliar la política RLS de perfiles a lectura pública (to public) porque /clases es pública y el username no es dato sensible. sql/019 ya ejecutado en Supabase.
-- Botón de instalar la PWA: las instrucciones para iPhone del panel de iOS ahora cubren tanto el flujo antiguo (botón Compartir directo) como el nuevo de iOS reciente (tres puntos, Compartir, Ver más, Añadir).
+- Botón de instalar la PWA: las instrucciones para iPhone del panel de iOS ahora cubren tanto el flujo antiguo (botón Compartir directo) como el nuevo de iOS reciente (tres puntos, Compartir, Ver más, Añadir). Verificado en un iPhone reciente: se leen bien y la lista <ol> no duplica el número de cada paso.
 - Etiqueta visual "Dirección" cambiada a "Zona" en toda la interfaz de clases (formulario de /publicar, con placeholder de ejemplo "Ej: Nervión, o C/ Larios"; ficha de detalle con prefijo "Zona:"; listado /clases; /mis-reservas; edición de clase). Solo cambió el texto visible: la columna de la base de datos y el nombre del campo/estado en el código siguen llamándose "direccion".
+- Mejoras en el mapa de clases (components/MapaClases.js):
+  - Botón "Ver detalles" dentro del popup de cada clase, enlazando a la ficha /clases/[id], para no tener que buscar la clase en el listado tras localizarla en el mapa.
+  - Marcadores diferenciados por categoría con forma + color en vez del pin azul único: círculo amarillo #F2C037 (Fuerza / funcional), triángulo rojo #E5533D (Cardio), cuadrado azul #3D8BFF (Yoga / Pilates / movilidad), rombo morado #9B5DE5 (Otros), círculo gris #9AA0A6 por defecto. Cada marcador es un L.divIcon con SVG y un pico inferior que señala la ubicación exacta (icono anclado en la punta). Se usan formas además de colores para no depender solo del color (accesible para daltonismo).
+  - Leyenda discreta debajo del mapa con cada forma+color junto a su categoría.
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
@@ -139,7 +143,8 @@ Otros pendientes menores (sin prioridad asignada):
 - Cambiar lang="en" por lang="es" en app/layout.js (toda la interfaz es en español).
 - Subir la longitud mínima de contraseña de 6 a 8 caracteres en Supabase (recomendado para producción).
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
-- Verificar en un iPhone reciente que las nuevas instrucciones para añadir a pantalla de inicio se leen bien (y que la lista <ol> no duplica el número de cada paso).
+- Mapa de clases: clustering de marcadores cercanos en un icono con número que se separen al hacer zoom; requiere instalar una librería tipo react-leaflet-cluster. Pendiente para una sesión con tiempo.
+- Mapa de clases: mostrar la ubicación del cliente en tiempo real ("tú estás aquí") con la Geolocation API, para ver clases cercanas. Requiere pedir permiso de geolocalización.
 
 ## Después de la beta (decidido el 27 julio 2026)
 - Confirmación de email en Supabase: reactivarla cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado. Requiere resolver antes el envío de correos (ver siguiente punto).

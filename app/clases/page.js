@@ -5,7 +5,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { SearchX } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
-import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
+import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO, ESTILO_POR_CATEGORIA, formaSVG } from '../../lib/imagenesCategoria'
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../lib/confirmacionClase'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
@@ -215,6 +215,17 @@ export default function ClasesPage() {
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
               <div className="md:sticky md:top-24 md:self-start">
                 <MapaClases clases={clasesFiltradas} />
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-[#E2E6CF] bg-white/70 px-4 py-3 text-xs text-[#3D4A00]">
+                  {Object.entries(ESTILO_POR_CATEGORIA).map(([nombre, { forma, color }]) => (
+                    <span key={nombre} className="flex items-center gap-1.5">
+                      <span
+                        className="inline-block h-3.5 w-3.5 shrink-0"
+                        dangerouslySetInnerHTML={{ __html: formaSVG(forma, color, 14) }}
+                      />
+                      {nombre}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className="flex flex-col gap-4">
