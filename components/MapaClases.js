@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'react-leaflet-cluster/dist/assets/MarkerCluster.css'
+import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css'
 import { ESTILO_POR_CATEGORIA, ESTILO_POR_DEFECTO } from '../lib/imagenesCategoria'
 
 delete L.Icon.Default.prototype._getIconUrl
@@ -45,6 +48,49 @@ function iconoPorCategoria(categoria) {
   })
 }
 
+function iconoCluster(cluster) {
+  const cantidad = cluster.getChildCount()
+
+  return L.divIcon({
+    html: `<div style="
+        width:40px;
+        height:40px;
+        border-radius:50%;
+        background:#3D4A00;
+        border:3px solid #fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:0 2px 4px rgba(0,0,0,0.45);
+      "><span style="color:#FFFFFF;font-weight:700;font-size:14px;line-height:1;">${cantidad}</span></div>`,
+    className: '',
+    iconSize: [40, 40],
+  })
+}
+
+function iconoUsuario() {
+  return L.divIcon({
+    html: `<div style="position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;z-index:1000;">
+        <div style="position:absolute;width:32px;height:32px;border-radius:50%;background:rgba(26,115,232,0.35);"></div>
+        <div style="position:relative;width:16px;height:16px;border-radius:50%;background:#1A73E8;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.45);"></div>
+      </div>`,
+    className: '',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+  })
+}
+
+function CentrarEnUsuario({ ubicacion }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!ubicacion) return
+    map.setView([ubicacion.lat, ubicacion.lng], 14)
+  }, [ubicacion, map])
+
+  return null
+}
+
 function AjustarEncuadre({ clases }) {
   const map = useMap()
 
@@ -63,41 +109,90 @@ function AjustarEncuadre({ clases }) {
 
 export default function MapaClases({ clases }) {
   const conCoordenadas = clases.filter((c) => c.lat != null && c.lng != null)
+  const [ubicacionUsuario, setUbicacionUsuario] = useState(null)
+  const [buscandoUbicacion, setBuscandoUbicacion] = useState(false)
+  const [errorUbicacion, setErrorUbicacion] = useState(null)
+
+  function verMiUbicacion() {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setErrorUbicacion('No pudimos obtener tu ubicación. Revisa los permisos del navegador.')
+      return
+    }
+
+    setBuscandoUbicacion(true)
+    setErrorUbicacion(null)
+
+    navigator.geolocation.getCurrentPosition(
+      (posicion) => {
+        setUbicacionUsuario({ lat: posicion.coords.latitude, lng: posicion.coords.longitude })
+        setBuscandoUbicacion(false)
+      },
+      () => {
+        setErrorUbicacion('No pudimos obtener tu ubicación. Revisa los permisos del navegador.')
+        setBuscandoUbicacion(false)
+      }
+    )
+  }
 
   return (
-    <div className="h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
+    <div className="relative h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
+      <button
+        type="button"
+        onClick={verMiUbicacion}
+        disabled={buscandoUbicacion}
+        className="absolute right-3 top-3 z-[1000] rounded-full border border-[#E2E6CF] bg-white px-4 py-2 text-sm font-bold text-[#3D4A00] shadow-md hover:bg-[#F5F7E8] disabled:opacity-70"
+      >
+        {buscandoUbicacion ? 'Buscando...' : 'Ver mi ubicación'}
+      </button>
+      {errorUbicacion && (
+        <p className="absolute left-3 right-3 top-14 z-[1000] rounded-lg bg-white/90 px-3 py-2 text-xs text-[#3D4A00] shadow">
+          {errorUbicacion}
+        </p>
+      )}
       <MapContainer center={CENTRO_SEVILLA} zoom={12} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <AjustarEncuadre clases={conCoordenadas} />
-        {conCoordenadas.map((clase) => {
-          const plazasMax = clase.plazas_max ?? 0
-          const plazasOcupadas = clase.plazas_ocupadas ?? 0
-          const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
+        <CentrarEnUsuario ubicacion={ubicacionUsuario} />
+        {ubicacionUsuario && (
+          <Marker
+            position={[ubicacionUsuario.lat, ubicacionUsuario.lng]}
+            icon={iconoUsuario()}
+            zIndexOffset={1000}
+          >
+            <Popup>Estás aquí</Popup>
+          </Marker>
+        )}
+        <MarkerClusterGroup iconCreateFunction={iconoCluster}>
+          {conCoordenadas.map((clase) => {
+            const plazasMax = clase.plazas_max ?? 0
+            const plazasOcupadas = clase.plazas_ocupadas ?? 0
+            const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
 
-          return (
-            <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoPorCategoria(clase.categoria)}>
-              <Popup>
-                <strong>{clase.titulo}</strong>
-                <br />
-                {clase.categoria}
-                <br />
-                {clase.precio} €
-                <br />
-                {plazasLibres}/{plazasMax} plazas libres
-                <br />
-                <Link
-                  href={`/clases/${clase.id}`}
-                  className="mt-2 block rounded-full bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
-                >
-                  Ver detalles
-                </Link>
-              </Popup>
-            </Marker>
-          )
-        })}
+            return (
+              <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoPorCategoria(clase.categoria)}>
+                <Popup>
+                  <strong>{clase.titulo}</strong>
+                  <br />
+                  {clase.categoria}
+                  <br />
+                  {clase.precio} €
+                  <br />
+                  {plazasLibres}/{plazasMax} plazas libres
+                  <br />
+                  <Link
+                    href={`/clases/${clase.id}`}
+                    className="mt-2 block rounded-full bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
+                  >
+                    Ver detalles
+                  </Link>
+                </Popup>
+              </Marker>
+            )
+          })}
+        </MarkerClusterGroup>
       </MapContainer>
     </div>
   )

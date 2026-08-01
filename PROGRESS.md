@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 30 julio 2026
+Última actualización: 1 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -143,8 +143,12 @@ Otros pendientes menores (sin prioridad asignada):
 - Cambiar lang="en" por lang="es" en app/layout.js (toda la interfaz es en español).
 - Subir la longitud mínima de contraseña de 6 a 8 caracteres en Supabase (recomendado para producción).
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
-- Mapa de clases: clustering de marcadores cercanos en un icono con número que se separen al hacer zoom; requiere instalar una librería tipo react-leaflet-cluster. Pendiente para una sesión con tiempo.
-- Mapa de clases: mostrar la ubicación del cliente en tiempo real ("tú estás aquí") con la Geolocation API, para ver clases cercanas. Requiere pedir permiso de geolocalización.
+- 3 vulnerabilidades "high" que reporta npm audit en next/postcss/sharp, preexistentes (anteriores a esta sesión, no las trajo react-leaflet-cluster); `npm audit fix --force` propone subir Next fuera del rango declarado en package.json y podría romper cosas, así que no se toca con la beta en vivo. Pendiente revisarlo con calma, sin --force.
+
+## Mapa de clases: clustering y ubicación del cliente (durante la beta)
+Hecho:
+- Clustering de marcadores (components/MapaClases.js): instalada la librería react-leaflet-cluster (v4.1.3, compatible con React 19 y react-leaflet 5; instalación limpia, sin --force ni --legacy-peer-deps), con sus dos CSS importados manualmente (MarkerCluster.css y MarkerCluster.Default.css). Los marcadores de clases cercanas se agrupan en una burbuja al alejar el zoom y se separan al acercar; burbuja verde oscuro #3D4A00 con el número en blanco, mediante icono personalizado vía iconCreateFunction.
+- Ubicación del cliente en el mapa (components/MapaClases.js): botón "Ver mi ubicación" (control flotante sobre el mapa) que usa la Geolocation API del navegador (getCurrentPosition, una sola lectura) para centrar el mapa en la posición del cliente (zoom 14). Marcador de punto azul estilo Google Maps (#1A73E8) con halo translúcido y borde blanco, colocado fuera del grupo de clustering (no se agrupa con las clases) y con zIndexOffset alto para quedar siempre por encima de los marcadores de clase. Si el permiso se deniega, falla la geolocalización o el navegador no la soporta, se muestra un aviso discreto y el mapa sigue funcionando sin el marcador de usuario.
 
 ## Después de la beta (decidido el 27 julio 2026)
 - Confirmación de email en Supabase: reactivarla cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado. Requiere resolver antes el envío de correos (ver siguiente punto).
