@@ -112,3 +112,19 @@ button {
     transition: none;
   }
 }
+
+/* Evita el zoom automático de Safari en iPhone al enfocar un campo con font-size < 16px */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="tel"] {
+    font-size: 16px !important;
+  }
+}
