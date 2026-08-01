@@ -8,6 +8,10 @@ import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
+function contarPalabras(texto) {
+  return texto.trim().split(/\s+/).filter(Boolean).length
+}
+
 export default function CuentaPage() {
   const [usuario, setUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)
@@ -205,6 +209,12 @@ export default function CuentaPage() {
     e.preventDefault()
     setErrorPerfil('')
     setConfirmacionPerfil('')
+
+    if (contarPalabras(descripcionPerfil) > 300) {
+      setErrorPerfil('La descripción no puede superar 300 palabras.')
+      return
+    }
+
     setGuardandoPerfil(true)
 
     let nuevaFotoUrl = fotoUrl
@@ -391,13 +401,19 @@ export default function CuentaPage() {
               <div>
                 <textarea
                   value={descripcionPerfil}
-                  onChange={(e) => setDescripcionPerfil(e.target.value.slice(0, 300))}
-                  maxLength={300}
+                  onChange={(e) => setDescripcionPerfil(e.target.value.slice(0, 3000))}
+                  maxLength={3000}
                   rows={4}
                   placeholder="Cuéntales a tus alumnos quién eres, tu experiencia y tu estilo de entrenamiento."
                   className="block w-full rounded-xl border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
                 />
-                <p className="mt-1 text-right text-xs text-[#6B7355]">{descripcionPerfil.length}/300</p>
+                <p
+                  className={`mt-1 text-right text-xs ${
+                    contarPalabras(descripcionPerfil) > 300 ? 'font-semibold text-red-600' : 'text-[#6B7355]'
+                  }`}
+                >
+                  {contarPalabras(descripcionPerfil)}/300 palabras
+                </p>
               </div>
 
               {errorPerfil && <p className="text-xs text-red-600">{errorPerfil}</p>}
