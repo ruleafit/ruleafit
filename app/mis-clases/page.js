@@ -272,6 +272,10 @@ export default function MisClasesPage() {
     .filter((c) => claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }))
     .sort((a, b) => (claveFechaHora(a) > claveFechaHora(b) ? -1 : 1))
 
+  const clasesRealizadas = clasesConAlumnos.filter(
+    (c) => c.estado !== 'cancelada' && claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora })
+  ).length
+
   function renderTarjeta(clase, indice, atenuada) {
     const haPasado = claseYaPaso({ fecha: clase.clase_fecha, hora: clase.clase_hora })
     const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
@@ -356,10 +360,14 @@ export default function MisClasesPage() {
             )}
 
             {clase.alumnos.length === 0 ? (
-              <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-[#E2E6CF] px-4 py-3 text-sm text-[#6B7355]">
-                <Users className="h-4 w-4 shrink-0 text-[#B5E600]" strokeWidth={1.75} />
-                Todavía no se ha apuntado nadie. En cuanto alguien reserve, lo verás aquí.
-              </div>
+              haPasado ? (
+                <p className="mt-4 text-sm text-zinc-400">Esta clase no tuvo reservas.</p>
+              ) : (
+                <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-[#E2E6CF] px-4 py-3 text-sm text-[#6B7355]">
+                  <Users className="h-4 w-4 shrink-0 text-[#B5E600]" strokeWidth={1.75} />
+                  Todavía no se ha apuntado nadie. En cuanto alguien reserve, lo verás aquí.
+                </div>
+              )
             ) : (
               <div className="mt-4 flex flex-col divide-y divide-[#E2E6CF] overflow-hidden rounded-lg border border-[#E2E6CF]">
                 {clase.alumnos.map((alumno) => {
@@ -499,9 +507,12 @@ export default function MisClasesPage() {
 
             {clasesPasadas.length > 0 && (
               <div className="mt-10">
-                <h2 className="mb-4 border-b border-[#E2E6CF] pb-2 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
-                  Historial
-                </h2>
+                <div className="mb-4 flex items-center justify-between border-b border-[#E2E6CF] pb-2">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Historial</h2>
+                  <span className="text-xs text-[#6B7355]">
+                    {clasesRealizadas} {clasesRealizadas === 1 ? 'clase realizada' : 'clases realizadas'}
+                  </span>
+                </div>
 
                 <div className="flex flex-col gap-5">
                   {clasesPasadas.map((clase, indice) => renderTarjeta(clase, indice, true))}

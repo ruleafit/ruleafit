@@ -65,7 +65,7 @@ export default function MisReservasPage() {
       const { data, error } = await supabase
         .from('reservas')
         .select(
-          'id, estado, cancelled_at, cancelada_por_entrenador, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_min, plazas_ocupadas, trainer_id, perfiles(username))'
+          'id, estado, cancelled_at, cancelada_por_entrenador, asistencia, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_min, plazas_ocupadas, trainer_id, perfiles(username))'
         )
         .eq('cliente_id', usuario.id)
         .or('estado.eq.activa,and(estado.eq.cancelada,cancelada_por_entrenador.eq.true)')
@@ -153,6 +153,8 @@ export default function MisReservasPage() {
   const reservasPasadas = reservasActivas
     .filter((r) => claseYaPaso(r.clases))
     .sort((a, b) => (claveFechaHora(a.clases) > claveFechaHora(b.clases) ? -1 : 1))
+
+  const clasesRealizadas = reservasActivas.filter((r) => r.asistencia === 'asistio').length
 
   return (
     <div className="flex flex-1 flex-col">
@@ -377,9 +379,12 @@ export default function MisReservasPage() {
 
         {reservasPasadas.length > 0 && (
           <div className="mt-10">
-            <h2 className="mb-4 border-b border-[#E2E6CF] pb-2 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
-              Historial
-            </h2>
+            <div className="mb-4 flex items-center justify-between border-b border-[#E2E6CF] pb-2">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Historial</h2>
+              <span className="text-xs text-[#6B7355]">
+                {clasesRealizadas} {clasesRealizadas === 1 ? 'clase realizada' : 'clases realizadas'}
+              </span>
+            </div>
 
             <div className="flex flex-col gap-4">
               {reservasPasadas.map((reserva, indice) => {

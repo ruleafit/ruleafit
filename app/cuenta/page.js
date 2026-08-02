@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Coins, History } from 'lucide-react'
+import { Coins, History, CalendarCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
+import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
@@ -22,6 +23,7 @@ export default function CuentaPage() {
   const [guardando, setGuardando] = useState(false)
   const [confirmacion, setConfirmacion] = useState('')
   const [openSaldo, setOpenSaldo] = useState(0)
+  const [clasesRealizadas, setClasesRealizadas] = useState(0)
   const [openMovimientos, setOpenMovimientos] = useState([])
   const [openMotivos, setOpenMotivos] = useState({})
   const [descripcionPerfil, setDescripcionPerfil] = useState('')
@@ -71,6 +73,28 @@ export default function CuentaPage() {
           mapaMotivos[motivo.codigo] = motivo.descripcion
         }
         setOpenMotivos(mapaMotivos)
+
+        const rolUsuario = data.user.user_metadata?.rol
+
+        if (rolUsuario === 'cliente') {
+          const { data: reservasAsistidas } = await supabase
+            .from('reservas')
+            .select('id')
+            .eq('cliente_id', data.user.id)
+            .eq('asistencia', 'asistio')
+
+          setClasesRealizadas(reservasAsistidas?.length ?? 0)
+        } else if (rolUsuario === 'entrenador') {
+          const { data: clasesEntrenador } = await supabase
+            .from('clases')
+            .select('fecha, hora, estado')
+            .eq('trainer_id', data.user.id)
+            .neq('estado', 'cancelada')
+
+          setClasesRealizadas(
+            (clasesEntrenador || []).filter((c) => claseYaPaso({ fecha: c.fecha, hora: c.hora })).length
+          )
+        }
       }
       setCargando(false)
     }
@@ -434,15 +458,29 @@ export default function CuentaPage() {
           <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">{bloqueUsername}</div>
         )}
 
-        <RevelarAlLlegar className="mb-8 flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
-            <Coins className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
-          </div>
-          <div>
-            <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{openSaldo}</p>
-            <p className="text-sm font-semibold text-[#3D4A00]">Open acumulados</p>
-          </div>
-        </RevelarAlLlegar>
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+              <Coins className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{openSaldo}</p>
+              <p className="text-sm font-semibold text-[#3D4A00]">Open acumulados</p>
+            </div>
+          </RevelarAlLlegar>
+
+          {(rol === 'cliente' || rol === 'entrenador') && (
+            <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+                <CalendarCheck className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{clasesRealizadas}</p>
+                <p className="text-sm font-semibold text-[#3D4A00]">Clases realizadas</p>
+              </div>
+            </RevelarAlLlegar>
+          )}
+        </div>
 
         <div className="mb-8">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1F2400]">

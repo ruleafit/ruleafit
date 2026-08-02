@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 1 agosto 2026
+Última actualización: 2 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -119,7 +119,7 @@ Hecho:
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
-Nota (hallazgo técnico): la tabla public.clases y sus políticas RLS iniciales (SELECT, INSERT) no están versionadas en ningún archivo de sql/ — se crearon directamente en el editor de Supabase antes de empezar a versionar el SQL del proyecto. Las funciones que escriben sobre clases (editar_clase(), cancelar_clase(), etc.) usan SECURITY DEFINER precisamente para no depender de si existe o no una política de UPDATE sobre esa tabla, que no queda documentada aquí.
+Nota (hallazgo técnico, resuelto el 2 agosto 2026): se creía que la tabla public.clases y sus políticas RLS no estaban versionadas en sql/, pero sí lo estaban: sql/016_tabla_clases.sql (tabla, RLS y las tres políticas), sql/019 (FK adicional a perfiles) y sql/010 (función usuario_tiene_reserva_en_clase, usada por la política de SELECT). Verificado el 2 agosto 2026 contra la definición real en Supabase, sin diferencias.
 
 Beta lanzada (en curso):
 - Beta repartida a ~30 personas del círculo cercano (~6 entrenadores, resto clientes), sin confirmación de email, con mensajes de WhatsApp distintos por rol. La app corre en producción (Vercel + Supabase); la gente la está usando durante una semana como si fuera real.
@@ -144,6 +144,8 @@ Otros pendientes menores (sin prioridad asignada):
 - Subir la longitud mínima de contraseña de 6 a 8 caracteres en Supabase (recomendado para producción).
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
 - 3 vulnerabilidades "high" que reporta npm audit en next/postcss/sharp, preexistentes (anteriores a esta sesión, no las trajo react-leaflet-cluster); `npm audit fix --force` propone subir Next fuera del rango declarado en package.json y podría romper cosas, así que no se toca con la beta en vivo. Pendiente revisarlo con calma, sin --force.
+- Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
+- Marcar asistencia automáticamente como "asistio" cuando pasen 24h desde la clase sin que el entrenador la marque a mano: pendiente decidir el enfoque (cron programado vs. calcularlo como valor por defecto al leer, sin tocar la fila). Afecta a la concesión de Open y, en el futuro, a las valoraciones (que requieren reservas.asistencia = 'asistio').
 
 ## Mapa de clases: clustering y ubicación del cliente (durante la beta)
 Hecho:
@@ -154,6 +156,14 @@ Hecho:
 Hecho:
 - Fix del zoom automático de Safari en iPhone al enfocar campos de formulario: regla en app/globals.css que fija font-size 16px en input/select/textarea solo en móvil (@media max-width: 640px), sin tocar el tamaño en escritorio.
 - Descripción del entrenador ampliada de 300 caracteres a 300 palabras: contador de palabras y validación al guardar en /cuenta (no deja guardar si se superan las 300 palabras), y CHECK de la base de datos ampliado de 300 a 3000 caracteres como red de seguridad, no como límite real (sql/022_ampliar_limite_descripcion.sql, ya ejecutado en Supabase).
+
+## Contador de clases realizadas (2 agosto 2026)
+Hecho:
+- /mis-clases: en clases ya pasadas sin ninguna reserva, ya no aparece el mensaje "Todavía no se ha apuntado nadie. En cuanto alguien reserve, lo verás aquí." (pensado para clases futuras); ahora muestra "Esta clase no tuvo reservas.", solo cuando claseYaPaso() confirma que la clase ya pasó. En clases futuras sin reservas el mensaje original se mantiene igual.
+- Contador de "clases realizadas" para ambos roles, sin RPCs ni consultas nuevas donde ya había datos cargados:
+  - /mis-reservas (cliente): texto discreto junto al título "Historial" con el número de reservas cuya asistencia = 'asistio', derivado de los datos ya cargados (se amplió el select de reservas para incluir la columna asistencia).
+  - /mis-clases (entrenador): mismo texto discreto junto a "Historial", contando las clases ya pasadas (claseYaPaso()) que no están canceladas, derivado de clasesConAlumnos ya cargado.
+  - /cuenta: tarjeta destacada "Clases realizadas" junto a "Open acumulados", mismo estilo (icono en círculo, número grande, etiqueta). Aquí sí hizo falta una consulta nueva por rol, ya que /cuenta no cargaba ni clases ni reservas: para clientes, cuenta de reservas con asistencia = 'asistio'; para entrenadores, clases propias no canceladas filtradas por claseYaPaso(). En los tres sitios se usa el valor real guardado en base de datos, 'asistio' sin tilde (columna reservas.asistencia, ver sql/006_open_fidelizacion.sql).
 
 ## Después de la beta (decidido el 27 julio 2026)
 - Confirmación de email en Supabase: reactivarla cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado. Requiere resolver antes el envío de correos (ver siguiente punto).
