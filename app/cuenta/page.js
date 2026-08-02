@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Coins, History, CalendarCheck } from 'lucide-react'
+import { Coins, History, CalendarCheck, Star } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
@@ -24,6 +24,8 @@ export default function CuentaPage() {
   const [confirmacion, setConfirmacion] = useState('')
   const [openSaldo, setOpenSaldo] = useState(0)
   const [clasesRealizadas, setClasesRealizadas] = useState(0)
+  const [promedioValoraciones, setPromedioValoraciones] = useState(null)
+  const [totalValoraciones, setTotalValoraciones] = useState(0)
   const [openMovimientos, setOpenMovimientos] = useState([])
   const [openMotivos, setOpenMotivos] = useState({})
   const [descripcionPerfil, setDescripcionPerfil] = useState('')
@@ -93,6 +95,19 @@ export default function CuentaPage() {
 
           setClasesRealizadas(
             (clasesEntrenador || []).filter((c) => claseYaPaso({ fecha: c.fecha, hora: c.hora })).length
+          )
+
+          const { data: valoracionesEntrenador } = await supabase
+            .from('valoraciones')
+            .select('estrellas')
+            .eq('entrenador_id', data.user.id)
+
+          const listaValoraciones = valoracionesEntrenador || []
+          setTotalValoraciones(listaValoraciones.length)
+          setPromedioValoraciones(
+            listaValoraciones.length > 0
+              ? listaValoraciones.reduce((suma, v) => suma + v.estrellas, 0) / listaValoraciones.length
+              : null
           )
         }
       }
@@ -481,6 +496,37 @@ export default function CuentaPage() {
             </RevelarAlLlegar>
           )}
         </div>
+
+        {rol === 'entrenador' && (
+          <RevelarAlLlegar className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+                <Star className="h-7 w-7 text-[#B5E600]" fill="#B5E600" strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">
+                  {promedioValoraciones !== null ? promedioValoraciones.toFixed(1).replace('.', ',') : '—'}
+                </p>
+                <p className="text-sm font-semibold text-[#3D4A00]">
+                  {totalValoraciones === 0
+                    ? 'Sin valoraciones todavía'
+                    : totalValoraciones === 1
+                      ? '(1 valoración)'
+                      : `(${totalValoraciones} valoraciones)`}
+                </p>
+              </div>
+            </div>
+
+            {totalValoraciones > 0 && username && (
+              <Link
+                href={`/entrenador/${username}/opiniones`}
+                className="rounded-full border border-[#3D4A00] px-4 py-2 text-sm font-bold text-[#3D4A00] transition hover:bg-[#3D4A00] hover:text-white"
+              >
+                Ver opiniones
+              </Link>
+            )}
+          </RevelarAlLlegar>
+        )}
 
         <div className="mb-8">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1F2400]">

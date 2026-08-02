@@ -136,12 +136,11 @@ Hecho:
 - El @username del entrenador es ahora un enlace a su perfil público en /clases, en la ficha /clases/[id] y en las tres tarjetas de /mis-reservas (próximas, canceladas e historial).
 
 Falta:
-- Sistema de valoraciones del entrenador (diseño ya decidido, sin implementar): 1 a 5 estrellas; solo puede valorar un cliente que haya entrenado con ese entrenador (reservas.asistencia = 'asistio'); un cliente solo puede valorar una vez a cada entrenador, pero puede editar su valoración; opinión escrita corta opcional (~100 caracteres) visible en el perfil público. Irá en el hueco TODO ya preparado en app/entrenador/[username]/page.js.
+- Ninguno.
 
 Otros pendientes menores (sin prioridad asignada):
 - Pulido fino según el feedback de la beta.
 - Cambiar lang="en" por lang="es" en app/layout.js (toda la interfaz es en español).
-- Subir la longitud mínima de contraseña de 6 a 8 caracteres en Supabase (recomendado para producción).
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
 - 3 vulnerabilidades "high" que reporta npm audit en next/postcss/sharp, preexistentes (anteriores a esta sesión, no las trajo react-leaflet-cluster); `npm audit fix --force` propone subir Next fuera del rango declarado en package.json y podría romper cosas, así que no se toca con la beta en vivo. Pendiente revisarlo con calma, sin --force.
 - Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
@@ -164,6 +163,18 @@ Hecho:
   - /mis-reservas (cliente): texto discreto junto al título "Historial" con el número de reservas cuya asistencia = 'asistio', derivado de los datos ya cargados (se amplió el select de reservas para incluir la columna asistencia).
   - /mis-clases (entrenador): mismo texto discreto junto a "Historial", contando las clases ya pasadas (claseYaPaso()) que no están canceladas, derivado de clasesConAlumnos ya cargado.
   - /cuenta: tarjeta destacada "Clases realizadas" junto a "Open acumulados", mismo estilo (icono en círculo, número grande, etiqueta). Aquí sí hizo falta una consulta nueva por rol, ya que /cuenta no cargaba ni clases ni reservas: para clientes, cuenta de reservas con asistencia = 'asistio'; para entrenadores, clases propias no canceladas filtradas por claseYaPaso(). En los tres sitios se usa el valor real guardado en base de datos, 'asistio' sin tilde (columna reservas.asistencia, ver sql/006_open_fidelizacion.sql).
+
+## Feedback de usuarios y valoraciones de entrenadores (2 agosto 2026)
+Hecho:
+- Feedback de usuarios ("Ayuda"): nueva tabla public.feedback en Supabase (id, user_id, mensaje, created_at; CHECK de mensaje entre 1 y 5000 caracteres y no vacío; RLS con política de INSERT solo del propio usuario autenticado, auth.uid() = user_id, y sin política de SELECT para usuarios normales, ya que el feedback se revisa desde el panel de Supabase con la service role, que se salta RLS). Nueva página /ayuda con formulario (solo para usuarios con sesión iniciada; sin sesión, mensaje pidiendo iniciar sesión) que guarda el mensaje con un insert; textarea con contador y límite de 5000 caracteres (coherente con el CHECK de la base de datos, ampliado desde 1000 iniciales). Enlace "Ayuda" añadido al footer (components/PieDePagina.js). SQL versionado en sql/023_tabla_feedback.sql y sql/024_ampliar_limite_feedback.sql, ambos ya ejecutados en Supabase. Pendiente para más adelante (tras tener dominio propio y SMTP con Resend, ver sección "Después de la beta"): aviso por correo al recibir un mensaje de feedback (trigger), con asunto tipo "AYUDA USUARIO".
+- Valoraciones de entrenadores: nueva tabla public.valoraciones (cliente_id y entrenador_id referencian perfiles.id; estrellas de 1 a 5; opinion opcional, hasta 750 caracteres en base de datos como red de seguridad y 100 palabras como límite real controlado en frontend; UNIQUE(cliente_id, entrenador_id) para una única valoración por par, editable). RLS: SELECT público (nota media y opiniones visibles sin sesión); INSERT/UPDATE solo del propio cliente y solo si ha asistido a alguna clase del entrenador valorado (EXISTS sobre reservas + clases con asistencia = 'asistio'); sin política de DELETE. SQL en sql/025_tabla_valoraciones.sql, ya ejecutado en Supabase.
+  - Perfil público del entrenador (app/entrenador/[username]/page.js): nota media + número de valoraciones + botón "Ver opiniones", visibles para cualquiera (visitantes sin sesión, clientes y el propio entrenador viendo su perfil). Formulario para valorar (1 a 5 estrellas clicables + opinión opcional con contador de palabras) solo para clientes que han asistido a una clase del entrenador; si el cliente ya tiene una valoración, el formulario carga sus valores y funciona en modo edición (upsert con onConflict cliente_id+entrenador_id); mensaje discreto para clientes que aún no cumplen el requisito de asistencia. Título de la sección de descripción cambiado de "Sobre mí" a "Sobre @username", para que tenga sentido visto desde fuera.
+  - Página nueva app/entrenador/[username]/opiniones/page.js: lista pública de las opiniones escritas del entrenador (se excluyen las valoraciones sin texto), ordenadas de más reciente a más antigua, mostrando solo estrellas + texto + fecha, sin ningún dato del cliente autor (anónimas por diseño de la consulta, sin ningún embed a perfiles del cliente).
+  - /cuenta: el entrenador ve también su nota media + número de valoraciones + botón "Ver opiniones", en una tarjeta junto a las de Open acumulados/Clases realizadas, para consultar su feedback sin tener que buscar su propio perfil público. No se muestra nada de esto a los clientes.
+- Longitud mínima de contraseña subida de 6 a 8 caracteres en la configuración de Supabase (Authentication -> Email). Cambio de configuración, no de código; afecta solo a registros y cambios de contraseña nuevos, no a las contraseñas ya existentes.
+
+Falta:
+- Ninguno.
 
 ## Después de la beta (decidido el 27 julio 2026)
 - Confirmación de email en Supabase: reactivarla cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado. Requiere resolver antes el envío de correos (ver siguiente punto).

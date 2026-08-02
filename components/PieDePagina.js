@@ -9,6 +9,12 @@ export default function PieDePagina() {
         </p>
         <div className="flex flex-wrap items-center gap-4">
           <Link
+            href="/ayuda"
+            className="rounded-sm transition-colors hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
+          >
+            Ayuda
+          </Link>
+          <Link
             href="/privacidad"
             className="rounded-sm transition-colors hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
           >
