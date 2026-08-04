@@ -119,6 +119,8 @@ Hecho:
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
+Nota (decisión de producto, 4 agosto 2026): se mantiene el marcado manual de asistencia (asistio/no_asistio) por el entrenador tal como está, a propósito; descartado implementar el marcado automático a las 24h que figuraba antes en pendientes. El marcado manual crea un incentivo cruzado sano: el entrenador marca "asistio" para que el cliente pueda valorarlo, y el cliente le presiona para que lo haga.
+
 Nota (hallazgo técnico, resuelto el 2 agosto 2026): se creía que la tabla public.clases y sus políticas RLS no estaban versionadas en sql/, pero sí lo estaban: sql/016_tabla_clases.sql (tabla, RLS y las tres políticas), sql/019 (FK adicional a perfiles) y sql/010 (función usuario_tiene_reserva_en_clase, usada por la política de SELECT). Verificado el 2 agosto 2026 contra la definición real en Supabase, sin diferencias.
 
 Beta lanzada (en curso):
@@ -144,7 +146,8 @@ Otros pendientes menores (sin prioridad asignada):
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
 - 3 vulnerabilidades "high" que reporta npm audit en next/postcss/sharp, preexistentes (anteriores a esta sesión, no las trajo react-leaflet-cluster); `npm audit fix --force` propone subir Next fuera del rango declarado en package.json y podría romper cosas, así que no se toca con la beta en vivo. Pendiente revisarlo con calma, sin --force.
 - Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
-- Marcar asistencia automáticamente como "asistio" cuando pasen 24h desde la clase sin que el entrenador la marque a mano: pendiente decidir el enfoque (cron programado vs. calcularlo como valor por defecto al leer, sin tocar la fila). Afecta a la concesión de Open y, en el futuro, a las valoraciones (que requieren reservas.asistencia = 'asistio').
+- Seguir entrenadores (tipo red social): tabla de seguimientos, botón Seguir/Siguiendo en el perfil, buscador de entrenadores y vista "a quién sigo". El aviso al publicar sesión depende de las notificaciones push.
+- Notificaciones push web (avisos en el móvil con la app cerrada; la PWA ya sirve de base).
 
 ## Mapa de clases: clustering y ubicación del cliente (durante la beta)
 Hecho:
@@ -184,6 +187,14 @@ Hecho:
 Falta:
 - Ninguno.
 
+## Terminología "clase/clases" a "sesión/sesiones" en la interfaz (4 agosto 2026)
+Hecho:
+- Texto visible de toda la interfaz (menús, portada, /clases, /clases/[id], /mis-clases, /mis-clases/[id]/editar, /mis-reservas, /publicar, /login, perfil público del entrenador y sus opiniones, metadata del manifest PWA y aviso de privacidad) cambiado de "clase/clases" a "sesión/sesiones", sin tocar la tabla clases, las funciones RPC, las rutas, los nombres de archivo/carpeta ni las variables (16 archivos de frontend). aviso-legal quedó sin tocar por ya usar "sesión/sesiones".
+- Descripción del motivo de Open asistencia_confirmada actualizada a la misma terminología (sql/027_texto_motivo_asistencia_sesion.sql, ya ejecutado en Supabase); el historial de Open de asistencias ya concedidas muestra ahora el texto nuevo, ya que se lee la descripción actual del motivo.
+
+Falta:
+- Ninguno.
+
 ## Después de la beta (decidido el 27 julio 2026)
 - Confirmación de email en Supabase: reactivarla cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado. Requiere resolver antes el envío de correos (ver siguiente punto).
 - Envío de correos con SMTP propio: el servidor compartido de Supabase no sirve para producción (2-3 correos/hora, cae en spam). Se usará Resend. IMPORTANTE (comprobado el 27 julio 2026): Resend sin un dominio propio verificado solo permite enviar correos a la propia dirección de la cuenta, no a terceros; por tanto Resend exige tener dominio propio.
@@ -191,10 +202,12 @@ Falta:
 - Traducir al español la plantilla del email de confirmación en Supabase: el botón de editar el HTML (Source) está deshabilitado en el plan actual y pide configurar SMTP propio, así que depende de tener Resend con dominio propio.
 - Aviso en /login para usuarios que intenten entrar sin haber confirmado el correo: cuando se active la confirmación, Supabase devuelve un error distinto en ese caso; conviene mostrar un mensaje claro tipo "confirma tu correo antes de entrar".
 - Login con Google (OAuth): se valoró para la beta pero se pospone por ser un montaje aparte (Google Cloud Console, credenciales, pantalla de consentimiento). Ventaja: quien entra con Google no necesita confirmar el email.
+- Recuperar contraseña por correo con enlace (depende del envío de emails).
 - 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
+- Rediseño de Open ligado al precio: no regalar los 5 Open de asistencia en clases gratis o muy baratas; conceder Open solo por encima de un umbral de precio X, aún por decidir.
 
 ## Análisis de competencia (21 julio 2026)
 
