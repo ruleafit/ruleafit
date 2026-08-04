@@ -494,7 +494,7 @@ export default function CuentaPage() {
               </div>
               <div>
                 <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{clasesRealizadas}</p>
-                <p className="text-sm font-semibold text-[#3D4A00]">Clases realizadas</p>
+                <p className="text-sm font-semibold text-[#3D4A00]">Sesiones realizadas</p>
               </div>
             </RevelarAlLlegar>
           )}
@@ -539,7 +539,7 @@ export default function CuentaPage() {
 
           {openMovimientos.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#E2E6CF] px-6 py-8 text-center text-sm text-[#6B7355]">
-              Todavía no tienes movimientos de Open. Cuando reserves o asistas a una clase, aparecerán aquí.
+              Todavía no tienes movimientos de Open. Cuando reserves o asistas a una sesión, aparecerán aquí.
             </div>
           ) : (
             <div className="divide-y divide-[#E2E6CF] overflow-hidden rounded-xl border border-[#E2E6CF] bg-white">

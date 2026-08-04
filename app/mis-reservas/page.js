@@ -128,7 +128,7 @@ export default function MisReservasPage() {
         <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#1F2400] shadow-sm">
           Esta página es solo para clientes. Ve a{' '}
           <Link href="/clases" className="font-semibold text-[#3D4A00] hover:underline">
-            ver las clases disponibles
+            ver las sesiones disponibles
           </Link>
           .
         </div>
@@ -179,12 +179,12 @@ export default function MisReservasPage() {
         {!error && sinReservas && (
           <RevelarAlLlegar className="flex flex-col items-center gap-4 rounded-xl border border-[#E2E6CF] bg-white px-6 py-16 text-center">
             <CalendarSearch className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
-            <p className="text-sm text-[#6B7355]">Todavía no has reservado ninguna clase</p>
+            <p className="text-sm text-[#6B7355]">Todavía no has reservado ninguna sesión</p>
             <Link
               href="/clases"
               className="inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
             >
-              Ver clases
+              Ver sesiones
             </Link>
           </RevelarAlLlegar>
         )}
@@ -303,7 +303,7 @@ export default function MisReservasPage() {
         {reservasCanceladasPorEntrenador.length > 0 && (
           <div className="mt-10">
             <h2 className="mb-4 border-b border-[#E2E6CF] pb-2 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
-              Clases canceladas por el entrenador
+              Sesiones canceladas por el entrenador
             </h2>
 
             <div className="flex flex-col gap-4">
@@ -382,7 +382,7 @@ export default function MisReservasPage() {
             <div className="mb-4 flex items-center justify-between border-b border-[#E2E6CF] pb-2">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Historial</h2>
               <span className="text-xs text-[#6B7355]">
-                {clasesRealizadas} {clasesRealizadas === 1 ? 'clase realizada' : 'clases realizadas'}
+                {clasesRealizadas} {clasesRealizadas === 1 ? 'sesión realizada' : 'sesiones realizadas'}
               </span>
             </div>
 

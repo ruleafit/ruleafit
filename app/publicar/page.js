@@ -71,7 +71,7 @@ export default function PublicarPage() {
     const usuarioActual = data.user
 
     if (!usuarioActual || usuarioActual.user_metadata?.rol !== 'entrenador') {
-      setMensaje('Solo los entrenadores pueden publicar clases.')
+      setMensaje('Solo los entrenadores pueden publicar sesiones.')
       return
     }
 
@@ -116,7 +116,7 @@ export default function PublicarPage() {
     if (error) {
       setMensaje('Error: ' + error.message)
     } else {
-      setMensaje('¡Clase publicada correctamente!')
+      setMensaje('¡Sesión publicada correctamente!')
       setTitulo('')
       setTipoActividad('')
       setDireccion('')
@@ -148,7 +148,7 @@ export default function PublicarPage() {
         <CabeceraPublicar />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
           <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
-            Debes iniciar sesión para publicar clases. Ve a{' '}
+            Debes iniciar sesión para publicar. Ve a{' '}
             <a href="/login" className="font-semibold text-[#3D4A00] hover:underline">iniciar sesión</a>.
           </div>
         </div>
@@ -162,14 +162,14 @@ export default function PublicarPage() {
         <CabeceraPublicar />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
           <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
-            Solo los entrenadores pueden publicar clases.
+            Solo los entrenadores pueden publicar sesiones.
           </div>
         </div>
       </div>
     )
   }
 
-  const esExito = mensaje === '¡Clase publicada correctamente!'
+  const esExito = mensaje === '¡Sesión publicada correctamente!'
   const esProgreso = mensaje === 'Publicando...'
   const esError = Boolean(mensaje) && !esExito && !esProgreso
 
@@ -308,7 +308,7 @@ export default function PublicarPage() {
                   placeholder="0 (sin mínimo)"
                 />
                 <p className={ayudaClass}>
-                  Si no se llega a este mínimo, la clase aparecerá como pendiente de confirmación. Déjalo vacío si no quieres mínimo.
+                  Si no se llega a este mínimo, la sesión aparecerá como pendiente de confirmación. Déjalo vacío si no quieres mínimo.
                 </p>
               </div>
 
@@ -329,7 +329,7 @@ export default function PublicarPage() {
           </RevelarAlLlegar>
 
           <button type="submit" className={botonPrimarioClass}>
-            Publicar clase
+            Publicar sesión
           </button>
         </form>
 
@@ -363,7 +363,7 @@ function CabeceraPublicar() {
       />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
       <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-6 sm:px-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Publica tu clase</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Publica tu sesión</h1>
         <p className="mt-1 text-sm text-white/85 sm:text-base">Tú decides cuándo, dónde y con cuánta gente.</p>
       </div>
     </section>

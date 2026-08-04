@@ -53,7 +53,7 @@ function CabeceraDetalle({ clase }) {
         href="/clases"
         className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-black/30 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/40 sm:left-6 sm:top-6"
       >
-        ← Clases
+        ← Sesiones
       </Link>
 
       <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-6 sm:px-6">
@@ -84,7 +84,7 @@ export default function DetalleClasePage() {
         .single()
 
       if (error || !data) {
-        setError('No se ha encontrado esta clase.')
+        setError('No se ha encontrado esta sesión.')
       } else {
         setClase(data)
       }
@@ -121,9 +121,9 @@ export default function DetalleClasePage() {
     return (
       <div className="flex min-h-[70vh] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <SearchX className="h-12 w-12 text-[#B5E600]" strokeWidth={1.75} />
-        <p className="text-sm text-[#6B7355]">{error || 'No se ha encontrado esta clase.'}</p>
+        <p className="text-sm text-[#6B7355]">{error || 'No se ha encontrado esta sesión.'}</p>
         <Link href="/clases" className={botonPrimarioClass}>
-          Volver a clases
+          Volver a sesiones
         </Link>
       </div>
     )
@@ -141,7 +141,7 @@ export default function DetalleClasePage() {
       {estaCancelada && (
         <div className="flex items-center justify-center gap-2 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700">
           <CircleAlert className="h-4 w-4 shrink-0" strokeWidth={2} />
-          Esta clase ha sido cancelada por el entrenador.
+          Esta sesión ha sido cancelada por el entrenador.
         </div>
       )}
 
@@ -150,7 +150,7 @@ export default function DetalleClasePage() {
       <div className="mx-auto w-full max-w-2xl px-4 pb-28 pt-8 sm:px-6 sm:pb-10">
         {clase.perfiles?.username && (
           <p className="mb-4 text-lg text-[#6B7355]">
-            Clase impartida por{' '}
+            Sesión impartida por{' '}
             <Link
               href={`/entrenador/${clase.perfiles.username}`}
               className="font-semibold text-[#3D4A00] hover:underline"

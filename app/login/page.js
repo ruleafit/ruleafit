@@ -49,7 +49,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <CabeceraAuth frase="Reserva tu próxima clase en segundos." />
+      <CabeceraAuth frase="Reserva tu próxima sesión en segundos." />
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-10 sm:px-6">
         <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">

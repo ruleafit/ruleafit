@@ -181,7 +181,7 @@ export default function PerfilEntrenadorPage() {
         <SearchX className="h-12 w-12 text-[#B5E600]" strokeWidth={1.75} />
         <p className="text-sm text-[#6B7355]">Entrenador no encontrado.</p>
         <Link href="/clases" className={botonPrimarioClass}>
-          Volver a clases
+          Volver a sesiones
         </Link>
       </div>
     )
@@ -206,7 +206,7 @@ export default function PerfilEntrenadorPage() {
         </h1>
 
         <span className="inline-flex items-center rounded-full bg-[#EDF5C9] px-4 py-1.5 text-sm font-semibold text-[#3D4A00]">
-          {clasesActivas} {clasesActivas === 1 ? 'clase activa' : 'clases activas'}
+          {clasesActivas} {clasesActivas === 1 ? 'sesión activa' : 'sesiones activas'}
         </span>
       </section>
 
@@ -328,7 +328,7 @@ export default function PerfilEntrenadorPage() {
             href="/clases"
             className="text-sm font-semibold text-[#3D4A00] underline decoration-[#B5E600] decoration-2 underline-offset-2 hover:text-[#1F2400]"
           >
-            Ver todas las clases
+            Ver todas las sesiones
           </Link>
         </div>
       </div>

@@ -94,7 +94,7 @@ export default function OpinionesEntrenadorPage() {
         <SearchX className="h-12 w-12 text-[#B5E600]" strokeWidth={1.75} />
         <p className="text-sm text-[#6B7355]">Entrenador no encontrado.</p>
         <Link href="/clases" className={botonPrimarioClass}>
-          Volver a clases
+          Volver a sesiones
         </Link>
       </div>
     )

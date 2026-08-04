@@ -65,7 +65,7 @@ export default function PoliticaPrivacidadPage() {
 
       <h3 className={h3Class}>Categorías de datos personales</h3>
       <p className={pClass}>
-        Las categorías de datos que se tratan en Openfit son únicamente datos identificativos. En concreto, se recogen: dirección de correo electrónico, contraseña (almacenada de forma cifrada), nombre de usuario público, tipo de perfil (cliente o entrenador) y el registro de las clases publicadas o reservadas por el Usuario.
+        Las categorías de datos que se tratan en Openfit son únicamente datos identificativos. En concreto, se recogen: dirección de correo electrónico, contraseña (almacenada de forma cifrada), nombre de usuario público, tipo de perfil (cliente o entrenador) y el registro de las sesiones publicadas o reservadas por el Usuario.
       </p>
       <p className={pClass}>
         En ningún caso se tratan categorías especiales de datos personales en el sentido del artículo 9 del RGPD.
@@ -87,7 +87,7 @@ export default function PoliticaPrivacidadPage() {
         Los datos personales son recabados y gestionados por Openfit con la finalidad de poder facilitar, agilizar y cumplir los compromisos establecidos entre el Sitio Web y el Usuario o el mantenimiento de la relación que se establezca en los formularios que este último rellene o para atender una solicitud o consulta.
       </p>
       <p className={pClass}>
-        En concreto, los datos se utilizan para crear y mantener la cuenta del Usuario, permitir la publicación de clases por parte de los entrenadores, gestionar las reservas y cancelaciones de los clientes, y administrar el sistema de puntos de fidelización de la plataforma.
+        En concreto, los datos se utilizan para crear y mantener la cuenta del Usuario, permitir la publicación de sesiones por parte de los entrenadores, gestionar las reservas y cancelaciones de los clientes, y administrar el sistema de puntos de fidelización de la plataforma.
       </p>
       <p className={pClass}>
         Openfit <strong>no</strong> utiliza los datos personales del Usuario con fines publicitarios, no realiza estudios de marketing, no elabora perfiles comerciales y no cede datos a terceros con fines comerciales.

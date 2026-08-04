@@ -44,7 +44,7 @@ function CabeceraEditar() {
       />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
       <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-6 sm:px-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Editar clase</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Editar sesión</h1>
         <p className="mt-1 text-sm text-white/85 sm:text-base">
           Solo puedes cambiar lo que no afecta a quienes ya han reservado.
         </p>
@@ -137,7 +137,7 @@ export default function EditarClasePage() {
         .single()
 
       if (errorCompleta || !filaCompleta) {
-        setErrorCarga(errorCompleta?.message || 'No se han podido cargar los datos de la clase.')
+        setErrorCarga(errorCompleta?.message || 'No se han podido cargar los datos de la sesión.')
         setCargandoClase(false)
         return
       }
@@ -236,7 +236,7 @@ export default function EditarClasePage() {
           <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
             Esta página es solo para entrenadores. Ve a{' '}
             <Link href="/clases" className="font-semibold text-[#3D4A00] hover:underline">
-              ver las clases disponibles
+              ver las sesiones disponibles
             </Link>
             .
           </div>
@@ -272,7 +272,7 @@ export default function EditarClasePage() {
             href="/mis-clases"
             className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
           >
-            Volver a Mis clases
+            Volver a Mis sesiones
           </Link>
         </div>
       </div>
@@ -366,7 +366,7 @@ export default function EditarClasePage() {
                 {sinMinimoDefinido ? (
                   <>
                     <p className={soloLecturaClass}>Sin mínimo definido</p>
-                    <p className={ayudaClass}>Esta clase no tiene mínimo. No se puede añadir uno desde aquí.</p>
+                    <p className={ayudaClass}>Esta sesión no tiene mínimo. No se puede añadir uno desde aquí.</p>
                   </>
                 ) : (
                   <>

@@ -102,7 +102,7 @@ export default function Menu() {
           )}
 
           <Link href="/clases" className={enlaceClass('/clases')}>
-            Clases
+            Sesiones
           </Link>
 
           {!usuario && (
@@ -125,7 +125,7 @@ export default function Menu() {
 
           {usuario && rol === 'entrenador' && (
             <Link href="/mis-clases" className={enlaceClass('/mis-clases')}>
-              Mis clases
+              Mis sesiones
             </Link>
           )}
 

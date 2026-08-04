@@ -123,7 +123,7 @@ export default function ClasesPage() {
         .order('fecha', { ascending: true })
 
       if (error) {
-        setError('Error al cargar las clases: ' + error.message)
+        setError('Error al cargar las sesiones: ' + error.message)
       } else {
         setClases(data || [])
       }
@@ -160,7 +160,7 @@ export default function ClasesPage() {
         <img src="/imagenes/running.jpg" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pb-6 sm:px-6">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Clases disponibles</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Sesiones disponibles</h1>
           <p className="mt-1 text-sm text-white/85 sm:text-base">
             Entrenamientos en Sevilla y Málaga, sin cuota ni permanencia.
           </p>
@@ -170,7 +170,7 @@ export default function ClasesPage() {
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
-        {!error && clases.length === 0 && <p className="text-sm text-[#6B7355]">No hay clases disponibles por ahora.</p>}
+        {!error && clases.length === 0 && <p className="text-sm text-[#6B7355]">No hay sesiones disponibles por ahora.</p>}
 
         {!error && clases.length > 0 && (
           <>
@@ -233,7 +233,7 @@ export default function ClasesPage() {
                   <RevelarAlLlegar className="flex flex-col items-center gap-3 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center">
                     <SearchX className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
                     <p className="text-sm text-[#6B7355]">
-                      No hay clases que coincidan con estos filtros ahora mismo. Prueba a cambiar la ciudad o la categoría.
+                      No hay sesiones que coincidan con estos filtros ahora mismo. Prueba a cambiar la ciudad o la categoría.
                     </p>
                     <button
                       type="button"

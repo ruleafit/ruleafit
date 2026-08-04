@@ -136,7 +136,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
   }
 
   if (clase.estado !== 'activa' || claseYaPaso(clase)) {
-    return <p className="text-sm text-zinc-500">Esta clase ya no está disponible</p>
+    return <p className="text-sm text-zinc-500">Esta sesión ya no está disponible</p>
   }
 
   if ((clase.plazas_ocupadas ?? 0) >= (clase.plazas_max ?? 0)) {
@@ -167,7 +167,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
-        Ya tienes esta clase reservada
+        Ya tienes esta sesión reservada
       </div>
     )
   }

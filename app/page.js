@@ -21,14 +21,14 @@ import RevelarAlLlegar from '../components/RevelarAlLlegar'
 import BotonInstalarApp from '../components/BotonInstalarApp'
 
 const ACCESOS_ENTRENADOR = [
-  { href: '/clases', label: 'Clases', Icono: Dumbbell },
-  { href: '/mis-clases', label: 'Mis clases', Icono: Users },
+  { href: '/clases', label: 'Sesiones', Icono: Dumbbell },
+  { href: '/mis-clases', label: 'Mis sesiones', Icono: Users },
   { href: '/publicar', label: 'Publicar', Icono: ClipboardList },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
 ]
 
 const ACCESOS_CLIENTE = [
-  { href: '/clases', label: 'Clases', Icono: Dumbbell },
+  { href: '/clases', label: 'Sesiones', Icono: Dumbbell },
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
 ]
@@ -206,7 +206,7 @@ export default function Home() {
                 <span className="whitespace-nowrap text-[#B5E600]">Sin cuotas.</span>
               </h1>
               <p className="max-w-xl text-lg text-white/90 sm:text-xl">
-                Clases sueltas en Sevilla y Málaga. Elige la de hoy, resérvala y ya está. Sin cuota mensual ni permanencia.
+                Sesiones sueltas en Sevilla y Málaga. Elige la de hoy, resérvala y ya está. Sin cuota mensual ni permanencia.
               </p>
 
               <div className="mt-2 flex flex-col gap-4 sm:flex-row">
@@ -254,12 +254,12 @@ export default function Home() {
           {sinClasesPublicadas ? (
             <RevelarAlLlegar className="flex flex-col items-center gap-4 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center shadow-sm">
               <ClipboardList className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
-              <p className="text-base font-bold text-[#1F2400]">Todavía no has publicado ninguna clase</p>
+              <p className="text-base font-bold text-[#1F2400]">Todavía no has publicado ninguna sesión</p>
               <p className="max-w-md text-sm text-[#6B7355]">
-                Publica tu primera clase y empieza a recibir reservas.
+                Publica tu primera sesión y empieza a recibir reservas.
               </p>
               <Link href="/publicar" className={botonPrimarioClass}>
-                Publicar mi primera clase
+                Publicar mi primera sesión
               </Link>
             </RevelarAlLlegar>
           ) : (
@@ -268,7 +268,7 @@ export default function Home() {
                 <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">
                   {clasesActivasAhora.length}
                 </p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Clases activas</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Sesiones activas</p>
               </RevelarAlLlegar>
 
               <RevelarAlLlegar delayMs={80} className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
@@ -285,14 +285,14 @@ export default function Home() {
                       {proximaClaseEntrenador.titulo}
                     </p>
                     <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
-                      Próxima clase · {proximaClaseEntrenador.fecha}
+                      Próxima sesión · {proximaClaseEntrenador.fecha}
                     </p>
                   </>
                 ) : (
                   <>
                     <p className="text-lg font-extrabold tracking-tight text-[#1F2400]">—</p>
                     <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
-                      Sin clases próximas
+                      Sin sesiones próximas
                     </p>
                   </>
                 )}
@@ -342,7 +342,7 @@ export default function Home() {
             </h2>
             <p className="max-w-xl text-base text-white/85 sm:text-lg">
               Decides qué días trabajas, a qué hora, cuánta gente entra y cuánto cobras. Sin horario fijo, sin jefe.
-              Publicas tu clase en dos minutos y cobras directamente a tus alumnos.
+              Publicas tu sesión en dos minutos y cobras directamente a tus alumnos.
             </p>
 
             <div className="mt-4 grid w-full grid-cols-1 gap-8 sm:grid-cols-3">
@@ -361,7 +361,7 @@ export default function Home() {
             </div>
 
             <Link href="/registro" className={`${botonPrimarioClass} mt-4`}>
-              Publica tu primera clase
+              Publica tu primera sesión
             </Link>
           </div>
         </RevelarAlLlegar>
@@ -378,10 +378,10 @@ export default function Home() {
           <div className="absolute inset-0 -z-10 bg-black/60" />
           <div className="flex flex-col items-center gap-6">
             <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              ¿Tienes hueco esta semana? Publica una clase más.
+              ¿Tienes hueco esta semana? Publica una sesión más.
             </p>
             <Link href="/publicar" className={botonPrimarioClass}>
-              Publicar clase
+              Publicar sesión
             </Link>
           </div>
         </RevelarAlLlegar>
@@ -395,10 +395,10 @@ export default function Home() {
           <div className="absolute inset-0 -z-10 bg-black/60" />
           <div className="flex flex-col items-center gap-6">
             <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              Solo, en pareja o en grupo. Pagas solo la clase a la que vas.
+              Solo, en pareja o en grupo. Pagas solo la sesión a la que vas.
             </p>
             <Link href="/clases" className={botonPrimarioClass}>
-              Ver clases
+              Ver sesiones
             </Link>
           </div>
         </RevelarAlLlegar>

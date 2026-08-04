@@ -99,8 +99,8 @@ function CabeceraMisClases() {
       <img src="/imagenes/yoga.jpg" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-center" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
       <div className="relative z-10 mx-auto w-full max-w-3xl px-4 pb-6 sm:px-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Mis clases</h1>
-        <p className="mt-1 text-sm text-white/85 sm:text-base">Tus clases publicadas y quién viene a cada una.</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Mis sesiones</h1>
+        <p className="mt-1 text-sm text-white/85 sm:text-base">Tus sesiones publicadas y quién viene a cada una.</p>
       </div>
     </section>
   )
@@ -202,7 +202,7 @@ export default function MisClasesPage() {
 
   async function handleCancelarClase(claseId) {
     const confirmado = window.confirm(
-      '¿Seguro que quieres cancelar esta clase? Se cancelarán también todas las reservas activas de tus alumnos. Esta acción no se puede deshacer.'
+      '¿Seguro que quieres cancelar esta sesión? Se cancelarán también todas las reservas activas de tus alumnos. Esta acción no se puede deshacer.'
     )
     if (!confirmado) return
 
@@ -226,7 +226,7 @@ export default function MisClasesPage() {
     )
     setMensajesCancelacion((prev) => ({
       ...prev,
-      [claseId]: `Clase cancelada. Se han cancelado ${data?.reservas_canceladas ?? 0} reservas.`,
+      [claseId]: `Sesión cancelada. Se han cancelado ${data?.reservas_canceladas ?? 0} reservas.`,
     }))
     setProcesandoCancelacionId(null)
   }
@@ -247,7 +247,7 @@ export default function MisClasesPage() {
           <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
             Esta página es solo para entrenadores. Ve a{' '}
             <Link href="/clases" className="font-semibold text-[#3D4A00] hover:underline">
-              ver las clases disponibles
+              ver las sesiones disponibles
             </Link>
             .
           </div>
@@ -310,7 +310,7 @@ export default function MisClasesPage() {
             />
             {clase.estado === 'cancelada' && (
               <span className="absolute left-3 top-3 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-700">
-                Clase cancelada
+                Sesión cancelada
               </span>
             )}
           </div>
@@ -361,7 +361,7 @@ export default function MisClasesPage() {
 
             {clase.alumnos.length === 0 ? (
               haPasado ? (
-                <p className="mt-4 text-sm text-zinc-400">Esta clase no tuvo reservas.</p>
+                <p className="mt-4 text-sm text-zinc-400">Esta sesión no tuvo reservas.</p>
               ) : (
                 <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-[#E2E6CF] px-4 py-3 text-sm text-[#6B7355]">
                   <Users className="h-4 w-4 shrink-0 text-[#B5E600]" strokeWidth={1.75} />
@@ -459,7 +459,7 @@ export default function MisClasesPage() {
                   className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Ban className="h-3.5 w-3.5" strokeWidth={1.75} />
-                  {procesandoCancelacionId === clase.clase_id ? 'Cancelando...' : 'Cancelar esta clase'}
+                  {procesandoCancelacionId === clase.clase_id ? 'Cancelando...' : 'Cancelar esta sesión'}
                 </button>
                 {erroresCancelacion[clase.clase_id] && (
                   <p className="text-xs text-red-600">{erroresCancelacion[clase.clase_id]}</p>
@@ -487,19 +487,19 @@ export default function MisClasesPage() {
         {!error && clasesConAlumnos.length === 0 && (
           <RevelarAlLlegar className="flex flex-col items-center gap-3 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center">
             <ClipboardList className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
-            <p className="text-sm text-[#6B7355]">Todavía no has publicado ninguna clase.</p>
+            <p className="text-sm text-[#6B7355]">Todavía no has publicado ninguna sesión.</p>
             <Link
               href="/publicar"
               className="mt-1 inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
             >
-              Publicar una clase
+              Publicar una sesión
             </Link>
           </RevelarAlLlegar>
         )}
 
         {!error && clasesConAlumnos.length > 0 && (
           <>
-            <TituloBloque Icono={ClipboardList}>Tus clases</TituloBloque>
+            <TituloBloque Icono={ClipboardList}>Tus sesiones</TituloBloque>
 
             <div className="flex flex-col gap-5">
               {clasesProximas.map((clase, indice) => renderTarjeta(clase, indice, false))}
@@ -510,7 +510,7 @@ export default function MisClasesPage() {
                 <div className="mb-4 flex items-center justify-between border-b border-[#E2E6CF] pb-2">
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Historial</h2>
                   <span className="text-xs text-[#6B7355]">
-                    {clasesRealizadas} {clasesRealizadas === 1 ? 'clase realizada' : 'clases realizadas'}
+                    {clasesRealizadas} {clasesRealizadas === 1 ? 'sesión realizada' : 'sesiones realizadas'}
                   </span>
                 </div>
 
