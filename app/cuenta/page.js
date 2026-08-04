@@ -117,6 +117,9 @@ export default function CuentaPage() {
   }, [])
 
   async function cerrarSesion() {
+    const confirmado = window.confirm('¿Estás seguro de que quieres cerrar sesión?')
+    if (!confirmado) return
+
     await supabase.auth.signOut()
     setUsuario(null)
   }

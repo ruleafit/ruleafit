@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import {
   Dumbbell,
   Users,
   ClipboardList,
   CircleUserRound,
   CalendarCheck,
-  LogOut,
   Wallet,
   UserRoundSearch,
   Clock,
@@ -61,7 +59,6 @@ const botonSecundarioClass =
   'inline-flex h-12 items-center justify-center rounded-full border-2 border-white px-8 text-base font-bold text-white transition motion-safe:hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
 
 export default function Home() {
-  const router = useRouter()
   const [usuario, setUsuario] = useState(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
   const [username, setUsername] = useState(null)
@@ -152,11 +149,6 @@ export default function Home() {
     return () => window.removeEventListener('scroll', alHacerScroll)
   }, [])
 
-  async function handleCerrarSesion() {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   if (cargandoSesion) {
     return (
       <div className="flex min-h-[60vh] flex-1 items-center justify-center">
@@ -176,6 +168,9 @@ export default function Home() {
     (total, c) => total + Number(c.reservas_activas || 0),
     0
   )
+  const clasesActivasAhora = esEntrenador
+    ? (misClases || []).filter((c) => c.estado === 'activa' && !claseYaPaso({ fecha: c.fecha, hora: c.hora }))
+    : []
   const proximaClaseEntrenador =
     clasesActivasEntrenador.filter((c) => !claseYaPaso({ fecha: c.fecha, hora: c.hora }))[0] || null
   const sinClasesPublicadas = esEntrenador && (misClases || []).length === 0
@@ -246,15 +241,6 @@ export default function Home() {
                   </Link>
                 ))}
               </div>
-
-              <button
-                type="button"
-                onClick={handleCerrarSesion}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
-              >
-                <LogOut className="h-4 w-4" strokeWidth={1.75} />
-                Cerrar sesión
-              </button>
             </div>
           )}
         </div>
@@ -280,7 +266,7 @@ export default function Home() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
                 <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">
-                  {clasesActivasEntrenador.length}
+                  {clasesActivasAhora.length}
                 </p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Clases activas</p>
               </RevelarAlLlegar>

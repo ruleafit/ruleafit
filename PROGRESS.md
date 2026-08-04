@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 2 agosto 2026
+Última actualización: 4 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -172,6 +172,14 @@ Hecho:
   - Página nueva app/entrenador/[username]/opiniones/page.js: lista pública de las opiniones escritas del entrenador (se excluyen las valoraciones sin texto), ordenadas de más reciente a más antigua, mostrando solo estrellas + texto + fecha, sin ningún dato del cliente autor (anónimas por diseño de la consulta, sin ningún embed a perfiles del cliente).
   - /cuenta: el entrenador ve también su nota media + número de valoraciones + botón "Ver opiniones", en una tarjeta junto a las de Open acumulados/Clases realizadas, para consultar su feedback sin tener que buscar su propio perfil público. No se muestra nada de esto a los clientes.
 - Longitud mínima de contraseña subida de 6 a 8 caracteres en la configuración de Supabase (Authentication -> Email). Cambio de configuración, no de código; afecta solo a registros y cambios de contraseña nuevos, no a las contraseñas ya existentes.
+
+Falta:
+- Ninguno.
+
+## Fix de contador y confirmación al cerrar sesión (4 agosto 2026)
+Hecho:
+- Fix del contador "Clases activas" en la portada del entrenador (app/page.js): antes contaba también clases ya pasadas (solo filtraba por estado = 'activa'), así que en la práctica se acercaba al total de clases publicadas. Ahora se calcula con una variable nueva, clasesActivasAhora, que filtra por estado activo Y no pasada (claseYaPaso), sin afectar al contador "Reservas acumuladas" (sigue usando la variable original).
+- Confirmación al cerrar sesión: al pulsar "Cerrar sesión" aparece un window.confirm ("¿Estás seguro de que quieres cerrar sesión?"), mismo patrón ya usado para cancelar clase/reserva. Aplicado en el menú de navegación (components/Menu.js) y en /cuenta. Además se quitó el botón "Cerrar sesión" redundante de la portada (app/page.js), ya que el del menú aparece en todas las páginas con sesión iniciada.
 
 Falta:
 - Ninguno.

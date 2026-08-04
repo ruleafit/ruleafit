@@ -38,6 +38,9 @@ export default function Menu() {
   const rol = usuario?.user_metadata?.rol
 
   async function handleCerrarSesion() {
+    const confirmado = window.confirm('¿Estás seguro de que quieres cerrar sesión?')
+    if (!confirmado) return
+
     await supabase.auth.signOut()
     router.push('/')
   }
