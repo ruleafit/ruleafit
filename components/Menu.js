@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home } from 'lucide-react'
+import { Home, Menu as IconoMenu, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 
 export default function Menu() {
@@ -11,6 +11,7 @@ export default function Menu() {
   const pathname = usePathname()
   const [usuario, setUsuario] = useState(null)
   const [conSombra, setConSombra] = useState(false)
+  const [menuAbierto, setMenuAbierto] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -77,6 +78,109 @@ export default function Menu() {
     'hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2'
 
+  // Lista de enlaces calculada una sola vez a partir de usuario/rol, para no
+  // repetir las condiciones entre la versión de escritorio y la de móvil.
+  const enlaces = []
+
+  if (usuario) {
+    enlaces.push({ key: 'inicio', href: '/', label: 'Inicio', icon: Home })
+  }
+
+  enlaces.push({ key: 'sesiones', href: '/clases', label: 'Sesiones' })
+
+  if (!usuario) {
+    enlaces.push({
+      key: 'eres-entrenador',
+      href: '/#entrenadores',
+      label: '¿Eres entrenador?',
+      onClick: handleClickEresEntrenador,
+      mutado: true,
+    })
+    enlaces.push({ key: 'login', href: '/login', label: 'Iniciar sesión' })
+    enlaces.push({ key: 'registro', href: '/registro', label: 'Registrarse', esBoton: true })
+  }
+
+  if (usuario && rol === 'entrenador') {
+    enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones' })
+    enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar', esBoton: true })
+  }
+
+  if (usuario && rol === 'cliente') {
+    enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas' })
+    enlaces.push({ key: 'entrenadores', href: '/entrenadores', label: 'Entrenadores' })
+  }
+
+  if (usuario) {
+    enlaces.push({ key: 'cuenta', href: '/cuenta', label: 'Mi cuenta' })
+  }
+
+  function renderEnlaceEscritorio(enlace) {
+    if (enlace.esBoton) {
+      return (
+        <Link key={enlace.key} href={enlace.href} className={botonClass}>
+          {enlace.label}
+        </Link>
+      )
+    }
+
+    if (enlace.mutado) {
+      return (
+        <Link
+          key={enlace.key}
+          href={enlace.href}
+          onClick={enlace.onClick}
+          className="px-0.5 py-1 text-sm text-[#6B7355] transition-colors hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
+        >
+          {enlace.label}
+        </Link>
+      )
+    }
+
+    const Icono = enlace.icon
+
+    return (
+      <Link
+        key={enlace.key}
+        href={enlace.href}
+        className={Icono ? `inline-flex items-center gap-1.5 ${enlaceClass(enlace.href)}` : enlaceClass(enlace.href)}
+      >
+        {Icono && <Icono className="h-4 w-4" strokeWidth={1.75} />}
+        {enlace.label}
+      </Link>
+    )
+  }
+
+  function renderEnlaceMovil(enlace) {
+    const Icono = enlace.icon
+    const activo = pathname === enlace.href
+
+    const claseEnlaceMovil = [
+      'flex items-center gap-2 rounded-lg px-3 py-3 text-base font-medium transition-colors',
+      enlace.esBoton
+        ? 'bg-[#B5E600] font-bold text-[#16231B] hover:bg-[#a3d100]'
+        : enlace.mutado
+          ? 'text-[#6B7355] hover:bg-zinc-50'
+          : activo
+            ? 'bg-[#EDF5C9] text-[#16231B]'
+            : 'text-[#16231B] hover:bg-zinc-50',
+    ].join(' ')
+
+    return (
+      <Link
+        key={enlace.key}
+        href={enlace.href}
+        onClick={(evento) => {
+          if (enlace.onClick) enlace.onClick(evento)
+          setMenuAbierto(false)
+        }}
+        className={claseEnlaceMovil}
+      >
+        {Icono && <Icono className="h-5 w-5" strokeWidth={1.75} />}
+        {enlace.label}
+      </Link>
+    )
+  }
+
   return (
     <nav
       className={`sticky top-0 z-50 w-full border-b border-zinc-200 bg-white motion-safe:transition-shadow motion-safe:duration-200 ${
@@ -93,72 +197,57 @@ export default function Menu() {
           Open<span style={{ color: '#B5E600' }}>fit</span>
         </Link>
 
-        <div className="flex flex-wrap items-center gap-5">
-          {usuario && (
-            <Link href="/" className={`inline-flex items-center gap-1.5 ${enlaceClass('/')}`}>
-              <Home className="h-4 w-4" strokeWidth={1.75} />
-              Inicio
-            </Link>
-          )}
-
-          <Link href="/clases" className={enlaceClass('/clases')}>
-            Sesiones
-          </Link>
-
-          {!usuario && (
-            <>
-              <Link
-                href="/#entrenadores"
-                onClick={handleClickEresEntrenador}
-                className="px-0.5 py-1 text-sm text-[#6B7355] transition-colors hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
-              >
-                ¿Eres entrenador?
-              </Link>
-              <Link href="/login" className={enlaceClass('/login')}>
-                Iniciar sesión
-              </Link>
-              <Link href="/registro" className={botonClass}>
-                Registrarse
-              </Link>
-            </>
-          )}
-
-          {usuario && rol === 'entrenador' && (
-            <Link href="/mis-clases" className={enlaceClass('/mis-clases')}>
-              Mis sesiones
-            </Link>
-          )}
-
-          {usuario && rol === 'entrenador' && (
-            <Link href="/publicar" className={botonClass}>
-              Publicar
-            </Link>
-          )}
-
-          {usuario && rol === 'cliente' && (
-            <Link href="/mis-reservas" className={enlaceClass('/mis-reservas')}>
-              Mis reservas
-            </Link>
-          )}
-
-          {usuario && rol === 'cliente' && (
-            <Link href="/entrenadores" className={enlaceClass('/entrenadores')}>
-              Entrenadores
-            </Link>
-          )}
+        <div className="hidden items-center gap-5 md:flex">
+          {enlaces.map(renderEnlaceEscritorio)}
 
           {usuario && (
-            <>
-              <Link href="/cuenta" className={enlaceClass('/cuenta')}>
-                Mi cuenta
-              </Link>
-              <button type="button" onClick={handleCerrarSesion} className={enlaceClass(null)}>
-                Cerrar sesión
-              </button>
-            </>
+            <button type="button" onClick={handleCerrarSesion} className={enlaceClass(null)}>
+              Cerrar sesión
+            </button>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setMenuAbierto((abierto) => !abierto)}
+          aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={menuAbierto}
+          className="inline-flex items-center gap-2 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#16231B] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 md:hidden"
+        >
+          {menuAbierto ? (
+            <>
+              <X className="h-5 w-5" strokeWidth={1.75} />
+              Cerrar
+            </>
+          ) : (
+            <>
+              <IconoMenu className="h-5 w-5" strokeWidth={1.75} />
+              Menú
+            </>
+          )}
+        </button>
       </div>
+
+      {menuAbierto && (
+        <div className="border-t border-zinc-200 bg-white px-6 py-4 md:hidden">
+          <div className="flex flex-col gap-1">
+            {enlaces.map(renderEnlaceMovil)}
+
+            {usuario && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await handleCerrarSesion()
+                  setMenuAbierto(false)
+                }}
+                className="flex items-center gap-2 rounded-lg px-3 py-3 text-left text-base font-medium text-[#16231B] transition-colors hover:bg-zinc-50"
+              >
+                Cerrar sesión
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

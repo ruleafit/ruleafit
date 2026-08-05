@@ -30,6 +30,7 @@ const ACCESOS_ENTRENADOR = [
 const ACCESOS_CLIENTE = [
   { href: '/clases', label: 'Sesiones', Icono: Dumbbell },
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck },
+  { href: '/entrenadores', label: 'Entrenadores', Icono: UserRoundSearch },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
 ]
 
