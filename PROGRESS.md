@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 4 agosto 2026
+Última actualización: 5 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -146,8 +146,8 @@ Otros pendientes menores (sin prioridad asignada):
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
 - 3 vulnerabilidades "high" que reporta npm audit en next/postcss/sharp, preexistentes (anteriores a esta sesión, no las trajo react-leaflet-cluster); `npm audit fix --force` propone subir Next fuera del rango declarado en package.json y podría romper cosas, así que no se toca con la beta en vivo. Pendiente revisarlo con calma, sin --force.
 - Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
-- Seguir entrenadores (tipo red social): tabla de seguimientos, botón Seguir/Siguiendo en el perfil, buscador de entrenadores y vista "a quién sigo". El aviso al publicar sesión depende de las notificaciones push.
 - Notificaciones push web (avisos en el móvil con la app cerrada; la PWA ya sirve de base).
+  - Incluye el aviso al cliente cuando un entrenador al que sigue publica una sesión nueva (seguir entrenadores ya implementado, ver "Seguir entrenadores y buscador de entrenadores").
 
 ## Mapa de clases: clustering y ubicación del cliente (durante la beta)
 Hecho:
@@ -191,6 +191,24 @@ Falta:
 Hecho:
 - Texto visible de toda la interfaz (menús, portada, /clases, /clases/[id], /mis-clases, /mis-clases/[id]/editar, /mis-reservas, /publicar, /login, perfil público del entrenador y sus opiniones, metadata del manifest PWA y aviso de privacidad) cambiado de "clase/clases" a "sesión/sesiones", sin tocar la tabla clases, las funciones RPC, las rutas, los nombres de archivo/carpeta ni las variables (16 archivos de frontend). aviso-legal quedó sin tocar por ya usar "sesión/sesiones".
 - Descripción del motivo de Open asistencia_confirmada actualizada a la misma terminología (sql/027_texto_motivo_asistencia_sesion.sql, ya ejecutado en Supabase); el historial de Open de asistencias ya concedidas muestra ahora el texto nuevo, ya que se lee la descripción actual del motivo.
+
+Falta:
+- Ninguno.
+
+## Seguir entrenadores y buscador de entrenadores (5 agosto 2026)
+Hecho:
+- Tabla public.seguimientos (sql/028_seguimientos.sql, ya ejecutado en Supabase): registra qué cliente sigue a qué entrenador (seguidor_id, entrenador_id, ambos referencian auth.users(id)), con UNIQUE(seguidor_id, entrenador_id) para evitar duplicados y CHECK(seguidor_id <> entrenador_id) para impedir el autoseguimiento. RLS: lectura pública; INSERT y DELETE solo sobre las propias filas (auth.uid() = seguidor_id); sin política de UPDATE (un seguimiento se crea o se borra, no se edita). Igual que en valoraciones, el rol (quién puede seguir y a quién se puede seguir) no se valida en la base de datos sino en el frontend, ya que perfiles no guarda el rol.
+- Botón Seguir/Siguiendo (components/BotonSeguir.js) en el perfil público del entrenador (app/entrenador/[username]/page.js), con los mismos estados que el resto de la app: sin sesión, enlace a /login; el propio entrenador viendo su perfil, oculto; cliente, botón funcional que alterna entre "Seguir" (lima) y "Siguiendo" (borde), insertando/borrando filas en seguimientos.
+- Contador PRIVADO de seguidores en /cuenta, visible solo para el entrenador: función RPC contar_mis_seguidores() (sql/029_contar_seguidores.sql, security definer, cuenta solo los propios vía auth.uid()), mostrado en una tarjeta junto a las de Open acumulados/Clases realizadas/Valoraciones. Decisión de producto: el número de seguidores NO se muestra en el perfil público, a propósito, para no penalizar a los entrenadores nuevos con un efecto "los que ya tienen tirón crecen más" desde el principio.
+- Buscador de entrenadores para clientes (app/entrenadores/page.js), accesible solo con sesión de cliente iniciada (sin sesión invita a iniciar sesión; con sesión de entrenador, mensaje "Esta sección es para clientes."): función RPC listar_entrenadores() (sql/030_listar_entrenadores.sql, security definer, filtra por el rol real en auth.users.raw_user_meta_data, no por tener clases publicadas) devuelve id/username/descripcion/foto_url de cada entrenador; búsqueda por username en el propio cliente, sin volver a llamar a Supabase al escribir; tarjetas con foto o inicial, enlazando al perfil público (/entrenador/[username]). Enlace "Entrenadores" añadido al menú de navegación, visible solo para clientes logueados.
+
+Falta:
+- El aviso al cliente cuando un entrenador al que sigue publica una sesión nueva; depende de las notificaciones push (ver pendientes).
+
+## Navegación móvil responsive y acceso a Entrenadores desde el inicio (5 agosto 2026)
+Hecho:
+- Menú de navegación (components/Menu.js) convertido en responsive: en móvil, botón tipo pastilla lima con icono + texto ("Menú"/"Cerrar" según esté cerrado o abierto) que despliega un panel a pantalla completa con todos los enlaces en columna y buen tamaño de toque; en escritorio (md y superior) el menú queda exactamente igual que antes, sin ningún cambio visual. La lista de enlaces se calcula una única vez a partir de usuario/rol y se reutiliza en ambas versiones, para no duplicar la lógica de roles; el resaltado de página activa (subrayado animado) en escritorio no se tocó.
+- Tarjeta de acceso "Entrenadores" añadida a la portada (app/page.js) para el cliente con sesión iniciada, junto a las de Sesiones/Mis reservas/Mi cuenta, enlazando a /entrenadores.
 
 Falta:
 - Ninguno.
