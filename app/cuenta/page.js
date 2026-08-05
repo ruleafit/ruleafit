@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Coins, History, CalendarCheck, Star } from 'lucide-react'
+import { Coins, History, CalendarCheck, Star, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
@@ -26,6 +26,7 @@ export default function CuentaPage() {
   const [clasesRealizadas, setClasesRealizadas] = useState(0)
   const [promedioValoraciones, setPromedioValoraciones] = useState(null)
   const [totalValoraciones, setTotalValoraciones] = useState(0)
+  const [numSeguidores, setNumSeguidores] = useState(0)
   const [openMovimientos, setOpenMovimientos] = useState([])
   const [openMotivos, setOpenMotivos] = useState({})
   const [descripcionPerfil, setDescripcionPerfil] = useState('')
@@ -109,6 +110,9 @@ export default function CuentaPage() {
               ? listaValoraciones.reduce((suma, v) => suma + v.estrellas, 0) / listaValoraciones.length
               : null
           )
+
+          const { data: numSeg } = await supabase.rpc('contar_mis_seguidores')
+          setNumSeguidores(numSeg ?? 0)
         }
       }
       setCargando(false)
@@ -528,6 +532,20 @@ export default function CuentaPage() {
                 Ver opiniones
               </Link>
             )}
+          </RevelarAlLlegar>
+        )}
+
+        {rol === 'entrenador' && (
+          <RevelarAlLlegar className="mb-8 flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+              <Users className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{numSeguidores}</p>
+              <p className="text-sm font-semibold text-[#3D4A00]">
+                {numSeguidores === 1 ? 'cliente te sigue' : 'clientes te siguen'}
+              </p>
+            </div>
           </RevelarAlLlegar>
         )}
 
