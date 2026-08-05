@@ -141,6 +141,12 @@ export default function Menu() {
             </Link>
           )}
 
+          {usuario && rol === 'cliente' && (
+            <Link href="/entrenadores" className={enlaceClass('/entrenadores')}>
+              Entrenadores
+            </Link>
+          )}
+
           {usuario && (
             <>
               <Link href="/cuenta" className={enlaceClass('/cuenta')}>
