@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { SearchX, Star } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
 import { claseYaPaso } from '../../../lib/ventanaEdicionClase'
+import BotonSeguir from '../../../components/BotonSeguir'
 
 const botonPrimarioClass =
   'inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
@@ -208,6 +209,8 @@ export default function PerfilEntrenadorPage() {
         <span className="inline-flex items-center rounded-full bg-[#EDF5C9] px-4 py-1.5 text-sm font-semibold text-[#3D4A00]">
           {clasesActivas} {clasesActivas === 1 ? 'sesión activa' : 'sesiones activas'}
         </span>
+
+        <BotonSeguir entrenadorId={perfil.id} usuarioActual={usuarioActual} />
       </section>
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
