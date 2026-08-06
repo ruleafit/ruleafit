@@ -183,7 +183,7 @@ export default function Menu() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 w-full border-b border-zinc-200 bg-white motion-safe:transition-shadow motion-safe:duration-200 ${
+      className={`sticky top-0 z-[2000] w-full border-b border-zinc-200 bg-white motion-safe:transition-shadow motion-safe:duration-200 ${
         conSombra ? 'shadow-sm' : ''
       }`}
     >

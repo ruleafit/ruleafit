@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css'
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css'
 import { ESTILO_POR_CATEGORIA, ESTILO_POR_DEFECTO } from '../lib/imagenesCategoria'
+import BuscadorDireccion from './BuscadorDireccion'
+import { iconoBusqueda } from '../lib/iconoBusqueda'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -91,6 +93,33 @@ function CentrarEnUsuario({ ubicacion }) {
   return null
 }
 
+function CentradorBusqueda({ coords }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!coords) return
+    map.setView([coords.lat, coords.lng], 15)
+  }, [coords, map])
+
+  return null
+}
+
+function ForzarAutoPanPopup() {
+  useMapEvents({
+    popupopen(evento) {
+      // El contenido del popup se pinta vía portal de React después de que Leaflet
+      // calcule el autoPan inicial, así que ese primer cálculo mide un popup casi
+      // vacío. Forzamos un recálculo (popup.update -> _adjustPan) ya con el
+      // contenido real pintado, en el siguiente frame.
+      requestAnimationFrame(() => {
+        evento.popup.update()
+      })
+    },
+  })
+
+  return null
+}
+
 function AjustarEncuadre({ clases }) {
   const map = useMap()
 
@@ -112,6 +141,7 @@ export default function MapaClases({ clases }) {
   const [ubicacionUsuario, setUbicacionUsuario] = useState(null)
   const [buscandoUbicacion, setBuscandoUbicacion] = useState(false)
   const [errorUbicacion, setErrorUbicacion] = useState(null)
+  const [coordsBusqueda, setCoordsBusqueda] = useState(null)
 
   function verMiUbicacion() {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -135,17 +165,23 @@ export default function MapaClases({ clases }) {
   }
 
   return (
-    <div className="relative h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
+    <div className="relative isolate h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
       <button
         type="button"
         onClick={verMiUbicacion}
         disabled={buscandoUbicacion}
-        className="absolute right-3 top-3 z-[1000] rounded-full border border-[#E2E6CF] bg-white px-4 py-2 text-sm font-bold text-[#3D4A00] shadow-md hover:bg-[#F5F7E8] disabled:opacity-70"
+        className="absolute left-1/2 top-3 z-[1000] -translate-x-1/2 rounded-full border-2 border-[#B5E600] bg-white px-4 py-2 text-sm font-bold text-[#16231B] shadow-md hover:bg-[#F5F7E8] disabled:opacity-70"
       >
         {buscandoUbicacion ? 'Buscando...' : 'Ver mi ubicación'}
       </button>
+      <div className="absolute left-1/2 top-14 z-[1000] w-[calc(100%-160px)] max-w-xs -translate-x-1/2">
+        <BuscadorDireccion
+          onSeleccionar={(sugerencia) => setCoordsBusqueda({ lat: sugerencia.lat, lng: sugerencia.lng })}
+          placeholder="Centrar mapa en una dirección..."
+        />
+      </div>
       {errorUbicacion && (
-        <p className="absolute left-3 right-3 top-14 z-[1000] rounded-lg bg-white/90 px-3 py-2 text-xs text-[#3D4A00] shadow">
+        <p className="absolute left-3 right-3 top-28 z-[1000] rounded-lg bg-white/90 px-3 py-2 text-xs text-[#3D4A00] shadow">
           {errorUbicacion}
         </p>
       )}
@@ -156,6 +192,16 @@ export default function MapaClases({ clases }) {
         />
         <AjustarEncuadre clases={conCoordenadas} />
         <CentrarEnUsuario ubicacion={ubicacionUsuario} />
+        <CentradorBusqueda coords={coordsBusqueda} />
+        <ForzarAutoPanPopup />
+        {coordsBusqueda && (
+          <Marker position={[coordsBusqueda.lat, coordsBusqueda.lng]} icon={iconoBusqueda()}>
+            <Tooltip>Esta es la ubicación que buscaste</Tooltip>
+            <Popup autoPanPaddingTopLeft={[20, 150]} autoPanPaddingBottomRight={[20, 20]}>
+              Esta es la ubicación que buscaste
+            </Popup>
+          </Marker>
+        )}
         {ubicacionUsuario && (
           <Marker
             position={[ubicacionUsuario.lat, ubicacionUsuario.lng]}
@@ -173,7 +219,7 @@ export default function MapaClases({ clases }) {
 
             return (
               <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoPorCategoria(clase.categoria)}>
-                <Popup>
+                <Popup autoPanPaddingTopLeft={[20, 150]} autoPanPaddingBottomRight={[20, 20]}>
                   <strong>{clase.titulo}</strong>
                   <br />
                   {clase.categoria}
