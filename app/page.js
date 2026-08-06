@@ -21,14 +21,14 @@ import RevelarAlLlegar from '../components/RevelarAlLlegar'
 import BotonInstalarApp from '../components/BotonInstalarApp'
 
 const ACCESOS_ENTRENADOR = [
-  { href: '/clases', label: 'Sesiones', Icono: Dumbbell },
+  { href: '/clases', label: 'Sesiones publicadas', Icono: Dumbbell },
   { href: '/mis-clases', label: 'Mis sesiones', Icono: Users },
   { href: '/publicar', label: 'Publicar', Icono: ClipboardList },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
 ]
 
 const ACCESOS_CLIENTE = [
-  { href: '/clases', label: 'Sesiones', Icono: Dumbbell },
+  { href: '/clases', label: 'Busca tu sesión', Icono: Dumbbell },
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck },
   { href: '/entrenadores', label: 'Entrenadores', Icono: UserRoundSearch },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },

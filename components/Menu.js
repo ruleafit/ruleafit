@@ -86,7 +86,15 @@ export default function Menu() {
     enlaces.push({ key: 'inicio', href: '/', label: 'Inicio', icon: Home })
   }
 
-  enlaces.push({ key: 'sesiones', href: '/clases', label: 'Sesiones' })
+  const labelSesiones = !usuario
+    ? 'Descubre sesiones'
+    : rol === 'entrenador'
+      ? 'Sesiones publicadas'
+      : rol === 'cliente'
+        ? 'Busca tu sesión'
+        : 'Sesiones'
+
+  enlaces.push({ key: 'sesiones', href: '/clases', label: labelSesiones })
 
   if (!usuario) {
     enlaces.push({
