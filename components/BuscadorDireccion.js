@@ -6,7 +6,7 @@ import { geocodificar } from '../lib/geocodificar'
 const MINIMO_CARACTERES = 4
 const RETARDO_DEBOUNCE_MS = 400
 
-export default function BuscadorDireccion({ onSeleccionar, placeholder = 'Busca una calle o lugar...' }) {
+export default function BuscadorDireccion({ onSeleccionar, placeholder = 'Buscar calle o lugar' }) {
   const [texto, setTexto] = useState('')
   const [sugerencias, setSugerencias] = useState([])
   const [cargando, setCargando] = useState(false)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Tooltip, Popup, useMapEvents, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import BuscadorDireccion from './BuscadorDireccion'
@@ -81,7 +81,6 @@ export default function MapaSelector({ ciudad, lat, lng, onCambiarUbicacion }) {
           {posicionMarcador && <Marker position={posicionMarcador} />}
           {coordsBusqueda && (
             <Marker position={[coordsBusqueda.lat, coordsBusqueda.lng]} icon={iconoBusqueda()}>
-              <Tooltip>Esta es la ubicación que buscaste</Tooltip>
               <Popup autoPanPaddingTopLeft={[20, 120]} autoPanPaddingBottomRight={[20, 20]}>
                 Esta es la ubicación que buscaste
               </Popup>

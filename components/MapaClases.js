@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -104,22 +104,6 @@ function CentradorBusqueda({ coords }) {
   return null
 }
 
-function ForzarAutoPanPopup() {
-  useMapEvents({
-    popupopen(evento) {
-      // El contenido del popup se pinta vía portal de React después de que Leaflet
-      // calcule el autoPan inicial, así que ese primer cálculo mide un popup casi
-      // vacío. Forzamos un recálculo (popup.update -> _adjustPan) ya con el
-      // contenido real pintado, en el siguiente frame.
-      requestAnimationFrame(() => {
-        evento.popup.update()
-      })
-    },
-  })
-
-  return null
-}
-
 function AjustarEncuadre({ clases }) {
   const map = useMap()
 
@@ -165,81 +149,80 @@ export default function MapaClases({ clases }) {
   }
 
   return (
-    <div className="relative isolate h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
-      <button
-        type="button"
-        onClick={verMiUbicacion}
-        disabled={buscandoUbicacion}
-        className="absolute left-1/2 top-3 z-[1000] -translate-x-1/2 rounded-full border-2 border-[#B5E600] bg-white px-4 py-2 text-sm font-bold text-[#16231B] shadow-md hover:bg-[#F5F7E8] disabled:opacity-70"
-      >
-        {buscandoUbicacion ? 'Buscando...' : 'Ver mi ubicación'}
-      </button>
-      <div className="absolute left-1/2 top-14 z-[1000] w-[calc(100%-160px)] max-w-xs -translate-x-1/2">
-        <BuscadorDireccion
-          onSeleccionar={(sugerencia) => setCoordsBusqueda({ lat: sugerencia.lat, lng: sugerencia.lng })}
-          placeholder="Centrar mapa en una dirección..."
-        />
+    <div>
+      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <button
+          type="button"
+          onClick={verMiUbicacion}
+          disabled={buscandoUbicacion}
+          className="shrink-0 rounded-full border-2 border-[#B5E600] bg-white px-4 py-2 text-sm font-bold text-[#16231B] shadow-md hover:bg-[#F5F7E8] disabled:opacity-70"
+        >
+          {buscandoUbicacion ? 'Buscando...' : 'Ver mi ubicación'}
+        </button>
+        <div className="flex-1 p-1">
+          <BuscadorDireccion
+            onSeleccionar={(sugerencia) => setCoordsBusqueda({ lat: sugerencia.lat, lng: sugerencia.lng })}
+          />
+        </div>
       </div>
       {errorUbicacion && (
-        <p className="absolute left-3 right-3 top-28 z-[1000] rounded-lg bg-white/90 px-3 py-2 text-xs text-[#3D4A00] shadow">
+        <p className="mb-2 rounded-lg bg-white/90 px-3 py-2 text-xs text-[#3D4A00] shadow">
           {errorUbicacion}
         </p>
       )}
-      <MapContainer center={CENTRO_SEVILLA} zoom={12} style={{ height: '100%', width: '100%' }}>
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <AjustarEncuadre clases={conCoordenadas} />
-        <CentrarEnUsuario ubicacion={ubicacionUsuario} />
-        <CentradorBusqueda coords={coordsBusqueda} />
-        <ForzarAutoPanPopup />
-        {coordsBusqueda && (
-          <Marker position={[coordsBusqueda.lat, coordsBusqueda.lng]} icon={iconoBusqueda()}>
-            <Tooltip>Esta es la ubicación que buscaste</Tooltip>
-            <Popup autoPanPaddingTopLeft={[20, 150]} autoPanPaddingBottomRight={[20, 20]}>
-              Esta es la ubicación que buscaste
-            </Popup>
-          </Marker>
-        )}
-        {ubicacionUsuario && (
-          <Marker
-            position={[ubicacionUsuario.lat, ubicacionUsuario.lng]}
-            icon={iconoUsuario()}
-            zIndexOffset={1000}
-          >
-            <Popup>Estás aquí</Popup>
-          </Marker>
-        )}
-        <MarkerClusterGroup iconCreateFunction={iconoCluster}>
-          {conCoordenadas.map((clase) => {
-            const plazasMax = clase.plazas_max ?? 0
-            const plazasOcupadas = clase.plazas_ocupadas ?? 0
-            const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
+      <div className="relative isolate h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
+        <MapContainer center={CENTRO_SEVILLA} zoom={12} style={{ height: '100%', width: '100%' }}>
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <AjustarEncuadre clases={conCoordenadas} />
+          <CentrarEnUsuario ubicacion={ubicacionUsuario} />
+          <CentradorBusqueda coords={coordsBusqueda} />
+          {coordsBusqueda && (
+            <Marker position={[coordsBusqueda.lat, coordsBusqueda.lng]} icon={iconoBusqueda()}>
+              <Popup>Esta es la ubicación que buscaste</Popup>
+            </Marker>
+          )}
+          {ubicacionUsuario && (
+            <Marker
+              position={[ubicacionUsuario.lat, ubicacionUsuario.lng]}
+              icon={iconoUsuario()}
+              zIndexOffset={1000}
+            >
+              <Popup>Estás aquí</Popup>
+            </Marker>
+          )}
+          <MarkerClusterGroup iconCreateFunction={iconoCluster}>
+            {conCoordenadas.map((clase) => {
+              const plazasMax = clase.plazas_max ?? 0
+              const plazasOcupadas = clase.plazas_ocupadas ?? 0
+              const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
 
-            return (
-              <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoPorCategoria(clase.categoria)}>
-                <Popup autoPanPaddingTopLeft={[20, 150]} autoPanPaddingBottomRight={[20, 20]}>
-                  <strong>{clase.titulo}</strong>
-                  <br />
-                  {clase.categoria}
-                  <br />
-                  {clase.precio} €
-                  <br />
-                  {plazasLibres}/{plazasMax} plazas libres
-                  <br />
-                  <Link
-                    href={`/clases/${clase.id}`}
-                    className="mt-2 block rounded-full bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
-                  >
-                    Ver detalles
-                  </Link>
-                </Popup>
-              </Marker>
-            )
-          })}
-        </MarkerClusterGroup>
-      </MapContainer>
+              return (
+                <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoPorCategoria(clase.categoria)}>
+                  <Popup>
+                    <strong>{clase.titulo}</strong>
+                    <br />
+                    {clase.categoria}
+                    <br />
+                    {clase.precio} €
+                    <br />
+                    {plazasLibres}/{plazasMax} plazas libres
+                    <br />
+                    <Link
+                      href={`/clases/${clase.id}`}
+                      className="mt-2 block rounded-full bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
+                    >
+                      Ver detalles
+                    </Link>
+                  </Popup>
+                </Marker>
+              )
+            })}
+          </MarkerClusterGroup>
+        </MapContainer>
+      </div>
     </div>
   )
 }
