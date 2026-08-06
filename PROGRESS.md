@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 5 agosto 2026
+Última actualización: 6 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -209,6 +209,17 @@ Falta:
 Hecho:
 - Menú de navegación (components/Menu.js) convertido en responsive: en móvil, botón tipo pastilla lima con icono + texto ("Menú"/"Cerrar" según esté cerrado o abierto) que despliega un panel a pantalla completa con todos los enlaces en columna y buen tamaño de toque; en escritorio (md y superior) el menú queda exactamente igual que antes, sin ningún cambio visual. La lista de enlaces se calcula una única vez a partir de usuario/rol y se reutiliza en ambas versiones, para no duplicar la lógica de roles; el resaltado de página activa (subrayado animado) en escritorio no se tocó.
 - Tarjeta de acceso "Entrenadores" añadida a la portada (app/page.js) para el cliente con sesión iniciada, junto a las de Sesiones/Mis reservas/Mi cuenta, enlazando a /entrenadores.
+
+Falta:
+- Ninguno.
+
+## Buscador de direcciones en los mapas y ajustes de navegación (6 agosto 2026)
+Hecho:
+- Buscador de direcciones con autocompletado en los mapas de /publicar y /clases: geocodificación con Nominatim de OpenStreetMap (lib/geocodificar.js), sin coste y sin API key, limitada a España (countrycodes=es); salvaguardas para no abusar del servicio público: mínimo de 4 caracteres antes de llamar, debounce de 400ms, y caché en memoria por texto de búsqueda. Componente reutilizable components/BuscadorDireccion.js: desplegable de hasta 5 sugerencias, marco lima permanente, placeholder corto "Buscar calle o lugar" (pensado para que no se corte en pantallas de móvil). Nota técnica: no requiere nada en Supabase, la geocodificación la resuelve el propio navegador contra la API pública de Nominatim. Nota de escalado: la instancia pública de Nominatim es suficiente para la beta y bastante más volumen; si algún día el uso creciera mucho, se migraría a una instancia self-hosted o a un proveedor de pago (Mapbox, Google), cambio acotado a lib/geocodificar.js.
+- En /publicar (components/MapaSelector.js): al buscar una calle aparece un marcador CORAL de referencia (icono propio, lib/iconoBusqueda.js) con letrero "Esta es la ubicación que buscaste" al pincharlo; el pin AZUL de la sesión (el que de verdad se guarda) sigue fijándose solo al pinchar el punto exacto en el mapa. Decisión de producto: separar a propósito "la calle que busqué" (mera referencia visual) del "punto exacto de la sesión" (lo que se guarda en clases.lat/lng), para no dar por hecho que el centro aproximado de una calle es el punto de encuentro real.
+- En /clases (components/MapaClases.js): el buscador solo centra el mapa (no filtra ni toca la lista de sesiones ni la consulta a Supabase), con el mismo marcador coral de referencia; el buscador y el botón "Ver mi ubicación" se sacaron de encima del mapa (antes superpuestos con position:absolute, tapaban a veces el letrero de una sesión) a una barra en flujo normal encima del recuadro del mapa, igual que en /publicar; esto permitió quitar el autoPan forzado que se había añadido como parche (el letrero de una sesión ya no aparece y desaparece).
+- Textos de navegación adaptados al rol: el acceso a /clases (menú de escritorio, menú hamburguesa de móvil y tarjeta de acceso de la portada) muestra "Descubre sesiones" sin sesión iniciada, "Busca tu sesión" para clientes y "Sesiones publicadas" para entrenadores, en vez del genérico "Sesiones" de antes.
+- Corregido el z-index del mapa en móvil: al hacer scroll, el mapa (o sus controles/overlays) podían pintarse por encima de la barra de navegación superior, tapándola. Arreglado con isolate (aísla el contexto de apilamiento de cada mapa) en components/MapaClases.js y components/MapaSelector.js, y subiendo el z-index del <nav> sticky (components/Menu.js) de z-50 a z-[2000] como refuerzo.
 
 Falta:
 - Ninguno.
