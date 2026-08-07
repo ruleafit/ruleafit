@@ -253,6 +253,8 @@ Falta:
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
 - Rediseño de Open ligado al precio: no regalar los 5 Open de asistencia en clases gratis o muy baratas; conceder Open solo por encima de un umbral de precio X, aún por decidir.
 
+Nota (investigación del modelo de cobros, 7 agosto 2026): Stripe Connect "puro" no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
+
 ## Análisis de competencia (21 julio 2026)
 
 Competidor directo detectado: Trainity (trainityapp.com), lanzado en julio de 2026. Misma propuesta que Openfit: entrenamientos en grupo al aire libre en Sevilla, sin cuotas mensuales, precios desde 3 €.
