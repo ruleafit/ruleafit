@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 6 agosto 2026
+Última actualización: 7 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -123,6 +123,8 @@ Nota (decisión de producto, 4 agosto 2026): se mantiene el marcado manual de as
 
 Nota (hallazgo técnico, resuelto el 2 agosto 2026): se creía que la tabla public.clases y sus políticas RLS no estaban versionadas en sql/, pero sí lo estaban: sql/016_tabla_clases.sql (tabla, RLS y las tres políticas), sql/019 (FK adicional a perfiles) y sql/010 (función usuario_tiene_reserva_en_clase, usada por la política de SELECT). Verificado el 2 agosto 2026 contra la definición real en Supabase, sin diferencias.
 
+Nota (decisión de marca pendiente, 7 agosto 2026): el nombre "Openfit" hay que cambiarlo sí o sí, ya que es una marca ya registrada por otra empresa del sector fitness (fitness/apps), con riesgo legal si el proyecto crece; openfit.com y openfit.es están cogidos. Candidato actual guardado: "Ruleafit", comprobado libre de dominio (.com) y sin marca previa aparente, pendiente de confirmar como decisión firme. En pruebas de dictado por voz sin contexto, el final "-fit" se falla a veces (se oye como -fic/-cit/-pick), aunque con contexto de app de deporte se acierta mejor; si se confirma el nombre, conviene comprar también ruleafic.com como red de seguridad. Cuando el nombre esté decidido al 100%, cambiar "Openfit" por el nuevo en: cabecera (menú superior), pie de página, página de inicio y el nombre del acceso directo/PWA en móvil (manifest), además de revisar textos legales, correo y metadata donde aparezca. De momento se mantiene "Openfit" en toda la app; no se cambia nada todavía.
+
 Beta lanzada (en curso):
 - Beta repartida a ~30 personas del círculo cercano (~6 entrenadores, resto clientes), sin confirmación de email, con mensajes de WhatsApp distintos por rol. La app corre en producción (Vercel + Supabase); la gente la está usando durante una semana como si fuera real.
 - Recogiendo errores y sugerencias (estéticas y de funcionalidad) para ir corrigiendo. IMPORTANTE: al haber gente usando la app en vivo, extremar el cuidado con lo que se sube a main.
@@ -220,6 +222,13 @@ Hecho:
 - En /clases (components/MapaClases.js): el buscador solo centra el mapa (no filtra ni toca la lista de sesiones ni la consulta a Supabase), con el mismo marcador coral de referencia; el buscador y el botón "Ver mi ubicación" se sacaron de encima del mapa (antes superpuestos con position:absolute, tapaban a veces el letrero de una sesión) a una barra en flujo normal encima del recuadro del mapa, igual que en /publicar; esto permitió quitar el autoPan forzado que se había añadido como parche (el letrero de una sesión ya no aparece y desaparece).
 - Textos de navegación adaptados al rol: el acceso a /clases (menú de escritorio, menú hamburguesa de móvil y tarjeta de acceso de la portada) muestra "Descubre sesiones" sin sesión iniciada, "Busca tu sesión" para clientes y "Sesiones publicadas" para entrenadores, en vez del genérico "Sesiones" de antes.
 - Corregido el z-index del mapa en móvil: al hacer scroll, el mapa (o sus controles/overlays) podían pintarse por encima de la barra de navegación superior, tapándola. Arreglado con isolate (aísla el contexto de apilamiento de cada mapa) en components/MapaClases.js y components/MapaSelector.js, y subiendo el z-index del <nav> sticky (components/Menu.js) de z-50 a z-[2000] como refuerzo.
+
+Falta:
+- Ninguno.
+
+## Botón de limpiar en el buscador de direcciones (7 agosto 2026)
+Hecho:
+- Botón "X" en components/BuscadorDireccion.js para vaciar el texto de golpe (antes había que borrar letra a letra), visible solo cuando hay texto escrito; también se activa el mismo efecto de limpieza si el usuario borra el texto a mano hasta dejarlo vacío. Nueva prop onLimpiar, usada en los dos mapas (components/MapaSelector.js en /publicar y components/MapaClases.js en /clases) para apagar a la vez el marcador coral de referencia. En /publicar esto además libera el punto donde estaba el coral, permitiendo fijar ahí mismo el pin azul de la sesión.
 
 Falta:
 - Ninguno.

@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { X } from 'lucide-react'
 import { geocodificar } from '../lib/geocodificar'
 
 const MINIMO_CARACTERES = 4
 const RETARDO_DEBOUNCE_MS = 400
 
-export default function BuscadorDireccion({ onSeleccionar, placeholder = 'Buscar calle o lugar' }) {
+export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholder = 'Buscar calle o lugar' }) {
   const [texto, setTexto] = useState('')
   const [sugerencias, setSugerencias] = useState([])
   const [cargando, setCargando] = useState(false)
@@ -14,9 +15,15 @@ export default function BuscadorDireccion({ onSeleccionar, placeholder = 'Buscar
 
   const controladorRef = useRef(null)
   const contenedorRef = useRef(null)
+  const teniaTextoRef = useRef(false)
 
   useEffect(() => {
     const textoNormalizado = texto.trim()
+
+    if (textoNormalizado.length === 0 && teniaTextoRef.current) {
+      onLimpiar?.()
+    }
+    teniaTextoRef.current = textoNormalizado.length > 0
 
     if (textoNormalizado.length < MINIMO_CARACTERES) {
       setSugerencias([])
@@ -65,6 +72,14 @@ export default function BuscadorDireccion({ onSeleccionar, placeholder = 'Buscar
     setSugerencias([])
   }
 
+  function handleLimpiar() {
+    setTexto('')
+    setSugerencias([])
+    setAbierto(false)
+    teniaTextoRef.current = false
+    onLimpiar?.()
+  }
+
   const mostrarSinResultados =
     abierto && !cargando && sugerencias.length === 0 && texto.trim().length >= MINIMO_CARACTERES
 
@@ -78,8 +93,19 @@ export default function BuscadorDireccion({ onSeleccionar, placeholder = 'Buscar
           if (sugerencias.length > 0) setAbierto(true)
         }}
         placeholder={placeholder}
-        className="w-full rounded-full border-2 border-[#B5E600] bg-white px-4 py-2 text-sm text-[#16231B] placeholder:text-[#6B7355] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+        className="w-full rounded-full border-2 border-[#B5E600] bg-white px-4 py-2 pr-8 text-sm text-[#16231B] placeholder:text-[#6B7355] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
       />
+
+      {texto && (
+        <button
+          type="button"
+          onClick={handleLimpiar}
+          aria-label="Borrar búsqueda"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7355] hover:text-[#16231B]"
+        >
+          <X className="h-4 w-4" strokeWidth={1.75} />
+        </button>
+      )}
 
       {cargando && (
         <p className="mt-1 text-xs text-[#6B7355]">Buscando...</p>

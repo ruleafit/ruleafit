@@ -162,6 +162,7 @@ export default function MapaClases({ clases }) {
         <div className="flex-1 p-1">
           <BuscadorDireccion
             onSeleccionar={(sugerencia) => setCoordsBusqueda({ lat: sugerencia.lat, lng: sugerencia.lng })}
+            onLimpiar={() => setCoordsBusqueda(null)}
           />
         </div>
       </div>

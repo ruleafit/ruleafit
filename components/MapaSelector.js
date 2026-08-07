@@ -64,7 +64,10 @@ export default function MapaSelector({ ciudad, lat, lng, onCambiarUbicacion }) {
   return (
     <div>
       <div className="mb-2 p-1">
-        <BuscadorDireccion onSeleccionar={handleSeleccionarSugerencia} />
+        <BuscadorDireccion
+          onSeleccionar={handleSeleccionarSugerencia}
+          onLimpiar={() => setCoordsBusqueda(null)}
+        />
       </div>
       <p className="mb-2 text-xs text-[#6B7355]">
         Busca una calle para situarte y luego pincha en el mapa para marcar el punto exacto de la sesión.
