@@ -146,7 +146,6 @@ Otros pendientes menores (sin prioridad asignada):
 - Pulido fino según el feedback de la beta.
 - Cambiar lang="en" por lang="es" en app/layout.js (toda la interfaz es en español).
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
-- 3 vulnerabilidades "high" que reporta npm audit en next/postcss/sharp, preexistentes (anteriores a esta sesión, no las trajo react-leaflet-cluster); `npm audit fix --force` propone subir Next fuera del rango declarado en package.json y podría romper cosas, así que no se toca con la beta en vivo. Pendiente revisarlo con calma, sin --force.
 - Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
 - Notificaciones push web (avisos en el móvil con la app cerrada; la PWA ya sirve de base).
   - Incluye el aviso al cliente cuando un entrenador al que sigue publica una sesión nueva (seguir entrenadores ya implementado, ver "Seguir entrenadores y buscador de entrenadores").
@@ -229,6 +228,13 @@ Falta:
 ## Botón de limpiar en el buscador de direcciones (7 agosto 2026)
 Hecho:
 - Botón "X" en components/BuscadorDireccion.js para vaciar el texto de golpe (antes había que borrar letra a letra), visible solo cuando hay texto escrito; también se activa el mismo efecto de limpieza si el usuario borra el texto a mano hasta dejarlo vacío. Nueva prop onLimpiar, usada en los dos mapas (components/MapaSelector.js en /publicar y components/MapaClases.js en /clases) para apagar a la vez el marcador coral de referencia. En /publicar esto además libera el punto donde estaba el coral, permitiendo fijar ahí mismo el pin azul de la sesión.
+
+Falta:
+- Ninguno.
+
+## Actualización de Next a 16.3.0 (7 agosto 2026)
+Hecho:
+- Subida de Next de 16.2.10 a 16.3.0 (salto de versión menor, no breaking), que cierra las 3 vulnerabilidades "high" que reportaba npm audit en next/postcss/sharp (arrastraban desde antes, no las trajo react-leaflet-cluster); npm audit queda en 0 vulnerabilidades. Probado en local tras la subida (build y funcionamiento igual que antes).
 
 Falta:
 - Ninguno.
