@@ -147,8 +147,7 @@ Otros pendientes menores (sin prioridad asignada):
 - Cambiar lang="en" por lang="es" en app/layout.js (toda la interfaz es en español).
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
 - Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
-- Notificaciones push web (avisos en el móvil con la app cerrada; la PWA ya sirve de base).
-  - Incluye el aviso al cliente cuando un entrenador al que sigue publica una sesión nueva (seguir entrenadores ya implementado, ver "Seguir entrenadores y buscador de entrenadores").
+- Notificaciones push web: motor y eventos directos ya implementados, ver "Notificaciones push (Bloque B: motor completo)". Queda pendiente el Bloque C (recordatorios automáticos) y el panel de preferencias por tipo.
 
 ## Mapa de clases: clustering y ubicación del cliente (durante la beta)
 Hecho:
@@ -204,7 +203,7 @@ Hecho:
 - Buscador de entrenadores para clientes (app/entrenadores/page.js), accesible solo con sesión de cliente iniciada (sin sesión invita a iniciar sesión; con sesión de entrenador, mensaje "Esta sección es para clientes."): función RPC listar_entrenadores() (sql/030_listar_entrenadores.sql, security definer, filtra por el rol real en auth.users.raw_user_meta_data, no por tener clases publicadas) devuelve id/username/descripcion/foto_url de cada entrenador; búsqueda por username en el propio cliente, sin volver a llamar a Supabase al escribir; tarjetas con foto o inicial, enlazando al perfil público (/entrenador/[username]). Enlace "Entrenadores" añadido al menú de navegación, visible solo para clientes logueados.
 
 Falta:
-- El aviso al cliente cuando un entrenador al que sigue publica una sesión nueva; depende de las notificaciones push (ver pendientes).
+- Ninguno.
 
 ## Navegación móvil responsive y acceso a Entrenadores desde el inicio (5 agosto 2026)
 Hecho:
@@ -247,6 +246,18 @@ Hecho:
 - Función autocancelar_clases_sin_minimo() que hace la cancelación en bloque (clase + sus reservas activas), marcando motivo_cancelacion = 'minimo' y sin marcar cancelada_por_entrenador (esta cancelación no la decide el entrenador). SQL 033, ya ejecutado en Supabase.
 - Cron de pg_cron 'autocancelar-clases', cada 5 minutos, que ejecuta la función anterior. SQL 034, ya ejecutado en Supabase, con la extensión pg_cron activada.
 - Probado: validado a mano (canceladas 2 sesiones de prueba) y con el cron real en producción (canceló una sesión de prueba sola a los 5 minutos, sin intervención manual).
+
+## Notificaciones push (Bloque B: motor completo) (8 agosto 2026)
+Hecho:
+- Motor de notificaciones push completo y probado en producción, incluida una prueba real en iPhone.
+- Piezas: claves VAPID generadas (pública en NEXT_PUBLIC_VAPID_PUBLIC_KEY, privada en VAPID_PRIVATE_KEY), service worker (public/sw.js, registrado desde components/RegistrarServiceWorker.js montado en app/layout.js), toggle de suscripción en /cuenta (components/NotificacionesToggle.js), tabla public.push_subscriptions (sql/035, RLS: cada usuario solo ve/crea/borra las suyas) y tabla public.notificaciones_cola (sql/036, cola sin políticas RLS: solo la escriben funciones SECURITY DEFINER y el backend con service role). Backend de envío: lib/enviarPush.js (usa la librería web-push) y cliente admin lib/supabaseAdmin.js (service role key, solo servidor), expuestos a través de la API app/api/procesar-notificaciones/route.js (POST protegido con el secreto CRON_SECRET vía cabecera Authorization).
+- Eventos directos ya enganchados a la cola: publicar una sesión nueva avisa a los seguidores del entrenador (trigger notificar_publicacion_clase(), sql/037); cancelar una clase (manual del entrenador o automática por no alcanzar el mínimo) avisa a cada cliente con reserva activa, y la autocancelación por mínimo avisa además al propio entrenador (sql/038); una reserva que agota las plazas de una sesión avisa al entrenador (sql/039).
+- Despliegue: variables NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, SUPABASE_SERVICE_ROLE_KEY y CRON_SECRET configuradas en Vercel; extensión pg_net instalada en Supabase; cron de producción (pg_cron + pg_net) que llama cada minuto a /api/procesar-notificaciones (sql/040, documentado en el repo con el secreto en placeholder, valor real solo en Supabase/Vercel).
+
+Falta:
+- Bloque C: recordatorios automáticos antes de la clase (24h / 7h / ~1h55, tipos de notificación 2-4 para el cliente y 7-9 para el entrenador), con su propio cron encadenado a la comprobación de que la sesión sigue viva (activa, no cancelada) en el momento de enviar.
+- Verificar en una autocancelación real (no solo de prueba) que los avisos tipo 6 y 11 (autocancelación por mínimo, a cliente y entrenador) llegan correctamente; hoy solo están probados los eventos manuales.
+- Sub-bloque 7: panel de preferencias por tipo de notificación (que el usuario pueda desactivar algunas categorías sin desactivar todas).
 
 ## Después de la beta (decidido el 27 julio 2026)
 
