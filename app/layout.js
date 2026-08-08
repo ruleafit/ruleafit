@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://www.ruleafit.com"),
   title: "Openfit",
   description: "Entrena cuando quieras, sin cuotas ni permanencia.",
 };
