@@ -239,6 +239,15 @@ Hecho:
 Falta:
 - Ninguno.
 
+## Autocancelación de sesiones sin mínimo (8 agosto 2026)
+Hecho:
+- Las sesiones con plazas_min > 0 que no alcanzan el mínimo se cancelan solas, automáticamente, cuando faltan ~1h50 para su inicio (comprobación cada 5 minutos vía cron, así que el margen real es esa ventana de 5 min alrededor de las 1h50).
+- Nueva columna clases.motivo_cancelacion ('entrenador' | 'minimo') para distinguir quién canceló la clase. SQL 031, ya ejecutado en Supabase.
+- Barrera real de 2h en cancelar_reserva(): el cliente ya no puede cancelar su reserva si faltan menos de 2h para el inicio (antes el límite de 2h solo calculaba el flag informativo reembolso_aplicable, sin impedir cancelar). SQL 032, ya ejecutado en Supabase.
+- Función autocancelar_clases_sin_minimo() que hace la cancelación en bloque (clase + sus reservas activas), marcando motivo_cancelacion = 'minimo' y sin marcar cancelada_por_entrenador (esta cancelación no la decide el entrenador). SQL 033, ya ejecutado en Supabase.
+- Cron de pg_cron 'autocancelar-clases', cada 5 minutos, que ejecuta la función anterior. SQL 034, ya ejecutado en Supabase, con la extensión pg_cron activada.
+- Probado: validado a mano (canceladas 2 sesiones de prueba) y con el cron real en producción (canceló una sesión de prueba sola a los 5 minutos, sin intervención manual).
+
 ## Después de la beta (decidido el 27 julio 2026)
 
 Hecho (8 agosto 2026):
