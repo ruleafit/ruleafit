@@ -6,6 +6,7 @@ import { Coins, History, CalendarCheck, Star, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
+import NotificacionesToggle from '../../components/NotificacionesToggle'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
@@ -577,6 +578,14 @@ export default function CuentaPage() {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+          <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Notificaciones</h2>
+          <p className="mb-4 text-sm text-[#6B7355]">
+            Recibe avisos en tu móvil cuando tus entrenadores publiquen sesiones y sobre tus reservas.
+          </p>
+          <NotificacionesToggle usuarioActual={usuario} />
         </div>
 
         <button
