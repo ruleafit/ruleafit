@@ -7,6 +7,8 @@ import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import NotificacionesToggle from '../../components/NotificacionesToggle'
+import PreferenciasNotificaciones from '../../components/PreferenciasNotificaciones'
+import HistorialNotificaciones from '../../components/HistorialNotificaciones'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
@@ -37,6 +39,7 @@ export default function CuentaPage() {
   const [guardandoPerfil, setGuardandoPerfil] = useState(false)
   const [errorPerfil, setErrorPerfil] = useState('')
   const [confirmacionPerfil, setConfirmacionPerfil] = useState('')
+  const [pushActivadas, setPushActivadas] = useState(false)
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -585,7 +588,15 @@ export default function CuentaPage() {
           <p className="mb-4 text-sm text-[#6B7355]">
             Recibe avisos en tu móvil cuando tus entrenadores publiquen sesiones y sobre tus reservas.
           </p>
-          <NotificacionesToggle usuarioActual={usuario} />
+          <NotificacionesToggle usuarioActual={usuario} onCambioEstado={setPushActivadas} />
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-[#162318] mb-3">Qué notificaciones quieres recibir</h3>
+            <PreferenciasNotificaciones usuarioActual={usuario} rol={rol} pushActivadas={pushActivadas} />
+          </div>
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-[#162318] mb-3">Últimas notificaciones</h3>
+            <HistorialNotificaciones usuarioActual={usuario} />
+          </div>
         </div>
 
         <button

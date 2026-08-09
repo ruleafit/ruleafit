@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Home, Menu as IconoMenu, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import CampanaNotificaciones from './CampanaNotificaciones'
 
 export default function Menu() {
   const router = useRouter()
@@ -215,25 +216,28 @@ export default function Menu() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMenuAbierto((abierto) => !abierto)}
-          aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
-          aria-expanded={menuAbierto}
-          className="inline-flex items-center gap-2 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#16231B] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 md:hidden"
-        >
-          {menuAbierto ? (
-            <>
-              <X className="h-5 w-5" strokeWidth={1.75} />
-              Cerrar
-            </>
-          ) : (
-            <>
-              <IconoMenu className="h-5 w-5" strokeWidth={1.75} />
-              Menú
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          {usuario && <CampanaNotificaciones usuarioActual={usuario} />}
+          <button
+            type="button"
+            onClick={() => setMenuAbierto((abierto) => !abierto)}
+            aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={menuAbierto}
+            className="inline-flex items-center gap-2 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#16231B] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 md:hidden"
+          >
+            {menuAbierto ? (
+              <>
+                <X className="h-5 w-5" strokeWidth={1.75} />
+                Cerrar
+              </>
+            ) : (
+              <>
+                <IconoMenu className="h-5 w-5" strokeWidth={1.75} />
+                Menú
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {menuAbierto && (

@@ -15,12 +15,16 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray
 }
 
-export default function NotificacionesToggle({ usuarioActual }) {
+export default function NotificacionesToggle({ usuarioActual, onCambioEstado }) {
   const [soportado, setSoportado] = useState(true)
   const [activado, setActivado] = useState(false)
   const [cargando, setCargando] = useState(true)
   const [procesando, setProcesando] = useState(false)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (onCambioEstado) onCambioEstado(activado)
+  }, [activado])
 
   // Al cargar: comprobar soporte del navegador y si ya hay una suscripcion activa.
   useEffect(() => {
@@ -114,7 +118,7 @@ export default function NotificacionesToggle({ usuarioActual }) {
         className={
           activado
             ? 'rounded-full border-2 border-[#162318] px-6 py-2 font-semibold text-[#162318] transition hover:bg-[#162318] hover:text-white disabled:opacity-60'
-            : 'rounded-full bg-[#B85E60] px-6 py-2 font-semibold text-white transition hover:brightness-95 disabled:opacity-60'
+            : 'rounded-full bg-[#B5E600] px-6 py-2 font-semibold text-[#3D4A00] transition hover:brightness-95 disabled:opacity-60'
         }
       >
         {cargando ? '...' : procesando ? '...' : activado ? 'Desactivar notificaciones' : 'Activar notificaciones'}
