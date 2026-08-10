@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 7 agosto 2026
+Última actualización: 9 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -257,6 +257,17 @@ Hecho:
 - Sub-bloque 7 (preferencias + centro de notificaciones), completo y en producción: dos tablas nuevas con RLS —notificaciones_historial (registro de TODAS las notificaciones generadas, con flag leido) y preferencias_notificaciones (opt-out por categoría)— (sql/044); función helper generar_notificacion() que escribe SIEMPRE en el historial y encola push solo si la preferencia de la categoría del tipo está activa (las categorías críticas —cancelaciones— siempre se envían), con mapeo tipo→categoría granular (cada recordatorio con su propia categoría) (sql/045 v1, sql/050 v2 granular). Las 5 funciones que generaban notificaciones se reconvirtieron para pasar por generar_notificacion(): publicación (sql/037→046), cancelación manual y por mínimo (sql/038→047), plazas agotadas (sql/039→048) y recordatorios (sql/042→049); ya no quedan inserts directos a notificaciones_cola en código de negocio. UI en /cuenta: panel de preferencias por categoría (components/PreferenciasNotificaciones.js, opt-out, toggles individuales que se atenúan si el push general está desactivado, cancelaciones siempre activas y no desactivables, color lima de marca #B5E600) y panel de historial fijo con las 10 últimas notificaciones (components/HistorialNotificaciones.js). Campana de notificaciones en components/Menu.js (components/CampanaNotificaciones.js), independiente del menú y siempre visible a la izquierda del botón "Menú" en escritorio y móvil: punto rojo si hay no leídas, lista de las 10 últimas, marca como leídas al abrir, refresco cada 60s. Commit f145b97.
 
 Falta: nada crítico. Opcional a futuro: purga de historial antiguo (notificaciones_historial crecerá sin límite) y verificar en una autocancelación real (no solo de prueba) que los avisos de autocancelación por mínimo (cliente y entrenador) llegan correctamente en producción.
+
+## Aviso de activar notificaciones tras la primera acción (9 agosto 2026)
+Hecho:
+- Banner discreto (components/AvisoActivarNotificaciones.js) que invita a activar las push tras la primera acción del usuario, no al registrarse: cliente al seguir a un entrenador o reservar una sesión; entrenador al publicar una sesión. No exige que sea la primera acción absoluta del usuario; cualquiera de esas tres acciones lo dispara.
+- Arquitectura: la lógica de suscripción push se extrajo de NotificacionesToggle a un hook compartido lib/usePush.js (mismo comportamiento, ahora reutilizable; activar() devuelve true/false). Las acciones emiten un evento global window 'primera-accion' (una línea en BotonSeguir, BotonReservar y app/publicar); el banner, montado en Menu.js y siempre presente con sesión iniciada, lo escucha vía un disparador incremental. El efecto solo reacciona al cambio del disparador (useRef guarda el último procesado), nunca al iniciar sesión ni al cambiar otras dependencias.
+- Frecuencia (opt-out amable, guardada en localStorage clave aviso_notif_v1): se ofrece 1 vez; si el usuario cierra con "ahora no" espera 7 días; a la 2ª negativa no vuelve a insistir. No se muestra si las push ya están activadas, si el permiso del navegador está en denied, o si no hay soporte.
+- Caso iPhone: si detecta iOS sin la PWA instalada, en vez de pedir permiso invita a instalar la app reutilizando BotonInstalarApp.
+- Commit a76679f.
+
+Falta:
+- Ninguno.
 
 ## Después de la beta (decidido el 27 julio 2026)
 
