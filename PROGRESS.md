@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 9 agosto 2026
+Última actualización: 10 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -276,6 +276,18 @@ Hecho:
 Falta:
 - Ninguno.
 
+## Login con Google (OAuth) (10 agosto 2026)
+Hecho:
+- Boton "Continuar con Google" en /login y /registro (signInWithOAuth, provider google, redirectTo a /auth/callback).
+- Ruta /auth/callback (app/auth/callback/page.js): cliente, procesa la sesion; si el usuario ya tiene rol en user_metadata va a /, si no va a /completar-perfil.
+- Pantalla /completar-perfil (app/completar-perfil/page.js): usuario nuevo de Google elige rol (Cliente/Entrenador con doble confirmacion y aviso destacado de que no se puede cambiar) y username (validado con RPC username_disponible). Al confirmar guarda rol+username en user_metadata (updateUser) Y actualiza el username en la tabla perfiles.
+- Detalle clave: el trigger crear_perfil_para_usuario_nuevo crea la fila de perfiles en el momento del login de Google con un username derivado del email (Google no manda username); por eso completar-perfil DEBE actualizar perfiles ademas de user_metadata, ya que la app lee el username de perfiles.
+- El registro normal (email/password) se mantiene intacto; Google es un carril aparte. Se añadio tambien el aviso coral destacado de "el rol no se puede cambiar" al registro normal, por coherencia.
+- Config (Fase 0): proveedor Google activado en Supabase Auth con Client ID/Secret de Google Cloud; Redirect URLs de localhost y produccion.
+- Commit 82fcee2.
+Falta:
+- Confirmar que la Redirect URL de produccion (https://www.ruleafit.com/auth/callback) esta en Supabase (la de localhost si esta, probado en local).
+
 ## Después de la beta (decidido el 27 julio 2026)
 
 Hecho (8 agosto 2026):
@@ -288,7 +300,6 @@ Falta:
 - Envío de correos con SMTP propio (dominio ya resuelto — desbloqueado, listo para abordar): el servidor compartido de Supabase no sirve para producción (2-3 correos/hora, cae en spam). Se usará Resend. IMPORTANTE (comprobado el 27 julio 2026): Resend sin un dominio propio verificado solo permite enviar correos a la propia dirección de la cuenta, no a terceros; por tanto Resend exige tener dominio propio (ya cubierto: dominio ruleafit.com comprado y vinculado).
 - Traducir al español la plantilla del email de confirmación en Supabase: el botón de editar el HTML (Source) está deshabilitado en el plan actual y pide configurar SMTP propio, así que depende de tener Resend con dominio propio.
 - Aviso en /login para usuarios que intenten entrar sin haber confirmado el correo: cuando se active la confirmación, Supabase devuelve un error distinto en ese caso; conviene mostrar un mensaje claro tipo "confirma tu correo antes de entrar".
-- Login con Google (OAuth) (dominio ya resuelto — desbloqueado, listo para abordar): se valoró para la beta pero se pospone por ser un montaje aparte (Google Cloud Console, credenciales, pantalla de consentimiento). Ventaja: quien entra con Google no necesita confirmar el email.
 - Recuperar contraseña por correo con enlace (dominio ya resuelto — desbloqueado, listo para abordar) (depende del envío de emails).
 - 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
 
