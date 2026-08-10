@@ -14,10 +14,13 @@ const labelClass = 'mb-1 block text-sm font-medium text-[#1F2400]'
 const botonPrimarioClass =
   'mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
 
-function traducirErrorLogin(mensajeOriginal) {
+function traducirErrorLogin(mensajeOriginal, codigo) {
   const m = (mensajeOriginal || '').toLowerCase()
   if (m.includes('invalid login credentials')) {
     return 'El correo o la contraseña no son correctos.'
+  }
+  if (codigo === 'email_not_confirmed' || m.includes('email not confirmed')) {
+    return 'Tienes que confirmar tu correo antes de entrar. Te enviamos un enlace de confirmación al registrarte; revisa tu bandeja de entrada y la carpeta de spam.'
   }
   return 'Algo ha ido mal. Inténtalo de nuevo.'
 }
@@ -40,7 +43,7 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setMensaje(traducirErrorLogin(error.message))
+      setMensaje(traducirErrorLogin(error.message, error.code))
       setCargando(false)
     } else {
       router.push('/')
