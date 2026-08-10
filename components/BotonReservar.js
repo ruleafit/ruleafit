@@ -120,6 +120,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     if (onReservado) {
       const nuevasPlazasOcupadas = data?.plazas_ocupadas ?? (clase.plazas_ocupadas ?? 0) + 1
       onReservado(nuevasPlazasOcupadas)
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('primera-accion'))
     }
   }
 

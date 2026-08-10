@@ -66,7 +66,10 @@ export default function BotonSeguir({ entrenadorId, usuarioActual }) {
         .from('seguimientos')
         .insert({ seguidor_id: usuarioActual.id, entrenador_id: entrenadorId })
       if (errInsertar) setError(true)
-      else setSiguiendo(true)
+      else {
+        setSiguiendo(true)
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('primera-accion'))
+      }
     }
     setProcesando(false)
   }

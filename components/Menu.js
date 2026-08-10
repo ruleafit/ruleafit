@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Home, Menu as IconoMenu, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import CampanaNotificaciones from './CampanaNotificaciones'
+import AvisoActivarNotificaciones from './AvisoActivarNotificaciones'
 
 export default function Menu() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export default function Menu() {
   const [usuario, setUsuario] = useState(null)
   const [conSombra, setConSombra] = useState(false)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [disparadorAviso, setDisparadorAviso] = useState(0)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -35,6 +37,14 @@ export default function Menu() {
     alHacerScroll()
     window.addEventListener('scroll', alHacerScroll)
     return () => window.removeEventListener('scroll', alHacerScroll)
+  }, [])
+
+  useEffect(() => {
+    function alPrimeraAccion() {
+      setDisparadorAviso((n) => n + 1)
+    }
+    window.addEventListener('primera-accion', alPrimeraAccion)
+    return () => window.removeEventListener('primera-accion', alPrimeraAccion)
   }, [])
 
   const rol = usuario?.user_metadata?.rol
@@ -191,6 +201,7 @@ export default function Menu() {
   }
 
   return (
+    <>
     <nav
       className={`sticky top-0 z-[2000] w-full border-b border-zinc-200 bg-white motion-safe:transition-shadow motion-safe:duration-200 ${
         conSombra ? 'shadow-sm' : ''
@@ -261,5 +272,10 @@ export default function Menu() {
         </div>
       )}
     </nav>
+
+    {usuario && (
+      <AvisoActivarNotificaciones usuarioActual={usuario} disparador={disparadorAviso} />
+    )}
+    </>
   )
 }

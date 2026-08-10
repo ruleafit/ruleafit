@@ -117,6 +117,7 @@ export default function PublicarPage() {
       setMensaje('Error: ' + error.message)
     } else {
       setMensaje('¡Sesión publicada correctamente!')
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('primera-accion'))
       setTitulo('')
       setTipoActividad('')
       setDireccion('')
