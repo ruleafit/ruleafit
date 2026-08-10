@@ -144,7 +144,6 @@ Falta:
 
 Otros pendientes menores (sin prioridad asignada):
 - Pulido fino según el feedback de la beta.
-- Cambiar lang="en" por lang="es" en app/layout.js (toda la interfaz es en español).
 - Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
 - Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
 - Notificaciones push web: bloque completo (motor, eventos directos, recordatorios programados, preferencias y centro de notificaciones), ver "Notificaciones push (Bloque B + C + sub-bloque 7: completo)".
