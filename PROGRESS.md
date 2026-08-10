@@ -301,10 +301,14 @@ Hecho (10 agosto 2026) · Bloque A · Infraestructura de correo (Resend):
 - SMTP propio configurado en Supabase (Authentication -> Emails -> Custom SMTP): host smtp.resend.com, puerto 465, usuario "resend", contraseña = API key de Resend. Remitente no-reply@ruleafit.com, nombre visible "Openfit" (provisional, hasta el rename final). Intervalo mínimo por usuario: 60 s.
 - Validado: correo de recuperación enviado desde Authentication -> Users llega correctamente desde no-reply@ruleafit.com con remitente Openfit.
 
+Hecho (10 agosto 2026) · Bloque B · Confirmación de registro:
+- Plantilla "Confirm signup" traducida al español en Supabase (asunto "Confirma tu cuenta en Openfit" y cuerpo con marca Openfit), respetando la variable {{ .ConfirmationURL }}.
+- Interruptor "Confirm email" activado en Supabase (Authentication -> Sign In / Providers -> Email). Comprobado antes que los 40 usuarios existentes ya tenían email_confirmed_at (no se bloquea a nadie); solo afecta a registros nuevos.
+- Aviso claro en /login cuando el email no está confirmado: nueva rama en traducirErrorLogin() de app/login/page.js que detecta error.code === 'email_not_confirmed' (con respaldo por texto) y muestra un mensaje pidiendo confirmar el correo y revisar spam. Commit c91b06f.
+- Validado en producción: registro con correo real -> correo en español -> no deja entrar sin confirmar (mensaje claro) -> tras confirmar, entra.
+
 Falta:
-- Confirmación de email en Supabase (SMTP ya montado — Bloque B): activar "Confirm email" cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado.
-- Traducir al español las plantillas de email en Supabase (confirmación y recuperación): con el SMTP propio ya configurado, el editor de plantillas queda desbloqueado. Pendiente (Bloques B y C).
-- Aviso en /login para usuarios que intenten entrar sin haber confirmado el correo: cuando se active la confirmación, Supabase devuelve un error distinto en ese caso; conviene mostrar un mensaje claro tipo "confirma tu correo antes de entrar".
+- Traducir al español la plantilla de email de recuperación de contraseña en Supabase (Bloque C). La de confirmación ya está traducida.
 - Recuperar contraseña (Bloque C): flujo de UI (enlace en /login + página para pedir el reset + página para fijar la nueva contraseña) y su plantilla. El envío ya está resuelto (SMTP).
 - 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
 
