@@ -295,12 +295,17 @@ Hecho (8 agosto 2026):
 - Supabase Auth actualizado: Site URL y Redirect URLs apuntando a https://www.ruleafit.com (sin quitar vercel.app ni localhost).
 - metadataBase añadido en app/layout.js apuntando a https://www.ruleafit.com.
 
+Hecho (10 agosto 2026) · Bloque A · Infraestructura de correo (Resend):
+- Cuenta creada en Resend (organización openfit2026), plan gratuito (3.000 correos/mes, 100/día, 1 dominio).
+- Dominio ruleafit.com verificado en Resend. Registros DNS añadidos en comvive.es: DKIM (TXT resend._domainkey), SPF (TXT send), MX (send -> feedback-smtp.eu-west-1.amazonses.com, prioridad 10) y DMARC (TXT _dmarc, v=DMARC1; p=none;). Los registros previos de Vercel quedaron intactos. Región de envío: EU (Ireland).
+- SMTP propio configurado en Supabase (Authentication -> Emails -> Custom SMTP): host smtp.resend.com, puerto 465, usuario "resend", contraseña = API key de Resend. Remitente no-reply@ruleafit.com, nombre visible "Openfit" (provisional, hasta el rename final). Intervalo mínimo por usuario: 60 s.
+- Validado: correo de recuperación enviado desde Authentication -> Users llega correctamente desde no-reply@ruleafit.com con remitente Openfit.
+
 Falta:
-- Confirmación de email en Supabase (dominio ya resuelto — desbloqueado, listo para abordar): reactivarla cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado. Requiere resolver antes el envío de correos (ver siguiente punto).
-- Envío de correos con SMTP propio (dominio ya resuelto — desbloqueado, listo para abordar): el servidor compartido de Supabase no sirve para producción (2-3 correos/hora, cae en spam). Se usará Resend. IMPORTANTE (comprobado el 27 julio 2026): Resend sin un dominio propio verificado solo permite enviar correos a la propia dirección de la cuenta, no a terceros; por tanto Resend exige tener dominio propio (ya cubierto: dominio ruleafit.com comprado y vinculado).
-- Traducir al español la plantilla del email de confirmación en Supabase: el botón de editar el HTML (Source) está deshabilitado en el plan actual y pide configurar SMTP propio, así que depende de tener Resend con dominio propio.
+- Confirmación de email en Supabase (SMTP ya montado — Bloque B): activar "Confirm email" cuando se abra a usuarios que no sean del círculo cercano. El código del registro ya está preparado.
+- Traducir al español las plantillas de email en Supabase (confirmación y recuperación): con el SMTP propio ya configurado, el editor de plantillas queda desbloqueado. Pendiente (Bloques B y C).
 - Aviso en /login para usuarios que intenten entrar sin haber confirmado el correo: cuando se active la confirmación, Supabase devuelve un error distinto en ese caso; conviene mostrar un mensaje claro tipo "confirma tu correo antes de entrar".
-- Recuperar contraseña por correo con enlace (dominio ya resuelto — desbloqueado, listo para abordar) (depende del envío de emails).
+- Recuperar contraseña (Bloque C): flujo de UI (enlace en /login + página para pedir el reset + página para fijar la nueva contraseña) y su plantilla. El envío ya está resuelto (SMTP).
 - 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
