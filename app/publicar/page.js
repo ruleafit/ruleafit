@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { CircleCheck, CircleAlert, Dumbbell, CalendarClock, MapPin, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
+import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const MapaSelector = dynamic(() => import('../../components/MapaSelector'), {
@@ -85,6 +86,11 @@ export default function PublicarPage() {
 
     if (!Number.isInteger(plazasMinNum) || plazasMinNum < 0 || plazasMinNum > plazasMaxNum) {
       setMensaje('Las plazas mínimas deben ser un número entero entre 0 y las plazas máximas.')
+      return
+    }
+
+    if (claseYaPaso({ fecha, hora })) {
+      setMensaje('La fecha y hora de la sesión ya han pasado. Elige un momento futuro.')
       return
     }
 
