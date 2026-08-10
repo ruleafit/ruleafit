@@ -47,6 +47,17 @@ export default function LoginPage() {
     }
   }
 
+  async function entrarConGoogle() {
+    const redirectTo = `${window.location.origin}/auth/callback`
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    })
+    if (error) {
+      setMensaje('No se pudo conectar con Google. Inténtalo de nuevo.')
+    }
+  }
+
   return (
     <div className="flex flex-1 flex-col">
       <CabeceraAuth frase="Reserva tu próxima sesión en segundos." />
@@ -93,6 +104,20 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          <div className="my-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-[#E2E6CF]" />
+            <span className="text-xs font-medium text-[#6B7355]">o</span>
+            <div className="h-px flex-1 bg-[#E2E6CF]" />
+          </div>
+
+          <button
+            type="button"
+            onClick={entrarConGoogle}
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-zinc-200 px-6 py-3 font-semibold text-[#162318] transition hover:bg-zinc-50"
+          >
+            Continuar con Google
+          </button>
 
           {mensaje && (
             <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
