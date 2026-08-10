@@ -269,6 +269,13 @@ Hecho:
 Falta:
 - Ninguno.
 
+## Validación de fecha pasada al publicar (9 agosto 2026)
+Hecho:
+- Impedir crear una sesión con fecha+hora ya pasada. Dos capas: (1) validación en el navegador en app/publicar/page.js reutilizando claseYaPaso de lib/ventanaEdicionClase (aviso inmediato al entrenador, no publica); (2) red de seguridad en base de datos con trigger BEFORE INSERT en clases (funcion validar_clase_no_pasada, sql/051) que rechaza fecha+hora anterior a ahora en hora Europe/Madrid.
+- Basta con que sea futura, sin margen minimo.
+Falta:
+- Ninguno.
+
 ## Después de la beta (decidido el 27 julio 2026)
 
 Hecho (8 agosto 2026):
