@@ -306,9 +306,16 @@ Hecho (10 agosto 2026) · Bloque B · Confirmación de registro:
 - Aviso claro en /login cuando el email no está confirmado: nueva rama en traducirErrorLogin() de app/login/page.js que detecta error.code === 'email_not_confirmed' (con respaldo por texto) y muestra un mensaje pidiendo confirmar el correo y revisar spam. Commit c91b06f.
 - Validado en producción: registro con correo real -> correo en español -> no deja entrar sin confirmar (mensaje claro) -> tras confirmar, entra.
 
+Hecho (11 agosto 2026) · Bloque C · Recuperación de contraseña:
+- Flujo aislado del callback de Google (no se tocó app/auth/callback). Enlace "¿Olvidaste tu contraseña?" añadido en /login.
+- Página /recuperar: pide el email y llama a resetPasswordForEmail con redirectTo dinámico (window.location.origin + /nueva-contrasena). Mensaje neutro que no revela si el email existe.
+- Página /nueva-contrasena: detecta la sesión de tipo recovery con onAuthStateChange (evento PASSWORD_RECOVERY) + getSession() de respaldo para evitar la condición de carrera; estado verificando/valido/invalido. Valida mínimo 8 caracteres y coincidencia, llama a updateUser, hace signOut y redirige a /login?reset=ok. Caso de enlace inválido/caducado manejado con aviso claro y opción de pedir otro.
+- Mensaje de éxito en /login al recibir ?reset=ok (useSearchParams envuelto en Suspense).
+- Plantilla "Reset password" traducida al español en Supabase (asunto "Restablece tu contraseña en Openfit"), respetando la variable {{ .ConfirmationURL }}. Redirect URLs ya cubrían /nueva-contrasena vía comodín.
+- Validado end-to-end en local con correo real: pedir reset -> correo en español -> enlace -> nueva contraseña -> login con la nueva. Commit del código: ver rama main (feat recuperar).
+- Conocido (mejora post-beta): el enlace de recuperación es de un solo uso y caduca ~1h; si se abre dos veces (p.ej. primero en un dispositivo donde no aplica y luego en otro) el segundo intento sale como caducado. La página lo gestiona ofreciendo pedir otro enlace. Valorar OTP/PKCE post-beta si molesta a usuarios reales.
+
 Falta:
-- Traducir al español la plantilla de email de recuperación de contraseña en Supabase (Bloque C). La de confirmación ya está traducida.
-- Recuperar contraseña (Bloque C): flujo de UI (enlace en /login + página para pedir el reset + página para fijar la nueva contraseña) y su plantilla. El envío ya está resuelto (SMTP).
 - 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
 
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
