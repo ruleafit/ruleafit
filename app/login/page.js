@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { CircleAlert, Loader2 } from 'lucide-react'
+import { CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
@@ -25,8 +25,10 @@ function traducirErrorLogin(mensajeOriginal, codigo) {
   return 'Algo ha ido mal. Inténtalo de nuevo.'
 }
 
-export default function LoginPage() {
+function LoginFormulario() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const restablecida = searchParams.get('reset') === 'ok'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -70,6 +72,15 @@ export default function LoginPage() {
           <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#1F2400]">
             Iniciar sesión
           </h1>
+
+          {restablecida && (
+            <div className="mb-4 flex items-start gap-2 rounded-xl border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00]">
+              <CircleCheck className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
+              <p className="font-medium">
+                Contraseña actualizada. Ya puedes iniciar sesión con tu nueva contraseña.
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div>
@@ -144,5 +155,13 @@ export default function LoginPage() {
         </RevelarAlLlegar>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginFormulario />
+    </Suspense>
   )
 }
