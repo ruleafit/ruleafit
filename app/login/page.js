@@ -108,6 +108,12 @@ export default function LoginPage() {
             </button>
           </form>
 
+          <p className="mt-3 text-right text-sm">
+            <Link href="/recuperar" className="text-[#6B7355] hover:text-[#3D4A00] hover:underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </p>
+
           <div className="my-4 flex items-center gap-3">
             <div className="h-px flex-1 bg-[#E2E6CF]" />
             <span className="text-xs font-medium text-[#6B7355]">o</span>
