@@ -80,6 +80,7 @@ function combinarClasesConAlumnos(clasesFilas, alumnosPorClase) {
     plazas_min: fila.plazas_min,
     plazas_ocupadas: fila.plazas_ocupadas,
     estado: fila.estado,
+    motivo_cancelacion: fila.motivo_cancelacion,
     alumnos: alumnosPorClase.get(fila.clase_id) || [],
   }))
 }
@@ -265,7 +266,7 @@ export default function MisClasesPage() {
   }
 
   const clasesProximas = clasesConAlumnos
-    .filter((c) => !claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }))
+    .filter((c) => !claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }) && c.estado !== 'cancelada')
     .sort((a, b) => (claveFechaHora(a) < claveFechaHora(b) ? -1 : 1))
 
   const clasesPasadas = clasesConAlumnos
@@ -308,10 +309,22 @@ export default function MisClasesPage() {
               alt=""
               className={`h-full w-full object-cover ${atenuada ? 'opacity-80 grayscale' : ''}`}
             />
-            {clase.estado === 'cancelada' && (
+            {clase.estado === 'cancelada' ? (
               <span className="absolute left-3 top-3 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-700">
                 Sesión cancelada
               </span>
+            ) : (
+              haPasado && (
+                pendienteConfirmacion ? (
+                  <span className="absolute left-3 top-3 rounded-full border border-zinc-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-zinc-500">
+                    No se alcanzó el mínimo
+                  </span>
+                ) : (
+                  <span className="absolute left-3 top-3 rounded-full border border-[#B5E600] bg-[#EDF5C9] px-2.5 py-1 text-xs font-semibold text-[#3D4A00]">
+                    Confirmada
+                  </span>
+                )
+              )
             )}
           </div>
 
@@ -340,7 +353,7 @@ export default function MisClasesPage() {
               </div>
             </div>
 
-            {tieneMinimo && (
+            {tieneMinimo && !haPasado && (
               <div className="mt-3">
                 {pendienteConfirmacion ? (
                   <div className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
@@ -355,13 +368,23 @@ export default function MisClasesPage() {
               </div>
             )}
 
+            {haPasado && clase.estado === 'cancelada' && (
+              <p className="mt-3 text-xs text-zinc-400">
+                {clase.motivo_cancelacion === 'minimo'
+                  ? 'Esta sesión no llegó al mínimo.'
+                  : 'Sesión cancelada por el entrenador.'}
+              </p>
+            )}
+
             {mensajesCancelacion[clase.clase_id] && (
               <p className="mt-3 text-xs text-[#6B7355]">{mensajesCancelacion[clase.clase_id]}</p>
             )}
 
             {clase.alumnos.length === 0 ? (
               haPasado ? (
-                <p className="mt-4 text-sm text-zinc-400">Esta sesión no tuvo reservas.</p>
+                clase.estado === 'cancelada' ? null : (
+                  <p className="mt-4 text-sm text-zinc-400">Esta sesión no tuvo reservas.</p>
+                )
               ) : (
                 <div className="mt-4 flex items-center gap-2 rounded-lg border border-dashed border-[#E2E6CF] px-4 py-3 text-sm text-[#6B7355]">
                   <Users className="h-4 w-4 shrink-0 text-[#B5E600]" strokeWidth={1.75} />

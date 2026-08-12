@@ -26,6 +26,18 @@ function etiquetaCuentaAtras(fecha) {
   return `Faltan ${dias} días`
 }
 
+const ETIQUETAS_ASISTENCIA_CLIENTE = {
+  asistio: 'Asististe',
+  no_asistio: 'No asististe',
+  pendiente: 'Pendiente de confirmar por el entrenador',
+}
+
+const CLASES_BADGE_ASISTENCIA_CLIENTE = {
+  asistio: 'border-[#B5E600] bg-[#EDF5C9] text-[#3D4A00]',
+  no_asistio: 'border-red-200 bg-red-50 text-red-700',
+  pendiente: 'border-amber-300 bg-amber-50 text-amber-800',
+}
+
 export default function MisReservasPage() {
   const router = useRouter()
   const [usuario, setUsuario] = useState(null)
@@ -153,6 +165,8 @@ export default function MisReservasPage() {
   const reservasPasadas = reservasActivas
     .filter((r) => claseYaPaso(r.clases))
     .sort((a, b) => (claveFechaHora(a.clases) > claveFechaHora(b.clases) ? -1 : 1))
+
+  const reservasPasadasRecientes = reservasPasadas.filter((r) => horasHastaClase(r.clases) > -30 * 24)
 
   const clasesRealizadas = reservasActivas.filter((r) => r.asistencia === 'asistio').length
 
@@ -387,9 +401,13 @@ export default function MisReservasPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              {reservasPasadas.map((reserva, indice) => {
+              {reservasPasadasRecientes.map((reserva, indice) => {
                 const clase = reserva.clases
                 const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
+                const claveAsistencia =
+                  reserva.asistencia === 'asistio' || reserva.asistencia === 'no_asistio'
+                    ? reserva.asistencia
+                    : 'pendiente'
 
                 return (
                   <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
@@ -405,7 +423,11 @@ export default function MisReservasPage() {
 
                       <div className="p-5">
                         <div className="mb-3 flex items-center justify-between gap-2">
-                          <span className="text-xs font-semibold text-zinc-500">Ya pasada</span>
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${CLASES_BADGE_ASISTENCIA_CLIENTE[claveAsistencia]}`}
+                          >
+                            {ETIQUETAS_ASISTENCIA_CLIENTE[claveAsistencia]}
+                          </span>
                         </div>
 
                         <h2 className="mb-1 text-lg font-bold text-zinc-500 sm:text-xl">{clase.titulo}</h2>
