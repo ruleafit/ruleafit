@@ -212,7 +212,7 @@ export default function MapaClases({ clases }) {
                     {plazasLibres}/{plazasMax} plazas libres
                     <br />
                     <Link
-                      href={`/clases/${clase.id}`}
+                      href={`/clases/${clase.id}?from=clases`}
                       className="mt-2 block rounded-full bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
                     >
                       Ver detalles

@@ -288,7 +288,7 @@ export default function MisReservasPage() {
 
                     <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#E2E6CF] pt-3">
                       <Link
-                        href={`/clases/${clase.id}`}
+                        href={`/clases/${clase.id}?from=mis-reservas`}
                         className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                       >
                         Ver detalle
@@ -376,7 +376,7 @@ export default function MisReservasPage() {
 
                         <div className="mt-3">
                           <Link
-                            href={`/clases/${clase.id}`}
+                            href={`/clases/${clase.id}?from=mis-reservas`}
                             className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-medium text-red-400 transition-colors hover:border-red-300 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                           >
                             Ver detalle
@@ -460,15 +460,6 @@ export default function MisReservasPage() {
                           <p>
                             Precio: <span className="text-zinc-500">{clase.precio} €</span>
                           </p>
-                        </div>
-
-                        <div className="mt-3 border-t border-[#E2E6CF] pt-3">
-                          <Link
-                            href={`/clases/${clase.id}`}
-                            className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
-                          >
-                            Ver detalle
-                          </Link>
                         </div>
                       </div>
                     </div>

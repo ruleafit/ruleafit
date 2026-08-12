@@ -24,6 +24,8 @@ const tarjetaClass = 'rounded-xl border border-[#E2E6CF] bg-white p-5 shadow-sm 
 const soloLecturaClass = 'block w-full rounded-lg border border-[#E2E6CF] bg-[#F4F5EE] px-3 py-2 text-sm text-[#6B7355]'
 const botonPrimarioClass =
   'mt-2 w-full rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100'
+const botonSecundarioClass =
+  'w-full rounded-full border border-[#E2E6CF] bg-white px-6 py-3 text-sm font-bold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2'
 
 function TituloBloque({ Icono, children }) {
   return (
@@ -74,6 +76,7 @@ export default function EditarClasePage() {
   const [plazasMin, setPlazasMin] = useState('1')
   const [plazasMax, setPlazasMax] = useState('')
 
+  const [valoresInicialesJSON, setValoresInicialesJSON] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState('')
 
@@ -152,12 +155,37 @@ export default function EditarClasePage() {
       setPuntoEncuentro(filaCompleta.punto_encuentro || '')
       setPlazasMin(String(filaCompleta.plazas_min ?? 1))
       setPlazasMax(String(filaCompleta.plazas_max ?? ''))
+      setValoresInicialesJSON(
+        JSON.stringify({
+          titulo: filaCompleta.titulo || '',
+          tipoActividad: filaCompleta.tipo_actividad || '',
+          categoria: filaCompleta.categoria || CATEGORIAS[0],
+          nivel: filaCompleta.nivel || NIVELES[0],
+          material: filaCompleta.material || '',
+          observaciones: filaCompleta.observaciones || '',
+          puntoEncuentro: filaCompleta.punto_encuentro || '',
+          plazasMin: String(filaCompleta.plazas_min ?? 1),
+          plazasMax: String(filaCompleta.plazas_max ?? ''),
+        })
+      )
       setCargandoClase(false)
     }
     cargarClase()
   }, [usuario, esEntrenador, id, cargandoSesion])
 
   const sinMinimoDefinido = clase?.plazas_min === 0
+  const formularioModificado =
+    JSON.stringify({
+      titulo,
+      tipoActividad,
+      categoria,
+      nivel,
+      material,
+      observaciones,
+      puntoEncuentro,
+      plazasMin,
+      plazasMax,
+    }) !== valoresInicialesJSON
 
   async function handleGuardar(e) {
     e.preventDefault()
@@ -430,9 +458,18 @@ export default function EditarClasePage() {
             </div>
           </div>
 
-          <button type="submit" disabled={guardando} className={botonPrimarioClass}>
-            {guardando ? 'Guardando...' : 'Guardar cambios'}
-          </button>
+          <div className="flex flex-col gap-3">
+            <button type="submit" disabled={guardando || !formularioModificado} className={botonPrimarioClass}>
+              {guardando ? 'Guardando...' : 'Guardar cambios'}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/mis-clases')}
+              className={botonSecundarioClass}
+            >
+              Cancelar
+            </button>
+          </div>
         </form>
 
         {mensaje && (

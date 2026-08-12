@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useParams, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { SearchX, CircleAlert, CalendarClock, MapPin, Dumbbell, Navigation } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
 import { textoPlazas } from '../../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../../lib/confirmacionClase'
+import { claseYaPaso } from '../../../lib/ventanaEdicionClase'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../../lib/imagenesCategoria'
 import BotonReservar from '../../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../../components/BotonCopiarCoordenadas'
@@ -21,6 +22,13 @@ const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
 const tarjetaClass = 'rounded-xl border border-[#E2E6CF] bg-white p-5 shadow-sm sm:p-6'
 const botonPrimarioClass =
   'inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
+
+const DESTINOS_VOLVER = {
+  clases: { href: '/clases', label: '← Sesiones' },
+  'mis-reservas': { href: '/mis-reservas', label: '← Mis reservas' },
+  'mis-clases': { href: '/mis-clases', label: '← Mis sesiones' },
+}
+const DESTINO_VOLVER_POR_DEFECTO = DESTINOS_VOLVER.clases
 
 function TituloBloque({ Icono, children }) {
   return (
@@ -41,7 +49,7 @@ function CampoDetalle({ etiqueta, valor }) {
   )
 }
 
-function CabeceraDetalle({ clase }) {
+function CabeceraDetalle({ clase, destinoVolver }) {
   const imagen = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
 
   return (
@@ -50,10 +58,10 @@ function CabeceraDetalle({ clase }) {
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/75 via-black/35 to-black/10" />
 
       <Link
-        href="/clases"
+        href={destinoVolver.href}
         className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-black/30 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/40 sm:left-6 sm:top-6"
       >
-        ← Sesiones
+        {destinoVolver.label}
       </Link>
 
       <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-6 sm:px-6">
@@ -68,8 +76,9 @@ function CabeceraDetalle({ clase }) {
   )
 }
 
-export default function DetalleClasePage() {
+function DetalleClaseContenido() {
   const { id } = useParams()
+  const searchParams = useSearchParams()
   const [clase, setClase] = useState(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -108,6 +117,7 @@ export default function DetalleClasePage() {
   }, [])
 
   const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
+  const destinoVolver = DESTINOS_VOLVER[searchParams.get('from')] || DESTINO_VOLVER_POR_DEFECTO
 
   if (cargando) {
     return (
@@ -122,8 +132,8 @@ export default function DetalleClasePage() {
       <div className="flex min-h-[70vh] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <SearchX className="h-12 w-12 text-[#B5E600]" strokeWidth={1.75} />
         <p className="text-sm text-[#6B7355]">{error || 'No se ha encontrado esta sesión.'}</p>
-        <Link href="/clases" className={botonPrimarioClass}>
-          Volver a sesiones
+        <Link href={destinoVolver.href} className={botonPrimarioClass}>
+          {destinoVolver.label}
         </Link>
       </div>
     )
@@ -134,6 +144,7 @@ export default function DetalleClasePage() {
   const plazasMin = clase.plazas_min ?? 0
   const porcentajeOcupado = plazasMax > 0 ? Math.min((plazasOcupadas / plazasMax) * 100, 100) : 0
   const { pendienteConfirmacion } = estadoConfirmacionClase({ plazasMin, plazasOcupadas })
+  const haPasado = claseYaPaso({ fecha: clase.fecha, hora: clase.hora })
   const estaCancelada = clase.estado === 'cancelada'
 
   return (
@@ -145,7 +156,7 @@ export default function DetalleClasePage() {
         </div>
       )}
 
-      <CabeceraDetalle clase={clase} />
+      <CabeceraDetalle clase={clase} destinoVolver={destinoVolver} />
 
       <div className="mx-auto w-full max-w-2xl px-4 pb-28 pt-8 sm:px-6 sm:pb-10">
         {clase.perfiles?.username && (
@@ -189,7 +200,9 @@ export default function DetalleClasePage() {
                 </div>
               ) : (
                 <div className="mb-2 flex items-center justify-between text-xs font-medium text-[#6B7355]">
-                  <span>{textoPlazas({ esEntrenador, plazasOcupadas, plazasMax })}</span>
+                  <span>
+                    {haPasado ? `${plazasOcupadas}/${plazasMax} plazas ocupadas` : textoPlazas({ esEntrenador, plazasOcupadas, plazasMax })}
+                  </span>
                 </div>
               )}
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EDF5C9]">
@@ -280,5 +293,13 @@ export default function DetalleClasePage() {
         />
       </div>
     </div>
+  )
+}
+
+export default function DetalleClasePage() {
+  return (
+    <Suspense fallback={null}>
+      <DetalleClaseContenido />
+    </Suspense>
   )
 }

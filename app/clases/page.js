@@ -349,7 +349,7 @@ export default function ClasesPage() {
                             </>
                           )}
                           <Link
-                            href={`/clases/${clase.id}`}
+                            href={`/clases/${clase.id}?from=clases`}
                             className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                           >
                             Ver detalle
