@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 10 agosto 2026
+Última actualización: 12 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -125,6 +125,11 @@ Nota (hallazgo técnico, resuelto el 2 agosto 2026): se creía que la tabla publ
 
 Nota (decisión de marca pendiente, 7 agosto 2026): el nombre "Openfit" hay que cambiarlo sí o sí, ya que es una marca ya registrada por otra empresa del sector fitness (fitness/apps), con riesgo legal si el proyecto crece; openfit.com y openfit.es están cogidos. Candidato actual guardado: "Ruleafit", comprobado libre de dominio (.com) y sin marca previa aparente, pendiente de confirmar como decisión firme. En pruebas de dictado por voz sin contexto, el final "-fit" se falla a veces (se oye como -fic/-cit/-pick), aunque con contexto de app de deporte se acierta mejor; si se confirma el nombre, conviene comprar también ruleafic.com como red de seguridad. Cuando el nombre esté decidido al 100%, cambiar "Openfit" por el nuevo en: cabecera (menú superior), pie de página, página de inicio y el nombre del acceso directo/PWA en móvil (manifest), además de revisar textos legales, correo y metadata donde aparezca. De momento se mantiene "Openfit" en toda la app; no se cambia nada todavía.
 
+Nota (checklist de rename, 12 agosto 2026): Rename Openfit -> [nombre final]: revisar en TRES grupos:
+- Código: búsqueda global de "openfit"/"Openfit"/"OpenFit" en todo el proyecto (interfaz, layout, manifest PWA, textos legales, remitente y asunto del correo de feedback en app/api/avisar-feedback/route.js).
+- Plantillas de correo de Supabase (Authentication -> Emails): "Confirm signup" y "Reset password" llevan "Openfit" en asunto y cuerpo; revisar también cualquier otra plantilla que se active.
+- Configuración en paneles: nombre visible del remitente en el Custom SMTP de Supabase (ahora "Openfit").
+
 Beta lanzada (en curso):
 - Beta repartida a ~30 personas del círculo cercano (~6 entrenadores, resto clientes), sin confirmación de email, con mensajes de WhatsApp distintos por rol. La app corre en producción (Vercel + Supabase); la gente la está usando durante una semana como si fuera real.
 - Recogiendo errores y sugerencias (estéticas y de funcionalidad) para ir corrigiendo. IMPORTANTE: al haber gente usando la app en vivo, extremar el cuidado con lo que se sube a main.
@@ -144,7 +149,6 @@ Falta:
 
 Otros pendientes menores (sin prioridad asignada):
 - Pulido fino según el feedback de la beta.
-- Historial de /mis-reservas y /mis-clases: cuando haya volumen, mostrar solo el último mes de clases pasadas y sustituir las más antiguas por un contador tipo "X clases realizadas", para no cargar de más la página. Aplazado hasta que haya datos suficientes en la beta.
 - Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
 - Notificaciones push web: bloque completo (motor, eventos directos, recordatorios programados, preferencias y centro de notificaciones), ver "Notificaciones push (Bloque B + C + sub-bloque 7: completo)".
 
@@ -326,9 +330,21 @@ Hecho (11 agosto 2026) · Bloque D · Aviso de feedback por correo:
 Falta:
 - 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
 
+## Historial y detalle de sesiones (12 agosto 2026)
+Hecho:
+- /mis-reservas (cliente): historial limitado a los últimos 30 días (reservasPasadasRecientes con horasHastaClase > -30*24); el contador "sesiones realizadas" sigue contando el total. Badge de asistencia por reserva (Asististe / No asististe / Pendiente de confirmar por el entrenador) estilo semáforo. Quitado "Ver detalle" en el historial (pasadas); se mantiene en próximas y canceladas.
+- /mis-clases (entrenador): badges de estado en pasadas (Confirmada verde / No se alcanzó el mínimo gris / Sesión cancelada roja). Texto según motivo de cancelación (motivo_cancelacion='minimo' -> "Esta sesión no llegó al mínimo"; NULL -> "Sesión cancelada por el entrenador"). Ocultado "Esta sesión no tuvo reservas" en pasadas canceladas. Las sesiones futuras canceladas ya no aparecen en próximas (filtro estado!='cancelada'). "Ver detalles" añadido solo en próximas.
+- SQL: sql/053 (autocancelar_clases_sin_minimo ahora pone plazas_ocupadas=0) y sql/054 (RPC mis_clases devuelve motivo_cancelacion, con DROP+CREATE). Ejecutados en Supabase.
+- Detalle /clases/[id]: en sesiones pasadas muestra "{ocupadas}/{max} plazas ocupadas" en vez de "Quedan X plazas". Botón "volver" devuelve al origen según query param ?from= (whitelist: clases / mis-reservas / mis-clases), con Suspense.
+- Editar sesión: botón "Cancelar" que vuelve sin guardar, y "Guardar cambios" deshabilitado hasta que haya cambios reales (comparación JSON de valores iniciales).
+
+Falta:
+- Ninguno.
+
 ## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
 - Rediseño de Open ligado al precio: no regalar los 5 Open de asistencia en clases gratis o muy baratas; conceder Open solo por encima de un umbral de precio X, aún por decidir.
+- Al integrar Stripe, quitar/ajustar el texto "se paga directamente al entrenador" que aparece junto al precio en el detalle de sesión (app/clases/[id]), igual que en su día se cambió "Cobras directo, sin intermediarios" -> "Cobros y reservas automáticos".
 
 Nota (investigación del modelo de cobros, 7 agosto 2026): Stripe Connect "puro" no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
 
