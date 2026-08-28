@@ -412,3 +412,12 @@ Hecho:
 
 Falta:
 - Ejecutar sql/055 en Supabase (lo hace el usuario, manual). Resto de bloques del rename ampliado, pendientes: plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
+
+## Rename Openfit → Ruleafit: bloque 4, plantillas de correo de Supabase y SMTP (28 agosto 2026)
+Hecho:
+- En el panel de Supabase (Authentication → Emails), plantillas "Confirm signup" y "Reset Password" actualizadas: asunto y cuerpo cambiados de "Openfit" a "Ruleafit", sin tocar las variables ({{ .ConfirmationURL }}).
+- Nombre de remitente visible del Custom SMTP cambiado de "Openfit" a "Ruleafit" (el remitente no-reply@ruleafit.com no cambia).
+- Cambio hecho directamente en el panel de Supabase, no en el repo — no hay diff de código en este bloque.
+
+Falta:
+- Resto de bloques del rename ampliado, pendientes: GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
