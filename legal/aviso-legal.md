@@ -21,7 +21,7 @@ Ruleafit **actúa exclusivamente como intermediario tecnológico**. No presta el
 
 En la presente versión del Sitio Web **no se realiza ningún cobro ni pago a través de la plataforma**. El precio de la sesión, si lo hubiera, se abona directamente al entrenador fuera de la aplicación, según lo que ambas partes acuerden. Ruleafit no interviene en dicha transacción, no percibe comisión alguna y no gestiona reembolsos.
 
-El Sitio Web ofrece asimismo un sistema de puntos de fidelización denominado "Open", de carácter meramente promocional. Los Open no constituyen dinero electrónico ni medio de pago, no pueden comprarse, recargarse, transferirse ni canjearse por dinero, y no otorgan derecho a contraprestación económica alguna.
+El Sitio Web ofrece asimismo un sistema de puntos de fidelización denominado "Rulos", de carácter meramente promocional. Los Rulos no constituyen dinero electrónico ni medio de pago, no pueden comprarse, recargarse, transferirse ni canjearse por dinero, y no otorgan derecho a contraprestación económica alguna.
 
 ### Advertencia sobre la actividad física
 

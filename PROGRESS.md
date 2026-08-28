@@ -438,4 +438,14 @@ Hecho:
 - FEEDBACK_ADMIN_EMAIL actualizado a ruleafit@gmail.com en Vercel (producción, hecho a mano por el usuario) y en .env.local (entorno local, sin commit por estar en .gitignore).
 
 Falta:
-- Resto de bloques del rename ampliado, sin cambios: limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql). El bloque de documentación/legal (CLAUDE.md + PROGRESS.md + legal/aviso-legal.md + app/aviso-legal/page.js) para reflejar el rename del sistema de puntos Open → Rulos sigue pendiente de confirmación, no aplicado todavía.
+- Resto de bloques del rename ampliado, sin cambios: limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
+
+## Rename sistema de puntos Open → Rulos: documentación y legal (28 agosto 2026)
+Hecho:
+- Las 3 tablas de Supabase renombradas: open_saldos → rulos_saldos, open_movimientos → rulos_movimientos, open_motivos → rulos_motivos, con vistas de compatibilidad bajo el nombre antiguo mientras se termina el despliegue (pendientes de eliminar en unos días).
+- Las 3 funciones renombradas: otorgar_open() → otorgar_rulos(), otorgar_open_bienvenida() → otorgar_rulos_bienvenida(), otorgar_open_valoracion() → otorgar_rulos_valoracion().
+- CLAUDE.md actualizado: la sección "Moneda" ahora describe "Rulos" en vez de "Open", incluida la equivalencia futura de referencia (1€ = 10 Rulos). No se tocó la mención a "Openfit" (marca, bloque aparte) ni a OpenStreetMap.
+- Documentos legales (legal/aviso-legal.md y app/aviso-legal/page.js) actualizados: el nombre del sistema de puntos de fidelización pasa de "Open" a "Rulos". legal/politica-privacidad.md y app/privacidad/page.js no necesitaron cambio: mencionan el sistema de puntos de forma genérica, sin nombrarlo.
+
+Falta:
+- Eliminar las vistas de compatibilidad open_saldos/open_movimientos/open_motivos en Supabase una vez confirmado que nada las usa ya (manual, lo hace el usuario).
