@@ -383,3 +383,13 @@ Hecho:
 
 Falta:
 - Ninguno.
+
+## Rename Openfit → Ruleafit: bloque 1, documentos legales (28 agosto 2026)
+Hecho:
+- Sustituido "Openfit" → "Ruleafit" en los 4 documentos legales: legal/aviso-legal.md, app/aviso-legal/page.js, legal/politica-privacidad.md y app/privacidad/page.js (page.js y .md son contenido duplicado, uno como componente y otro como fuente).
+- De paso, corregida una URL desactualizada encontrada en el propio texto legal: las 8 apariciones de https://openfit-five.vercel.app (dominio antiguo de Vercel) se actualizaron a https://www.ruleafit.com (dominio real de producción).
+- Verificado que el titular/responsable del tratamiento en ambos documentos es siempre la persona física (Rubén Fernández Personat, con NIF), nunca "Openfit" como entidad — la sustitución de marca no afecta a ninguna razón social.
+- Sigue pendiente el resto de bloques del rename ampliado: interfaz visible + metadata/PWA + iconos; correo de feedback + dato ya insertado en Supabase (tabla open_motivos); plantillas de correo de Supabase + nombre SMTP; GitHub/Gmail (pendientes de decisión del usuario); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera en sql/*.sql).
+
+Falta:
+- Ninguno (de este bloque). Resto de bloques del rename, pendientes.
