@@ -429,3 +429,13 @@ Hecho:
 
 Falta:
 - El resto del rename de marca Openfit → Ruleafit sigue pausado y pendiente de retomar: GitHub/Gmail (pendientes de decisión) y limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
+
+## Rename de GitHub: repo y cuenta (28 agosto 2026)
+Hecho:
+- Repo de GitHub renombrado de "openfit" a "ruleafit" (misma cuenta, openfit2026, en ese momento); remoto local actualizado a https://github.com/openfit2026/ruleafit.git y verificado con push de prueba.
+- Cuenta de GitHub renombrada de "openfit2026" a "ruleafit"; remoto local actualizado de nuevo a https://github.com/ruleafit/ruleafit.git y verificado con este mismo commit.
+- Contacto VAPID de las notificaciones push (lib/enviarPush.js) cambiado de mailto:openfit2026@gmail.com a mailto:ruleafit@gmail.com.
+- FEEDBACK_ADMIN_EMAIL actualizado a ruleafit@gmail.com en Vercel (producción, hecho a mano por el usuario) y en .env.local (entorno local, sin commit por estar en .gitignore).
+
+Falta:
+- Resto de bloques del rename ampliado, sin cambios: limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql). El bloque de documentación/legal (CLAUDE.md + PROGRESS.md + legal/aviso-legal.md + app/aviso-legal/page.js) para reflejar el rename del sistema de puntos Open → Rulos sigue pendiente de confirmación, no aplicado todavía.
