@@ -25,13 +25,13 @@ export default function CuentaPage() {
   const [errorUsername, setErrorUsername] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [confirmacion, setConfirmacion] = useState('')
-  const [openSaldo, setOpenSaldo] = useState(0)
+  const [rulosSaldo, setRulosSaldo] = useState(0)
   const [clasesRealizadas, setClasesRealizadas] = useState(0)
   const [promedioValoraciones, setPromedioValoraciones] = useState(null)
   const [totalValoraciones, setTotalValoraciones] = useState(0)
   const [numSeguidores, setNumSeguidores] = useState(0)
-  const [openMovimientos, setOpenMovimientos] = useState([])
-  const [openMotivos, setOpenMotivos] = useState({})
+  const [rulosMovimientos, setRulosMovimientos] = useState([])
+  const [rulosMotivos, setRulosMotivos] = useState({})
   const [descripcionPerfil, setDescripcionPerfil] = useState('')
   const [fotoUrl, setFotoUrl] = useState(null)
   const [archivoFoto, setArchivoFoto] = useState(null)
@@ -58,28 +58,28 @@ export default function CuentaPage() {
         setFotoUrl(perfil?.foto_url || null)
 
         const { data: saldoFila } = await supabase
-          .from('open_saldos')
+          .from('rulos_saldos')
           .select('saldo')
           .eq('usuario_id', data.user.id)
           .maybeSingle()
 
-        setOpenSaldo(saldoFila?.saldo ?? 0)
+        setRulosSaldo(saldoFila?.saldo ?? 0)
 
         const { data: movimientos } = await supabase
-          .from('open_movimientos')
+          .from('rulos_movimientos')
           .select('id, cantidad, motivo, nota, created_at')
           .eq('usuario_id', data.user.id)
           .order('created_at', { ascending: false })
 
-        setOpenMovimientos(movimientos || [])
+        setRulosMovimientos(movimientos || [])
 
-        const { data: motivos } = await supabase.from('open_motivos').select('codigo, descripcion')
+        const { data: motivos } = await supabase.from('rulos_motivos').select('codigo, descripcion')
 
         const mapaMotivos = {}
         for (const motivo of motivos || []) {
           mapaMotivos[motivo.codigo] = motivo.descripcion
         }
-        setOpenMotivos(mapaMotivos)
+        setRulosMotivos(mapaMotivos)
 
         const rolUsuario = data.user.user_metadata?.rol
 
@@ -513,8 +513,8 @@ export default function CuentaPage() {
               <Coins className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
             </div>
             <div>
-              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{openSaldo}</p>
-              <p className="text-sm font-semibold text-[#3D4A00]">Open acumulados</p>
+              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{rulosSaldo}</p>
+              <p className="text-sm font-semibold text-[#3D4A00]">Rulos acumulados</p>
             </div>
           </RevelarAlLlegar>
 
@@ -579,26 +579,26 @@ export default function CuentaPage() {
         <div className="mb-8">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1F2400]">
             <History className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
-            Historial de Open
+            Historial de Rulos
           </h2>
 
-          {openMovimientos.length === 0 ? (
+          {rulosMovimientos.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#E2E6CF] px-6 py-8 text-center text-sm text-[#6B7355]">
-              Todavía no tienes movimientos de Open. Cuando reserves o asistas a una sesión, aparecerán aquí.
+              Todavía no tienes movimientos de Rulos. Cuando reserves o asistas a una sesión, aparecerán aquí.
             </div>
           ) : (
             <div className="divide-y divide-[#E2E6CF] overflow-hidden rounded-xl border border-[#E2E6CF] bg-white">
-              {openMovimientos.map((mov) => (
+              {rulosMovimientos.map((mov) => (
                 <div key={mov.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div>
-                    <p className="text-sm text-[#1F2400]">{mov.nota || openMotivos[mov.motivo] || mov.motivo}</p>
+                    <p className="text-sm text-[#1F2400]">{mov.nota || rulosMotivos[mov.motivo] || mov.motivo}</p>
                     <p className="text-xs text-[#6B7355]">{new Date(mov.created_at).toLocaleString('es-ES')}</p>
                   </div>
                   <span
                     className={`shrink-0 text-sm font-bold ${mov.cantidad > 0 ? 'text-[#3D4A00]' : 'text-red-700'}`}
                   >
                     {mov.cantidad > 0 ? '+' : ''}
-                    {mov.cantidad} Open
+                    {mov.cantidad} Rulos
                   </span>
                 </div>
               ))}
