@@ -1,6 +1,6 @@
 # Openfit — Progreso del proyecto
 
-Última actualización: 12 agosto 2026
+Última actualización: 28 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -373,3 +373,13 @@ Conclusiones para la hoja de ruta:
 - Subir la prioridad de los pagos reales (Fase 6): dejan de ser un extra posterior al lanzamiento para ser la diferencia entre producto y demostración.
 - Valorar añadir a la hoja de ruta perfiles públicos de entrenador y valoraciones tras la clase. No dependen de Stripe y son clave para la confianza en un marketplace.
 - Antes de cobrar dinero habrá que preparar la documentación legal correspondiente, con asesoramiento profesional.
+
+## Campana de notificaciones: solo no leídas (28 agosto 2026)
+Hecho:
+- La campana de notificaciones (components/CampanaNotificaciones.js) ahora carga solo las notificaciones no leídas de notificaciones_historial (antes cargaba las últimas 10 sin importar si estaban leídas). Al abrir la campana se marcan como leídas en base de datos y desaparece el punto rojo, pero la lista se mantiene visible mientras el desplegable está abierto; al cerrarse (clic fuera o volviendo a pulsar la campana) la lista se vacía, así que la próxima apertura solo trae notificaciones nuevas. El refresco automático cada 60s se pausa mientras está abierta para no vaciar la lista delante del usuario.
+- Estado vacío nuevo: cuando no hay notificaciones sin leer, se muestra "No tienes notificaciones nuevas ahora mismo" con un enlace "Ver historial de notificaciones" que lleva a /cuenta#notificaciones (el historial completo de HistorialNotificaciones.js no cambia: sigue mostrando siempre las últimas notificaciones, leídas o no).
+- app/cuenta/page.js: bloque "Notificaciones" con id="notificaciones" y scroll-mt-24; useEffect que, cuando cargando pasa a false y el hash de la URL es #notificaciones, hace scroll automático y suave hasta el bloque (con reintentos vía requestAnimationFrame por si el bloque tarda un frame en pintarse). La navegación desde la campana usa router.push con { scroll: false } para que el propio Next no interfiera con el scroll manual (su mecanismo interno de scroll-to-hash solo lo intenta una vez, muy pronto, y falla porque el bloque aún no existe mientras cargando es true).
+- Es un único componente compartido entre cliente y entrenador, así que el cambio aplica a ambos roles automáticamente.
+
+Falta:
+- Ninguno.

@@ -317,6 +317,29 @@ export default function CuentaPage() {
     setTimeout(() => setConfirmacionPerfil(''), 5000)
   }
 
+  useEffect(() => {
+    if (cargando) return
+    if (window.location.hash !== '#notificaciones') return
+
+    let cancelado = false
+    let intentos = 0
+    function intentarScroll() {
+      if (cancelado) return
+      const el = document.getElementById('notificaciones')
+      intentos += 1
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      } else if (intentos < 10) {
+        requestAnimationFrame(intentarScroll)
+      }
+    }
+    requestAnimationFrame(intentarScroll)
+
+    return () => {
+      cancelado = true
+    }
+  }, [cargando])
+
   if (cargando) {
     return (
       <div className="flex min-h-[60vh] flex-1 items-center justify-center">
@@ -583,7 +606,7 @@ export default function CuentaPage() {
           )}
         </div>
 
-        <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+        <div id="notificaciones" className="mb-8 scroll-mt-24 rounded-xl border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Notificaciones</h2>
           <p className="mb-4 text-sm text-[#6B7355]">
             Recibe avisos en tu móvil cuando tus entrenadores publiquen sesiones y sobre tus reservas.
