@@ -42,9 +42,9 @@ export async function POST(request) {
   const fecha = new Date(feedback.created_at).toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })
 
   const { error: errorEnvio } = await resend.emails.send({
-    from: 'Openfit <no-reply@ruleafit.com>',
+    from: 'Ruleafit <no-reply@ruleafit.com>',
     to: process.env.FEEDBACK_ADMIN_EMAIL,
-    subject: 'Nuevo feedback de usuario en Openfit',
+    subject: 'Nuevo feedback de usuario en Ruleafit',
     text: `De: ${remitente}\nFecha: ${fecha}\n\n${feedback.mensaje}`,
   })
 

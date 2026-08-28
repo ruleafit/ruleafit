@@ -404,3 +404,11 @@ Hecho:
 
 Falta:
 - Ninguno (de este bloque). Resto de bloques del rename ampliado, pendientes: correo de feedback + dato ya insertado en Supabase (open_motivos); plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
+
+## Rename Openfit → Ruleafit: bloque 3, correo de feedback y dato en Supabase (28 agosto 2026)
+Hecho:
+- app/api/avisar-feedback/route.js: remitente ("Ruleafit <no-reply@ruleafit.com>") y asunto ("Nuevo feedback de usuario en Ruleafit") actualizados. lib/enviarPush.js y FEEDBACK_ADMIN_EMAIL (.env.local) no se tocan a propósito: son la dirección de correo real (openfit2026@gmail.com), no texto de marca, pendiente de decidir si se cambia de cuenta más adelante.
+- sql/055_texto_motivo_bienvenida_ruleafit.sql creado: UPDATE sobre public.open_motivos (columna descripcion, codigo = 'bienvenida') para corregir el texto ya insertado por sql/006 ("Bienvenida al registrarse en Openfit" -> "...en Ruleafit"). Sigue el mismo patrón que sql/027. Pendiente de ejecutar a mano en Supabase; hasta entonces, el historial de Open sigue mostrando el texto antiguo.
+
+Falta:
+- Ejecutar sql/055 en Supabase (lo hace el usuario, manual). Resto de bloques del rename ampliado, pendientes: plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
