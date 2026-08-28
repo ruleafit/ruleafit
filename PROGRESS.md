@@ -411,7 +411,9 @@ Hecho:
 - sql/055_texto_motivo_bienvenida_ruleafit.sql creado: UPDATE sobre public.open_motivos (columna descripcion, codigo = 'bienvenida') para corregir el texto ya insertado por sql/006 ("Bienvenida al registrarse en Openfit" -> "...en Ruleafit"). Sigue el mismo patrón que sql/027. Pendiente de ejecutar a mano en Supabase; hasta entonces, el historial de Open sigue mostrando el texto antiguo.
 
 Falta:
-- Ejecutar sql/055 en Supabase (lo hace el usuario, manual). Resto de bloques del rename ampliado, pendientes: plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
+- Resto de bloques del rename ampliado, pendientes: plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
+
+Verificado (28 agosto 2026): tras el rename del sistema de puntos Open → Rulos (open_motivos → rulos_motivos), se comprobó directamente en Supabase que la fila con codigo = 'bienvenida' ya dice "Bienvenida al registrarse en Ruleafit". No hizo falta ejecutar ningún UPDATE adicional de sql/055.
 
 ## Rename Openfit → Ruleafit: bloque 4, plantillas de correo de Supabase y SMTP (28 agosto 2026)
 Hecho:
