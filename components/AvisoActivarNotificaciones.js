@@ -100,7 +100,7 @@ export default function AvisoActivarNotificaciones({ usuarioActual, disparador }
           </p>
           <p className="mt-0.5 text-xs text-[#162318]/70">
             {necesitaInstalar
-              ? 'Añade Openfit a tu pantalla de inicio para que te avisemos de tus sesiones.'
+              ? 'Añade Ruleafit a tu pantalla de inicio para que te avisemos de tus sesiones.'
               : 'Te avisaremos cuando haya novedades en tus sesiones. Puedes cambiarlo cuando quieras.'}
           </p>
           <div className="mt-3">

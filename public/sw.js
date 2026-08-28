@@ -3,13 +3,13 @@ self.addEventListener('push', function (event) {
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: 'Openfit', body: event.data ? event.data.text() : '' };
+    data = { title: 'Ruleafit', body: event.data ? event.data.text() : '' };
   }
-  const title = data.title || 'Openfit';
+  const title = data.title || 'Ruleafit';
   const options = {
     body: data.body || '',
-    icon: '/openfit-icon-192.png',
-    badge: '/openfit-icon-192.png',
+    icon: '/ruleafit-icon-192.png',
+    badge: '/ruleafit-icon-192.png',
     data: { url: data.url || '/' },
   };
   event.waitUntil(self.registration.showNotification(title, options));

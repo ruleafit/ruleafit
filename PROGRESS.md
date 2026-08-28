@@ -393,3 +393,14 @@ Hecho:
 
 Falta:
 - Ninguno (de este bloque). Resto de bloques del rename, pendientes.
+
+## Rename Openfit → Ruleafit: bloque 2, interfaz visible + metadata/PWA + iconos (28 agosto 2026)
+Hecho:
+- Sustituido "Openfit" → "Ruleafit" en los textos visibles al usuario: app/registro/page.js (título y placeholder de nombre de usuario), app/completar-perfil/page.js (mismo placeholder), components/BotonInstalarApp.js ("Ten Ruleafit a mano"), components/AvisoActivarNotificaciones.js (texto del banner).
+- Metadata/PWA: app/layout.js (title), app/manifest.js (name y short_name de la app instalable).
+- public/sw.js: título de fallback de las notificaciones push y rutas de icon/badge.
+- Los dos iconos de la PWA renombrados con git mv (historial de archivo conservado): public/openfit-icon-192.png -> public/ruleafit-icon-192.png, public/openfit-icon-512.png -> public/ruleafit-icon-512.png; referencias actualizadas en manifest.js y sw.js.
+- Verificado: el short_name "Ruleafit" (8 caracteres) no tiene problema de longitud para Android/iOS; icon y badge de sw.js seguían apuntando al mismo archivo que antes (solo cambia el nombre, no el comportamiento).
+
+Falta:
+- Ninguno (de este bloque). Resto de bloques del rename ampliado, pendientes: correo de feedback + dato ya insertado en Supabase (open_motivos); plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).

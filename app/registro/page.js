@@ -123,7 +123,7 @@ export default function RegistroPage() {
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-10 sm:px-6">
         <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
           <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#1F2400]">
-            Crear cuenta en Openfit
+            Crear cuenta en Ruleafit
           </h1>
 
           {registroExitoso ? (
@@ -138,7 +138,7 @@ export default function RegistroPage() {
             <>
               <form onSubmit={handleRegistro} className="flex flex-col gap-4">
                 <div>
-                  <p className={labelClass}>Quiero usar Openfit como:</p>
+                  <p className={labelClass}>Quiero usar Ruleafit como:</p>
                   <div className="flex gap-3">
                     <button
                       type="button"

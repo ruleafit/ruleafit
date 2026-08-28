@@ -1,7 +1,7 @@
 export default function manifest() {
   return {
-    name: "Openfit",
-    short_name: "Openfit",
+    name: "Ruleafit",
+    short_name: "Ruleafit",
     description: "Sesiones sueltas de entrenamiento en Sevilla y Málaga. Sin cuota ni permanencia.",
     start_url: "/",
     display: "standalone",
@@ -9,13 +9,13 @@ export default function manifest() {
     theme_color: "#B5E600",
     icons: [
       {
-        src: "/openfit-icon-192.png",
+        src: "/ruleafit-icon-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any maskable"
       },
       {
-        src: "/openfit-icon-512.png",
+        src: "/ruleafit-icon-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any maskable"

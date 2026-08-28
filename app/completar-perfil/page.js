@@ -126,7 +126,7 @@ export default function CompletarPerfilPage() {
         {!confirmando ? (
           <>
             <label className="mb-2 block text-sm font-semibold text-[#162318]">
-              Quiero usar Openfit como:
+              Quiero usar Ruleafit como:
             </label>
             <div className="mb-2 flex gap-3">
               <button type="button" aria-pressed={rol === 'cliente'} onClick={() => setRol('cliente')} className={rolBotonClass(rol === 'cliente')}>

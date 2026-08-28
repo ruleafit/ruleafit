@@ -60,7 +60,7 @@ export default function BotonInstalarApp({ className }) {
   return (
     <div className="my-8 flex flex-col items-center gap-3 text-center">
       <button type="button" onClick={handlePulsar} className={className}>
-        Ten Openfit a mano
+        Ten Ruleafit a mano
       </button>
       <p className="text-xs text-[#6B7355]">Sin descargar nada y en un segundo.</p>
 
