@@ -214,7 +214,7 @@ export default function Menu() {
             pathname === '/'
           )}`}
         >
-          Open<span style={{ color: '#B5E600' }}>fit</span>
+          Rulea<span style={{ color: '#B5E600' }}>fit</span>
         </Link>
 
         <div className="hidden items-center gap-5 md:flex">

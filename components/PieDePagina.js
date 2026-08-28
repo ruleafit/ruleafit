@@ -5,7 +5,7 @@ export default function PieDePagina() {
     <footer className="mt-auto border-t border-zinc-200 bg-white">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-6 text-sm text-zinc-500">
         <p>
-          © 2026 Open<span style={{ color: '#B5E600' }}>fit</span>
+          © 2026 Rulea<span style={{ color: '#B5E600' }}>fit</span>
         </p>
         <div className="flex flex-wrap items-center gap-4">
           <Link

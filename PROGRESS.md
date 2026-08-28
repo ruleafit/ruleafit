@@ -421,3 +421,11 @@ Hecho:
 
 Falta:
 - Resto de bloques del rename ampliado, pendientes: GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
+
+## Logo partido "Rulea"+"fit" (28 agosto 2026)
+Hecho:
+- Se detectó que el logo de marca estaba escrito en JSX como dos fragmentos de texto en colores distintos ("Open" + `<span>` lima "fit"), por lo que no aparecía como la cadena "Openfit" y se había colado en el rename de marca. Corregido en los 3 sitios donde aparece: components/Menu.js (cabecera), components/PieDePagina.js (copyright del footer) y components/CabeceraAuth.js (cabecera compartida de /login y /registro). Ahora dividen "Ruleafit" como "Rulea" (color oscuro heredado) + "fit" (lima #B5E600), manteniendo el mismo patrón visual de resaltar el sufijo "-fit".
+- Cambio puramente visual/textual: mismo estilo inline, misma estructura JSX, sin tocar lógica ni props.
+
+Falta:
+- El resto del rename de marca Openfit → Ruleafit sigue pausado y pendiente de retomar: GitHub/Gmail (pendientes de decisión) y limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
