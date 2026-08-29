@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 021_storage_avatares_politicas.sql
+-- Ruleafit · 021_storage_avatares_politicas.sql
 -- Políticas RLS sobre storage.objects para el bucket "avatares" (creado
 -- manualmente en Supabase Storage como bucket PÚBLICO), donde cada usuario
 -- sube su foto de perfil.

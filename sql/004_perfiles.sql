@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 004_perfiles.sql
+-- Ruleafit · 004_perfiles.sql
 -- Nombres de usuario: tabla public.perfiles, generación automática al
 -- registrarse, backfill para las cuentas ya existentes, y actualización de
 -- reservas_de_mis_clases() para mostrar el username en vez del email.

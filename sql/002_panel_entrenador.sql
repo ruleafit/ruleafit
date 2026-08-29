@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 002_panel_entrenador.sql
+-- Ruleafit · 002_panel_entrenador.sql
 -- Panel del entrenador: función RPC de solo lectura para ver quién se ha
 -- apuntado a sus propias clases.
 --

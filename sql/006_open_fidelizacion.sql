@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 006_open_fidelizacion.sql
+-- Ruleafit · 006_open_fidelizacion.sql
 -- Moneda "Open" (puntos de fidelización) — MVP: saldo por usuario, historial
 -- de movimientos, bienvenida automática y recompensa por asistencia
 -- confirmada por el entrenador. Sin retos (fuera de esta fase), sin compra,

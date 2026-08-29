@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 011_panel_entrenador_y_contador.sql
+-- Ruleafit · 011_panel_entrenador_y_contador.sql
 -- Dos correcciones al panel del entrenador, detectadas al usar /mis-clases:
 --
 -- 1) reservas_de_mis_clases() arranca desde public.reservas (JOIN normal con

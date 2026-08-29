@@ -1,19 +1,19 @@
-# Openfit — Contexto del proyecto
+# Ruleafit — Contexto del proyecto
 
 ## Qué es
 Marketplace de clases sueltas de entrenamiento (sin gimnasio ni cuota), en Sevilla (principal) y Málaga. Dos perfiles: cliente y entrenador. Color de marca: lima #B5E600.
 
-Visión a futuro (no implementada todavía, solo de referencia): Openfit contempla abrirse más adelante a gimnasios y a entrenamientos individuales o en pareja, además de al aire libre y en grupo. Por eso, los textos de la interfaz no deben prometer exclusivamente entrenamiento al aire libre ni en grupo.
+Visión a futuro (no implementada todavía, solo de referencia): Ruleafit contempla abrirse más adelante a gimnasios y a entrenamientos individuales o en pareja, además de al aire libre y en grupo. Por eso, los textos de la interfaz no deben prometer exclusivamente entrenamiento al aire libre ni en grupo.
 
 ## Stack
 Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. Stripe más adelante (fuera del MVP).
 
 ## Estructura y cuentas
-- Proyecto en C:\proyectos\openfit.
-- Repo privado: github.com/openfit2026/openfit.
-- Supabase: proyecto "openfit", región Europa (Irlanda).
+- Proyecto en C:\proyectos\ruleafit.
+- Repo privado: github.com/ruleafit/ruleafit.
+- Supabase: proyecto "ruleafit", región Europa (Irlanda).
 - Conector Supabase en lib/supabaseClient.js; claves en .env.local (no se sube a git, protegido por .gitignore).
-- Desplegado en Vercel en https://openfit-five.vercel.app, con despliegue automático al hacer push a la rama main.
+- Desplegado en Vercel en https://www.ruleafit.com, con despliegue automático al hacer push a la rama main.
 - Imágenes estáticas del proyecto en public/imagenes (portada, fuerza, running, yoga, combate, comunidad). El mapa de imagen por categoría de clase vive en lib/imagenesCategoria.js, compartido entre /clases y /mis-reservas.
 
 ## Decisiones de producto (MVP)
@@ -21,7 +21,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. 
 - Cancelación con umbral de 2h: gratis antes, sin devolución después.
 - Moneda "Rulos" (puntos de fidelización, no es una cartera de dinero):
   - MVP: los Rulos se ganan mediante retos, promociones, bienvenida o asistencia confirmada; implementado hasta ahora: bienvenida automática de 20 Rulos al registrarse, y asistencia confirmada de 5 Rulos por clase, concedida (y corregible mediante movimiento compensatorio) por el entrenador vía marcar_asistencia(); retos y promociones quedan fuera de esta fase. No se pueden comprar, recargar con dinero, retirar ni transferir; no se usan para reservar ni pagar clases. Las clases se siguen pagando directamente al entrenador, fuera de la app. Sin recargas simuladas ni descuentos de Rulos al reservar.
-  - Visión futura (no implementado todavía, solo de referencia): cuando Openfit integre pagos reales, el usuario podrá recargar dinero y convertirlo en Rulos (equivalencia inicial de referencia 1€ = 10 Rulos, revisable); a partir de entonces los Rulos podrán usarse para reservar clases dentro de la app. Antes de esa fase habrá que definir cómo se compensa al entrenador cuando se usen Rulos ganados gratuitamente, y revisar requisitos legales y técnicos.
+  - Visión futura (no implementado todavía, solo de referencia): cuando Ruleafit integre pagos reales, el usuario podrá recargar dinero y convertirlo en Rulos (equivalencia inicial de referencia 1€ = 10 Rulos, revisable); a partir de entonces los Rulos podrán usarse para reservar clases dentro de la app. Antes de esa fase habrá que definir cómo se compensa al entrenador cuando se usen Rulos ganados gratuitamente, y revisar requisitos legales y técnicos.
 - Ubicación: mapa real (Leaflet + OpenStreetMap) + dirección libre + punto de encuentro.
 - Tipo de actividad (tipo_actividad): texto libre escrito por el entrenador (zumba, boxeo, running...; se muestra al cliente) + categoría general para filtros. Categorías: Fuerza / funcional, Cardio, Yoga / Pilates / movilidad, Otros.
 - Las clases pueden tener un mínimo de plazas (plazas_min) opcional; por debajo del mínimo se muestra un aviso de "pendiente de confirmación". El entrenador puede cancelar una clase entera (cancelar_clase()), lo que cancela también todas sus reservas activas y las marca con cancelada_por_entrenador = true, para que el cliente vea un aviso claro en /mis-reservas en vez de que la reserva desaparezca sin explicación.

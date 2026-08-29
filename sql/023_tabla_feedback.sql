@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 023_tabla_feedback.sql
+-- Ruleafit · 023_tabla_feedback.sql
 -- Tabla public.feedback: mensajes libres (problemas, sugerencias, etc.) que
 -- cualquier usuario con sesión puede enviar. Se revisan a mano desde el panel
 -- de Supabase (Table Editor), que usa la service role y se salta RLS, así

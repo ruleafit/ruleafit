@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 052_trigger_aviso_feedback.sql
+-- Ruleafit · 052_trigger_aviso_feedback.sql
 -- Al insertarse una fila nueva en public.feedback, dispara por pg_net una
 -- llamada HTTP POST a /api/avisar-feedback (backend en Vercel), que lee el
 -- feedback por su id y envia un correo de aviso al administrador via Resend.

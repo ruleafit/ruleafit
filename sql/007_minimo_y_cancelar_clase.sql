@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 007_minimo_y_cancelar_clase.sql
+-- Ruleafit · 007_minimo_y_cancelar_clase.sql
 -- Mínimo de plazas por clase (columna, sin lógica de confirmación todavía) y
 -- cancelación de una clase entera por parte del entrenador.
 --

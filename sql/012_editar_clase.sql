@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 012_editar_clase.sql
+-- Ruleafit · 012_editar_clase.sql
 -- Edición de clases ya publicadas por el entrenador (Paso 1 del plan:
 -- función RPC; el cliente —página /mis-clases/[id]/editar y botón "Editar"
 -- en /mis-clases— se hace en pasos posteriores, no en este archivo).

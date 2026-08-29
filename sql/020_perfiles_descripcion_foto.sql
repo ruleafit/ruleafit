@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 020_perfiles_descripcion_foto.sql
+-- Ruleafit · 020_perfiles_descripcion_foto.sql
 -- Añade a public.perfiles dos columnas opcionales para el futuro perfil
 -- público de entrenador: una bio corta (descripcion) y la URL de la foto de
 -- perfil (foto_url). Ambas nullable: no afectan a los perfiles existentes ni

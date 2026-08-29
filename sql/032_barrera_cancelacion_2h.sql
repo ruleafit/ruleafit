@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 032_barrera_cancelacion_2h.sql
+-- Ruleafit · 032_barrera_cancelacion_2h.sql
 -- Añade una barrera real de 2 horas a cancelar_reserva(): hasta ahora el
 -- umbral de 2h solo se calculaba como flag informativo (reembolso_aplicable)
 -- sin impedir cancelar; esta versión rechaza la cancelación si faltan menos

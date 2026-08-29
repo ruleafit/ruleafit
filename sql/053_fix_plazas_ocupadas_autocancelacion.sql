@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 053_fix_plazas_ocupadas_autocancelacion.sql
+-- Ruleafit · 053_fix_plazas_ocupadas_autocancelacion.sql
 -- autocancelar_clases_sin_minimo() cancela en bloque las reservas activas de
 -- la clase pero nunca toca clases.plazas_ocupadas, así que el contador se
 -- queda congelado con el valor previo a la autocancelación en vez de reflejar

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 022_ampliar_limite_descripcion.sql
+-- Ruleafit · 022_ampliar_limite_descripcion.sql
 -- Amplía el CHECK de public.perfiles.descripcion de 300 a 3000 caracteres.
 --
 -- Por qué: el límite de producto real es 300 PALABRAS, no caracteres, y ese

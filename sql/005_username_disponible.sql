@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 005_username_disponible.sql
+-- Ruleafit · 005_username_disponible.sql
 -- Comprobación de disponibilidad de nombre de usuario ANTES de registrarse
 -- (sin sesión iniciada todavía).
 --

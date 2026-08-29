@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 019_fk_clases_perfiles_y_rls_publica.sql
+-- Ruleafit · 019_fk_clases_perfiles_y_rls_publica.sql
 -- Habilita mostrar el username del entrenador en las consultas de clases:
 --
 --   (a) Añade una foreign key de public.clases.trainer_id a

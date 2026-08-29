@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 010_arreglo_recursion_rls.sql
+-- Ruleafit · 010_arreglo_recursion_rls.sql
 -- Corrige "infinite recursion detected in policy for relation clases",
 -- causado por sql/009_ver_clase_cancelada_propia.sql: la política "Ver
 -- clases activas" de public.clases consultaba directamente public.reservas

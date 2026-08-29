@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 033_autocancelar_sin_minimo.sql
+-- Ruleafit · 033_autocancelar_sin_minimo.sql
 -- Cancelación automática de clases que no van a alcanzar su plazas_min a
 -- tiempo: función pensada para ser invocada periódicamente por un cron (cada
 -- 5 minutos), que cancela toda clase activa con mínimo definido cuya

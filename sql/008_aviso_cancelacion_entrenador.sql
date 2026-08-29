@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 008_aviso_cancelacion_entrenador.sql
+-- Ruleafit · 008_aviso_cancelacion_entrenador.sql
 -- Permite al cliente distinguir si una reserva se canceló porque él mismo la
 -- canceló, o porque el entrenador canceló la clase entera.
 --

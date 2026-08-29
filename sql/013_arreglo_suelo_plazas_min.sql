@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 013_arreglo_suelo_plazas_min.sql
+-- Ruleafit · 013_arreglo_suelo_plazas_min.sql
 -- Corrige un bloqueo detectado en editar_clase() (sql/012_editar_clase.sql)
 -- al construir la página de edición del cliente.
 --

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 025_tabla_valoraciones.sql
+-- Ruleafit · 025_tabla_valoraciones.sql
 -- Tabla public.valoraciones: valoraciones de clientes a entrenadores
 -- (1 a 5 estrellas + opinión escrita opcional), visibles públicamente en el
 -- perfil del entrenador. Solo puede valorar quien haya asistido a alguna

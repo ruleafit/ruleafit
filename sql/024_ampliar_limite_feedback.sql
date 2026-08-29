@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 024_ampliar_limite_feedback.sql
+-- Ruleafit · 024_ampliar_limite_feedback.sql
 -- Amplía el CHECK de public.feedback.mensaje de 1000 a 5000 caracteres.
 --
 -- Por qué: el límite de 1000 caracteres (sql/023) resultaba demasiado corto

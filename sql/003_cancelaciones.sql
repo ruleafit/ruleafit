@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 003_cancelaciones.sql
+-- Ruleafit · 003_cancelaciones.sql
 -- Cancelación de reservas por parte del cliente, con cálculo del umbral de 2h
 -- (sin cargo ni devolución real todavía: la cartera no existe aún, ver
 -- CLAUDE.md "Decisiones de producto (MVP)").

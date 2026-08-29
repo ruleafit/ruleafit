@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 038_notificar_cancelacion.sql
+-- Ruleafit · 038_notificar_cancelacion.sql
 -- Añade una notificación en notificaciones_cola para cada cliente con reserva
 -- activa cuando su sesión se cancela, tanto si la cancela el entrenador
 -- (cancelar_clase) como si se cancela sola por no alcanzar el mínimo

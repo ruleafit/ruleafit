@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 054_mis_clases_motivo_cancelacion.sql
+-- Ruleafit · 054_mis_clases_motivo_cancelacion.sql
 -- mis_clases() no devuelve motivo_cancelacion (columna añadida en
 -- sql/031_motivo_cancelacion.sql), así que el front (app/mis-clases/page.js)
 -- no tiene forma de distinguir una clase cancelada por el entrenador de una

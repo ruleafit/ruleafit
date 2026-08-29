@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 001_reservas.sql
+-- Ruleafit · 001_reservas.sql
 -- Sistema de reservas: tabla, restricciones, RLS y función RPC atómica.
 --
 -- EJECUTADO el 12 de julio de 2026 en el proyecto Supabase "openfit".

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Openfit · 009_ver_clase_cancelada_propia.sql
+-- Ruleafit · 009_ver_clase_cancelada_propia.sql
 -- Amplía la política de lectura de public.clases para que un usuario
 -- autenticado pueda ver también una clase no activa (p.ej. cancelada por el
 -- entrenador) si tiene una reserva propia (cualquier estado) sobre ella.
