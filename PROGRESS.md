@@ -341,10 +341,10 @@ Hecho:
 Falta:
 - Ninguno.
 
-## Fase 6 · Pagos reales con Stripe — futuro, fuera del MVP
+## Fase 6 · Pagos online reales — futuro, fuera del MVP
 - Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
 - Rediseño de Open ligado al precio: no regalar los 5 Open de asistencia en clases gratis o muy baratas; conceder Open solo por encima de un umbral de precio X, aún por decidir.
-- Al integrar Stripe, quitar/ajustar el texto "se paga directamente al entrenador" que aparece junto al precio en el detalle de sesión (app/clases/[id]), igual que en su día se cambió "Cobras directo, sin intermediarios" -> "Cobros y reservas automáticos".
+- Al integrar el proveedor de pagos, quitar/ajustar el texto "se paga directamente al entrenador" que aparece junto al precio en el detalle de sesión (app/clases/[id]), igual que en su día se cambió "Cobras directo, sin intermediarios" -> "Cobros y reservas automáticos".
 
 Nota (investigación del modelo de cobros, 7 agosto 2026): Stripe Connect "puro" no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
 

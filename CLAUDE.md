@@ -6,7 +6,7 @@ Marketplace de clases sueltas de entrenamiento (sin gimnasio ni cuota), en Sevil
 Visión a futuro (no implementada todavía, solo de referencia): Ruleafit contempla abrirse más adelante a gimnasios y a entrenamientos individuales o en pareja, además de al aire libre y en grupo. Por eso, los textos de la interfaz no deben prometer exclusivamente entrenamiento al aire libre ni en grupo.
 
 ## Stack
-Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. Stripe más adelante (fuera del MVP).
+Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. Pagos online más adelante (fuera del MVP; proveedor sin decidir, puede ser Stripe o un banco convencional).
 
 ## Estructura y cuentas
 - Proyecto en C:\proyectos\ruleafit.
