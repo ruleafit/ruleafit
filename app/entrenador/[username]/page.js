@@ -88,19 +88,19 @@ export default function PerfilEntrenadorPage() {
       setUsuarioActual(userData.user)
 
       if (userData.user && userData.user.user_metadata?.rol === 'cliente') {
-        const { data: reservasAsistidas } = await supabase
+        const { data: reservasActivas } = await supabase
           .from('reservas')
-          .select('id, clases(trainer_id)')
+          .select('id, clases(trainer_id, fecha, hora)')
           .eq('cliente_id', userData.user.id)
-          .eq('asistencia', 'asistio')
+          .eq('estado', 'activa')
 
-        const haAsistido = (reservasAsistidas || []).some(
-          (reserva) => reserva.clases?.trainer_id === perfilData.id
+        const haCompletadoClase = (reservasActivas || []).some(
+          (reserva) => reserva.clases?.trainer_id === perfilData.id && claseYaPaso(reserva.clases)
         )
 
-        setPuedeValorar(haAsistido)
+        setPuedeValorar(haCompletadoClase)
 
-        if (haAsistido) {
+        if (haCompletadoClase) {
           const { data: valoracionPropia } = await supabase
             .from('valoraciones')
             .select('id, estrellas, opinion')

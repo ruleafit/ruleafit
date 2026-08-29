@@ -7,9 +7,7 @@ import {
   CalendarClock,
   ClipboardList,
   Users,
-  Clock,
   CircleCheck,
-  CircleX,
   CircleAlert,
   Ban,
   Pencil,
@@ -20,30 +18,6 @@ import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
 import { motivoNoEditableClase, claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
-
-const ETIQUETAS_ASISTENCIA = {
-  pendiente: 'Sin marcar',
-  asistio: 'Asistió',
-  no_asistio: 'No asistió',
-}
-
-const ICONOS_ASISTENCIA = {
-  pendiente: Clock,
-  asistio: CircleCheck,
-  no_asistio: CircleX,
-}
-
-const CLASES_BADGE_ASISTENCIA = {
-  pendiente: 'bg-[#F4F5EE] text-[#6B7355]',
-  asistio: 'bg-[#EDF5C9] text-[#3D4A00]',
-  no_asistio: 'bg-red-50 text-red-700',
-}
-
-const CLASES_FILA_ASISTENCIA = {
-  pendiente: '',
-  asistio: 'bg-[#EDF5C9]/40',
-  no_asistio: 'bg-red-50/50',
-}
 
 function claveFechaHora(clase) {
   return `${clase.clase_fecha} ${String(clase.clase_hora).slice(0, 5)}`
@@ -62,7 +36,6 @@ function agruparAlumnosPorClase(filas) {
       reserva_id: fila.reserva_id,
       cliente_username: fila.cliente_username,
       reservado_en: fila.reservado_en,
-      asistencia: fila.asistencia,
     })
   }
 
@@ -114,8 +87,6 @@ export default function MisClasesPage() {
   const [clasesConAlumnos, setClasesConAlumnos] = useState([])
   const [cargandoDatos, setCargandoDatos] = useState(true)
   const [error, setError] = useState('')
-  const [procesandoAsistenciaId, setProcesandoAsistenciaId] = useState(null)
-  const [erroresAsistencia, setErroresAsistencia] = useState({})
   const [procesandoCancelacionId, setProcesandoCancelacionId] = useState(null)
   const [erroresCancelacion, setErroresCancelacion] = useState({})
   const [mensajesCancelacion, setMensajesCancelacion] = useState({})
@@ -168,38 +139,6 @@ export default function MisClasesPage() {
     }
     cargarClases()
   }, [usuario, esEntrenador])
-
-  async function handleMarcarAsistencia(reservaId, asistio) {
-    setProcesandoAsistenciaId(reservaId)
-    setErroresAsistencia((prev) => {
-      const siguiente = { ...prev }
-      delete siguiente[reservaId]
-      return siguiente
-    })
-
-    const { error } = await supabase.rpc('marcar_asistencia', {
-      p_reserva_id: reservaId,
-      p_asistio: asistio,
-    })
-
-    if (error) {
-      setErroresAsistencia((prev) => ({ ...prev, [reservaId]: error.message }))
-      setProcesandoAsistenciaId(null)
-      return
-    }
-
-    setClasesConAlumnos((prev) =>
-      prev.map((clase) => ({
-        ...clase,
-        alumnos: clase.alumnos.map((alumno) =>
-          alumno.reserva_id === reservaId
-            ? { ...alumno, asistencia: asistio ? 'asistio' : 'no_asistio' }
-            : alumno
-        ),
-      }))
-    )
-    setProcesandoAsistenciaId(null)
-  }
 
   async function handleCancelarClase(claseId) {
     const confirmado = window.confirm(
@@ -393,71 +332,19 @@ export default function MisClasesPage() {
               )
             ) : (
               <div className="mt-4 flex flex-col divide-y divide-[#E2E6CF] overflow-hidden rounded-lg border border-[#E2E6CF]">
-                {clase.alumnos.map((alumno) => {
-                  const procesando = procesandoAsistenciaId === alumno.reserva_id
-                  const IconoAsistencia = ICONOS_ASISTENCIA[alumno.asistencia]
-
-                  return (
-                    <div
-                      key={alumno.reserva_id}
-                      className={`flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between ${CLASES_FILA_ASISTENCIA[alumno.asistencia]}`}
-                    >
-                      <div className="text-sm">
-                        <p className="font-semibold text-[#1F2400]">{alumno.cliente_username}</p>
-                        <p className="text-xs text-[#6B7355]">
-                          Reservó el {new Date(alumno.reservado_en).toLocaleString('es-ES')}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2">
-                        {haPasado && (
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${CLASES_BADGE_ASISTENCIA[alumno.asistencia]}`}
-                          >
-                            <IconoAsistencia className="h-3.5 w-3.5" strokeWidth={2} />
-                            {ETIQUETAS_ASISTENCIA[alumno.asistencia]}
-                          </span>
-                        )}
-
-                        {clase.estado === 'activa' && haPasado && alumno.asistencia === 'pendiente' && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleMarcarAsistencia(alumno.reserva_id, true)}
-                              disabled={procesando}
-                              className="rounded-full border border-[#B5E600] px-3 py-1 text-xs font-semibold text-[#3D4A00] transition-colors hover:bg-[#EDF5C9] disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {procesando ? '...' : 'Asistió'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleMarcarAsistencia(alumno.reserva_id, false)}
-                              disabled={procesando}
-                              className="rounded-full border border-[#E2E6CF] px-3 py-1 text-xs font-semibold text-[#6B7355] transition-colors hover:border-[#6B7355] hover:text-[#1F2400] disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {procesando ? '...' : 'No asistió'}
-                            </button>
-                          </>
-                        )}
-
-                        {clase.estado === 'activa' && alumno.asistencia !== 'pendiente' && (
-                          <button
-                            type="button"
-                            onClick={() => handleMarcarAsistencia(alumno.reserva_id, alumno.asistencia !== 'asistio')}
-                            disabled={procesando}
-                            className="text-xs font-medium text-[#6B7355] underline transition-colors hover:text-[#1F2400] disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {procesando ? 'Corrigiendo...' : 'Corregir'}
-                          </button>
-                        )}
-                      </div>
-
-                      {erroresAsistencia[alumno.reserva_id] && (
-                        <p className="text-xs text-red-600">{erroresAsistencia[alumno.reserva_id]}</p>
-                      )}
+                {clase.alumnos.map((alumno) => (
+                  <div
+                    key={alumno.reserva_id}
+                    className="flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="text-sm">
+                      <p className="font-semibold text-[#1F2400]">{alumno.cliente_username}</p>
+                      <p className="text-xs text-[#6B7355]">
+                        Reservó el {new Date(alumno.reservado_en).toLocaleString('es-ES')}
+                      </p>
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
             )}
 
