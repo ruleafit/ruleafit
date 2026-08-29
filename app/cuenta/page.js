@@ -84,13 +84,15 @@ export default function CuentaPage() {
         const rolUsuario = data.user.user_metadata?.rol
 
         if (rolUsuario === 'cliente') {
-          const { data: reservasAsistidas } = await supabase
+          const { data: reservasActivas } = await supabase
             .from('reservas')
-            .select('id')
+            .select('id, clases(fecha, hora)')
             .eq('cliente_id', data.user.id)
-            .eq('asistencia', 'asistio')
+            .eq('estado', 'activa')
 
-          setClasesRealizadas(reservasAsistidas?.length ?? 0)
+          setClasesRealizadas(
+            (reservasActivas || []).filter((r) => claseYaPaso(r.clases)).length
+          )
         } else if (rolUsuario === 'entrenador') {
           const { data: clasesEntrenador } = await supabase
             .from('clases')
