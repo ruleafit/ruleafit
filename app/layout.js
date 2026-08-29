@@ -18,6 +18,9 @@ export const metadata = {
   metadataBase: new URL("https://www.ruleafit.com"),
   title: "Ruleafit",
   description: "Entrena cuando quieras, sin cuotas ni permanencia.",
+  verification: {
+    google: "yiCqj7T2AtZAHRaU1Tv6joiiE7sFaqyuchPKjjwt0yk",
+  },
 };
 
 export const viewport = {
