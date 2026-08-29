@@ -1,6 +1,6 @@
-# Openfit — Progreso del proyecto
+# Ruleafit — Progreso del proyecto
 
-Última actualización: 28 agosto 2026
+Última actualización: 29 agosto 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -451,3 +451,13 @@ Hecho:
 
 Falta:
 - Eliminar las vistas de compatibilidad open_saldos/open_movimientos/open_motivos en Supabase una vez confirmado que nada las usa ya (manual, lo hace el usuario).
+
+## Desbloqueo de despliegues en Vercel por email de commit (29 agosto 2026)
+Hecho:
+- Vercel bloqueaba los despliegues de Producción porque el email global de Git en el ordenador local no coincidía con un email verificado en la cuenta de GitHub (`ruleafit`): estaba en `openfit2026@gmail.com`, en vez de `ruleafit@gmail.com`.
+- Corregido con `git config --global user.email "ruleafit@gmail.com"`.
+- Verificado con un commit vacío (`chore: trigger redeploy`, `0dad8ca`): desplegó en Vercel con estado "Ready" sin bloqueo, confirmando que los commits posteriores a `fbd1a07` (que ya llevaba el email correcto de forma puntual) también quedan resueltos por el cambio de configuración global, sin necesidad de repetir el truco en cada commit.
+- Corregido también el título de este documento ("Openfit" -> "Ruleafit", quedaba desde antes del rename de marca).
+
+Falta:
+- Resto de la limpieza interna del rename ampliado, sin cambios: revisar package.json (ya en "ruleafit", sin pendiente), CLAUDE.md y comentarios de cabecera de sql/*.sql.
