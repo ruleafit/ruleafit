@@ -203,7 +203,7 @@ export default function Home() {
           {!usuario && (
             <>
               <h1 className="flex flex-col gap-1 text-2xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                <span className="whitespace-nowrap">Tú eliges qué entrenar.</span>
+                <span className="whitespace-nowrap">Tú eliges qué entrenar.</span>{' '}
                 <span className="whitespace-nowrap text-[#B5E600]">Sin cuotas.</span>
               </h1>
               <p className="max-w-xl text-lg text-white/90 sm:text-xl">
