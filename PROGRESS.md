@@ -472,3 +472,25 @@ Hecho:
 
 Falta:
 - Ninguno de este bloque.
+
+## Invitación de ruleafit@gmail.com al equipo de Resend (7 septiembre 2026)
+Hecho:
+- Pendiente desde el 29 de agosto de 2026: no se conseguía añadir `ruleafit@gmail.com` como admin del equipo "ruleafit" en Resend (propiedad de `openfit2026@gmail.com`). Se abrió un ticket a soporte de Resend ese mismo día; el 1 de septiembre, soporte (Brian) respondió sugiriendo que el fallo era un lío de sesiones del navegador: se intentaba aceptar la invitación mientras el navegador tenía activa la sesión de Resend de la otra cuenta (`openfit2026@gmail.com`).
+- El 7 de septiembre se reintentó siguiendo esa pista: se canceló la invitación pendiente desde el panel de Resend (Settings → Team, como `openfit2026@gmail.com`) y se generó una invitación nueva a `ruleafit@gmail.com` con rol Admin.
+- Primer intento de aceptarla en ventana de incógnito fallando igual ("This invite is for another account", resuelto en la cuenta openfit2026@gmail.com pese a estar en incógnito, porque el botón "Log in with Google" recogió automáticamente la cuenta de Google vinculada al perfil de Chrome). Se generó una segunda invitación nueva (la primera queda inválida en cuanto se visita una vez con la cuenta equivocada) y esta vez se aceptó con el formulario de email/contraseña de Resend en vez de "Log in with Google", evitando el lío de cuentas.
+- Verificado por los dos lados: en Resend (Settings → Team) `ruleafit@gmail.com` figura como "Joined on Sep 07, 2026", rol Admin, ya no "Pending".
+
+Falta:
+- Ninguno de este bloque. El ticket de soporte con Resend se puede cerrar o dejar sin responder, ya no hace falta seguimiento.
+
+## Fix SEO: página /ayuda no se indexaba en Google por quedar oculta a usuarios sin sesión (7 septiembre 2026)
+Hecho:
+- Detectado a raíz de un aviso de Google Search Console ("Nuevos motivos que impiden que se indexen páginas", 6 de septiembre de 2026) con dos motivos. Comprobado uno por uno directamente en Search Console (Indexación de páginas), no solo leído el correo:
+  - "Rastreada: actualmente sin indexar" → la URL afectada era `https://www.ruleafit.com/favicon.ico?favicon...`. Comportamiento normal (Google rastrea el favicon para la miniatura de resultados, pero no lo indexa como página); no requería ninguna acción.
+  - "Duplicada: el usuario no ha indicado ninguna versión canónica" → la URL afectada era `https://www.ruleafit.com/ayuda`. Causa real encontrada en `app/ayuda/page.js`: la página ocultaba todo su contenido (título, descripción, formulario de feedback) detrás de una comprobación de sesión, y solo mostraba el texto genérico "No has iniciado sesión. Ve a iniciar sesión." a cualquier visitante no autenticado — incluidos los robots de Google, que rastrean sin iniciar sesión. Al ser un texto genérico que podía coincidir con el de otras páginas protegidas del sitio, Google no sabía distinguir esta página del resto y no la indexaba.
+- Corregido `app/ayuda/page.js`: el título, la descripción y el formulario de la página ahora se muestran siempre, a cualquier visitante; el inicio de sesión solo se exige en el momento de enviar el mensaje (antes bloqueaba el acceso a toda la página). Commit `a9f3639`.
+- Desplegado en Vercel (estado "Ready") y verificado en directo con el navegador que `https://www.ruleafit.com/ayuda` ya muestra el contenido real sin sesión iniciada.
+- Se le indicó al usuario cómo solicitar la reindexación manual de esa URL en Search Console (Inspeccionar URL → Solicitar indexación) para acelerar que Google la vuelva a rastrear.
+
+Falta:
+- Confirmar en unos días en Search Console que la URL ha pasado a "Indexada" tras la reindexación manual.
