@@ -461,3 +461,14 @@ Hecho:
 
 Falta:
 - Resto de la limpieza interna del rename ampliado, sin cambios: revisar package.json (ya en "ruleafit", sin pendiente), CLAUDE.md y comentarios de cabecera de sql/*.sql.
+
+## Fix: registro de usuarios roto por rename incompleto Open → Rulos (7 septiembre 2026)
+Hecho:
+- Detectado el 30 de agosto de 2026: ningún usuario nuevo podía registrarse en la web, ni por email ni con Google — el alta por email daba "Algo ha ido mal" y el botón de Google devolvía directamente a /login sin crear sesión.
+- Causa real, confirmada en Supabase el 7 de septiembre de 2026: el rename Open → Rulos del 28 de agosto (ver más arriba, "Rename sistema de puntos Open → Rulos") renombró las funciones con `ALTER FUNCTION ... RENAME TO`, que cambia el nombre en el catálogo de Postgres pero no reescribe el cuerpo de la función. `otorgar_rulos()` (antes `otorgar_open()`) seguía escribiendo en `public.open_movimientos` / `public.open_saldos`, tablas que dejaron de existir el 30 de agosto al borrar las vistas de compatibilidad; y `otorgar_rulos_bienvenida()` (antes `otorgar_open_bienvenida()`) seguía llamando a `public.otorgar_open(...)`, nombre que ya no existía. Esa función se dispara con un trigger `AFTER INSERT` en `auth.users` (bienvenida automática de 20 Rulos); al fallar dentro del trigger, se abortaba toda la transacción de alta — por eso afectaba igual al registro por email que al de Google (los dos crean una fila nueva en `auth.users`).
+- Se encontraron dos funciones más con el mismo patrón roto por dentro, comprobado que sin ningún trigger activo hoy que las dispare (`otorgar_rulos_valoracion`, bono por valorar al entrenador; y `marcar_asistencia`, ya en desuso desde la Tarea A del 29 de agosto). No estaban rompiendo nada en producción, pero se corrigieron igual por higiene.
+- Corregidas las 4 funciones en Supabase (SQL Editor, a mano por bloqueos del clasificador de seguridad al escribir varias de golpe). Detalle exacto documentado en `sql/059_fix_funciones_open_a_rulos.sql`.
+- Verificado con búsqueda en `pg_proc` (0 funciones ya referencian los nombres viejos) y con un registro de prueba real completado con éxito tras el arreglo.
+
+Falta:
+- Ninguno de este bloque.
