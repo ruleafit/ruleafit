@@ -29,6 +29,11 @@ export default function AyudaPage() {
     setError('')
     setConfirmacion('')
 
+    if (!usuario) {
+      setError('Debes iniciar sesión para enviar tu mensaje.')
+      return
+    }
+
     if (mensaje.trim() === '') {
       setError('Escribe un mensaje antes de enviarlo.')
       return
@@ -52,28 +57,6 @@ export default function AyudaPage() {
     setTimeout(() => setConfirmacion(''), 5000)
   }
 
-  if (cargando) {
-    return (
-      <div className="flex min-h-[60vh] flex-1 items-center justify-center">
-        <p className="text-[#6B7355]">Cargando...</p>
-      </div>
-    )
-  }
-
-  if (!usuario) {
-    return (
-      <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <p className="text-[#6B7355]">
-          No has iniciado sesión. Ve a{' '}
-          <Link href="/login" className="font-semibold text-[#3D4A00] hover:underline">
-            iniciar sesión
-          </Link>
-          .
-        </p>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-1 flex-col">
       <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
@@ -88,6 +71,16 @@ export default function AyudaPage() {
             </p>
           </div>
         </div>
+
+        {!cargando && !usuario && (
+          <p className="mb-4 text-sm text-[#6B7355]">
+            Para enviarnos un mensaje necesitas{' '}
+            <Link href="/login" className="font-semibold text-[#3D4A00] hover:underline">
+              iniciar sesión
+            </Link>
+            .
+          </p>
+        )}
 
         <form onSubmit={enviarFeedback} className="rounded-xl border border-[#E2E6CF] bg-white p-6">
           <textarea
