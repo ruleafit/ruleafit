@@ -160,7 +160,7 @@ export default function ClasesPage() {
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pb-6 sm:px-6">
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Sesiones disponibles</h1>
           <p className="mt-1 text-sm text-white/85 sm:text-base">
-            Entrenamientos en Sevilla y Málaga, sin cuota ni permanencia.
+            Sesiones en Sevilla y Málaga, sin cuota ni permanencia.
           </p>
         </div>
       </section>
