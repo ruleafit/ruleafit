@@ -108,7 +108,7 @@ export default function Menu() {
 
   // min-h fija para que las píldoras de una sola palabra (Publicar,
   // Usuarios, Mi cuenta) queden con la misma altura que las de dos líneas
-  // (Busca tu sesión, Mis reservas, Mis sesiones publicadas) y el menú no
+  // (Explora y reserva, Mis reservas, Mis sesiones publicadas) y el menú no
   // se vea asimétrico. Pedido por el usuario el 11 sept 2026.
   const pildoraBaseClass =
     'inline-flex min-h-[52px] items-center justify-center rounded-full px-4 py-2 text-center text-sm font-bold leading-tight ' +
@@ -124,7 +124,7 @@ export default function Menu() {
 
   if (usuario) {
     enlaces.push({ key: 'inicio', href: '/', label: 'Inicio', icon: Home })
-    enlaces.push({ key: 'sesiones', href: '/clases', label: 'Busca tu sesión', variante: 'participante' })
+    enlaces.push({ key: 'sesiones', href: '/clases', label: 'Explora y reserva', variante: 'participante' })
     enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas', variante: 'participante' })
     enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones publicadas', variante: 'organizador' })
     enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar', variante: 'organizador' })
