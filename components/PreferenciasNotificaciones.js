@@ -126,7 +126,7 @@ export default function PreferenciasNotificaciones({ usuarioActual, pushActivada
         </div>
 
         <div className="flex flex-col gap-3 border-t border-[#E2E6CF] pt-5">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Como organizador</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Como entrenador / organizador</h4>
           {CATEGORIAS_ORGANIZADOR.map((cat) => (
             <div key={cat.clave} className="flex items-center justify-between gap-4">
               <span className="text-sm text-[#162318]">{cat.etiqueta}</span>
@@ -154,7 +154,7 @@ export default function PreferenciasNotificaciones({ usuarioActual, pushActivada
       {/* Recuadro de cancelaciones - FUERA de la atenuacion, siempre a plena visibilidad */}
       <div className="mt-1 flex items-start gap-2 rounded-lg border-l-4 border-[#B5E600] bg-[#3D4A00]/5 px-3 py-2">
         <span className="text-sm font-semibold text-[#3D4A00]">
-          Las notificaciones de cancelación siempre están activas por ser importantes y no se pueden desactivar.
+          Las notificaciones de cancelación siempre están activas debido a su importancia y no se pueden desactivar.
         </span>
       </div>
 
