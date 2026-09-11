@@ -97,13 +97,21 @@ export default function Menu() {
       return 'bg-[#B5E600] text-[#1F2400] hover:bg-[#a3d100]'
     }
     if (variante === 'ambos') {
-      return 'bg-[#1F2400] text-white hover:brightness-110'
+      // Mismo tono que #1F2400 (usado en las tarjetas "ambos" de la
+      // portada) pero aclarado: sin el icono lima que llevan las tarjetas,
+      // el original se veía casi negro en la barra de escritorio. Pedido
+      // por el usuario el 11 sept 2026.
+      return 'bg-[#3A4700] text-white hover:brightness-110'
     }
     return 'border-2 border-[#1F2400]/15 bg-white text-[#1F2400] hover:border-[#B5E600]'
   }
 
+  // min-h fija para que las píldoras de una sola palabra (Publicar,
+  // Usuarios, Mi cuenta) queden con la misma altura que las de dos líneas
+  // (Busca tu sesión, Mis reservas, Mis sesiones publicadas) y el menú no
+  // se vea asimétrico. Pedido por el usuario el 11 sept 2026.
   const pildoraBaseClass =
-    'inline-flex items-center justify-center rounded-full px-4 py-2 text-center text-sm font-bold leading-tight ' +
+    'inline-flex min-h-[52px] items-center justify-center rounded-full px-4 py-2 text-center text-sm font-bold leading-tight ' +
     'transition-colors motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2'
 
