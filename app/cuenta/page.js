@@ -462,7 +462,7 @@ export default function CuentaPage() {
             <span className="inline-flex items-center rounded-full bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
               Nivel {infoNivel.nivel}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#B5E600]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#3D4A00]">
               <span aria-hidden="true">{rango.icono}</span>
               {rango.nombre}
             </span>
