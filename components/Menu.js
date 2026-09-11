@@ -87,6 +87,26 @@ export default function Menu() {
     'hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2'
 
+  // Mismo criterio de color que app/page.js (estiloTarjetaAcceso): blanco
+  // con borde para lo más orientado a participar, verde lima para lo más
+  // orientado a organizar, fondo oscuro para lo que sirve para ambas cosas.
+  // Pedido por el usuario el 11 sept 2026 para diferenciar de un vistazo
+  // los 6 enlaces principales, tanto aquí como en las tarjetas de la portada.
+  function pildoraClasePorVariante(variante) {
+    if (variante === 'organizador') {
+      return 'bg-[#B5E600] text-[#1F2400] hover:bg-[#a3d100]'
+    }
+    if (variante === 'ambos') {
+      return 'bg-[#1F2400] text-white hover:brightness-110'
+    }
+    return 'border-2 border-[#1F2400]/15 bg-white text-[#1F2400] hover:border-[#B5E600]'
+  }
+
+  const pildoraBaseClass =
+    'inline-flex items-center justify-center rounded-full px-4 py-2 text-center text-sm font-bold leading-tight ' +
+    'transition-colors motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2'
+
   // Lista de enlaces calculada una sola vez a partir de si hay sesión
   // iniciada o no, para no repetir las condiciones entre la versión de
   // escritorio y la de móvil. Ya no depende del rol (Fase 3 de la
@@ -96,12 +116,12 @@ export default function Menu() {
 
   if (usuario) {
     enlaces.push({ key: 'inicio', href: '/', label: 'Inicio', icon: Home })
-    enlaces.push({ key: 'sesiones', href: '/clases', label: 'Busca tu sesión' })
-    enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas' })
-    enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones publicadas' })
-    enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar', esBoton: true })
-    enlaces.push({ key: 'usuarios', href: '/entrenadores', label: 'Usuarios' })
-    enlaces.push({ key: 'cuenta', href: '/cuenta', label: 'Mi cuenta' })
+    enlaces.push({ key: 'sesiones', href: '/clases', label: 'Busca tu sesión', variante: 'participante' })
+    enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas', variante: 'participante' })
+    enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones publicadas', variante: 'organizador' })
+    enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar', variante: 'organizador' })
+    enlaces.push({ key: 'usuarios', href: '/entrenadores', label: 'Usuarios', variante: 'ambos' })
+    enlaces.push({ key: 'cuenta', href: '/cuenta', label: 'Mi cuenta', variante: 'ambos' })
   } else {
     enlaces.push({ key: 'sesiones', href: '/clases', label: 'Descubre sesiones' })
     enlaces.push({
@@ -116,6 +136,21 @@ export default function Menu() {
   }
 
   function renderEnlaceEscritorio(enlace) {
+    if (enlace.variante) {
+      const activo = pathname === enlace.href
+      return (
+        <Link
+          key={enlace.key}
+          href={enlace.href}
+          className={`${pildoraBaseClass} ${pildoraClasePorVariante(enlace.variante)} ${
+            activo ? 'ring-2 ring-offset-2 ring-[#1F2400]/25' : ''
+          }`}
+        >
+          {enlace.label}
+        </Link>
+      )
+    }
+
     if (enlace.esBoton) {
       return (
         <Link key={enlace.key} href={enlace.href} className={botonClass}>
@@ -157,13 +192,19 @@ export default function Menu() {
 
     const claseEnlaceMovil = [
       'flex items-center gap-2 rounded-lg px-3 py-3 text-base font-medium transition-colors',
-      enlace.esBoton
+      enlace.variante === 'organizador'
         ? 'bg-[#B5E600] font-bold text-[#16231B] hover:bg-[#a3d100]'
-        : enlace.mutado
-          ? 'text-[#6B7355] hover:bg-zinc-50'
-          : activo
-            ? 'bg-[#EDF5C9] text-[#16231B]'
-            : 'text-[#16231B] hover:bg-zinc-50',
+        : enlace.variante === 'ambos'
+          ? 'bg-[#1F2400] font-bold text-white hover:brightness-110'
+          : enlace.variante === 'participante'
+            ? 'border-2 border-[#1F2400]/15 text-[#16231B] hover:bg-zinc-50'
+            : enlace.esBoton
+              ? 'bg-[#B5E600] font-bold text-[#16231B] hover:bg-[#a3d100]'
+              : enlace.mutado
+                ? 'text-[#6B7355] hover:bg-zinc-50'
+                : activo
+                  ? 'bg-[#EDF5C9] text-[#16231B]'
+                  : 'text-[#16231B] hover:bg-zinc-50',
     ].join(' ')
 
     return (

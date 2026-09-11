@@ -21,18 +21,34 @@ import RevelarAlLlegar from '../components/RevelarAlLlegar'
 import BotonInstalarApp from '../components/BotonInstalarApp'
 
 // Tarjetas únicas para cualquier usuario logueado (Fase 3 de la unificación
-// de roles, 11 sept 2026): ya no hay dos listas según rol. "invertido" marca
-// las dos tarjetas más orientadas a organizar sesiones (antes solo visibles
-// para "entrenador"), que llevan los colores invertidos para diferenciarlas
-// dentro de la misma cuadrícula: fondo verde lima y dibujo en blanco.
+// de roles, 11 sept 2026; retocado el mismo día a partir del feedback del
+// usuario sobre la primera versión). "variante" diferencia los tres grupos
+// que pidió el usuario: los dos enfocados a participar en sesiones
+// ("participante"), los dos enfocados a organizarlas ("organizador"), y los
+// dos que sirven para ambas cosas por igual ("ambos"). Ver
+// estiloTarjetaAcceso más abajo para los colores de cada uno.
 const ACCESOS = [
-  { href: '/clases', label: 'Busca tu sesión', Icono: Dumbbell },
-  { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck },
-  { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: Users, invertido: true },
-  { href: '/publicar', label: 'Publicar', Icono: ClipboardList, invertido: true },
-  { href: '/entrenadores', label: 'Usuarios', Icono: UserRoundSearch },
-  { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
+  { href: '/clases', label: 'Busca tu sesión', Icono: Dumbbell, variante: 'participante' },
+  { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck, variante: 'participante' },
+  { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: Users, variante: 'organizador' },
+  { href: '/publicar', label: 'Publicar', Icono: ClipboardList, variante: 'organizador' },
+  { href: '/entrenadores', label: 'Usuarios', Icono: UserRoundSearch, variante: 'ambos' },
+  { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound, variante: 'ambos' },
 ]
+
+// Mismo criterio de color en toda la portada y en components/Menu.js:
+// blanco con borde = participante, verde lima = organizador, fondo oscuro
+// con icono lima = ambos (mismo estilo que ya usaba el bloque de captación
+// "¿Eres entrenador?" más abajo, para que no sea un color inventado).
+function estiloTarjetaAcceso(variante) {
+  if (variante === 'organizador') {
+    return { tarjeta: 'border-[#B5E600] bg-[#B5E600]', icono: 'text-white', texto: 'text-[#1F2400]' }
+  }
+  if (variante === 'ambos') {
+    return { tarjeta: 'border-[#1F2400] bg-[#1F2400]', icono: 'text-[#B5E600]', texto: 'text-white' }
+  }
+  return { tarjeta: 'border-2 border-[#1F2400]/15 bg-white/95', icono: 'text-[#B5E600]', texto: 'text-[#1F2400]' }
+}
 
 const CATEGORIAS = [
   { nombre: 'Fuerza / funcional', imagen: '/imagenes/fuerza.jpg' },
@@ -75,6 +91,8 @@ export default function Home() {
   const [prefiereMenosMovimiento, setPrefiereMenosMovimiento] = useState(false)
   const [misClases, setMisClases] = useState(null)
   const [cargandoMisClases, setCargandoMisClases] = useState(true)
+  const [misReservas, setMisReservas] = useState(null)
+  const [cargandoMisReservas, setCargandoMisReservas] = useState(true)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -143,6 +161,39 @@ export default function Home() {
   }, [usuario, cargandoSesion])
 
   useEffect(() => {
+    // Reservas propias como participante, para la franja de "Tus próximas
+    // reservas" de la portada (pedido por el usuario el 11 sept 2026, junto
+    // con dividir en dos la antigua franja de cifras del entrenador).
+    async function cargarMisReservas() {
+      if (cargandoSesion) {
+        return
+      }
+
+      if (!usuario) {
+        setMisReservas(null)
+        setCargandoMisReservas(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('reservas')
+        .select('id, estado, clases(id, titulo, fecha, hora)')
+        .eq('cliente_id', usuario.id)
+        .eq('estado', 'activa')
+        .order('fecha', { foreignTable: 'clases', ascending: true })
+        .order('hora', { foreignTable: 'clases', ascending: true })
+
+      if (error) {
+        setMisReservas(null)
+      } else {
+        setMisReservas(data || [])
+      }
+      setCargandoMisReservas(false)
+    }
+    cargarMisReservas()
+  }, [usuario, cargandoSesion])
+
+  useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
     setPrefiereMenosMovimiento(media.matches)
 
@@ -175,15 +226,17 @@ export default function Home() {
   const tieneClasesPublicadas = (misClases || []).length > 0
 
   const clasesActivasPropias = (misClases || []).filter((c) => c.estado === 'activa')
-  const totalReservasPropias = clasesActivasPropias.reduce(
-    (total, c) => total + Number(c.reservas_activas || 0),
-    0
-  )
   const clasesActivasAhora = clasesActivasPropias.filter(
     (c) => !claseYaPaso({ fecha: c.fecha, hora: c.hora })
   )
-  const proximaClasePropia =
-    clasesActivasPropias.filter((c) => !claseYaPaso({ fecha: c.fecha, hora: c.hora }))[0] || null
+
+  const proximasReservasPropias = (misReservas || [])
+    .filter((r) => r.clases && !claseYaPaso({ fecha: r.clases.fecha, hora: r.clases.hora }))
+    .sort((a, b) => {
+      const claveA = `${a.clases.fecha} ${String(a.clases.hora).slice(0, 5)}`
+      const claveB = `${b.clases.fecha} ${String(b.clases.hora).slice(0, 5)}`
+      return claveA < claveB ? -1 : 1
+    })
 
   return (
     <div className="flex flex-1 flex-col">
@@ -240,18 +293,19 @@ export default function Home() {
               </div>
 
               <div className="flex flex-wrap justify-center gap-4">
-                {ACCESOS.map(({ href, label, Icono, invertido }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={`tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px] ${
-                      invertido ? 'border-[#B5E600] bg-[#B5E600]' : 'border-[#E2E6CF] bg-white/95'
-                    }`}
-                  >
-                    <Icono className={`h-8 w-8 ${invertido ? 'text-white' : 'text-[#B5E600]'}`} strokeWidth={1.75} />
-                    <span className="text-sm font-bold text-[#1F2400]">{label}</span>
-                  </Link>
-                ))}
+                {ACCESOS.map(({ href, label, Icono, variante }) => {
+                  const estilo = estiloTarjetaAcceso(variante)
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px] ${estilo.tarjeta}`}
+                    >
+                      <Icono className={`h-8 w-8 ${estilo.icono}`} strokeWidth={1.75} />
+                      <span className={`text-sm font-bold ${estilo.texto}`}>{label}</span>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -260,57 +314,74 @@ export default function Home() {
 
       <BotonInstalarApp className={botonPrimarioClass} />
 
-      {/* Cifras de sesiones propias publicadas (cualquier usuario logueado) */}
-      {usuario && !cargandoMisClases && (
+      {/* Dos franjas separadas: sesiones propias publicadas (como organizador)
+          y reservas propias (como participante). Antes era un único bloque
+          de "cifras" solo para quien tenía sesiones publicadas; a petición
+          del usuario (11 sept 2026) ahora son dos listas simples en
+          paralelo, visibles siempre que haya sesión iniciada. */}
+      {usuario && !cargandoMisClases && !cargandoMisReservas && (
         <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-20">
-          {!tieneClasesPublicadas ? (
-            <RevelarAlLlegar className="flex flex-col items-center gap-4 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center shadow-sm">
-              <ClipboardList className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
-              <p className="text-base font-bold text-[#1F2400]">Todavía no has publicado ninguna sesión</p>
-              <p className="max-w-md text-sm text-[#6B7355]">
-                Publica tu primera sesión y empieza a recibir reservas.
-              </p>
-              <Link href="/publicar" className={botonPrimarioClass}>
-                Publicar mi primera sesión
-              </Link>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm">
+              <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-[#1F2400]">
+                <ClipboardList className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
+                Tus próximas sesiones publicadas
+              </h2>
+              {clasesActivasAhora.length === 0 ? (
+                <div className="flex flex-col items-start gap-3">
+                  <p className="text-sm text-[#6B7355]">Todavía no tienes ninguna sesión publicada próxima.</p>
+                  <Link href="/publicar" className="text-sm font-semibold text-[#3D4A00] hover:underline">
+                    Publicar una sesión →
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-col divide-y divide-[#E2E6CF]">
+                  {clasesActivasAhora.slice(0, 4).map((c) => (
+                    <Link
+                      key={c.clase_id}
+                      href={`/clases/${c.clase_id}?from=mis-clases`}
+                      className="flex items-center justify-between gap-3 py-2.5 text-sm transition-colors hover:bg-[#F4F5EE]"
+                    >
+                      <span className="truncate font-semibold text-[#1F2400]">{c.titulo}</span>
+                      <span className="shrink-0 text-xs text-[#6B7355]">
+                        {c.fecha} · {String(c.hora).slice(0, 5)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </RevelarAlLlegar>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
-                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">
-                  {clasesActivasAhora.length}
-                </p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Sesiones activas</p>
-              </RevelarAlLlegar>
 
-              <RevelarAlLlegar delayMs={80} className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
-                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{totalReservasPropias}</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
-                  Reservas acumuladas
-                </p>
-              </RevelarAlLlegar>
-
-              <RevelarAlLlegar delayMs={160} className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
-                {proximaClasePropia ? (
-                  <>
-                    <p className="truncate text-lg font-extrabold tracking-tight text-[#1F2400]">
-                      {proximaClasePropia.titulo}
-                    </p>
-                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
-                      Próxima sesión · {proximaClasePropia.fecha}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-lg font-extrabold tracking-tight text-[#1F2400]">—</p>
-                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
-                      Sin sesiones próximas
-                    </p>
-                  </>
-                )}
-              </RevelarAlLlegar>
-            </div>
-          )}
+            <RevelarAlLlegar delayMs={80} className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm">
+              <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-[#1F2400]">
+                <CalendarCheck className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
+                Tus próximas reservas
+              </h2>
+              {proximasReservasPropias.length === 0 ? (
+                <div className="flex flex-col items-start gap-3">
+                  <p className="text-sm text-[#6B7355]">Todavía no tienes ninguna reserva próxima.</p>
+                  <Link href="/clases" className="text-sm font-semibold text-[#3D4A00] hover:underline">
+                    Buscar una sesión →
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-col divide-y divide-[#E2E6CF]">
+                  {proximasReservasPropias.slice(0, 4).map((r) => (
+                    <Link
+                      key={r.id}
+                      href={`/clases/${r.clases.id}?from=mis-reservas`}
+                      className="flex items-center justify-between gap-3 py-2.5 text-sm transition-colors hover:bg-[#F4F5EE]"
+                    >
+                      <span className="truncate font-semibold text-[#1F2400]">{r.clases.titulo}</span>
+                      <span className="shrink-0 text-xs text-[#6B7355]">
+                        {r.clases.fecha} · {String(r.clases.hora).slice(0, 5)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </RevelarAlLlegar>
+          </div>
         </section>
       )}
 
