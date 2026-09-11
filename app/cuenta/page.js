@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Coins, History, CalendarCheck, Star, Users } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
+import { calcularNivel } from '../../lib/niveles'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import NotificacionesToggle from '../../components/NotificacionesToggle'
 import PreferenciasNotificaciones from '../../components/PreferenciasNotificaciones'
@@ -372,6 +373,7 @@ export default function CuentaPage() {
   }
 
   const inicial = (username || usuario.email || '?').charAt(0).toUpperCase()
+  const infoNivel = calcularNivel(rulosSaldo)
 
   const bloqueUsername = (
     <>
@@ -450,6 +452,25 @@ export default function CuentaPage() {
             )}
           </div>
           <p className="text-lg font-bold text-white sm:text-xl">{username || usuario.email}</p>
+
+          {/* Nivel de usuario (0-100), calculado a partir del saldo de
+              Rulos. Ver lib/niveles.js para la curva de costes. */}
+          <span className="inline-flex items-center rounded-full bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
+            Nivel {infoNivel.nivel}
+          </span>
+          <div className="flex w-40 flex-col items-center gap-1 sm:w-48">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/25">
+              <div
+                className="h-full rounded-full bg-[#B5E600]"
+                style={{ width: `${Math.round(infoNivel.progreso * 100)}%` }}
+              />
+            </div>
+            <p className="text-[11px] text-white/80">
+              {infoNivel.esMaximo
+                ? 'Nivel máximo alcanzado'
+                : `${infoNivel.rulosParaSiguiente} rulos para el nivel ${infoNivel.nivel + 1}`}
+            </p>
+          </div>
         </div>
       </section>
 
