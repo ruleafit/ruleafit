@@ -10,11 +10,14 @@ export default function BotonSeguir({ entrenadorId, usuarioActual }) {
   const [procesando, setProcesando] = useState(false)
   const [error, setError] = useState(false)
 
-  const esCliente = usuarioActual?.user_metadata?.rol === 'cliente'
+  // El candado de "no puedes seguirte a ti mismo" (esSuPropioPerfil) ya
+  // existía y no se toca. El bloqueo por rol (esCliente) se quita en la
+  // Fase 6 de la unificación de roles (11 sept 2026): cualquier usuario
+  // logueado puede seguir a otro.
   const esSuPropioPerfil = usuarioActual?.id === entrenadorId
 
   useEffect(() => {
-    if (!usuarioActual || !esCliente || esSuPropioPerfil) {
+    if (!usuarioActual || esSuPropioPerfil) {
       setCargando(false)
       return
     }
@@ -32,7 +35,7 @@ export default function BotonSeguir({ entrenadorId, usuarioActual }) {
     }
     comprobar()
     return () => { activo = false }
-  }, [usuarioActual, entrenadorId, esCliente, esSuPropioPerfil])
+  }, [usuarioActual, entrenadorId, esSuPropioPerfil])
 
   if (esSuPropioPerfil) return null
 
@@ -42,12 +45,10 @@ export default function BotonSeguir({ entrenadorId, usuarioActual }) {
         href="/login"
         className="inline-block rounded-full border border-[#16231B]/30 px-5 py-2 text-sm font-medium text-[#16231B] transition hover:bg-[#16231B]/5"
       >
-        Sigue a este entrenador
+        Sigue a este usuario
       </Link>
     )
   }
-
-  if (!esCliente) return null
 
   async function alternar() {
     if (procesando || cargando) return

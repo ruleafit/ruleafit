@@ -67,13 +67,17 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     }
   }, [])
 
-  const rol = usuario?.user_metadata?.rol
+  // Ya no depende del rol guardado (Fase 5 de la unificación de roles, 11
+  // sept 2026): cualquier usuario puede organizar unas sesiones y
+  // participar en otras, así que lo relevante es si ESTA sesión concreta
+  // es suya como organizador, no un rol fijo en su perfil.
+  const esMiPropiaSesion = !!(usuario && clase.trainer_id === usuario.id)
 
   useEffect(() => {
     let cancelado = false
 
     async function comprobarReservaActiva() {
-      if (!usuario || rol !== 'cliente') {
+      if (!usuario || esMiPropiaSesion) {
         setYaReservada(false)
         setComprobandoReserva(false)
         return
@@ -100,7 +104,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     return () => {
       cancelado = true
     }
-  }, [usuario, rol, clase.id])
+  }, [usuario, esMiPropiaSesion, clase.id])
 
   async function handleReservar() {
     setReservando(true)
@@ -132,8 +136,8 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     )
   }
 
-  if (rol !== 'cliente') {
-    return <p className="text-sm text-zinc-500">Solo los clientes pueden reservar</p>
+  if (esMiPropiaSesion) {
+    return <p className="text-sm text-zinc-500">Esta es tu propia sesión</p>
   }
 
   if (clase.estado !== 'activa' || claseYaPaso(clase)) {

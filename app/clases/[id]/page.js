@@ -116,7 +116,11 @@ function DetalleClaseContenido() {
     }
   }, [])
 
-  const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
+  // Ya no depende del rol guardado (Fase 5 de la unificación de roles, 11
+  // sept 2026): lo relevante es si el usuario es quien organiza ESTA
+  // sesión concreta, no un rol fijo en su perfil (`clase` puede ser null
+  // aquí todavía, mientras carga o si no se encontró).
+  const esEntrenador = !!(usuario && clase && clase.trainer_id === usuario.id)
   const destinoVolver = DESTINOS_VOLVER[searchParams.get('from')] || DESTINO_VOLVER_POR_DEFECTO
 
   if (cargando) {
@@ -152,7 +156,7 @@ function DetalleClaseContenido() {
       {estaCancelada && (
         <div className="flex items-center justify-center gap-2 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700">
           <CircleAlert className="h-4 w-4 shrink-0" strokeWidth={2} />
-          Esta sesión ha sido cancelada por el entrenador.
+          Esta sesión ha sido cancelada por el entrenador / organizador.
         </div>
       )}
 

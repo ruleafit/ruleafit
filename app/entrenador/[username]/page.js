@@ -87,7 +87,11 @@ export default function PerfilEntrenadorPage() {
       const { data: userData } = await supabase.auth.getUser()
       setUsuarioActual(userData.user)
 
-      if (userData.user && userData.user.user_metadata?.rol === 'cliente') {
+      // Ya no depende del rol guardado (Fase 6 de la unificación de roles,
+      // 11 sept 2026): lo relevante es que no sea tu propio perfil, no un
+      // rol fijo. El candado real (haber entrenado con esta persona) se
+      // calcula justo debajo de todos modos.
+      if (userData.user && userData.user.id !== perfilData.id) {
         const { data: reservasActivas } = await supabase
           .from('reservas')
           .select('id, clases(trainer_id, fecha, hora)')
@@ -180,7 +184,7 @@ export default function PerfilEntrenadorPage() {
     return (
       <div className="flex min-h-[70vh] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <SearchX className="h-12 w-12 text-[#B5E600]" strokeWidth={1.75} />
-        <p className="text-sm text-[#6B7355]">Entrenador no encontrado.</p>
+        <p className="text-sm text-[#6B7355]">Usuario no encontrado.</p>
         <Link href="/clases" className={botonPrimarioClass}>
           Volver a sesiones
         </Link>
@@ -219,7 +223,7 @@ export default function PerfilEntrenadorPage() {
             Sobre @{perfil.username}
           </h2>
           <p className="text-sm text-[#1F2400]">
-            {perfil.descripcion || 'Este entrenador aún no ha completado su perfil.'}
+            {perfil.descripcion || 'Este usuario aún no ha completado su perfil.'}
           </p>
         </div>
 
@@ -254,7 +258,7 @@ export default function PerfilEntrenadorPage() {
           {puedeValorar && (
             <form onSubmit={enviarValoracion} className="mt-6 border-t border-[#E2E6CF] pt-6">
               <p className="mb-2 text-sm font-semibold text-[#1F2400]">
-                {valoracionId ? 'Edita tu valoración' : 'Valora a este entrenador'}
+                {valoracionId ? 'Edita tu valoración' : 'Valora a este usuario'}
               </p>
 
               <div className="mb-4 flex gap-1">
@@ -319,9 +323,9 @@ export default function PerfilEntrenadorPage() {
             </form>
           )}
 
-          {usuarioActual && usuarioActual.user_metadata?.rol === 'cliente' && !puedeValorar && (
+          {usuarioActual && usuarioActual.id !== perfil.id && !puedeValorar && (
             <p className="mt-6 border-t border-[#E2E6CF] pt-6 text-sm text-[#6B7355]">
-              Solo puedes valorar a un entrenador con el que hayas entrenado.
+              Solo puedes valorar a un usuario con el que hayas entrenado.
             </p>
           )}
         </div>

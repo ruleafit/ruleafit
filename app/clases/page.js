@@ -99,8 +99,6 @@ export default function ClasesPage() {
     }
   }, [])
 
-  const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
-
   function handleReservado(claseId, nuevasPlazasOcupadas) {
     setClases((prev) =>
       prev.map((c) => (c.id === claseId ? { ...c, plazas_ocupadas: nuevasPlazasOcupadas } : c))
@@ -252,6 +250,10 @@ export default function ClasesPage() {
                   const porcentajeOcupado = plazasMax > 0 ? Math.min((plazasOcupadas / plazasMax) * 100, 100) : 0
                   const { pendienteConfirmacion } = estadoConfirmacionClase({ plazasMin, plazasOcupadas })
                   const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
+                  // Por sesión, no por usuario (Fase 5 de la unificación de
+                  // roles, 11 sept 2026): un mismo usuario puede organizar
+                  // esta sesión y ser participante en otra de la lista.
+                  const esEntrenador = !!(usuario && clase.trainer_id === usuario.id)
 
                   return (
                     <RevelarAlLlegar key={clase.id} delayMs={Math.min(indice * 60, 240)}>

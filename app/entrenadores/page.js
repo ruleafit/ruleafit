@@ -25,7 +25,9 @@ export default function EntrenadoresPage() {
       const usuarioActual = userData.user || null
       setUsuario(usuarioActual)
 
-      if (usuarioActual && usuarioActual.user_metadata?.rol === 'cliente') {
+      // Ya no depende del rol guardado (Fase 6 de la unificación de roles,
+      // 11 sept 2026): cualquier usuario logueado puede ver el directorio.
+      if (usuarioActual) {
         const { data, error: errorRpc } = await supabase.rpc('listar_entrenadores')
 
         if (errorRpc) {
@@ -59,14 +61,6 @@ export default function EntrenadoresPage() {
     )
   }
 
-  if (usuario.user_metadata?.rol !== 'cliente') {
-    return (
-      <div className="flex min-h-[60vh] flex-1 items-center justify-center px-6 text-center">
-        <p className="text-sm text-[#6B7355]">Esta sección es para clientes.</p>
-      </div>
-    )
-  }
-
   const busquedaNormalizada = busqueda.trim().toLowerCase()
 
   const entrenadoresFiltrados = entrenadores.filter((entrenador) => {
@@ -81,7 +75,7 @@ export default function EntrenadoresPage() {
         <img src="/imagenes/comunidad.jpg" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pb-6 sm:px-6">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Entrenadores</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Usuarios</h1>
           <p className="mt-1 text-sm text-white/85 sm:text-base">
             Descubre entrenadores en Sevilla y Málaga y entra en su perfil.
           </p>
@@ -92,7 +86,7 @@ export default function EntrenadoresPage() {
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
         {!error && entrenadores.length === 0 && (
-          <p className="text-sm text-[#6B7355]">Todavía no hay entrenadores disponibles.</p>
+          <p className="text-sm text-[#6B7355]">Todavía no hay usuarios disponibles.</p>
         )}
 
         {!error && entrenadores.length > 0 && (
@@ -116,7 +110,7 @@ export default function EntrenadoresPage() {
               <RevelarAlLlegar className="flex flex-col items-center gap-3 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center">
                 <SearchX className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
                 <p className="text-sm text-[#6B7355]">
-                  No hay entrenadores que coincidan con esta búsqueda. Prueba con otro término.
+                  No hay usuarios que coincidan con esta búsqueda. Prueba con otro término.
                 </p>
                 <button
                   type="button"
@@ -157,7 +151,7 @@ export default function EntrenadoresPage() {
                           <h2 className="text-lg font-bold text-[#1F2400]">@{entrenador.username}</h2>
 
                           <p className="line-clamp-3 text-sm text-[#6B7355]">
-                            {entrenador.descripcion || 'Este entrenador aún no ha completado su perfil.'}
+                            {entrenador.descripcion || 'Este usuario aún no ha completado su perfil.'}
                           </p>
                         </div>
                       </Link>
