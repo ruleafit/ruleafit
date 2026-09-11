@@ -197,7 +197,17 @@ export default function PerfilEntrenadorPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <section className="flex flex-col items-center gap-3 bg-[#FBFAF3] px-4 pb-10 pt-14 text-center sm:pt-16">
+      <section className="relative flex flex-col items-center gap-3 bg-[#FBFAF3] px-4 pb-10 pt-14 text-center sm:pt-16">
+        {/* Antes solo se podía volver al directorio desde el menú; pedido
+            por el usuario el 11 sept 2026 al ver que se quedaba sin salida
+            fácil al entrar en un perfil desde /entrenadores. */}
+        <Link
+          href="/entrenadores"
+          className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full border border-[#1F2400]/15 bg-white px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition hover:border-[#B5E600] hover:text-[#1F2400] sm:left-6 sm:top-6"
+        >
+          ← Usuarios
+        </Link>
+
         <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-[#B5E600] text-3xl font-extrabold text-[#1F2400] shadow-sm">
           {perfil.foto_url ? (
             <img src={perfil.foto_url} alt="Foto de perfil" className="h-full w-full object-cover" />
