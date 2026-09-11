@@ -96,22 +96,20 @@ export default function EditarClasePage() {
     comprobarSesion()
   }, [router])
 
-  const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
-
   useEffect(() => {
     async function cargarClase() {
       // Espera a que la comprobación de sesión termine antes de decidir
       // nada: si se entra aquí con usuario todavía sin resolver (primer
-      // render), esEntrenador da "false" y la guarda de abajo pondría
-      // cargandoClase en false prematuramente, dejándolo así para siempre
-      // (nunca se vuelve a poner en true) mientras la carga real de la
-      // clase sigue en marcha. Eso abría el hueco de tiempo en el que el
-      // formulario podía llegar a pintarse con clase todavía a null.
+      // render), la guarda de abajo pondría cargandoClase en false
+      // prematuramente, dejándolo así para siempre (nunca se vuelve a poner
+      // en true) mientras la carga real de la clase sigue en marcha. Eso
+      // abría el hueco de tiempo en el que el formulario podía llegar a
+      // pintarse con clase todavía a null.
       if (cargandoSesion) {
         return
       }
 
-      if (!usuario || !esEntrenador || !id) {
+      if (!usuario || !id) {
         setCargandoClase(false)
         return
       }
@@ -171,7 +169,7 @@ export default function EditarClasePage() {
       setCargandoClase(false)
     }
     cargarClase()
-  }, [usuario, esEntrenador, id, cargandoSesion])
+  }, [usuario, id, cargandoSesion])
 
   const sinMinimoDefinido = clase?.plazas_min === 0
   const formularioModificado =
@@ -256,23 +254,6 @@ export default function EditarClasePage() {
     )
   }
 
-  if (!esEntrenador) {
-    return (
-      <div className="flex flex-1 flex-col">
-        <CabeceraEditar />
-        <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
-          <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
-            Esta página es solo para entrenadores. Ve a{' '}
-            <Link href="/clases" className="font-semibold text-[#3D4A00] hover:underline">
-              ver las sesiones disponibles
-            </Link>
-            .
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   if (errorCarga) {
     return (
       <div className="flex flex-1 flex-col">
@@ -347,7 +328,7 @@ export default function EditarClasePage() {
                   className={inputClass}
                   placeholder="Ej: Zumba, boxeo, running..."
                 />
-                <p className={ayudaClass}>Esto lo verá el cliente tal cual lo escribas.</p>
+                <p className={ayudaClass}>Esto lo verán quienes reserven, tal cual lo escribas.</p>
               </div>
 
               <div>

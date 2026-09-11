@@ -53,11 +53,9 @@ export default function MisReservasPage() {
     comprobarSesion()
   }, [router])
 
-  const esCliente = usuario?.user_metadata?.rol === 'cliente'
-
   useEffect(() => {
     async function cargarReservas() {
-      if (!usuario || !esCliente) {
+      if (!usuario) {
         setCargandoReservas(false)
         return
       }
@@ -80,7 +78,7 @@ export default function MisReservasPage() {
       setCargandoReservas(false)
     }
     cargarReservas()
-  }, [usuario, esCliente])
+  }, [usuario])
 
   async function handleCancelar(reserva, clase) {
     const confirmado = window.confirm(
@@ -117,21 +115,6 @@ export default function MisReservasPage() {
     return (
       <div className="flex min-h-[60vh] flex-1 items-center justify-center">
         <p className="text-[#6B7355]">Cargando...</p>
-      </div>
-    )
-  }
-
-  if (!esCliente) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-        <h1 className="mb-8 text-2xl font-bold text-[#1F2400] sm:text-3xl">Mis reservas</h1>
-        <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#1F2400] shadow-sm">
-          Esta página es solo para clientes. Ve a{' '}
-          <Link href="/clases" className="font-semibold text-[#3D4A00] hover:underline">
-            ver las sesiones disponibles
-          </Link>
-          .
-        </div>
       </div>
     )
   }
@@ -230,7 +213,7 @@ export default function MisReservasPage() {
 
                     {clase.perfiles?.username && (
                       <p className="mb-3 text-sm text-[#6B7355]">
-                        Entrenador:{' '}
+                        Entrenador / Organizador:{' '}
                         <Link
                           href={`/entrenador/${clase.perfiles.username}`}
                           className="font-semibold text-[#3D4A00] hover:underline"
@@ -305,7 +288,7 @@ export default function MisReservasPage() {
         {reservasCanceladasPorEntrenador.length > 0 && (
           <div className="mt-10">
             <h2 className="mb-4 border-b border-[#E2E6CF] pb-2 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
-              Sesiones canceladas por el entrenador
+              Sesiones canceladas por el entrenador / organizador
             </h2>
 
             <div className="flex flex-col gap-4">
@@ -345,7 +328,7 @@ export default function MisReservasPage() {
                         <p className="mt-3 border-t border-red-200 pt-3 text-sm text-red-500">
                           {clase.perfiles?.username ? (
                             <>
-                              Cancelada por el entrenador{' '}
+                              Cancelada por el entrenador / organizador{' '}
                               <Link
                                 href={`/entrenador/${clase.perfiles.username}`}
                                 className="font-semibold hover:underline"
@@ -355,7 +338,7 @@ export default function MisReservasPage() {
                               .
                             </>
                           ) : (
-                            'Cancelada por el entrenador.'
+                            'Cancelada por el entrenador / organizador.'
                           )}
                           {reserva.cancelled_at && (
                             <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>
@@ -410,7 +393,7 @@ export default function MisReservasPage() {
 
                         {clase.perfiles?.username && (
                           <p className="mb-3 text-sm text-zinc-400">
-                            Entrenador:{' '}
+                            Entrenador / Organizador:{' '}
                             <Link
                               href={`/entrenador/${clase.perfiles.username}`}
                               className="font-semibold text-zinc-500 hover:underline"

@@ -107,11 +107,9 @@ export default function MisClasesPage() {
     comprobarSesion()
   }, [router])
 
-  const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
-
   useEffect(() => {
     async function cargarClases() {
-      if (!usuario || !esEntrenador) {
+      if (!usuario) {
         setCargandoDatos(false)
         return
       }
@@ -138,7 +136,7 @@ export default function MisClasesPage() {
       setCargandoDatos(false)
     }
     cargarClases()
-  }, [usuario, esEntrenador])
+  }, [usuario])
 
   async function handleCancelarClase(claseId) {
     const confirmado = window.confirm(
@@ -175,23 +173,6 @@ export default function MisClasesPage() {
     return (
       <div className="flex min-h-[60vh] flex-1 items-center justify-center">
         <p className="text-[#6B7355]">Cargando...</p>
-      </div>
-    )
-  }
-
-  if (!esEntrenador) {
-    return (
-      <div className="flex flex-1 flex-col">
-        <CabeceraMisClases />
-        <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
-          <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
-            Esta página es solo para entrenadores. Ve a{' '}
-            <Link href="/clases" className="font-semibold text-[#3D4A00] hover:underline">
-              ver las sesiones disponibles
-            </Link>
-            .
-          </div>
-        </div>
       </div>
     )
   }
@@ -311,7 +292,7 @@ export default function MisClasesPage() {
               <p className="mt-3 text-xs text-zinc-400">
                 {clase.motivo_cancelacion === 'minimo'
                   ? 'Esta sesión no llegó al mínimo.'
-                  : 'Sesión cancelada por el entrenador.'}
+                  : 'Sesión cancelada por el entrenador / organizador.'}
               </p>
             )}
 

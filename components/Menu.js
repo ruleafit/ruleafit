@@ -47,8 +47,6 @@ export default function Menu() {
     return () => window.removeEventListener('primera-accion', alPrimeraAccion)
   }, [])
 
-  const rol = usuario?.user_metadata?.rol
-
   async function handleCerrarSesion() {
     const confirmado = window.confirm('¿Estás seguro de que quieres cerrar sesión?')
     if (!confirmado) return
@@ -89,25 +87,23 @@ export default function Menu() {
     'hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2'
 
-  // Lista de enlaces calculada una sola vez a partir de usuario/rol, para no
-  // repetir las condiciones entre la versión de escritorio y la de móvil.
+  // Lista de enlaces calculada una sola vez a partir de si hay sesión
+  // iniciada o no, para no repetir las condiciones entre la versión de
+  // escritorio y la de móvil. Ya no depende del rol (Fase 3 de la
+  // unificación de roles, 11 sept 2026): cualquier usuario logueado ve
+  // los mismos enlaces, tanto para participar como para organizar.
   const enlaces = []
 
   if (usuario) {
     enlaces.push({ key: 'inicio', href: '/', label: 'Inicio', icon: Home })
-  }
-
-  const labelSesiones = !usuario
-    ? 'Descubre sesiones'
-    : rol === 'entrenador'
-      ? 'Sesiones publicadas'
-      : rol === 'cliente'
-        ? 'Busca tu sesión'
-        : 'Sesiones'
-
-  enlaces.push({ key: 'sesiones', href: '/clases', label: labelSesiones })
-
-  if (!usuario) {
+    enlaces.push({ key: 'sesiones', href: '/clases', label: 'Busca tu sesión' })
+    enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas' })
+    enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones publicadas' })
+    enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar', esBoton: true })
+    enlaces.push({ key: 'usuarios', href: '/entrenadores', label: 'Usuarios' })
+    enlaces.push({ key: 'cuenta', href: '/cuenta', label: 'Mi cuenta' })
+  } else {
+    enlaces.push({ key: 'sesiones', href: '/clases', label: 'Descubre sesiones' })
     enlaces.push({
       key: 'eres-entrenador',
       href: '/#entrenadores',
@@ -117,20 +113,6 @@ export default function Menu() {
     })
     enlaces.push({ key: 'login', href: '/login', label: 'Iniciar sesión' })
     enlaces.push({ key: 'registro', href: '/registro', label: 'Registrarse', esBoton: true })
-  }
-
-  if (usuario && rol === 'entrenador') {
-    enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones' })
-    enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar', esBoton: true })
-  }
-
-  if (usuario && rol === 'cliente') {
-    enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas' })
-    enlaces.push({ key: 'entrenadores', href: '/entrenadores', label: 'Entrenadores' })
-  }
-
-  if (usuario) {
-    enlaces.push({ key: 'cuenta', href: '/cuenta', label: 'Mi cuenta' })
   }
 
   function renderEnlaceEscritorio(enlace) {

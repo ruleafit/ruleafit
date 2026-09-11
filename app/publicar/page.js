@@ -63,16 +63,14 @@ export default function PublicarPage() {
     comprobarSesion()
   }, [])
 
-  const esEntrenador = usuario?.user_metadata?.rol === 'entrenador'
-
   async function handlePublicar(e) {
     e.preventDefault()
 
     const { data } = await supabase.auth.getUser()
     const usuarioActual = data.user
 
-    if (!usuarioActual || usuarioActual.user_metadata?.rol !== 'entrenador') {
-      setMensaje('Solo los entrenadores pueden publicar sesiones.')
+    if (!usuarioActual) {
+      setMensaje('Debes iniciar sesión para publicar.')
       return
     }
 
@@ -163,19 +161,6 @@ export default function PublicarPage() {
     )
   }
 
-  if (!esEntrenador) {
-    return (
-      <div className="flex flex-1 flex-col">
-        <CabeceraPublicar />
-        <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
-          <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
-            Solo los entrenadores pueden publicar sesiones.
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const esExito = mensaje === '¡Sesión publicada correctamente!'
   const esProgreso = mensaje === 'Publicando...'
   const esError = Boolean(mensaje) && !esExito && !esProgreso
@@ -212,7 +197,7 @@ export default function PublicarPage() {
                   className={inputClass}
                   placeholder="Ej: Zumba, boxeo, running..."
                 />
-                <p className={ayudaClass}>Esto lo verá el cliente tal cual lo escribas.</p>
+                <p className={ayudaClass}>Esto lo verán quienes reserven, tal cual lo escribas.</p>
               </div>
 
               <div>

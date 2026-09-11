@@ -20,17 +20,17 @@ import { claseYaPaso } from '../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../components/RevelarAlLlegar'
 import BotonInstalarApp from '../components/BotonInstalarApp'
 
-const ACCESOS_ENTRENADOR = [
-  { href: '/clases', label: 'Sesiones publicadas', Icono: Dumbbell },
-  { href: '/mis-clases', label: 'Mis sesiones', Icono: Users },
-  { href: '/publicar', label: 'Publicar', Icono: ClipboardList },
-  { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
-]
-
-const ACCESOS_CLIENTE = [
+// Tarjetas únicas para cualquier usuario logueado (Fase 3 de la unificación
+// de roles, 11 sept 2026): ya no hay dos listas según rol. "invertido" marca
+// las dos tarjetas más orientadas a organizar sesiones (antes solo visibles
+// para "entrenador"), que llevan los colores invertidos para diferenciarlas
+// dentro de la misma cuadrícula: fondo verde lima y dibujo en blanco.
+const ACCESOS = [
   { href: '/clases', label: 'Busca tu sesión', Icono: Dumbbell },
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck },
-  { href: '/entrenadores', label: 'Entrenadores', Icono: UserRoundSearch },
+  { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: Users, invertido: true },
+  { href: '/publicar', label: 'Publicar', Icono: ClipboardList, invertido: true },
+  { href: '/entrenadores', label: 'Usuarios', Icono: UserRoundSearch },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound },
 ]
 
@@ -41,13 +41,21 @@ const CATEGORIAS = [
   { nombre: 'Otros', imagen: '/imagenes/combate.jpg' },
 ]
 
+// Unificados en una sola lista (Fase 3): antes eran dos ternas alternativas
+// según rol ("como participante" / "como organizador"), ahora se muestran
+// las seis juntas porque cualquiera puede ser ambas cosas.
 const PUNTOS = [
   { texto: 'Sin cuota mensual', Icono: Wallet },
   { texto: 'Elige tu entrenador', Icono: UserRoundSearch },
   { texto: 'Cancela hasta 2 h antes', Icono: Clock },
+  { texto: 'Tu horario, tus normas', Icono: CalendarClock },
+  { texto: 'Tú fijas el precio y las plazas', Icono: Tag },
+  { texto: 'Cobros y reservas automáticos', Icono: HandCoins },
 ]
 
-const PUNTOS_ENTRENADOR = [
+// Solo para el bloque "¿Eres entrenador?" de captación (visible sin sesión
+// iniciada, se mantiene sin cambios según lo decidido).
+const PUNTOS_CAPTACION_ENTRENADOR = [
   { texto: 'Tu horario, tus normas', Icono: CalendarClock },
   { texto: 'Tú fijas el precio y las plazas', Icono: Tag },
   { texto: 'Cobros y reservas automáticos', Icono: HandCoins },
@@ -104,17 +112,19 @@ export default function Home() {
   useEffect(() => {
     async function cargarMisClases() {
       // Espera a que la sesión esté resuelta antes de decidir nada: si se
-      // entra aquí con usuario todavía sin resolver (primer render),
-      // esEntrenador daría "false" y se marcaría cargandoMisClases en false
-      // prematuramente y para siempre (mismo fallo de condición de carrera
-      // que hubo en app/mis-clases/[id]/editar/page.js).
+      // entra aquí con usuario todavía sin resolver (primer render), se
+      // marcaría cargandoMisClases en false prematuramente y para siempre
+      // (mismo fallo de condición de carrera que hubo en
+      // app/mis-clases/[id]/editar/page.js).
       if (cargandoSesion) {
         return
       }
 
-      const esEntrenadorActual = usuario?.user_metadata?.rol === 'entrenador'
-
-      if (!usuario || !esEntrenadorActual) {
+      // Se pide para cualquier usuario logueado, ya no solo "entrenador"
+      // (Fase 3 de la unificación de roles, 11 sept 2026): mis_clases() ya
+      // no exige rol desde la Fase 1, y ahora cualquiera puede tener
+      // sesiones publicadas.
+      if (!usuario) {
         setMisClases(null)
         setCargandoMisClases(false)
         return
@@ -158,23 +168,22 @@ export default function Home() {
     )
   }
 
-  const rol = usuario?.user_metadata?.rol
-  const esEntrenador = rol === 'entrenador'
-  const accesos = esEntrenador ? ACCESOS_ENTRENADOR : ACCESOS_CLIENTE
+  // Fase 3 de la unificación de roles (11 sept 2026): estas cifras ya no
+  // dependen del rol guardado, sino de si el propio usuario tiene sesiones
+  // publicadas (misClases, ahora pedido para cualquier logueado).
   const desplazamientoParallax = prefiereMenosMovimiento ? 0 : Math.min(scrollY * 0.2, 80)
-  const puntosMostrados = esEntrenador ? PUNTOS_ENTRENADOR : PUNTOS
+  const tieneClasesPublicadas = (misClases || []).length > 0
 
-  const clasesActivasEntrenador = esEntrenador ? (misClases || []).filter((c) => c.estado === 'activa') : []
-  const totalReservasEntrenador = clasesActivasEntrenador.reduce(
+  const clasesActivasPropias = (misClases || []).filter((c) => c.estado === 'activa')
+  const totalReservasPropias = clasesActivasPropias.reduce(
     (total, c) => total + Number(c.reservas_activas || 0),
     0
   )
-  const clasesActivasAhora = esEntrenador
-    ? (misClases || []).filter((c) => c.estado === 'activa' && !claseYaPaso({ fecha: c.fecha, hora: c.hora }))
-    : []
-  const proximaClaseEntrenador =
-    clasesActivasEntrenador.filter((c) => !claseYaPaso({ fecha: c.fecha, hora: c.hora }))[0] || null
-  const sinClasesPublicadas = esEntrenador && (misClases || []).length === 0
+  const clasesActivasAhora = clasesActivasPropias.filter(
+    (c) => !claseYaPaso({ fecha: c.fecha, hora: c.hora })
+  )
+  const proximaClasePropia =
+    clasesActivasPropias.filter((c) => !claseYaPaso({ fecha: c.fecha, hora: c.hora }))[0] || null
 
   return (
     <div className="flex flex-1 flex-col">
@@ -231,13 +240,15 @@ export default function Home() {
               </div>
 
               <div className="flex flex-wrap justify-center gap-4">
-                {accesos.map(({ href, label, Icono }) => (
+                {ACCESOS.map(({ href, label, Icono, invertido }) => (
                   <Link
                     key={href}
                     href={href}
-                    className="tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border border-[#E2E6CF] bg-white/95 p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px]"
+                    className={`tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px] ${
+                      invertido ? 'border-[#B5E600] bg-[#B5E600]' : 'border-[#E2E6CF] bg-white/95'
+                    }`}
                   >
-                    <Icono className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
+                    <Icono className={`h-8 w-8 ${invertido ? 'text-white' : 'text-[#B5E600]'}`} strokeWidth={1.75} />
                     <span className="text-sm font-bold text-[#1F2400]">{label}</span>
                   </Link>
                 ))}
@@ -249,10 +260,10 @@ export default function Home() {
 
       <BotonInstalarApp className={botonPrimarioClass} />
 
-      {/* Cifras del entrenador (solo con sesión de entrenador) */}
-      {esEntrenador && !cargandoMisClases && (
+      {/* Cifras de sesiones propias publicadas (cualquier usuario logueado) */}
+      {usuario && !cargandoMisClases && (
         <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-20">
-          {sinClasesPublicadas ? (
+          {!tieneClasesPublicadas ? (
             <RevelarAlLlegar className="flex flex-col items-center gap-4 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center shadow-sm">
               <ClipboardList className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
               <p className="text-base font-bold text-[#1F2400]">Todavía no has publicado ninguna sesión</p>
@@ -273,20 +284,20 @@ export default function Home() {
               </RevelarAlLlegar>
 
               <RevelarAlLlegar delayMs={80} className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
-                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{totalReservasEntrenador}</p>
+                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{totalReservasPropias}</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
                   Reservas acumuladas
                 </p>
               </RevelarAlLlegar>
 
               <RevelarAlLlegar delayMs={160} className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-center shadow-sm">
-                {proximaClaseEntrenador ? (
+                {proximaClasePropia ? (
                   <>
                     <p className="truncate text-lg font-extrabold tracking-tight text-[#1F2400]">
-                      {proximaClaseEntrenador.titulo}
+                      {proximaClasePropia.titulo}
                     </p>
                     <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
-                      Próxima sesión · {proximaClaseEntrenador.fecha}
+                      Próxima sesión · {proximaClasePropia.fecha}
                     </p>
                   </>
                 ) : (
@@ -303,8 +314,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* b) Franja de categorías (no se muestra al entrenador con sesión) */}
-      {!esEntrenador && (
+      {/* b) Franja de categorías (no se muestra a quien ya tiene sesiones propias publicadas) */}
+      {!cargandoMisClases && !tieneClasesPublicadas && (
         <section className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
           <RevelarAlLlegar as="h2" className="mb-10 text-2xl font-bold tracking-tight text-[#1F2400] sm:text-3xl">
             Encuentra tu entrenamiento
@@ -347,7 +358,7 @@ export default function Home() {
             </p>
 
             <div className="mt-4 grid w-full grid-cols-1 gap-8 sm:grid-cols-3">
-              {PUNTOS_ENTRENADOR.map(({ texto, Icono }, indice) => (
+              {PUNTOS_CAPTACION_ENTRENADOR.map(({ texto, Icono }, indice) => (
                 <RevelarAlLlegar
                   key={texto}
                   delayMs={indice * 100}
@@ -368,8 +379,8 @@ export default function Home() {
         </RevelarAlLlegar>
       )}
 
-      {/* c) Franja de comunidad (entrenador ve una llamada a publicar en su lugar) */}
-      {esEntrenador ? (
+      {/* c) Franja de comunidad (quien ya tiene sesiones propias ve una llamada a publicar otra, en vez de a buscar sesiones) */}
+      {tieneClasesPublicadas ? (
         <RevelarAlLlegar as="section" className="relative isolate flex min-h-[50vh] items-center justify-center overflow-hidden px-6 py-20 text-center">
           <img
             src="/imagenes/fuerza.jpg"
@@ -405,10 +416,10 @@ export default function Home() {
         </RevelarAlLlegar>
       )}
 
-      {/* d) Tres puntos con iconos (mensajes según rol) */}
+      {/* d) Puntos con iconos (unificados, ya no cambian según rol) */}
       <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-24">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-3">
-          {puntosMostrados.map(({ texto, Icono }, indice) => (
+          {PUNTOS.map(({ texto, Icono }, indice) => (
             <RevelarAlLlegar key={texto} delayMs={indice * 100} className="flex flex-col items-center gap-4 text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#EDF5C9]">
                 <Icono className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
