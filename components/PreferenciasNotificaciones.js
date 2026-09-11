@@ -3,26 +3,31 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
-// Categorias desactivables por rol (opt-out: ausencia de fila = activa).
-// Las cancelaciones NO aparecen: son criticas y siempre se envian.
-const CATEGORIAS_CLIENTE = [
-  { clave: 'publicaciones',    etiqueta: 'Nuevas sesiones de entrenadores que sigo' },
+// Categorias desactivables (opt-out: ausencia de fila = activa). Las
+// cancelaciones NO aparecen: son criticas y siempre se envian.
+//
+// Antes se elegía una lista de 4 según el rol guardado (cliente veía solo
+// las de participante, entrenador solo las de organizador). Fase 7 de la
+// unificación de roles (11 sept 2026): se muestran las 8 a la vez,
+// agrupadas visualmente en dos bloques, porque un mismo usuario puede
+// tener a la vez una reserva próxima y una sesión propia próxima.
+const CATEGORIAS_PARTICIPANTE = [
+  { clave: 'publicaciones',    etiqueta: 'Nuevas sesiones de usuarios que sigo' },
   { clave: 'recordatorio_24h', etiqueta: 'Recordatorio 24 horas antes' },
   { clave: 'recordatorio_7h',  etiqueta: 'Recordatorio 7 horas antes' },
   { clave: 'recordatorio_2h',  etiqueta: 'Recordatorio 2 horas antes' },
 ]
-const CATEGORIAS_ENTRENADOR = [
+const CATEGORIAS_ORGANIZADOR = [
   { clave: 'recordatorio_24h_entrenador', etiqueta: 'Recordatorio 24 horas antes' },
   { clave: 'recordatorio_7h_entrenador',  etiqueta: 'Recordatorio 7 horas antes' },
   { clave: 'recordatorio_2h_entrenador',  etiqueta: 'Recordatorio 2 horas antes' },
   { clave: 'plazas_agotadas',             etiqueta: 'Aviso cuando mi sesión se llena' },
 ]
+const TODAS_LAS_CATEGORIAS = [...CATEGORIAS_PARTICIPANTE, ...CATEGORIAS_ORGANIZADOR]
 
-export default function PreferenciasNotificaciones({ usuarioActual, rol, pushActivadas }) {
-  const categorias = rol === 'entrenador' ? CATEGORIAS_ENTRENADOR : CATEGORIAS_CLIENTE
-
+export default function PreferenciasNotificaciones({ usuarioActual, pushActivadas }) {
   const [activas, setActivas] = useState(() =>
-    Object.fromEntries(categorias.map((c) => [c.clave, true]))
+    Object.fromEntries(TODAS_LAS_CATEGORIAS.map((c) => [c.clave, true]))
   )
   const [cargando, setCargando] = useState(true)
   const [guardando, setGuardando] = useState(null)
@@ -37,7 +42,7 @@ export default function PreferenciasNotificaciones({ usuarioActual, rol, pushAct
           .select('categoria, activo')
           .eq('usuario_id', usuarioActual.id)
         if (!vivo) return
-        const estado = Object.fromEntries(categorias.map((c) => [c.clave, true]))
+        const estado = Object.fromEntries(TODAS_LAS_CATEGORIAS.map((c) => [c.clave, true]))
         if (data) {
           for (const fila of data) {
             if (fila.categoria in estado) estado[fila.categoria] = fila.activo
@@ -52,7 +57,7 @@ export default function PreferenciasNotificaciones({ usuarioActual, rol, pushAct
     }
     cargar()
     return () => { vivo = false }
-  }, [usuarioActual.id, rol])
+  }, [usuarioActual.id])
 
   async function alternar(clave) {
     if (guardando) return
@@ -94,28 +99,56 @@ export default function PreferenciasNotificaciones({ usuarioActual, rol, pushAct
       )}
 
       {/* SOLO los toggles se atenuan */}
-      <div className={"flex flex-col gap-3" + (pushActivadas ? '' : ' opacity-50 pointer-events-none')}>
-        {categorias.map((cat) => (
-          <div key={cat.clave} className="flex items-center justify-between gap-4">
-            <span className="text-sm text-[#162318]">{cat.etiqueta}</span>
-            <button
-              onClick={() => alternar(cat.clave)}
-              disabled={guardando === cat.clave || !pushActivadas}
-              className={
-                (activas[cat.clave] ? 'bg-[#B5E600]' : 'bg-zinc-300') +
-                ' relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-60'
-              }
-              aria-pressed={activas[cat.clave]}
-            >
-              <span
+      <div className={"flex flex-col gap-5" + (pushActivadas ? '' : ' opacity-50 pointer-events-none')}>
+        <div className="flex flex-col gap-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Como participante</h4>
+          {CATEGORIAS_PARTICIPANTE.map((cat) => (
+            <div key={cat.clave} className="flex items-center justify-between gap-4">
+              <span className="text-sm text-[#162318]">{cat.etiqueta}</span>
+              <button
+                onClick={() => alternar(cat.clave)}
+                disabled={guardando === cat.clave || !pushActivadas}
                 className={
-                  (activas[cat.clave] ? 'translate-x-6' : 'translate-x-1') +
-                  ' inline-block h-4 w-4 rounded-full bg-white transition'
+                  (activas[cat.clave] ? 'bg-[#B5E600]' : 'bg-zinc-300') +
+                  ' relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-60'
                 }
-              />
-            </button>
-          </div>
-        ))}
+                aria-pressed={activas[cat.clave]}
+              >
+                <span
+                  className={
+                    (activas[cat.clave] ? 'translate-x-6' : 'translate-x-1') +
+                    ' inline-block h-4 w-4 rounded-full bg-white transition'
+                  }
+                />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-[#E2E6CF] pt-5">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Como organizador</h4>
+          {CATEGORIAS_ORGANIZADOR.map((cat) => (
+            <div key={cat.clave} className="flex items-center justify-between gap-4">
+              <span className="text-sm text-[#162318]">{cat.etiqueta}</span>
+              <button
+                onClick={() => alternar(cat.clave)}
+                disabled={guardando === cat.clave || !pushActivadas}
+                className={
+                  (activas[cat.clave] ? 'bg-[#B5E600]' : 'bg-zinc-300') +
+                  ' relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition disabled:opacity-60'
+                }
+                aria-pressed={activas[cat.clave]}
+              >
+                <span
+                  className={
+                    (activas[cat.clave] ? 'translate-x-6' : 'translate-x-1') +
+                    ' inline-block h-4 w-4 rounded-full bg-white transition'
+                  }
+                />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Recuadro de cancelaciones - FUERA de la atenuacion, siempre a plena visibilidad */}

@@ -26,7 +26,13 @@ export default function CuentaPage() {
   const [guardando, setGuardando] = useState(false)
   const [confirmacion, setConfirmacion] = useState('')
   const [rulosSaldo, setRulosSaldo] = useState(0)
-  const [clasesRealizadas, setClasesRealizadas] = useState(0)
+  // Antes era un único contador que se calculaba de una forma u otra según
+  // el rol guardado (participante o organizador, nunca los dos). Fase 7 de
+  // la unificación de roles (11 sept 2026): se separan en dos contadores
+  // que se calculan siempre, porque un mismo usuario puede tener ambos.
+  const [sesionesParticipante, setSesionesParticipante] = useState(0)
+  const [sesionesOrganizador, setSesionesOrganizador] = useState(0)
+  const [numClasesOrganizadasTotal, setNumClasesOrganizadasTotal] = useState(0)
   const [promedioValoraciones, setPromedioValoraciones] = useState(null)
   const [totalValoraciones, setTotalValoraciones] = useState(0)
   const [numSeguidores, setNumSeguidores] = useState(0)
@@ -81,45 +87,46 @@ export default function CuentaPage() {
         }
         setRulosMotivos(mapaMotivos)
 
-        const rolUsuario = data.user.user_metadata?.rol
+        // Ya no depende del rol guardado (Fase 7 de la unificación de
+        // roles, 11 sept 2026): cualquier usuario puede haber participado
+        // en sesiones y/o haberlas organizado, así que estas consultas se
+        // lanzan siempre en vez de excluirse según un rol fijo.
+        const { data: reservasActivas } = await supabase
+          .from('reservas')
+          .select('id, clases(fecha, hora)')
+          .eq('cliente_id', data.user.id)
+          .eq('estado', 'activa')
 
-        if (rolUsuario === 'cliente') {
-          const { data: reservasActivas } = await supabase
-            .from('reservas')
-            .select('id, clases(fecha, hora)')
-            .eq('cliente_id', data.user.id)
-            .eq('estado', 'activa')
+        setSesionesParticipante(
+          (reservasActivas || []).filter((r) => claseYaPaso(r.clases)).length
+        )
 
-          setClasesRealizadas(
-            (reservasActivas || []).filter((r) => claseYaPaso(r.clases)).length
-          )
-        } else if (rolUsuario === 'entrenador') {
-          const { data: clasesEntrenador } = await supabase
-            .from('clases')
-            .select('fecha, hora, estado')
-            .eq('trainer_id', data.user.id)
-            .neq('estado', 'cancelada')
+        const { data: clasesOrganizadas } = await supabase
+          .from('clases')
+          .select('fecha, hora, estado')
+          .eq('trainer_id', data.user.id)
+          .neq('estado', 'cancelada')
 
-          setClasesRealizadas(
-            (clasesEntrenador || []).filter((c) => claseYaPaso({ fecha: c.fecha, hora: c.hora })).length
-          )
+        setNumClasesOrganizadasTotal((clasesOrganizadas || []).length)
+        setSesionesOrganizador(
+          (clasesOrganizadas || []).filter((c) => claseYaPaso({ fecha: c.fecha, hora: c.hora })).length
+        )
 
-          const { data: valoracionesEntrenador } = await supabase
-            .from('valoraciones')
-            .select('estrellas')
-            .eq('entrenador_id', data.user.id)
+        const { data: valoracionesPropias } = await supabase
+          .from('valoraciones')
+          .select('estrellas')
+          .eq('entrenador_id', data.user.id)
 
-          const listaValoraciones = valoracionesEntrenador || []
-          setTotalValoraciones(listaValoraciones.length)
-          setPromedioValoraciones(
-            listaValoraciones.length > 0
-              ? listaValoraciones.reduce((suma, v) => suma + v.estrellas, 0) / listaValoraciones.length
-              : null
-          )
+        const listaValoraciones = valoracionesPropias || []
+        setTotalValoraciones(listaValoraciones.length)
+        setPromedioValoraciones(
+          listaValoraciones.length > 0
+            ? listaValoraciones.reduce((suma, v) => suma + v.estrellas, 0) / listaValoraciones.length
+            : null
+        )
 
-          const { data: numSeg } = await supabase.rpc('contar_mis_seguidores')
-          setNumSeguidores(numSeg ?? 0)
-        }
+        const { data: numSeg } = await supabase.rpc('contar_mis_seguidores')
+        setNumSeguidores(numSeg ?? 0)
       }
       setCargando(false)
     }
@@ -364,8 +371,6 @@ export default function CuentaPage() {
     )
   }
 
-  const rol = usuario.user_metadata?.rol
-  const rolMostrado = rol === 'entrenador' ? 'Entrenador' : rol === 'cliente' ? 'Cliente' : 'Sin rol'
   const inicial = (username || usuario.email || '?').charAt(0).toUpperCase()
 
   const bloqueUsername = (
@@ -445,69 +450,66 @@ export default function CuentaPage() {
             )}
           </div>
           <p className="text-lg font-bold text-white sm:text-xl">{username || usuario.email}</p>
-          <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-            {rolMostrado}
-          </span>
         </div>
       </section>
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
-        {rol === 'entrenador' ? (
-          <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
-            <h2 className="mb-4 text-lg font-bold text-[#1F2400]">Perfil del entrenador</h2>
+        {/* Antes este formulario de foto/descripción solo se mostraba con
+            rol "entrenador". Fase 7 de la unificación de roles (11 sept
+            2026): se abre a cualquier usuario, porque cualquiera puede
+            publicar sesiones y tener un perfil público que otros visiten. */}
+        <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+          <h2 className="mb-4 text-lg font-bold text-[#1F2400]">Tu perfil</h2>
 
-            <form onSubmit={guardarPerfil} className="flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border border-[#E2E6CF] bg-[#FBFAF3]">
-                  {previewFoto || fotoUrl ? (
-                    <img src={previewFoto || fotoUrl} alt="Foto de perfil" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-[#B5E600]">
-                      {inicial}
-                    </div>
-                  )}
-                </div>
-                <label className="inline-block cursor-pointer rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#3D4A00] transition hover:border-[#B5E600]">
-                  Elegir foto
-                  <input type="file" accept="image/*" onChange={manejarSeleccionFoto} className="hidden" />
-                </label>
+          <form onSubmit={guardarPerfil} className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border border-[#E2E6CF] bg-[#FBFAF3]">
+                {previewFoto || fotoUrl ? (
+                  <img src={previewFoto || fotoUrl} alt="Foto de perfil" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-[#B5E600]">
+                    {inicial}
+                  </div>
+                )}
               </div>
+              <label className="inline-block cursor-pointer rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#3D4A00] transition hover:border-[#B5E600]">
+                Elegir foto
+                <input type="file" accept="image/*" onChange={manejarSeleccionFoto} className="hidden" />
+              </label>
+            </div>
 
-              <div>
-                <textarea
-                  value={descripcionPerfil}
-                  onChange={(e) => setDescripcionPerfil(e.target.value.slice(0, 3000))}
-                  maxLength={3000}
-                  rows={4}
-                  placeholder="Cuéntales a tus alumnos quién eres, tu experiencia y tu estilo de entrenamiento."
-                  className="block w-full rounded-xl border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
-                />
-                <p
-                  className={`mt-1 text-right text-xs ${
-                    contarPalabras(descripcionPerfil) > 300 ? 'font-semibold text-red-600' : 'text-[#6B7355]'
-                  }`}
-                >
-                  {contarPalabras(descripcionPerfil)}/300 palabras
-                </p>
-              </div>
-
-              {errorPerfil && <p className="text-xs text-red-600">{errorPerfil}</p>}
-              {confirmacionPerfil && <p className="text-sm font-medium text-[#3D4A00]">{confirmacionPerfil}</p>}
-
-              <button
-                type="submit"
-                disabled={guardandoPerfil}
-                className="self-start rounded-full bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+            <div>
+              <textarea
+                value={descripcionPerfil}
+                onChange={(e) => setDescripcionPerfil(e.target.value.slice(0, 3000))}
+                maxLength={3000}
+                rows={4}
+                placeholder="Cuéntales a los demás quién eres, tu experiencia y, si organizas sesiones, tu estilo de entrenamiento."
+                className="block w-full rounded-xl border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+              />
+              <p
+                className={`mt-1 text-right text-xs ${
+                  contarPalabras(descripcionPerfil) > 300 ? 'font-semibold text-red-600' : 'text-[#6B7355]'
+                }`}
               >
-                {guardandoPerfil ? 'Guardando...' : 'Guardar perfil'}
-              </button>
-            </form>
+                {contarPalabras(descripcionPerfil)}/300 palabras
+              </p>
+            </div>
 
-            <div className="mt-6 border-t border-[#E2E6CF] pt-6">{bloqueUsername}</div>
-          </div>
-        ) : (
-          <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">{bloqueUsername}</div>
-        )}
+            {errorPerfil && <p className="text-xs text-red-600">{errorPerfil}</p>}
+            {confirmacionPerfil && <p className="text-sm font-medium text-[#3D4A00]">{confirmacionPerfil}</p>}
+
+            <button
+              type="submit"
+              disabled={guardandoPerfil}
+              className="self-start rounded-full bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {guardandoPerfil ? 'Guardando...' : 'Guardar perfil'}
+            </button>
+          </form>
+
+          <div className="mt-6 border-t border-[#E2E6CF] pt-6">{bloqueUsername}</div>
+        </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
@@ -520,63 +522,79 @@ export default function CuentaPage() {
             </div>
           </RevelarAlLlegar>
 
-          {(rol === 'cliente' || rol === 'entrenador') && (
-            <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
-                <CalendarCheck className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{clasesRealizadas}</p>
-                <p className="text-sm font-semibold text-[#3D4A00]">Sesiones realizadas</p>
-              </div>
-            </RevelarAlLlegar>
-          )}
-        </div>
-
-        {rol === 'entrenador' && (
-          <RevelarAlLlegar className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
-                <Star className="h-7 w-7 text-[#B5E600]" fill="#B5E600" strokeWidth={1.75} />
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">
-                  {promedioValoraciones !== null ? promedioValoraciones.toFixed(1).replace('.', ',') : '—'}
-                </p>
-                <p className="text-sm font-semibold text-[#3D4A00]">
-                  {totalValoraciones === 0
-                    ? 'Sin valoraciones todavía'
-                    : totalValoraciones === 1
-                      ? '(1 valoración)'
-                      : `(${totalValoraciones} valoraciones)`}
-                </p>
-              </div>
-            </div>
-
-            {totalValoraciones > 0 && username && (
-              <Link
-                href={`/entrenador/${username}/opiniones`}
-                className="rounded-full border border-[#3D4A00] px-4 py-2 text-sm font-bold text-[#3D4A00] transition hover:bg-[#3D4A00] hover:text-white"
-              >
-                Ver opiniones
-              </Link>
-            )}
-          </RevelarAlLlegar>
-        )}
-
-        {rol === 'entrenador' && (
-          <RevelarAlLlegar className="mb-8 flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+          {/* Antes un único contador "Sesiones realizadas" que se calculaba
+              de una forma u otra según el rol. Fase 7 de la unificación de
+              roles (11 sept 2026): se muestran siempre los dos, porque un
+              mismo usuario puede haber participado en unas y organizado
+              otras. */}
+          <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
-              <Users className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+              <CalendarCheck className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
             </div>
             <div>
-              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{numSeguidores}</p>
-              <p className="text-sm font-semibold text-[#3D4A00]">
-                {numSeguidores === 1 ? 'cliente te sigue' : 'clientes te siguen'}
-              </p>
+              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{sesionesParticipante}</p>
+              <p className="text-sm font-semibold text-[#3D4A00]">Sesiones en las que has participado</p>
             </div>
           </RevelarAlLlegar>
-        )}
+
+          <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+              <CalendarCheck className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{sesionesOrganizador}</p>
+              <p className="text-sm font-semibold text-[#3D4A00]">Sesiones que has organizado</p>
+            </div>
+          </RevelarAlLlegar>
+        </div>
+
+        {/* Valoraciones: antes solo visible con rol "entrenador". Fase 7 de
+            la unificación de roles (11 sept 2026): siempre visible, con un
+            mensaje distinto si el usuario nunca ha organizado ninguna
+            sesión (no puede tener valoraciones todavía) frente a si ya
+            organiza pero nadie le ha valorado aún. */}
+        <RevelarAlLlegar className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+              <Star className="h-7 w-7 text-[#B5E600]" fill="#B5E600" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">
+                {promedioValoraciones !== null ? promedioValoraciones.toFixed(1).replace('.', ',') : '—'}
+              </p>
+              <p className="text-sm font-semibold text-[#3D4A00]">
+                {totalValoraciones === 0
+                  ? numClasesOrganizadasTotal === 0
+                    ? 'Todavía no has organizado ninguna sesión'
+                    : 'Sin valoraciones todavía'
+                  : totalValoraciones === 1
+                    ? '(1 valoración)'
+                    : `(${totalValoraciones} valoraciones)`}
+              </p>
+            </div>
+          </div>
+
+          {totalValoraciones > 0 && username && (
+            <Link
+              href={`/entrenador/${username}/opiniones`}
+              className="rounded-full border border-[#3D4A00] px-4 py-2 text-sm font-bold text-[#3D4A00] transition hover:bg-[#3D4A00] hover:text-white"
+            >
+              Ver opiniones
+            </Link>
+          )}
+        </RevelarAlLlegar>
+
+        <RevelarAlLlegar className="mb-8 flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+            <Users className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
+          </div>
+          <div>
+            <p className="text-3xl font-extrabold tracking-tight text-[#1F2400]">{numSeguidores}</p>
+            <p className="text-sm font-semibold text-[#3D4A00]">
+              {numSeguidores === 1 ? 'usuario te sigue' : 'usuarios te siguen'}
+            </p>
+          </div>
+        </RevelarAlLlegar>
 
         <div className="mb-8">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1F2400]">
@@ -611,12 +629,12 @@ export default function CuentaPage() {
         <div id="notificaciones" className="mb-8 scroll-mt-24 rounded-xl border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Notificaciones</h2>
           <p className="mb-4 text-sm text-[#6B7355]">
-            Recibe avisos en tu móvil cuando tus entrenadores publiquen sesiones y sobre tus reservas.
+            Recibe avisos en tu móvil cuando los usuarios que sigues publiquen sesiones y sobre tus reservas.
           </p>
           <NotificacionesToggle usuarioActual={usuario} onCambioEstado={setPushActivadas} />
           <div className="mt-6">
             <h3 className="text-sm font-semibold text-[#162318] mb-3">Qué notificaciones quieres recibir</h3>
-            <PreferenciasNotificaciones usuarioActual={usuario} rol={rol} pushActivadas={pushActivadas} />
+            <PreferenciasNotificaciones usuarioActual={usuario} pushActivadas={pushActivadas} />
           </div>
           <div className="mt-6">
             <h3 className="text-sm font-semibold text-[#162318] mb-3">Últimas notificaciones</h3>
