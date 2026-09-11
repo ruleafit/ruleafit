@@ -22,13 +22,7 @@ export default function AuthCallbackPage() {
         return
       }
 
-      // Decidir segun tenga rol o no.
-      const rol = user.user_metadata?.rol
-      if (rol) {
-        router.replace('/')
-      } else {
-        router.replace('/completar-perfil')
-      }
+      router.replace('/')
     }
     procesar()
     return () => { activo = false }

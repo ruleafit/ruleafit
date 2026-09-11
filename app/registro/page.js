@@ -16,16 +16,6 @@ const labelClass = 'mb-1 block text-sm font-medium text-[#1F2400]'
 const botonPrimarioClass =
   'mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
 
-function rolBotonClass(activo) {
-  return [
-    'flex-1 rounded-xl px-4 py-3 text-sm font-bold transition-colors',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2',
-    activo
-      ? 'border-2 border-[#B5E600] bg-[#EDF5C9] text-[#3D4A00]'
-      : 'border border-[#E2E6CF] bg-white text-[#6B7355] hover:border-[#B5E600]',
-  ].join(' ')
-}
-
 function traducirErrorRegistro(mensajeOriginal) {
   const m = (mensajeOriginal || '').toLowerCase()
   if (m.includes('username') || m.includes('perfiles')) {
@@ -42,7 +32,6 @@ export default function RegistroPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
-  const [rol, setRol] = useState('cliente')
   const [aceptaMayoria, setAceptaMayoria] = useState(false)
   const [mensaje, setMensaje] = useState('')
   const [registroExitoso, setRegistroExitoso] = useState(false)
@@ -90,7 +79,7 @@ export default function RegistroPage() {
       email: email,
       password: password,
       options: {
-        data: { rol: rol, username: username },
+        data: { username: username },
       },
     })
 
@@ -137,34 +126,6 @@ export default function RegistroPage() {
           ) : (
             <>
               <form onSubmit={handleRegistro} className="flex flex-col gap-4">
-                <div>
-                  <p className={labelClass}>Quiero usar Ruleafit como:</p>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      aria-pressed={rol === 'cliente'}
-                      onClick={() => setRol('cliente')}
-                      className={rolBotonClass(rol === 'cliente')}
-                    >
-                      Cliente
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={rol === 'entrenador'}
-                      onClick={() => setRol('entrenador')}
-                      className={rolBotonClass(rol === 'entrenador')}
-                    >
-                      Entrenador
-                    </button>
-                  </div>
-
-                  <div className="mt-3 rounded-lg border-2 border-[#B85E60] bg-[#B85E60]/10 px-4 py-3">
-                    <p className="text-sm font-bold text-[#B85E60]">
-                      ⚠️ Importante: el tipo de cuenta NO se puede cambiar más adelante. Asegúrate de elegir correctamente.
-                    </p>
-                  </div>
-                </div>
-
                 <div>
                   <label className={labelClass}>Nombre de usuario</label>
                   <input
