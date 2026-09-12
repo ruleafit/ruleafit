@@ -13,12 +13,12 @@ import {
   CalendarClock,
   Tag,
   HandCoins,
+  Whistle,
 } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { claseYaPaso } from '../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../components/RevelarAlLlegar'
 import BotonInstalarApp from '../components/BotonInstalarApp'
-import IconoSilbato from '../components/IconoSilbato'
 
 // Tarjetas únicas para cualquier usuario logueado (Fase 3 de la unificación
 // de roles, 11 sept 2026; retocado el mismo día a partir del feedback del
@@ -31,7 +31,7 @@ const ACCESOS = [
   { href: '/clases', label: 'Explora y reserva', Icono: Dumbbell, variante: 'participante' },
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck, variante: 'participante' },
   { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: ClipboardList, variante: 'organizador' },
-  { href: '/publicar', label: 'Publicar sesión', Icono: IconoSilbato, variante: 'organizador', cuadroIcono: true },
+  { href: '/publicar', label: 'Publicar sesión', Icono: Whistle, variante: 'organizador' },
   { href: '/entrenadores', label: 'Ruleros', Icono: UserRoundSearch, variante: 'ambos' },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound, variante: 'ambos' },
 ]
@@ -293,7 +293,7 @@ export default function Home() {
               </div>
 
               <div className="flex flex-wrap justify-center gap-4">
-                {ACCESOS.map(({ href, label, Icono, variante, cuadroIcono }) => {
+                {ACCESOS.map(({ href, label, Icono, variante }) => {
                   const estilo = estiloTarjetaAcceso(variante)
                   return (
                     <Link
@@ -301,13 +301,7 @@ export default function Home() {
                       href={href}
                       className={`tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px] ${estilo.tarjeta}`}
                     >
-                      {cuadroIcono ? (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1F2400]/15">
-                          <Icono className={`h-7 w-7 ${estilo.icono}`} />
-                        </div>
-                      ) : (
-                        <Icono className={`h-8 w-8 ${estilo.icono}`} strokeWidth={1.75} />
-                      )}
+                      <Icono className={`h-8 w-8 ${estilo.icono}`} strokeWidth={1.75} />
                       <span className={`text-sm font-bold ${estilo.texto}`}>{label}</span>
                     </Link>
                   )
