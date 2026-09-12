@@ -31,7 +31,7 @@ const ACCESOS = [
   { href: '/clases', label: 'Explora y reserva', Icono: Dumbbell, variante: 'participante' },
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck, variante: 'participante' },
   { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: ClipboardList, variante: 'organizador' },
-  { href: '/publicar', label: 'Publicar una sesión', Icono: IconoSilbato, variante: 'organizador' },
+  { href: '/publicar', label: 'Publicar sesión', Icono: IconoSilbato, variante: 'organizador', cuadroIcono: true },
   { href: '/entrenadores', label: 'Ruleros', Icono: UserRoundSearch, variante: 'ambos' },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound, variante: 'ambos' },
 ]
@@ -293,7 +293,7 @@ export default function Home() {
               </div>
 
               <div className="flex flex-wrap justify-center gap-4">
-                {ACCESOS.map(({ href, label, Icono, variante }) => {
+                {ACCESOS.map(({ href, label, Icono, variante, cuadroIcono }) => {
                   const estilo = estiloTarjetaAcceso(variante)
                   return (
                     <Link
@@ -301,7 +301,13 @@ export default function Home() {
                       href={href}
                       className={`tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px] ${estilo.tarjeta}`}
                     >
-                      <Icono className={`h-8 w-8 ${estilo.icono}`} strokeWidth={1.75} />
+                      {cuadroIcono ? (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1F2400]/15">
+                          <Icono className={`h-7 w-7 ${estilo.icono}`} />
+                        </div>
+                      ) : (
+                        <Icono className={`h-8 w-8 ${estilo.icono}`} strokeWidth={1.75} />
+                      )}
                       <span className={`text-sm font-bold ${estilo.texto}`}>{label}</span>
                     </Link>
                   )

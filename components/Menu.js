@@ -127,7 +127,7 @@ export default function Menu() {
     enlaces.push({ key: 'sesiones', href: '/clases', label: 'Explora y reserva', variante: 'participante' })
     enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas', variante: 'participante' })
     enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones publicadas', variante: 'organizador' })
-    enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar una sesión', variante: 'organizador' })
+    enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar sesión', variante: 'organizador' })
     enlaces.push({ key: 'usuarios', href: '/entrenadores', label: 'Ruleros', variante: 'ambos' })
     enlaces.push({ key: 'cuenta', href: '/cuenta', label: 'Mi cuenta', variante: 'ambos' })
   } else {
