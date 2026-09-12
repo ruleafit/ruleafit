@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   Dumbbell,
-  Users,
   ClipboardList,
   CircleUserRound,
   CalendarCheck,
@@ -19,6 +18,7 @@ import { supabase } from '../lib/supabaseClient'
 import { claseYaPaso } from '../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../components/RevelarAlLlegar'
 import BotonInstalarApp from '../components/BotonInstalarApp'
+import IconoSilbato from '../components/IconoSilbato'
 
 // Tarjetas únicas para cualquier usuario logueado (Fase 3 de la unificación
 // de roles, 11 sept 2026; retocado el mismo día a partir del feedback del
@@ -30,8 +30,8 @@ import BotonInstalarApp from '../components/BotonInstalarApp'
 const ACCESOS = [
   { href: '/clases', label: 'Explora y reserva', Icono: Dumbbell, variante: 'participante' },
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck, variante: 'participante' },
-  { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: Users, variante: 'organizador' },
-  { href: '/publicar', label: 'Publicar', Icono: ClipboardList, variante: 'organizador' },
+  { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: ClipboardList, variante: 'organizador' },
+  { href: '/publicar', label: 'Publicar una sesión', Icono: IconoSilbato, variante: 'organizador' },
   { href: '/entrenadores', label: 'Ruleros', Icono: UserRoundSearch, variante: 'ambos' },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound, variante: 'ambos' },
 ]
