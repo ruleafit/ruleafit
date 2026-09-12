@@ -18,10 +18,11 @@ const CATEGORIAS_PARTICIPANTE = [
   { clave: 'recordatorio_2h',  etiqueta: 'Recordatorio 2 horas antes' },
 ]
 const CATEGORIAS_ORGANIZADOR = [
-  { clave: 'recordatorio_24h_entrenador', etiqueta: 'Recordatorio 24 horas antes' },
-  { clave: 'recordatorio_7h_entrenador',  etiqueta: 'Recordatorio 7 horas antes' },
-  { clave: 'recordatorio_2h_entrenador',  etiqueta: 'Recordatorio 2 horas antes' },
-  { clave: 'plazas_agotadas',             etiqueta: 'Aviso cuando mi sesión se llena' },
+  { clave: 'recordatorio_24h_entrenador',   etiqueta: 'Recordatorio 24 horas antes' },
+  { clave: 'recordatorio_7h_entrenador',    etiqueta: 'Recordatorio 7 horas antes' },
+  { clave: 'recordatorio_2h_entrenador',    etiqueta: 'Recordatorio 2 horas antes' },
+  { clave: 'recordatorio_10min_entrenador', etiqueta: 'Recordatorio 10 minutos antes' },
+  { clave: 'plazas_agotadas',               etiqueta: 'Aviso cuando mi sesión se llena' },
 ]
 const TODAS_LAS_CATEGORIAS = [...CATEGORIAS_PARTICIPANTE, ...CATEGORIAS_ORGANIZADOR]
 
