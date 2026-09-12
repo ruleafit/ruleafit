@@ -327,8 +327,8 @@ export default function PublicarPage() {
               destaque más. */}
           <div className="flex items-start gap-2 rounded-lg border-l-4 border-red-600 bg-red-50 px-3 py-2">
             <span className="text-sm font-semibold text-red-700">
-              Recuerda revisar los nombres antes de empezar la sesión, para confirmar que todos los asistentes han
-              reservado.
+              Recuerda revisar los nombres antes de empezar la sesión en el apartado "Mis sesiones publicadas", para
+              confirmar que todos los asistentes han reservado.
             </span>
           </div>
 

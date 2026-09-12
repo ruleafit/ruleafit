@@ -292,7 +292,7 @@ begin
     loop
       perform public.generar_notificacion(
         v_rec.usuario_id, v_rec.tipo, 'Recordatorio de sesión',
-        'Tu sesión está a punto de empezar, revisa los nombres de las reservas antes de comenzar.', '/mis-clases'
+        'Recuerda revisar los nombres de tus participantes. Tu sesión empieza en breve.', '/mis-clases'
       );
     end loop;
   exception when others then null; end;
