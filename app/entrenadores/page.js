@@ -78,7 +78,7 @@ export default function EntrenadoresPage() {
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pb-6 sm:px-6">
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Ruleros</h1>
           <p className="mt-1 text-sm text-white/85 sm:text-base">
-            Descubre ruleros en Sevilla y Málaga y entra en su perfil o sigue a otros ruleros.
+            Descubre otros ruleros en Sevilla y Málaga, entra en su perfil y síguelos para enterarte de cuando publican una sesión.
           </p>
         </div>
       </section>
