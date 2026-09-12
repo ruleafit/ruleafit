@@ -92,7 +92,7 @@ export default function OpinionesEntrenadorPage() {
     return (
       <div className="flex min-h-[70vh] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <SearchX className="h-12 w-12 text-[#B5E600]" strokeWidth={1.75} />
-        <p className="text-sm text-[#6B7355]">Usuario no encontrado.</p>
+        <p className="text-sm text-[#6B7355]">Rulero no encontrado.</p>
         <Link href="/clases" className={botonPrimarioClass}>
           Volver a sesiones
         </Link>
@@ -135,7 +135,7 @@ export default function OpinionesEntrenadorPage() {
         {opiniones.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-[#E2E6CF] px-6 py-12 text-center">
             <MessageSquareText className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
-            <p className="text-sm text-[#6B7355]">Este usuario aún no tiene opiniones escritas.</p>
+            <p className="text-sm text-[#6B7355]">Este rulero aún no tiene opiniones escritas.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">

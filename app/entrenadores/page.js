@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { SearchX, User } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
+import { calcularNivel, calcularRango } from '../../lib/niveles'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const filtroCampoClass =
@@ -53,7 +54,7 @@ export default function EntrenadoresPage() {
   if (!usuario) {
     return (
       <div className="flex min-h-[60vh] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="text-sm text-[#6B7355]">Inicia sesión para descubrir entrenadores.</p>
+        <p className="text-sm text-[#6B7355]">Inicia sesión para descubrir ruleros.</p>
         <Link href="/login" className={botonPrimarioClass}>
           Iniciar sesión
         </Link>
@@ -75,9 +76,9 @@ export default function EntrenadoresPage() {
         <img src="/imagenes/comunidad.jpg" alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/70 via-black/35 to-black/10" />
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pb-6 sm:px-6">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Usuarios</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Ruleros</h1>
           <p className="mt-1 text-sm text-white/85 sm:text-base">
-            Descubre entrenadores en Sevilla y Málaga y entra en su perfil o sigue a otros usuarios.
+            Descubre ruleros en Sevilla y Málaga y entra en su perfil o sigue a otros ruleros.
           </p>
         </div>
       </section>
@@ -86,7 +87,7 @@ export default function EntrenadoresPage() {
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
         {!error && entrenadores.length === 0 && (
-          <p className="text-sm text-[#6B7355]">Todavía no hay usuarios disponibles.</p>
+          <p className="text-sm text-[#6B7355]">Todavía no hay ruleros disponibles.</p>
         )}
 
         {!error && entrenadores.length > 0 && (
@@ -110,7 +111,7 @@ export default function EntrenadoresPage() {
               <RevelarAlLlegar className="flex flex-col items-center gap-3 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center">
                 <SearchX className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
                 <p className="text-sm text-[#6B7355]">
-                  No hay usuarios que coincidan con esta búsqueda. Prueba con otro término.
+                  No hay ruleros que coincidan con esta búsqueda. Prueba con otro término.
                 </p>
                 <button
                   type="button"
@@ -126,6 +127,8 @@ export default function EntrenadoresPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {entrenadoresFiltrados.map((entrenador, indice) => {
                   const inicial = (entrenador.username || '?').charAt(0).toUpperCase()
+                  const infoNivel = calcularNivel(entrenador.rulos_saldo)
+                  const rango = calcularRango(infoNivel.nivel)
 
                   return (
                     <RevelarAlLlegar key={entrenador.id} delayMs={Math.min(indice * 60, 240)}>
@@ -150,8 +153,22 @@ export default function EntrenadoresPage() {
 
                           <h2 className="text-lg font-bold text-[#1F2400]">@{entrenador.username}</h2>
 
+                          {/* Nivel y rango (pedido por el usuario el 12 sept
+                              2026): ver el nivel de otros ruleros motiva a
+                              subir el propio. Mismo cálculo que en
+                              /cuenta, ver lib/niveles.js. */}
+                          <div className="flex flex-wrap items-center justify-center gap-2">
+                            <span className="inline-flex items-center rounded-full bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
+                              Nivel {infoNivel.nivel}
+                            </span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#FBFAF3] px-3 py-1 text-xs font-bold text-[#3D4A00]">
+                              <span aria-hidden="true">{rango.icono}</span>
+                              {rango.nombre}
+                            </span>
+                          </div>
+
                           <p className="line-clamp-3 text-sm text-[#6B7355]">
-                            {entrenador.descripcion || 'Este usuario aún no ha completado su perfil.'}
+                            {entrenador.descripcion || 'Este rulero aún no ha completado su perfil.'}
                           </p>
                         </div>
                       </Link>

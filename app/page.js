@@ -32,7 +32,7 @@ const ACCESOS = [
   { href: '/mis-reservas', label: 'Mis reservas', Icono: CalendarCheck, variante: 'participante' },
   { href: '/mis-clases', label: 'Mis sesiones publicadas', Icono: Users, variante: 'organizador' },
   { href: '/publicar', label: 'Publicar', Icono: ClipboardList, variante: 'organizador' },
-  { href: '/entrenadores', label: 'Usuarios', Icono: UserRoundSearch, variante: 'ambos' },
+  { href: '/entrenadores', label: 'Ruleros', Icono: UserRoundSearch, variante: 'ambos' },
   { href: '/cuenta', label: 'Mi cuenta', Icono: CircleUserRound, variante: 'ambos' },
 ]
 

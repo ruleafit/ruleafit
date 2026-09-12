@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { SearchX, Star } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
 import { claseYaPaso } from '../../../lib/ventanaEdicionClase'
+import { calcularNivel, calcularRango } from '../../../lib/niveles'
 import BotonSeguir from '../../../components/BotonSeguir'
 
 const botonPrimarioClass =
@@ -25,6 +26,7 @@ function contarPalabras(texto) {
 export default function PerfilEntrenadorPage() {
   const { username } = useParams()
   const [perfil, setPerfil] = useState(null)
+  const [rulosSaldo, setRulosSaldo] = useState(0)
   const [clasesActivas, setClasesActivas] = useState(0)
   const [cargando, setCargando] = useState(true)
   const [noEncontrado, setNoEncontrado] = useState(false)
@@ -72,6 +74,18 @@ export default function PerfilEntrenadorPage() {
       }
 
       setPerfil(perfilData)
+
+      // Nivel público (pedido por el usuario el 12 sept 2026): el saldo de
+      // Rulos de cualquiera ya es legible por cualquier autenticado desde
+      // sql/061_niveles_publicos.sql, para poder mostrar el nivel de otros
+      // ruleros y motivar a subir el propio.
+      const { data: saldoFila } = await supabase
+        .from('rulos_saldos')
+        .select('saldo')
+        .eq('usuario_id', perfilData.id)
+        .maybeSingle()
+
+      setRulosSaldo(saldoFila?.saldo ?? 0)
 
       const { data: clasesData } = await supabase
         .from('clases')
@@ -184,7 +198,7 @@ export default function PerfilEntrenadorPage() {
     return (
       <div className="flex min-h-[70vh] flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <SearchX className="h-12 w-12 text-[#B5E600]" strokeWidth={1.75} />
-        <p className="text-sm text-[#6B7355]">Usuario no encontrado.</p>
+        <p className="text-sm text-[#6B7355]">Rulero no encontrado.</p>
         <Link href="/clases" className={botonPrimarioClass}>
           Volver a sesiones
         </Link>
@@ -194,6 +208,8 @@ export default function PerfilEntrenadorPage() {
 
   const inicial = (perfil.username || '?').charAt(0).toUpperCase()
   const palabrasOpinion = contarPalabras(opinionTexto)
+  const infoNivel = calcularNivel(rulosSaldo)
+  const rango = calcularRango(infoNivel.nivel)
 
   return (
     <div className="flex flex-1 flex-col">
@@ -205,7 +221,7 @@ export default function PerfilEntrenadorPage() {
           href="/entrenadores"
           className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full border border-[#1F2400]/15 bg-white px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition hover:border-[#B5E600] hover:text-[#1F2400] sm:left-6 sm:top-6"
         >
-          ← Usuarios
+          ← Ruleros
         </Link>
 
         <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-[#B5E600] text-3xl font-extrabold text-[#1F2400] shadow-sm">
@@ -224,6 +240,17 @@ export default function PerfilEntrenadorPage() {
           {clasesActivas} {clasesActivas === 1 ? 'sesión activa' : 'sesiones activas'}
         </span>
 
+        {/* Nivel y rango público (pedido por el usuario el 12 sept 2026). */}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
+            Nivel {infoNivel.nivel}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#3D4A00]">
+            <span aria-hidden="true">{rango.icono}</span>
+            {rango.nombre}
+          </span>
+        </div>
+
         <BotonSeguir entrenadorId={perfil.id} usuarioActual={usuarioActual} />
       </section>
 
@@ -233,7 +260,7 @@ export default function PerfilEntrenadorPage() {
             Sobre @{perfil.username}
           </h2>
           <p className="text-sm text-[#1F2400]">
-            {perfil.descripcion || 'Este usuario aún no ha completado su perfil.'}
+            {perfil.descripcion || 'Este rulero aún no ha completado su perfil.'}
           </p>
         </div>
 
@@ -268,7 +295,7 @@ export default function PerfilEntrenadorPage() {
           {puedeValorar && (
             <form onSubmit={enviarValoracion} className="mt-6 border-t border-[#E2E6CF] pt-6">
               <p className="mb-2 text-sm font-semibold text-[#1F2400]">
-                {valoracionId ? 'Edita tu valoración' : 'Valora a este usuario'}
+                {valoracionId ? 'Edita tu valoración' : 'Valora a este rulero'}
               </p>
 
               <div className="mb-4 flex gap-1">
@@ -335,7 +362,7 @@ export default function PerfilEntrenadorPage() {
 
           {usuarioActual && usuarioActual.id !== perfil.id && !puedeValorar && (
             <p className="mt-6 border-t border-[#E2E6CF] pt-6 text-sm text-[#6B7355]">
-              Solo puedes valorar a un usuario con el que hayas entrenado.
+              Solo puedes valorar a un rulero con el que hayas entrenado.
             </p>
           )}
         </div>

@@ -45,7 +45,7 @@ export default function BotonSeguir({ entrenadorId, usuarioActual }) {
         href="/login"
         className="inline-block rounded-full border border-[#16231B]/30 px-5 py-2 text-sm font-medium text-[#16231B] transition hover:bg-[#16231B]/5"
       >
-        Sigue a este usuario
+        Sigue a este rulero
       </Link>
     )
   }
