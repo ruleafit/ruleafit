@@ -153,7 +153,7 @@ export default function PreferenciasNotificaciones({ usuarioActual, pushActivada
       </div>
 
       {/* Recuadro de cancelaciones - FUERA de la atenuacion, siempre a plena visibilidad */}
-      <div className="mt-1 flex items-start gap-2 rounded-lg border-l-4 border-[#B5E600] bg-[#3D4A00]/5 px-3 py-2">
+      <div className="mt-1 flex items-start gap-2 rounded-lg bg-[#3D4A00]/16 px-3 py-2">
         <span className="text-sm font-semibold text-[#3D4A00]">
           Las notificaciones de cancelación siempre están activas debido a su importancia y no se pueden desactivar.
         </span>

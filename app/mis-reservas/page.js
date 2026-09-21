@@ -326,7 +326,7 @@ export default function MisReservasPage() {
 
                 return (
                   <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
-                    <div className="overflow-hidden rounded-xl border border-red-200 border-l-4 border-l-red-300 bg-red-50">
+                    <div className="overflow-hidden rounded-xl border border-red-200 bg-red-50">
                       <div className="relative h-32 w-full opacity-80 sm:h-36">
                         <img src={imagenClase} alt="" className="h-full w-full object-cover grayscale" />
                         {clase.categoria && (
