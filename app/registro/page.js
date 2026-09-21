@@ -95,6 +95,12 @@ export default function RegistroPage() {
   }
 
   async function entrarConGoogle() {
+    if (!aceptaMayoria) {
+      setErrorMayoria('Marca la casilla para confirmar que eres mayor de edad y aceptar el aviso legal.')
+      return
+    }
+    setErrorMayoria('')
+
     const redirectTo = `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
