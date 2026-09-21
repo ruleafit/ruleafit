@@ -12,7 +12,7 @@ const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
 const labelClass = 'mb-1 block text-sm font-medium text-[#1F2400]'
 const botonPrimarioClass =
-  'mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
+  'mt-2 flex w-full items-center justify-center gap-2 corte-btn bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
 
 const MIN_LONGITUD = 8
 
@@ -97,7 +97,7 @@ export default function NuevaContrasenaPage() {
       <div className="flex flex-1 flex-col">
         <CabeceraAuth frase="Crea tu nueva contraseña." />
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-10 sm:px-6">
-          <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
+          <RevelarAlLlegar className="corte-card border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
             <p className="text-center text-sm text-[#6B7355]">Verificando enlace...</p>
           </RevelarAlLlegar>
         </div>
@@ -110,8 +110,8 @@ export default function NuevaContrasenaPage() {
       <div className="flex flex-1 flex-col">
         <CabeceraAuth frase="Crea tu nueva contraseña." />
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-10 sm:px-6">
-          <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
-            <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <RevelarAlLlegar className="corte-card border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
+            <div className="flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
               <p className="font-medium">
                 Este enlace no es válido o ha caducado. Vuelve a solicitar el restablecimiento.
@@ -133,7 +133,7 @@ export default function NuevaContrasenaPage() {
       <CabeceraAuth frase="Crea tu nueva contraseña." />
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-10 sm:px-6">
-        <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
+        <RevelarAlLlegar className="corte-card border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
           <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#1F2400]">
             Nueva contraseña
           </h1>
@@ -175,7 +175,7 @@ export default function NuevaContrasenaPage() {
             </button>
 
             {mensaje && (
-              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
                 <p className="font-medium">{mensaje}</p>
               </div>

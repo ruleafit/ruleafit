@@ -47,6 +47,26 @@ button {
     transform 200ms ease-out, box-shadow 200ms ease-out;
 }
 
+/* Esquinas cortadas: identidad de forma propia (sustituye a rounded-full/rounded-xl/2xl/3xl
+   en botones, chips, campos y tarjetas). Los círculos reales -avatares, puntos, interruptores-
+   se quedan en rounded-full, no llevan estas clases. */
+.corte-tag {
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+
+.corte-btn {
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+}
+
+.corte-card {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+/* Barras finas (progreso, etc.): corte mínimo para que no se coma la altura */
+.corte-barra {
+  clip-path: polygon(2px 0, 100% 0, 100% calc(100% - 2px), calc(100% - 2px) 100%, 0 100%, 0 2px);
+}
+
 /* Aparición al hacer scroll (activada por IntersectionObserver vía RevelarAlLlegar) */
 .reveal {
   opacity: 0;

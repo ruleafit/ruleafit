@@ -91,7 +91,7 @@ export default function AvisoActivarNotificaciones({ usuarioActual, disparador }
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[2200] px-3 pb-3">
-      <div className="mx-auto flex max-w-lg items-start gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-lg">
+      <div className="mx-auto flex max-w-lg items-start gap-3 corte-card border border-zinc-200 bg-white p-4 shadow-lg">
         <div className="flex-1">
           <p className="text-sm font-semibold text-[#3D4A00]">
             {necesitaInstalar
@@ -110,7 +110,7 @@ export default function AvisoActivarNotificaciones({ usuarioActual, disparador }
               <button
                 onClick={alActivar}
                 disabled={procesando}
-                className="rounded-full bg-[#B5E600] px-5 py-2 text-sm font-semibold text-[#3D4A00] transition hover:brightness-95 disabled:opacity-60"
+                className="corte-btn bg-[#B5E600] px-5 py-2 text-sm font-semibold text-[#3D4A00] transition hover:brightness-95 disabled:opacity-60"
               >
                 {procesando ? '...' : 'Activar notificaciones'}
               </button>

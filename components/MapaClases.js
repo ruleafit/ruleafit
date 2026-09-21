@@ -155,7 +155,7 @@ export default function MapaClases({ clases }) {
           type="button"
           onClick={verMiUbicacion}
           disabled={buscandoUbicacion}
-          className="shrink-0 rounded-full border-2 border-[#B5E600] bg-white px-4 py-2 text-sm font-bold text-[#16231B] shadow-md hover:bg-[#F5F7E8] disabled:opacity-70"
+          className="shrink-0 corte-btn border-2 border-[#B5E600] bg-white px-4 py-2 text-sm font-bold text-[#16231B] shadow-md hover:bg-[#F5F7E8] disabled:opacity-70"
         >
           {buscandoUbicacion ? 'Buscando...' : 'Ver mi ubicación'}
         </button>
@@ -171,7 +171,7 @@ export default function MapaClases({ clases }) {
           {errorUbicacion}
         </p>
       )}
-      <div className="relative isolate h-[300px] w-full overflow-hidden rounded-xl border border-[#E2E6CF] sm:h-[500px]">
+      <div className="relative isolate h-[300px] w-full overflow-hidden corte-card border border-[#E2E6CF] sm:h-[500px]">
         <MapContainer center={CENTRO_SEVILLA} zoom={12} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -213,7 +213,7 @@ export default function MapaClases({ clases }) {
                     <br />
                     <Link
                       href={`/clases/${clase.id}?from=clases`}
-                      className="mt-2 block rounded-full bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
+                      className="mt-2 block corte-btn bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
                     >
                       Ver detalles
                     </Link>

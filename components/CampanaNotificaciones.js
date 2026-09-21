@@ -120,7 +120,7 @@ export default function CampanaNotificaciones({ usuarioActual }) {
       </button>
 
       {abierta && (
-        <div className="fixed left-3 right-3 top-16 w-auto md:absolute md:left-auto md:right-0 md:top-auto md:mt-2 md:w-80 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg z-[2100]">
+        <div className="fixed left-3 right-3 top-16 w-auto md:absolute md:left-auto md:right-0 md:top-auto md:mt-2 md:w-80 overflow-hidden corte-card border border-zinc-200 bg-white shadow-lg z-[2100]">
           <div className="border-b border-zinc-100 px-4 py-3">
             <p className="text-sm font-semibold text-[#3D4A00]">Notificaciones</p>
           </div>

@@ -22,9 +22,9 @@ import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import GestionBonos from '../../components/GestionBonos'
 
 const clasePestanaActiva =
-  'rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400]'
+  'corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400]'
 const clasePestanaInactiva =
-  'rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
+  'corte-btn border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
 
 function claveFechaHora(clase) {
   return `${clase.clase_fecha} ${String(clase.clase_hora).slice(0, 5)}`
@@ -230,7 +230,7 @@ export default function MisClasesPage() {
 
     return (
       <RevelarAlLlegar key={clase.clase_id} delayMs={Math.min(indice * 60, 240)}>
-        <div className={`tarjeta-hover overflow-hidden rounded-xl border shadow-sm ${colorTarjeta}`}>
+        <div className={`tarjeta-hover overflow-hidden corte-card border shadow-sm ${colorTarjeta}`}>
           <div className="zoom-imagen relative h-40 w-full sm:h-44">
             <img
               src={imagenClase}
@@ -238,17 +238,17 @@ export default function MisClasesPage() {
               className={`h-full w-full object-cover ${atenuada ? 'opacity-80 grayscale' : ''}`}
             />
             {clase.estado === 'cancelada' ? (
-              <span className="absolute left-3 top-3 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-700">
+              <span className="absolute left-3 top-3 corte-tag border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-700">
                 Sesión cancelada
               </span>
             ) : (
               haPasado && (
                 pendienteConfirmacion ? (
-                  <span className="absolute left-3 top-3 rounded-full border border-zinc-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-zinc-500">
+                  <span className="absolute left-3 top-3 corte-tag border border-zinc-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-zinc-500">
                     No se alcanzó el mínimo
                   </span>
                 ) : (
-                  <span className="absolute left-3 top-3 rounded-full border border-[#B5E600] bg-[#EDF5C9] px-2.5 py-1 text-xs font-semibold text-[#3D4A00]">
+                  <span className="absolute left-3 top-3 corte-tag border border-[#B5E600] bg-[#EDF5C9] px-2.5 py-1 text-xs font-semibold text-[#3D4A00]">
                     Confirmada
                   </span>
                 )
@@ -273,9 +273,9 @@ export default function MisClasesPage() {
                   plazasMax: clase.plazas_max,
                 })}
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EDF5C9]">
+              <div className="h-1.5 w-full overflow-hidden corte-barra bg-[#EDF5C9]">
                 <div
-                  className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
+                  className="h-full corte-barra bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
                   style={{ width: `${porcentajeOcupado}%` }}
                 />
               </div>
@@ -284,11 +284,11 @@ export default function MisClasesPage() {
             {tieneMinimo && !haPasado && (
               <div className="mt-3">
                 {pendienteConfirmacion ? (
-                  <div className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                  <div className="inline-flex items-center corte-tag border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
                     {textoFaltanParaConfirmar(faltanParaConfirmar)}
                   </div>
                 ) : (
-                  <div className="inline-flex items-center gap-1 rounded-full bg-[#EDF5C9] px-3 py-1.5 text-xs font-semibold text-[#3D4A00]">
+                  <div className="inline-flex items-center gap-1 corte-tag bg-[#EDF5C9] px-3 py-1.5 text-xs font-semibold text-[#3D4A00]">
                     <CircleCheck className="h-3.5 w-3.5" strokeWidth={2} />
                     Mínimo alcanzado
                   </div>
@@ -342,7 +342,7 @@ export default function MisClasesPage() {
                 {!haPasado && (
                   <Link
                     href={`/clases/${clase.clase_id}?from=mis-clases`}
-                    className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                    className="corte-tag border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                   >
                     Ver detalles
                   </Link>
@@ -350,7 +350,7 @@ export default function MisClasesPage() {
                 {esEditable && (
                   <Link
                     href={`/mis-clases/${clase.clase_id}/editar`}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9]"
+                    className="inline-flex items-center gap-1.5 corte-tag border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9]"
                   >
                     <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
                     Editar
@@ -365,7 +365,7 @@ export default function MisClasesPage() {
                   type="button"
                   onClick={() => handleCancelarClase(clase.clase_id)}
                   disabled={procesandoCancelacionId === clase.clase_id}
-                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 corte-tag px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Ban className="h-3.5 w-3.5" strokeWidth={1.75} />
                   {procesandoCancelacionId === clase.clase_id ? 'Cancelando...' : 'Cancelar esta sesión'}
@@ -408,19 +408,19 @@ export default function MisClasesPage() {
         {pestana === 'sesiones' && (
           <>
         {error && (
-          <div className="mb-6 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mb-6 flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
             <p className="font-medium">{error}</p>
           </div>
         )}
 
         {!error && clasesConAlumnos.length === 0 && (
-          <RevelarAlLlegar className="flex flex-col items-center gap-3 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center">
+          <RevelarAlLlegar className="flex flex-col items-center gap-3 corte-card border border-[#E2E6CF] bg-white px-6 py-14 text-center">
             <ClipboardList className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
             <p className="text-sm text-[#6B7355]">Todavía no has publicado ninguna sesión.</p>
             <Link
               href="/publicar"
-              className="mt-1 inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
+              className="mt-1 inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
             >
               Publicar una sesión
             </Link>

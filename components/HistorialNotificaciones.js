@@ -51,7 +51,7 @@ export default function HistorialNotificaciones({ usuarioActual }) {
   }
 
   return (
-    <ul className="flex flex-col divide-y divide-zinc-100 rounded-xl border border-zinc-200 overflow-hidden">
+    <ul className="flex flex-col divide-y divide-zinc-100 corte-card border border-zinc-200 overflow-hidden">
       {items.map((n) => (
         <li key={n.id}>
           <button

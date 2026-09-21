@@ -25,8 +25,8 @@ export default function NotificacionesToggle({ usuarioActual, onCambioEstado }) 
         disabled={procesando || cargando}
         className={
           activado
-            ? 'rounded-full border-2 border-[#162318] px-6 py-2 font-semibold text-[#162318] transition hover:bg-[#162318] hover:text-white disabled:opacity-60'
-            : 'rounded-full bg-[#B5E600] px-6 py-2 font-semibold text-[#3D4A00] transition hover:brightness-95 disabled:opacity-60'
+            ? 'corte-btn border-2 border-[#162318] px-6 py-2 font-semibold text-[#162318] transition hover:bg-[#162318] hover:text-white disabled:opacity-60'
+            : 'corte-btn bg-[#B5E600] px-6 py-2 font-semibold text-[#3D4A00] transition hover:brightness-95 disabled:opacity-60'
         }
       >
         {cargando ? '...' : procesando ? '...' : activado ? 'Desactivar notificaciones' : 'Activar notificaciones'}

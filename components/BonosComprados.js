@@ -35,7 +35,7 @@ export default function BonosComprados() {
 
   if (error) {
     return (
-      <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div className="flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
         <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
         <p className="font-medium">{error}</p>
       </div>
@@ -44,7 +44,7 @@ export default function BonosComprados() {
 
   if (bonos.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-[#E2E6CF] px-6 py-10 text-center">
+      <div className="flex flex-col items-center gap-3 corte-card border border-dashed border-[#E2E6CF] px-6 py-10 text-center">
         <Gift className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
         <p className="text-sm text-[#6B7355]">
           Todavía no has comprado ningún bono. Búscalos en el perfil del entrenador con el que quieras entrenar.
@@ -65,7 +65,7 @@ export default function BonosComprados() {
         return (
           <div
             key={bono.bono_cliente_id}
-            className={`rounded-xl border p-5 ${
+            className={`corte-card border p-5 ${
               caducado ? 'border-red-200 bg-red-50' : 'border-[#E2E6CF] bg-white'
             }`}
           >
@@ -86,7 +86,7 @@ export default function BonosComprados() {
                 {bono.descripcion && <p className="mt-1 text-sm text-[#1F2400]">{bono.descripcion}</p>}
               </div>
               {caducado && (
-                <span className="shrink-0 rounded-full border border-red-300 bg-white px-2.5 py-1 text-xs font-semibold text-red-600">
+                <span className="shrink-0 corte-tag border border-red-300 bg-white px-2.5 py-1 text-xs font-semibold text-red-600">
                   Caducado
                 </span>
               )}
@@ -98,9 +98,9 @@ export default function BonosComprados() {
                   <p className="mb-1 text-xs font-medium text-[#6B7355]">
                     {bono.sesiones_usadas} de {bono.numero_sesiones} sesiones usadas
                   </p>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EDF5C9]">
+                  <div className="h-1.5 w-full overflow-hidden corte-barra bg-[#EDF5C9]">
                     <div
-                      className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
+                      className="h-full corte-barra bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
                       style={{ width: `${porcentaje}%` }}
                     />
                   </div>

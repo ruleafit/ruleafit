@@ -7,7 +7,7 @@ import { SearchX, Star, MessageSquareText } from 'lucide-react'
 import { supabase } from '../../../../lib/supabaseClient'
 
 const botonPrimarioClass =
-  'inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
+  'inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
 
 function escaparParaIlike(texto) {
   return String(texto).replace(/[%_\\]/g, (caracter) => '\\' + caracter)
@@ -133,14 +133,14 @@ export default function OpinionesEntrenadorPage() {
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
         {opiniones.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-[#E2E6CF] px-6 py-12 text-center">
+          <div className="flex flex-col items-center gap-3 corte-card border border-dashed border-[#E2E6CF] px-6 py-12 text-center">
             <MessageSquareText className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
             <p className="text-sm text-[#6B7355]">Este rulero aún no tiene opiniones escritas.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
             {opiniones.map((opinion) => (
-              <div key={opinion.id} className="rounded-xl border border-[#E2E6CF] bg-white p-5">
+              <div key={opinion.id} className="corte-card border border-[#E2E6CF] bg-white p-5">
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <Estrellas cantidad={opinion.estrellas} />
                   <span className="text-xs text-[#6B7355]">

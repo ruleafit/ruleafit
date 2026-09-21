@@ -83,7 +83,7 @@ export default function Menu() {
   }
 
   const botonClass =
-    'inline-block rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-black ' +
+    'inline-block corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-black ' +
     'hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2'
 
@@ -111,7 +111,7 @@ export default function Menu() {
   // (Explora y reserva, Mis reservas, Mis sesiones publicadas) y el menú no
   // se vea asimétrico. Pedido por el usuario el 11 sept 2026.
   const pildoraBaseClass =
-    'inline-flex min-h-[52px] items-center justify-center rounded-full px-4 py-2 text-center text-sm font-bold leading-tight ' +
+    'inline-flex min-h-[52px] items-center justify-center corte-btn px-4 py-2 text-center text-sm font-bold leading-tight ' +
     'transition-colors motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2'
 
@@ -265,7 +265,7 @@ export default function Menu() {
             onClick={() => setMenuAbierto((abierto) => !abierto)}
             aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={menuAbierto}
-            className="inline-flex items-center gap-2 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#16231B] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 md:hidden"
+            className="inline-flex items-center gap-2 corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#16231B] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 md:hidden"
           >
             {menuAbierto ? (
               <>

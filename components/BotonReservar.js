@@ -11,7 +11,7 @@ const TAMANOS_BOTON = {
 
 function botonReservarClass(tamaño) {
   return (
-    `inline-flex items-center justify-center rounded-full bg-[#B5E600] font-bold text-black ${TAMANOS_BOTON[tamaño]} ` +
+    `inline-flex items-center justify-center corte-btn bg-[#B5E600] font-bold text-black ${TAMANOS_BOTON[tamaño]} ` +
     'hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ' +
     'disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
@@ -19,7 +19,7 @@ function botonReservarClass(tamaño) {
 }
 
 function botonCompletaClass(tamaño) {
-  return `inline-flex cursor-not-allowed items-center justify-center rounded-full bg-zinc-200 font-bold text-zinc-500 ${TAMANOS_BOTON[tamaño]}`
+  return `inline-flex cursor-not-allowed items-center justify-center corte-btn bg-zinc-200 font-bold text-zinc-500 ${TAMANOS_BOTON[tamaño]}`
 }
 
 const enlaceLoginClass = 'text-sm font-semibold text-[#7a9900] hover:underline'

@@ -19,9 +19,9 @@ const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
   loading: () => <p className="text-sm text-[#6B7355]">Cargando mapa...</p>,
 })
 
-const tarjetaClass = 'rounded-xl border border-[#E2E6CF] bg-white p-5 shadow-sm sm:p-6'
+const tarjetaClass = 'corte-card border border-[#E2E6CF] bg-white p-5 shadow-sm sm:p-6'
 const botonPrimarioClass =
-  'inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
+  'inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
 
 const DESTINOS_VOLVER = {
   clases: { href: '/clases', label: '← Sesiones' },
@@ -59,14 +59,14 @@ function CabeceraDetalle({ clase, destinoVolver }) {
 
       <Link
         href={destinoVolver.href}
-        className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 rounded-full bg-black/30 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/40 sm:left-6 sm:top-6"
+        className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 corte-tag bg-black/30 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-black/40 sm:left-6 sm:top-6"
       >
         {destinoVolver.label}
       </Link>
 
       <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-6 sm:px-6">
         {clase.categoria && (
-          <span className="mb-2 inline-block rounded-full border border-[#B5E600] bg-black/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          <span className="mb-2 inline-block corte-tag border border-[#B5E600] bg-black/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
             {clase.categoria}
           </span>
         )}
@@ -197,7 +197,7 @@ function DetalleClaseContenido() {
 
             <div className="mt-5">
               {pendienteConfirmacion ? (
-                <div className="mb-2 flex items-center justify-between rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                <div className="mb-2 flex items-center justify-between corte-tag border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
                   <span>
                     Pendiente de confirmación ({plazasOcupadas}/{plazasMin} plazas mínimas)
                   </span>
@@ -209,9 +209,9 @@ function DetalleClaseContenido() {
                   </span>
                 </div>
               )}
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EDF5C9]">
+              <div className="h-1.5 w-full overflow-hidden corte-barra bg-[#EDF5C9]">
                 <div
-                  className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
+                  className="h-full corte-barra bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
                   style={{ width: `${porcentajeOcupado}%` }}
                 />
               </div>
@@ -249,7 +249,7 @@ function DetalleClaseContenido() {
 
               {clase.lat != null && clase.lng != null && (
                 <>
-                  <div className="overflow-hidden rounded-xl border border-[#E2E6CF]">
+                  <div className="overflow-hidden corte-card border border-[#E2E6CF]">
                     <MapaVista lat={clase.lat} lng={clase.lng} titulo={clase.titulo} />
                   </div>
 
@@ -258,7 +258,7 @@ function DetalleClaseContenido() {
                       href={`https://www.google.com/maps/dir/?api=1&destination=${clase.lat},${clase.lng}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-[#B5E600] px-5 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
+                      className="inline-flex h-11 items-center justify-center gap-1.5 corte-btn bg-[#B5E600] px-5 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
                     >
                       <Navigation className="h-4 w-4" strokeWidth={2} />
                       Cómo llegar
@@ -267,7 +267,7 @@ function DetalleClaseContenido() {
                     <BotonCopiarCoordenadas
                       lat={clase.lat}
                       lng={clase.lng}
-                      className="inline-flex h-11 items-center justify-center rounded-full border border-[#E2E6CF] px-4 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                      className="inline-flex h-11 items-center justify-center corte-btn border border-[#E2E6CF] px-4 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                     />
                   </div>
                 </>

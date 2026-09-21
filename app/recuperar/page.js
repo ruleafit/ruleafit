@@ -11,7 +11,7 @@ const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
 const labelClass = 'mb-1 block text-sm font-medium text-[#1F2400]'
 const botonPrimarioClass =
-  'mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
+  'mt-2 flex w-full items-center justify-center gap-2 corte-btn bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
 
 function traducirErrorRecuperar(mensajeOriginal) {
   const m = (mensajeOriginal || '').toLowerCase()
@@ -50,13 +50,13 @@ export default function RecuperarPage() {
       <CabeceraAuth frase="Recupera el acceso a tu cuenta." />
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-10 sm:px-6">
-        <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
+        <RevelarAlLlegar className="corte-card border border-[#E2E6CF] bg-white p-6 shadow-sm sm:p-8">
           <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#1F2400]">
             Recuperar contraseña
           </h1>
 
           {enviado ? (
-            <div className="flex items-start gap-2 rounded-xl border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00]">
+            <div className="flex items-start gap-2 corte-card border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00]">
               <CircleCheck className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
               <p className="font-medium">
                 Si ese correo está registrado, te hemos enviado un enlace para restablecer tu contraseña. Revisa tu
@@ -93,7 +93,7 @@ export default function RecuperarPage() {
               </button>
 
               {mensaje && (
-                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
                   <p className="font-medium">{mensaje}</p>
                 </div>

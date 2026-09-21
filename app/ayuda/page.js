@@ -82,7 +82,7 @@ export default function AyudaPage() {
           </p>
         )}
 
-        <form onSubmit={enviarFeedback} className="rounded-xl border border-[#E2E6CF] bg-white p-6">
+        <form onSubmit={enviarFeedback} className="corte-card border border-[#E2E6CF] bg-white p-6">
           <textarea
             value={mensaje}
             onChange={(e) => {
@@ -92,7 +92,7 @@ export default function AyudaPage() {
             maxLength={LIMITE_MENSAJE}
             rows={6}
             placeholder="Escribe aquí tu mensaje..."
-            className="block w-full rounded-xl border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+            className="block w-full corte-btn border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
           />
           <p className="mt-1 text-right text-xs text-[#6B7355]">
             {mensaje.length}/{LIMITE_MENSAJE}
@@ -104,7 +104,7 @@ export default function AyudaPage() {
           <button
             type="submit"
             disabled={enviando}
-            className="rounded-full bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+            className="corte-btn bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {enviando ? 'Enviando...' : 'Enviar'}
           </button>

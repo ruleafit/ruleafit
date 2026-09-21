@@ -78,10 +78,10 @@ const PUNTOS_CAPTACION_ENTRENADOR = [
 ]
 
 const botonPrimarioClass =
-  'inline-flex h-12 items-center justify-center rounded-full bg-[#B5E600] px-8 text-base font-bold text-[#1F2400] shadow-sm transition motion-safe:hover:-translate-y-0.5 hover:bg-[#a3d100] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
+  'inline-flex h-12 items-center justify-center corte-btn bg-[#B5E600] px-8 text-base font-bold text-[#1F2400] shadow-sm transition motion-safe:hover:-translate-y-0.5 hover:bg-[#a3d100] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
 
 const botonSecundarioClass =
-  'inline-flex h-12 items-center justify-center rounded-full border-2 border-white px-8 text-base font-bold text-white transition motion-safe:hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
+  'inline-flex h-12 items-center justify-center corte-btn border-2 border-white px-8 text-base font-bold text-white transition motion-safe:hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40'
 
 export default function Home() {
   const [usuario, setUsuario] = useState(null)
@@ -300,7 +300,7 @@ export default function Home() {
                     <Link
                       key={href}
                       href={href}
-                      className={`tarjeta-hover flex w-[140px] flex-col items-center gap-2 rounded-xl border p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px] ${estilo.tarjeta}`}
+                      className={`tarjeta-hover flex w-[140px] flex-col items-center gap-2 corte-card border p-5 text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 sm:w-[160px] ${estilo.tarjeta}`}
                     >
                       <Icono className={`h-8 w-8 ${estilo.icono}`} strokeWidth={1.75} />
                       <span className={`text-sm font-bold ${estilo.texto}`}>{label}</span>
@@ -323,7 +323,7 @@ export default function Home() {
       {usuario && !cargandoMisClases && !cargandoMisReservas && (
         <section className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-20">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <RevelarAlLlegar className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm">
+            <RevelarAlLlegar className="corte-card border border-[#E2E6CF] bg-white p-6 shadow-sm">
               <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-[#1F2400]">
                 <ClipboardList className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
                 Tus próximas sesiones publicadas
@@ -353,7 +353,7 @@ export default function Home() {
               )}
             </RevelarAlLlegar>
 
-            <RevelarAlLlegar delayMs={80} className="rounded-xl border border-[#E2E6CF] bg-white p-6 shadow-sm">
+            <RevelarAlLlegar delayMs={80} className="corte-card border border-[#E2E6CF] bg-white p-6 shadow-sm">
               <h2 className="mb-4 flex items-center gap-2 text-base font-bold text-[#1F2400]">
                 <CalendarCheck className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
                 Tus próximas reservas
@@ -398,10 +398,10 @@ export default function Home() {
               <RevelarAlLlegar key={nombre} delayMs={indice * 100}>
                 <Link
                   href="/clases"
-                  className="zoom-imagen tarjeta-hover group relative isolate flex h-56 items-end rounded-xl shadow-sm sm:h-64"
+                  className="zoom-imagen tarjeta-hover group relative isolate flex h-56 items-end corte-card shadow-sm sm:h-64"
                 >
-                  <img src={imagen} alt="" className="absolute inset-0 -z-10 h-full w-full rounded-xl object-cover" />
-                  <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <img src={imagen} alt="" className="absolute inset-0 -z-10 h-full w-full corte-card object-cover" />
+                  <div className="absolute inset-0 -z-10 corte-card bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                   <span className="relative z-10 p-5 text-lg font-bold text-white">{nombre}</span>
                 </Link>
               </RevelarAlLlegar>

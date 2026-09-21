@@ -93,7 +93,7 @@ export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholde
           if (sugerencias.length > 0) setAbierto(true)
         }}
         placeholder={placeholder}
-        className="w-full rounded-full border-2 border-[#B5E600] bg-white px-4 py-2 pr-8 text-sm text-[#16231B] placeholder:text-[#6B7355] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+        className="w-full corte-btn border-2 border-[#B5E600] bg-white px-4 py-2 pr-8 text-sm text-[#16231B] placeholder:text-[#6B7355] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
       />
 
       {texto && (
@@ -112,7 +112,7 @@ export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholde
       )}
 
       {abierto && sugerencias.length > 0 && (
-        <ul className="absolute left-0 top-full z-[1000] mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-[#E2E6CF] bg-white py-1 shadow-lg">
+        <ul className="absolute left-0 top-full z-[1000] mt-1 max-h-60 w-full overflow-y-auto corte-card border border-[#E2E6CF] bg-white py-1 shadow-lg">
           {sugerencias.map((sugerencia, indice) => (
             <li key={`${sugerencia.lat}-${sugerencia.lng}-${indice}`}>
               <button
@@ -128,7 +128,7 @@ export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholde
       )}
 
       {mostrarSinResultados && (
-        <p className="absolute left-0 top-full z-[1000] mt-1 w-full rounded-xl border border-[#E2E6CF] bg-white px-4 py-2 text-xs text-[#6B7355] shadow-lg">
+        <p className="absolute left-0 top-full z-[1000] mt-1 w-full corte-card border border-[#E2E6CF] bg-white px-4 py-2 text-xs text-[#6B7355] shadow-lg">
           Sin resultados
         </p>
       )}

@@ -65,7 +65,7 @@ export default function BotonInstalarApp({ className }) {
       <p className="text-xs text-[#6B7355]">Sin descargar nada y en un segundo.</p>
 
       {esIOS && mostrarInstrucciones && (
-        <div className="mt-2 max-w-xs rounded-xl border border-[#E2E6CF] bg-white p-5 text-left shadow-sm">
+        <div className="mt-2 max-w-xs corte-card border border-[#E2E6CF] bg-white p-5 text-left shadow-sm">
           <p className="text-sm font-bold text-[#1F2400]">Añadir a la pantalla de inicio</p>
           <ol className="mt-2 flex flex-col gap-2 text-sm text-[#1F2400]">
             <li>

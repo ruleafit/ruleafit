@@ -20,12 +20,12 @@ const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
 const labelClass = 'mb-1 block text-sm font-medium text-[#1F2400]'
 const ayudaClass = 'mt-1 text-xs text-[#6B7355]'
-const tarjetaClass = 'rounded-xl border border-[#E2E6CF] bg-white p-5 shadow-sm sm:p-6'
+const tarjetaClass = 'corte-card border border-[#E2E6CF] bg-white p-5 shadow-sm sm:p-6'
 const soloLecturaClass = 'block w-full rounded-lg border border-[#E2E6CF] bg-[#F4F5EE] px-3 py-2 text-sm text-[#6B7355]'
 const botonPrimarioClass =
-  'mt-2 w-full rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100'
+  'mt-2 w-full corte-btn bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100'
 const botonSecundarioClass =
-  'w-full rounded-full border border-[#E2E6CF] bg-white px-6 py-3 text-sm font-bold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2'
+  'w-full corte-btn border border-[#E2E6CF] bg-white px-6 py-3 text-sm font-bold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2'
 
 function TituloBloque({ Icono, children }) {
   return (
@@ -259,7 +259,7 @@ export default function EditarClasePage() {
       <div className="flex flex-1 flex-col">
         <CabeceraEditar />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
-          <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
             <p className="font-medium">{errorCarga}</p>
           </div>
@@ -273,13 +273,13 @@ export default function EditarClasePage() {
       <div className="flex flex-1 flex-col">
         <CabeceraEditar />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
-          <div className="flex items-start gap-2 rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
+          <div className="flex items-start gap-2 corte-card border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
             <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" strokeWidth={1.75} />
             <p>{motivoNoEditable}</p>
           </div>
           <Link
             href="/mis-clases"
-            className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
+            className="mt-4 inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
           >
             Volver a Mis sesiones
           </Link>
@@ -454,7 +454,7 @@ export default function EditarClasePage() {
         </form>
 
         {mensaje && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="mt-4 flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
             <p className="font-medium">{mensaje}</p>
           </div>

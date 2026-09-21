@@ -12,9 +12,9 @@ import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import BonosComprados from '../../components/BonosComprados'
 
 const clasePestanaActiva =
-  'rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400]'
+  'corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400]'
 const clasePestanaInactiva =
-  'rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
+  'corte-btn border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
 
 function claveFechaHora(clase) {
   return `${clase.fecha} ${String(clase.hora).slice(0, 5)}`
@@ -182,7 +182,7 @@ export default function MisReservasPage() {
         {pestana === 'reservas' && (
           <>
         {mensaje && (
-          <div className="mb-4 rounded-xl border border-[#B5E600] bg-[#EDF5C9] px-4 py-2.5 text-sm font-medium text-[#1F2400]">
+          <div className="mb-4 corte-card border border-[#B5E600] bg-[#EDF5C9] px-4 py-2.5 text-sm font-medium text-[#1F2400]">
             {mensaje}
           </div>
         )}
@@ -190,12 +190,12 @@ export default function MisReservasPage() {
         {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
         {!error && sinReservas && (
-          <RevelarAlLlegar className="flex flex-col items-center gap-4 rounded-xl border border-[#E2E6CF] bg-white px-6 py-16 text-center">
+          <RevelarAlLlegar className="flex flex-col items-center gap-4 corte-card border border-[#E2E6CF] bg-white px-6 py-16 text-center">
             <CalendarSearch className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
             <p className="text-sm text-[#6B7355]">Todavía no has reservado ninguna sesión</p>
             <Link
               href="/clases"
-              className="inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
+              className="inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
             >
               Ver sesiones
             </Link>
@@ -214,16 +214,16 @@ export default function MisReservasPage() {
 
             return (
               <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
-                <div className="tarjeta-hover overflow-hidden rounded-xl border border-[#E2E6CF] border-l-4 border-l-[#B5E600] bg-white shadow-sm">
+                <div className="tarjeta-hover overflow-hidden corte-card border border-[#E2E6CF] border-l-4 border-l-[#B5E600] bg-white shadow-sm">
                   <div className="zoom-imagen relative h-32 w-full sm:h-36">
                     <img src={imagenClase} alt="" className="h-full w-full object-cover" />
                     {clase.categoria && (
-                      <span className="absolute left-3 top-3 rounded-full border border-[#B5E600] bg-white/90 px-2.5 py-1 text-xs font-semibold text-[#1F2400]">
+                      <span className="absolute left-3 top-3 corte-tag border border-[#B5E600] bg-white/90 px-2.5 py-1 text-xs font-semibold text-[#1F2400]">
                         {clase.categoria}
                       </span>
                     )}
                     {cuentaAtras && (
-                      <span className="absolute right-3 top-3 rounded-full bg-[#1F2400]/80 px-2.5 py-1 text-xs font-semibold text-white">
+                      <span className="absolute right-3 top-3 corte-tag bg-[#1F2400]/80 px-2.5 py-1 text-xs font-semibold text-white">
                         {cuentaAtras}
                       </span>
                     )}
@@ -252,7 +252,7 @@ export default function MisReservasPage() {
                     )}
 
                     {pendienteConfirmacion && (
-                      <div className="mb-3 flex items-center justify-between rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                      <div className="mb-3 flex items-center justify-between corte-tag border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
                         <span>{textoFaltanParaConfirmar(faltanParaConfirmar)}</span>
                       </div>
                     )}
@@ -288,7 +288,7 @@ export default function MisReservasPage() {
                     <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#E2E6CF] pt-3">
                       <Link
                         href={`/clases/${clase.id}?from=mis-reservas`}
-                        className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                        className="corte-tag border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                       >
                         Ver detalle
                       </Link>
@@ -297,7 +297,7 @@ export default function MisReservasPage() {
                         type="button"
                         onClick={() => handleCancelar(reserva, clase)}
                         disabled={cancelandoId === reserva.id}
-                        className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="corte-tag border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {cancelandoId === reserva.id ? 'Cancelando...' : 'Cancelar reserva'}
                       </button>
@@ -326,11 +326,11 @@ export default function MisReservasPage() {
 
                 return (
                   <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
-                    <div className="overflow-hidden rounded-xl border border-red-200 bg-red-50">
+                    <div className="overflow-hidden corte-card border border-red-200 bg-red-50">
                       <div className="relative h-32 w-full opacity-80 sm:h-36">
                         <img src={imagenClase} alt="" className="h-full w-full object-cover grayscale" />
                         {clase.categoria && (
-                          <span className="absolute left-3 top-3 rounded-full border border-red-200 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-400">
+                          <span className="absolute left-3 top-3 corte-tag border border-red-200 bg-white/90 px-2.5 py-1 text-xs font-semibold text-red-400">
                             {clase.categoria}
                           </span>
                         )}
@@ -376,7 +376,7 @@ export default function MisReservasPage() {
                         <div className="mt-3">
                           <Link
                             href={`/clases/${clase.id}?from=mis-reservas`}
-                            className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-medium text-red-400 transition-colors hover:border-red-300 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                            className="corte-tag border border-red-200 px-2.5 py-1 text-xs font-medium text-red-400 transition-colors hover:border-red-300 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                           >
                             Ver detalle
                           </Link>
@@ -406,11 +406,11 @@ export default function MisReservasPage() {
 
                 return (
                   <RevelarAlLlegar key={reserva.id} delayMs={Math.min(indice * 60, 240)}>
-                    <div className="overflow-hidden rounded-xl border border-[#E2E6CF] border-l-4 border-l-zinc-300 bg-zinc-50">
+                    <div className="overflow-hidden corte-card border border-[#E2E6CF] border-l-4 border-l-zinc-300 bg-zinc-50">
                       <div className="relative h-32 w-full opacity-80 sm:h-36">
                         <img src={imagenClase} alt="" className="h-full w-full object-cover grayscale" />
                         {clase.categoria && (
-                          <span className="absolute left-3 top-3 rounded-full border border-zinc-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-zinc-500">
+                          <span className="absolute left-3 top-3 corte-tag border border-zinc-300 bg-white/90 px-2.5 py-1 text-xs font-semibold text-zinc-500">
                             {clase.categoria}
                           </span>
                         )}

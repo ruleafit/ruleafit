@@ -38,7 +38,7 @@ const FRANJAS_FILTRO = [
 const CUANDO_FILTRO = ['Todas', 'Hoy', 'Mañana', 'Próximos 7 días', 'Próximos 30 días']
 
 const filtroCampoClass =
-  'block w-full rounded-full border border-[#E2E6CF] bg-white px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600] sm:w-auto'
+  'block w-full corte-btn border border-[#E2E6CF] bg-white px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600] sm:w-auto'
 
 const filtroLabelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wide text-[#6B7355]'
 
@@ -172,7 +172,7 @@ export default function ClasesPage() {
 
         {!error && clases.length > 0 && (
           <>
-            <div className="mb-8 flex flex-col gap-4 rounded-xl border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5">
+            <div className="mb-8 flex flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5">
               <div>
                 <label className={filtroLabelClass}>Ciudad</label>
                 <select value={filtroCiudad} onChange={(e) => setFiltroCiudad(e.target.value)} className={filtroCampoClass}>
@@ -213,7 +213,7 @@ export default function ClasesPage() {
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
               <div className="md:sticky md:top-24 md:self-start">
                 <MapaClases clases={clasesFiltradas} />
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-[#E2E6CF] bg-white/70 px-4 py-3 text-xs text-[#3D4A00]">
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 corte-card border border-[#E2E6CF] bg-white/70 px-4 py-3 text-xs text-[#3D4A00]">
                   {Object.entries(ESTILO_POR_CATEGORIA).map(([nombre, { forma, color }]) => (
                     <span key={nombre} className="flex items-center gap-1.5">
                       <span
@@ -228,7 +228,7 @@ export default function ClasesPage() {
 
               <div className="flex flex-col gap-4">
                 {clasesFiltradas.length === 0 && (
-                  <RevelarAlLlegar className="flex flex-col items-center gap-3 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center">
+                  <RevelarAlLlegar className="flex flex-col items-center gap-3 corte-card border border-[#E2E6CF] bg-white px-6 py-14 text-center">
                     <SearchX className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
                     <p className="text-sm text-[#6B7355]">
                       No hay sesiones que coincidan con estos filtros ahora mismo. Prueba a cambiar la ciudad o la categoría.
@@ -236,7 +236,7 @@ export default function ClasesPage() {
                     <button
                       type="button"
                       onClick={limpiarFiltros}
-                      className="mt-1 inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
+                      className="mt-1 inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
                     >
                       Limpiar filtros
                     </button>
@@ -257,11 +257,11 @@ export default function ClasesPage() {
 
                   return (
                     <RevelarAlLlegar key={clase.id} delayMs={Math.min(indice * 60, 240)}>
-                    <div className="tarjeta-hover overflow-hidden rounded-xl border border-[#E2E6CF] bg-white shadow-sm">
+                    <div className="tarjeta-hover overflow-hidden corte-card border border-[#E2E6CF] bg-white shadow-sm">
                       <div className="zoom-imagen relative h-40 w-full sm:h-44">
                         <img src={imagenClase} alt="" className="h-full w-full object-cover" />
                         {clase.categoria && (
-                          <span className="absolute left-3 top-3 rounded-full border border-[#B5E600] bg-white/90 px-2.5 py-1 text-xs font-semibold text-[#1F2400]">
+                          <span className="absolute left-3 top-3 corte-tag border border-[#B5E600] bg-white/90 px-2.5 py-1 text-xs font-semibold text-[#1F2400]">
                             {clase.categoria}
                           </span>
                         )}
@@ -316,7 +316,7 @@ export default function ClasesPage() {
 
                         <div className="mt-4">
                           {pendienteConfirmacion ? (
-                            <div className="mb-1 flex items-center justify-between rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                            <div className="mb-1 flex items-center justify-between corte-tag border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
                               <span>Pendiente de confirmación ({plazasOcupadas}/{plazasMin} plazas mínimas)</span>
                             </div>
                           ) : (
@@ -324,9 +324,9 @@ export default function ClasesPage() {
                               <span>{textoPlazas({ esEntrenador, plazasOcupadas, plazasMax })}</span>
                             </div>
                           )}
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#EDF5C9]">
+                          <div className="h-1.5 w-full overflow-hidden corte-barra bg-[#EDF5C9]">
                             <div
-                              className="h-full rounded-full bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
+                              className="h-full corte-barra bg-[#B5E600] motion-safe:transition-all motion-safe:duration-300"
                               style={{ width: `${porcentajeOcupado}%` }}
                             />
                           </div>
@@ -346,13 +346,13 @@ export default function ClasesPage() {
                                 lat={clase.lat}
                                 lng={clase.lng}
                                 onError={() => setError('No se pudieron copiar las coordenadas.')}
-                                className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                                className="corte-tag border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                               />
                             </>
                           )}
                           <Link
                             href={`/clases/${clase.id}?from=clases`}
-                            className="rounded-full border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                            className="corte-tag border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
                           >
                             Ver detalle
                           </Link>

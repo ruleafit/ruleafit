@@ -16,7 +16,7 @@ function formatearFechaLimite(plazoDias) {
 }
 
 const botonPrimarioClass =
-  'inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
+  'inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
 
 const LIMITE_PALABRAS_OPINION = 100
 const LIMITE_CARACTERES_OPINION = 750
@@ -268,7 +268,7 @@ export default function PerfilEntrenadorPage() {
             fácil al entrar en un perfil desde /entrenadores. */}
         <Link
           href="/entrenadores"
-          className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full border border-[#1F2400]/15 bg-white px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition hover:border-[#B5E600] hover:text-[#1F2400] sm:left-6 sm:top-6"
+          className="absolute left-4 top-4 inline-flex items-center gap-1 corte-tag border border-[#1F2400]/15 bg-white px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition hover:border-[#B5E600] hover:text-[#1F2400] sm:left-6 sm:top-6"
         >
           ← Ruleros
         </Link>
@@ -285,16 +285,16 @@ export default function PerfilEntrenadorPage() {
           @{perfil.username}
         </h1>
 
-        <span className="inline-flex items-center rounded-full bg-[#EDF5C9] px-4 py-1.5 text-sm font-semibold text-[#3D4A00]">
+        <span className="inline-flex items-center corte-tag bg-[#EDF5C9] px-4 py-1.5 text-sm font-semibold text-[#3D4A00]">
           {clasesActivas} {clasesActivas === 1 ? 'sesión activa' : 'sesiones activas'}
         </span>
 
         {/* Nivel y rango público (pedido por el usuario el 12 sept 2026). */}
         <div className="flex flex-wrap items-center justify-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
+          <span className="inline-flex items-center corte-tag bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
             Nivel {infoNivel.nivel}
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#3D4A00]">
+          <span className="inline-flex items-center gap-1 corte-tag bg-white px-3 py-1 text-xs font-bold text-[#3D4A00]">
             <span aria-hidden="true">{rango.icono}</span>
             {rango.nombre}
           </span>
@@ -304,7 +304,7 @@ export default function PerfilEntrenadorPage() {
       </section>
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
-        <div className="rounded-xl border border-[#E2E6CF] bg-white p-6">
+        <div className="corte-card border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
             Sobre @{perfil.username}
           </h2>
@@ -314,7 +314,7 @@ export default function PerfilEntrenadorPage() {
         </div>
 
         {bonosOfrecidos.length > 0 && (
-          <div className="mt-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+          <div className="mt-8 corte-card border border-[#E2E6CF] bg-white p-6">
             <h2 className="mb-3 flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
               <Gift className="h-4 w-4 text-[#B5E600]" strokeWidth={1.75} />
               Bonos de @{perfil.username}
@@ -351,7 +351,7 @@ export default function PerfilEntrenadorPage() {
                       type="button"
                       onClick={() => handleAdquirirBono(bono)}
                       disabled={adquiriendoId === bono.id}
-                      className="shrink-0 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+                      className="shrink-0 corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {adquiriendoId === bono.id ? 'Adquiriendo...' : 'Adquirir'}
                     </button>
@@ -362,7 +362,7 @@ export default function PerfilEntrenadorPage() {
           </div>
         )}
 
-        <div className="mt-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+        <div className="mt-8 corte-card border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Valoraciones</h2>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -429,7 +429,7 @@ export default function PerfilEntrenadorPage() {
                 maxLength={LIMITE_CARACTERES_OPINION}
                 rows={3}
                 placeholder="Cuenta tu experiencia (opcional)"
-                className="block w-full rounded-xl border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+                className="block w-full corte-btn border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
               />
               <p
                 className={`mt-1 text-right text-xs ${
@@ -447,7 +447,7 @@ export default function PerfilEntrenadorPage() {
               <button
                 type="submit"
                 disabled={guardandoValoracion || estrellasSeleccionadas === 0}
-                className="rounded-full bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+                className="corte-btn bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {guardandoValoracion
                   ? 'Guardando...'

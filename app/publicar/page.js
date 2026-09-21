@@ -27,9 +27,9 @@ const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
 const labelClass = 'mb-1 block text-sm font-medium text-[#1F2400]'
 const ayudaClass = 'mt-1 text-xs text-[#6B7355]'
-const tarjetaClass = 'rounded-xl border border-[#E2E6CF] bg-white p-5 shadow-sm sm:p-6'
+const tarjetaClass = 'corte-card border border-[#E2E6CF] bg-white p-5 shadow-sm sm:p-6'
 const botonPrimarioClass =
-  'mt-2 w-full rounded-full bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2'
+  'mt-2 w-full corte-btn bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2'
 
 export default function PublicarPage() {
   const [usuario, setUsuario] = useState(null)
@@ -152,7 +152,7 @@ export default function PublicarPage() {
       <div className="flex flex-1 flex-col">
         <CabeceraPublicar />
         <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
-          <div className="rounded-xl border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
+          <div className="corte-card border border-[#E2E6CF] bg-white p-6 text-sm text-[#6B7355] shadow-sm">
             Debes iniciar sesión para publicar. Ve a{' '}
             <a href="/login" className="font-semibold text-[#3D4A00] hover:underline">iniciar sesión</a>.
           </div>
@@ -246,7 +246,7 @@ export default function PublicarPage() {
 
               <div>
                 <label className={labelClass}>Ubicación en el mapa</label>
-                <div className="w-full overflow-hidden rounded-xl border border-[#E2E6CF]">
+                <div className="w-full overflow-hidden corte-card border border-[#E2E6CF]">
                   <MapaSelector
                     ciudad={ciudad}
                     lat={lat}
@@ -339,7 +339,7 @@ export default function PublicarPage() {
 
         {mensaje && (
           <div
-            className={`mt-4 flex items-start gap-2 rounded-xl border px-4 py-3 text-sm ${
+            className={`mt-4 flex items-start gap-2 corte-card border px-4 py-3 text-sm ${
               esExito
                 ? 'border-[#B5E600]/50 bg-[#EDF5C9] text-[#3D4A00]'
                 : esError

@@ -411,14 +411,14 @@ export default function CuentaPage() {
               if (errorUsername) setErrorUsername('')
             }}
             required
-            className="mb-3 block w-full rounded-full border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+            className="mb-3 block w-full corte-btn border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
           />
           {errorUsername && <p className="mb-3 text-xs text-red-600">{errorUsername}</p>}
           <div className="flex gap-3">
             <button
               type="submit"
               disabled={guardando}
-              className="flex-1 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+              className="flex-1 corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {guardando ? 'Guardando...' : 'Guardar'}
             </button>
@@ -426,7 +426,7 @@ export default function CuentaPage() {
               type="button"
               onClick={cancelarEdicion}
               disabled={guardando}
-              className="flex-1 rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:border-[#B5E600] disabled:cursor-not-allowed"
+              className="flex-1 corte-btn border border-[#E2E6CF] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:border-[#B5E600] disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
@@ -459,18 +459,18 @@ export default function CuentaPage() {
               lib/niveles.js para la curva de costes y el reparto de
               rangos. */}
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
+            <span className="inline-flex items-center corte-tag bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
               Nivel {infoNivel.nivel}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#3D4A00]">
+            <span className="inline-flex items-center gap-1 corte-tag bg-white px-3 py-1 text-xs font-bold text-[#3D4A00]">
               <span aria-hidden="true">{rango.icono}</span>
               {rango.nombre}
             </span>
           </div>
           <div className="flex w-40 flex-col items-center gap-1 sm:w-48">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/25">
+            <div className="h-1.5 w-full overflow-hidden corte-barra bg-white/25">
               <div
-                className="h-full rounded-full bg-[#B5E600]"
+                className="h-full corte-barra bg-[#B5E600]"
                 style={{ width: `${Math.round(infoNivel.progreso * 100)}%` }}
               />
             </div>
@@ -488,7 +488,7 @@ export default function CuentaPage() {
             rol "entrenador". Fase 7 de la unificación de roles (11 sept
             2026): se abre a cualquier usuario, porque cualquiera puede
             publicar sesiones y tener un perfil público que otros visiten. */}
-        <div className="mb-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+        <div className="mb-8 corte-card border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-4 text-lg font-bold text-[#1F2400]">Tu perfil</h2>
 
           <form onSubmit={guardarPerfil} className="flex flex-col gap-4">
@@ -502,7 +502,7 @@ export default function CuentaPage() {
                   </div>
                 )}
               </div>
-              <label className="inline-block cursor-pointer rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#3D4A00] transition hover:border-[#B5E600]">
+              <label className="inline-block cursor-pointer corte-btn border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#3D4A00] transition hover:border-[#B5E600]">
                 Elegir foto
                 <input type="file" accept="image/*" onChange={manejarSeleccionFoto} className="hidden" />
               </label>
@@ -515,7 +515,7 @@ export default function CuentaPage() {
                 maxLength={3000}
                 rows={4}
                 placeholder="Cuéntales a los demás quién eres, tu experiencia y, si organizas sesiones, tu estilo de entrenamiento."
-                className="block w-full rounded-xl border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+                className="block w-full corte-btn border border-[#E2E6CF] px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
               />
               <p
                 className={`mt-1 text-right text-xs ${
@@ -532,7 +532,7 @@ export default function CuentaPage() {
             <button
               type="submit"
               disabled={guardandoPerfil}
-              className="self-start rounded-full bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+              className="self-start corte-btn bg-[#B5E600] px-6 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {guardandoPerfil ? 'Guardando...' : 'Guardar perfil'}
             </button>
@@ -542,7 +542,7 @@ export default function CuentaPage() {
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+          <RevelarAlLlegar className="flex items-center gap-4 corte-card border border-[#E2E6CF] bg-[#EDF5C9] p-6">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
               <Coins className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
             </div>
@@ -557,7 +557,7 @@ export default function CuentaPage() {
               roles (11 sept 2026): se muestran siempre los dos, porque un
               mismo usuario puede haber participado en unas y organizado
               otras. */}
-          <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+          <RevelarAlLlegar className="flex items-center gap-4 corte-card border border-[#E2E6CF] bg-[#EDF5C9] p-6">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
               <CalendarCheck className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
             </div>
@@ -567,7 +567,7 @@ export default function CuentaPage() {
             </div>
           </RevelarAlLlegar>
 
-          <RevelarAlLlegar className="flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+          <RevelarAlLlegar className="flex items-center gap-4 corte-card border border-[#E2E6CF] bg-[#EDF5C9] p-6">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
               <CalendarCheck className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
             </div>
@@ -583,7 +583,7 @@ export default function CuentaPage() {
             mensaje distinto si el usuario nunca ha organizado ninguna
             sesión (no puede tener valoraciones todavía) frente a si ya
             organiza pero nadie le ha valorado aún. */}
-        <RevelarAlLlegar className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+        <RevelarAlLlegar className="mb-8 flex flex-wrap items-center justify-between gap-4 corte-card border border-[#E2E6CF] bg-[#EDF5C9] p-6">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
               <Star className="h-7 w-7 text-[#B5E600]" fill="#B5E600" strokeWidth={1.75} />
@@ -607,14 +607,14 @@ export default function CuentaPage() {
           {totalValoraciones > 0 && username && (
             <Link
               href={`/entrenador/${username}/opiniones`}
-              className="rounded-full border border-[#3D4A00] px-4 py-2 text-sm font-bold text-[#3D4A00] transition hover:bg-[#3D4A00] hover:text-white"
+              className="corte-btn border border-[#3D4A00] px-4 py-2 text-sm font-bold text-[#3D4A00] transition hover:bg-[#3D4A00] hover:text-white"
             >
               Ver opiniones
             </Link>
           )}
         </RevelarAlLlegar>
 
-        <RevelarAlLlegar className="mb-8 flex items-center gap-4 rounded-xl border border-[#E2E6CF] bg-[#EDF5C9] p-6">
+        <RevelarAlLlegar className="mb-8 flex items-center gap-4 corte-card border border-[#E2E6CF] bg-[#EDF5C9] p-6">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
             <Users className="h-7 w-7 text-[#B5E600]" strokeWidth={1.75} />
           </div>
@@ -633,11 +633,11 @@ export default function CuentaPage() {
           </h2>
 
           {rulosMovimientos.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#E2E6CF] px-6 py-8 text-center text-sm text-[#6B7355]">
+            <div className="corte-card border border-dashed border-[#E2E6CF] px-6 py-8 text-center text-sm text-[#6B7355]">
               Todavía no tienes movimientos de Rulos. Cuando reserves o asistas a una sesión, aparecerán aquí.
             </div>
           ) : (
-            <div className="divide-y divide-[#E2E6CF] overflow-hidden rounded-xl border border-[#E2E6CF] bg-white">
+            <div className="divide-y divide-[#E2E6CF] overflow-hidden corte-card border border-[#E2E6CF] bg-white">
               {rulosMovimientos.map((mov) => (
                 <div key={mov.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div>
@@ -656,7 +656,7 @@ export default function CuentaPage() {
           )}
         </div>
 
-        <div id="notificaciones" className="mb-8 scroll-mt-24 rounded-xl border border-[#E2E6CF] bg-white p-6">
+        <div id="notificaciones" className="mb-8 scroll-mt-24 corte-card border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Notificaciones</h2>
           <p className="mb-4 text-sm text-[#6B7355]">
             Recibe avisos en tu móvil cuando los usuarios que sigues publiquen sesiones y sobre tus reservas.
@@ -675,7 +675,7 @@ export default function CuentaPage() {
         <button
           type="button"
           onClick={cerrarSesion}
-          className="inline-flex w-full items-center justify-center rounded-full bg-[#1F2400] px-6 py-3 text-sm font-bold text-white transition hover:bg-black sm:w-auto"
+          className="inline-flex w-full items-center justify-center corte-btn bg-[#1F2400] px-6 py-3 text-sm font-bold text-white transition hover:bg-black sm:w-auto"
         >
           Cerrar sesión
         </button>

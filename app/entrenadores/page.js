@@ -8,10 +8,10 @@ import { calcularNivel, calcularRango } from '../../lib/niveles'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const filtroCampoClass =
-  'block w-full rounded-full border border-[#E2E6CF] bg-white px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
+  'block w-full corte-btn border border-[#E2E6CF] bg-white px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
 
 const botonPrimarioClass =
-  'inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
+  'inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
 
 export default function EntrenadoresPage() {
   const [usuario, setUsuario] = useState(null)
@@ -92,7 +92,7 @@ export default function EntrenadoresPage() {
 
         {!error && entrenadores.length > 0 && (
           <>
-            <div className="mb-8 flex flex-col gap-4 rounded-xl border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5">
+            <div className="mb-8 flex flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5">
               <div className="sm:w-72">
                 <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[#6B7355]">
                   Buscar
@@ -108,7 +108,7 @@ export default function EntrenadoresPage() {
             </div>
 
             {entrenadoresFiltrados.length === 0 && (
-              <RevelarAlLlegar className="flex flex-col items-center gap-3 rounded-xl border border-[#E2E6CF] bg-white px-6 py-14 text-center">
+              <RevelarAlLlegar className="flex flex-col items-center gap-3 corte-card border border-[#E2E6CF] bg-white px-6 py-14 text-center">
                 <SearchX className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
                 <p className="text-sm text-[#6B7355]">
                   No hay ruleros que coincidan con esta búsqueda. Prueba con otro término.
@@ -116,7 +116,7 @@ export default function EntrenadoresPage() {
                 <button
                   type="button"
                   onClick={() => setBusqueda('')}
-                  className="mt-1 inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
+                  className="mt-1 inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]"
                 >
                   Limpiar búsqueda
                 </button>
@@ -134,7 +134,7 @@ export default function EntrenadoresPage() {
                     <RevelarAlLlegar key={entrenador.id} delayMs={Math.min(indice * 60, 240)}>
                       <Link
                         href={`/entrenador/${entrenador.username}`}
-                        className="tarjeta-hover flex h-full flex-col overflow-hidden rounded-xl border border-[#E2E6CF] bg-white shadow-sm"
+                        className="tarjeta-hover flex h-full flex-col overflow-hidden corte-card border border-[#E2E6CF] bg-white shadow-sm"
                       >
                         <div className="flex flex-col items-center gap-3 p-6 text-center">
                           <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-[#B5E600] text-2xl font-extrabold text-[#1F2400] shadow-sm">
@@ -158,10 +158,10 @@ export default function EntrenadoresPage() {
                               subir el propio. Mismo cálculo que en
                               /cuenta, ver lib/niveles.js. */}
                           <div className="flex flex-wrap items-center justify-center gap-2">
-                            <span className="inline-flex items-center rounded-full bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
+                            <span className="inline-flex items-center corte-tag bg-[#B5E600] px-3 py-1 text-xs font-bold text-[#1F2400]">
                               Nivel {infoNivel.nivel}
                             </span>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[#FBFAF3] px-3 py-1 text-xs font-bold text-[#3D4A00]">
+                            <span className="inline-flex items-center gap-1 corte-tag bg-[#FBFAF3] px-3 py-1 text-xs font-bold text-[#3D4A00]">
                               <span aria-hidden="true">{rango.icono}</span>
                               {rango.nombre}
                             </span>
