@@ -11,6 +11,7 @@ import {
   CircleAlert,
   Ban,
   Pencil,
+  Gift,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
@@ -18,6 +19,12 @@ import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
 import { motivoNoEditableClase, claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
+import GestionBonos from '../../components/GestionBonos'
+
+const clasePestanaActiva =
+  'rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400]'
+const clasePestanaInactiva =
+  'rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
 
 function claveFechaHora(clase) {
   return `${clase.clase_fecha} ${String(clase.clase_hora).slice(0, 5)}`
@@ -84,6 +91,7 @@ export default function MisClasesPage() {
   const router = useRouter()
   const [usuario, setUsuario] = useState(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
+  const [pestana, setPestana] = useState('sesiones')
   const [clasesConAlumnos, setClasesConAlumnos] = useState([])
   const [cargandoDatos, setCargandoDatos] = useState(true)
   const [error, setError] = useState('')
@@ -378,6 +386,27 @@ export default function MisClasesPage() {
       <CabeceraMisClases />
 
       <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+        <div className="mb-8 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setPestana('sesiones')}
+            className={pestana === 'sesiones' ? clasePestanaActiva : clasePestanaInactiva}
+          >
+            Sesiones
+          </button>
+          <button
+            type="button"
+            onClick={() => setPestana('bonos')}
+            className={pestana === 'bonos' ? clasePestanaActiva : clasePestanaInactiva}
+          >
+            Bonos
+          </button>
+        </div>
+
+        {pestana === 'bonos' && <GestionBonos />}
+
+        {pestana === 'sesiones' && (
+          <>
         {error && (
           <div className="mb-6 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" strokeWidth={1.75} />
@@ -420,6 +449,8 @@ export default function MisClasesPage() {
                 </div>
               </div>
             )}
+          </>
+        )}
           </>
         )}
       </div>

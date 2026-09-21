@@ -3,11 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { SearchX, Star } from 'lucide-react'
+import { SearchX, Star, Gift } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
 import { claseYaPaso } from '../../../lib/ventanaEdicionClase'
 import { calcularNivel, calcularRango } from '../../../lib/niveles'
 import BotonSeguir from '../../../components/BotonSeguir'
+
+function formatearFechaLimite(plazoDias) {
+  const fecha = new Date()
+  fecha.setDate(fecha.getDate() + plazoDias)
+  return fecha.toLocaleDateString('es-ES')
+}
 
 const botonPrimarioClass =
   'inline-flex h-10 items-center justify-center rounded-full bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
@@ -35,6 +41,10 @@ export default function PerfilEntrenadorPage() {
   const [totalValoraciones, setTotalValoraciones] = useState(0)
 
   const [usuarioActual, setUsuarioActual] = useState(null)
+  const [bonosOfrecidos, setBonosOfrecidos] = useState([])
+  const [adquiriendoId, setAdquiriendoId] = useState(null)
+  const [mensajeBono, setMensajeBono] = useState('')
+  const [errorBono, setErrorBono] = useState('')
   const [puedeValorar, setPuedeValorar] = useState(false)
   const [valoracionId, setValoracionId] = useState(null)
   const [estrellasSeleccionadas, setEstrellasSeleccionadas] = useState(0)
@@ -95,6 +105,15 @@ export default function PerfilEntrenadorPage() {
 
       const activas = (clasesData || []).filter((clase) => !claseYaPaso(clase)).length
       setClasesActivas(activas)
+
+      const { data: bonosData } = await supabase
+        .from('bonos')
+        .select('id, numero_sesiones, plazo_dias, precio, descripcion')
+        .eq('trainer_id', perfilData.id)
+        .eq('activo', true)
+        .order('precio', { ascending: true })
+
+      setBonosOfrecidos(bonosData || [])
 
       await cargarValoraciones(perfilData.id)
 
@@ -186,6 +205,36 @@ export default function PerfilEntrenadorPage() {
     await cargarValoraciones(perfil.id)
   }
 
+  async function handleAdquirirBono(bono) {
+    if (!usuarioActual) {
+      setErrorBono('Inicia sesión para adquirir un bono.')
+      return
+    }
+
+    const fechaLimite = formatearFechaLimite(bono.plazo_dias)
+    const confirmado = window.confirm(
+      `Vas a adquirir este bono de ${bono.precio} €. Debe consumirse antes del ${fechaLimite}. ` +
+        'Las sesiones no utilizadas no son reembolsables. ¿Confirmas?'
+    )
+    if (!confirmado) return
+
+    setAdquiriendoId(bono.id)
+    setErrorBono('')
+    setMensajeBono('')
+
+    const { error } = await supabase.rpc('adquirir_bono', { p_bono_id: bono.id })
+
+    setAdquiriendoId(null)
+
+    if (error) {
+      setErrorBono(error.message)
+      return
+    }
+
+    setMensajeBono('Bono adquirido. Lo verás en "Mis reservas" → pestaña Bonos, y se usará automáticamente al reservar sesiones de este rulero.')
+    setTimeout(() => setMensajeBono(''), 8000)
+  }
+
   if (cargando) {
     return (
       <div className="flex min-h-[60vh] flex-1 items-center justify-center">
@@ -263,6 +312,55 @@ export default function PerfilEntrenadorPage() {
             {perfil.descripcion || 'Este rulero aún no ha completado su perfil.'}
           </p>
         </div>
+
+        {bonosOfrecidos.length > 0 && (
+          <div className="mt-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
+            <h2 className="mb-3 flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
+              <Gift className="h-4 w-4 text-[#B5E600]" strokeWidth={1.75} />
+              Bonos de @{perfil.username}
+            </h2>
+
+            {mensajeBono && (
+              <p className="mb-3 rounded-lg border border-[#B5E600] bg-[#EDF5C9] px-3 py-2 text-sm font-medium text-[#1F2400]">
+                {mensajeBono}
+              </p>
+            )}
+            {errorBono && <p className="mb-3 text-sm text-red-600">{errorBono}</p>}
+
+            <div className="flex flex-col gap-3">
+              {bonosOfrecidos.map((bono) => (
+                <div
+                  key={bono.id}
+                  className="flex flex-col gap-2 rounded-lg border border-[#E2E6CF] p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-[#1F2400]">
+                      {bono.numero_sesiones === null
+                        ? 'Sesiones ilimitadas'
+                        : `${bono.numero_sesiones} sesiones`}{' '}
+                      · {bono.precio} €
+                    </p>
+                    <p className="text-xs text-[#6B7355]">
+                      Plazo de {bono.plazo_dias} días para consumirlas desde la compra.
+                    </p>
+                    {bono.descripcion && <p className="mt-1 text-sm text-[#1F2400]">{bono.descripcion}</p>}
+                  </div>
+
+                  {usuarioActual && usuarioActual.id !== perfil.id && (
+                    <button
+                      type="button"
+                      onClick={() => handleAdquirirBono(bono)}
+                      disabled={adquiriendoId === bono.id}
+                      className="shrink-0 rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100] disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {adquiriendoId === bono.id ? 'Adquiriendo...' : 'Adquirir'}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 rounded-xl border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Valoraciones</h2>

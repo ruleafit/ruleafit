@@ -52,6 +52,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
   const [comprobandoReserva, setComprobandoReserva] = useState(true)
   const [reservando, setReservando] = useState(false)
   const [errorReserva, setErrorReserva] = useState('')
+  const [usadoBono, setUsadoBono] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -119,6 +120,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     }
 
     setYaReservada(true)
+    setUsadoBono(!!data?.usado_bono)
     setReservando(false)
 
     if (onReservado) {
@@ -158,21 +160,26 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
 
   if (yaReservada) {
     return (
-      <div
-        className={`inline-flex items-center gap-2 font-semibold text-[#7a9900] ${
-          tamaño === 'grande' ? 'text-base' : 'text-sm'
-        }`}
-      >
-        <svg
-          className={tamaño === 'grande' ? 'h-5 w-5' : 'h-4 w-4'}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+      <div>
+        <div
+          className={`inline-flex items-center gap-2 font-semibold text-[#7a9900] ${
+            tamaño === 'grande' ? 'text-base' : 'text-sm'
+          }`}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-        Ya tienes esta sesión reservada
+          <svg
+            className={tamaño === 'grande' ? 'h-5 w-5' : 'h-4 w-4'}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Ya tienes esta sesión reservada
+        </div>
+        {usadoBono && (
+          <p className="mt-1 text-xs text-[#6B7355]">Se ha descontado 1 sesión de tu bono con este rulero.</p>
+        )}
       </div>
     )
   }

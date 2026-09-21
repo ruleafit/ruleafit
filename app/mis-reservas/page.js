@@ -9,6 +9,12 @@ import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCate
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
 import { claseYaPaso, horasHastaClase } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
+import BonosComprados from '../../components/BonosComprados'
+
+const clasePestanaActiva =
+  'rounded-full bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400]'
+const clasePestanaInactiva =
+  'rounded-full border border-[#E2E6CF] px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
 
 function claveFechaHora(clase) {
   return `${clase.fecha} ${String(clase.hora).slice(0, 5)}`
@@ -30,6 +36,7 @@ export default function MisReservasPage() {
   const router = useRouter()
   const [usuario, setUsuario] = useState(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
+  const [pestana, setPestana] = useState('reservas')
   const [reservas, setReservas] = useState([])
   const [cargandoReservas, setCargandoReservas] = useState(true)
   const [error, setError] = useState('')
@@ -153,6 +160,27 @@ export default function MisReservasPage() {
       </section>
 
       <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+        <div className="mb-8 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setPestana('reservas')}
+            className={pestana === 'reservas' ? clasePestanaActiva : clasePestanaInactiva}
+          >
+            Reservas
+          </button>
+          <button
+            type="button"
+            onClick={() => setPestana('bonos')}
+            className={pestana === 'bonos' ? clasePestanaActiva : clasePestanaInactiva}
+          >
+            Bonos
+          </button>
+        </div>
+
+        {pestana === 'bonos' && <BonosComprados />}
+
+        {pestana === 'reservas' && (
+          <>
         {mensaje && (
           <div className="mb-4 rounded-xl border border-[#B5E600] bg-[#EDF5C9] px-4 py-2.5 text-sm font-medium text-[#1F2400]">
             {mensaje}
@@ -427,6 +455,8 @@ export default function MisReservasPage() {
               })}
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
     </div>
