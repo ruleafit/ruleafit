@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { CircleCheck, CircleAlert, Dumbbell, CalendarClock, MapPin, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
@@ -31,7 +32,10 @@ const tarjetaClass = 'corte-card border border-[#E2E6CF] bg-white p-5 shadow-sm 
 const botonPrimarioClass =
   'mt-2 w-full corte-btn bg-[#B5E600] px-6 py-3 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2'
 
-export default function PublicarPage() {
+function PublicarFormulario() {
+  const searchParams = useSearchParams()
+  const copiarId = searchParams.get('copiar')
+
   const [usuario, setUsuario] = useState(null)
   const [cargando, setCargando] = useState(true)
 
@@ -63,6 +67,46 @@ export default function PublicarPage() {
     comprobarSesion()
   }, [])
 
+  // Copiar sesión (pedido por el usuario el 21 sept 2026): si se llega aquí
+  // desde "Copiar sesión" en Mis sesiones publicadas, se precarga el
+  // formulario con los datos de esa sesión, incluida fecha y hora (copia
+  // exacta) - el propio aviso de fecha/hora duplicada al publicar avisa si
+  // no se cambia nada.
+  useEffect(() => {
+    async function cargarDatosCopia() {
+      if (!copiarId) return
+
+      const { data } = await supabase
+        .from('clases')
+        .select(
+          'titulo, categoria, tipo_actividad, ciudad, direccion, punto_encuentro, fecha, hora, duracion, nivel, precio, plazas_max, plazas_min, material, observaciones, lat, lng'
+        )
+        .eq('id', copiarId)
+        .maybeSingle()
+
+      if (!data) return
+
+      setTitulo(data.titulo || '')
+      setCategoria(data.categoria || CATEGORIAS[0])
+      setTipoActividad(data.tipo_actividad || '')
+      setCiudad(data.ciudad || CIUDADES[0])
+      setDireccion(data.direccion || '')
+      setPuntoEncuentro(data.punto_encuentro || '')
+      setFecha(data.fecha || '')
+      setHora(data.hora ? String(data.hora).slice(0, 5) : '')
+      setDuracion(data.duracion != null ? String(data.duracion) : '')
+      setNivel(data.nivel || NIVELES[0])
+      setPrecio(data.precio != null ? String(data.precio) : '')
+      setPlazasMax(data.plazas_max != null ? String(data.plazas_max) : '')
+      setPlazasMin(data.plazas_min != null ? String(data.plazas_min) : '0')
+      setMaterial(data.material || '')
+      setObservaciones(data.observaciones || '')
+      setLat(data.lat ?? null)
+      setLng(data.lng ?? null)
+    }
+    cargarDatosCopia()
+  }, [copiarId])
+
   async function handlePublicar(e) {
     e.preventDefault()
 
@@ -90,6 +134,25 @@ export default function PublicarPage() {
     if (claseYaPaso({ fecha, hora })) {
       setMensaje('La fecha y hora de la sesión ya han pasado. Elige un momento futuro.')
       return
+    }
+
+    // Aviso de fecha/hora duplicada (pedido por el usuario el 21 sept 2026):
+    // no se bloquea, solo se avisa - puede ser intencionado (otro compañero
+    // da la otra sesión).
+    const { data: sesionesEnElMismoHorario } = await supabase
+      .from('clases')
+      .select('id')
+      .eq('trainer_id', usuarioActual.id)
+      .eq('estado', 'activa')
+      .eq('fecha', fecha)
+      .eq('hora', hora)
+      .limit(1)
+
+    if (sesionesEnElMismoHorario && sesionesEnElMismoHorario.length > 0) {
+      const confirmado = window.confirm(
+        `Ya tienes otra sesión programada el ${fecha} a las ${hora}. ¿Seguro que quieres publicar esta también?`
+      )
+      if (!confirmado) return
     }
 
     setMensaje('Publicando...')
@@ -354,6 +417,14 @@ export default function PublicarPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function PublicarPage() {
+  return (
+    <Suspense fallback={null}>
+      <PublicarFormulario />
+    </Suspense>
   )
 }
 
