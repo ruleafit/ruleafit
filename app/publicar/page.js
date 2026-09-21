@@ -72,17 +72,23 @@ function PublicarFormulario() {
   // formulario con los datos de esa sesión, incluida fecha y hora (copia
   // exacta) - el propio aviso de fecha/hora duplicada al publicar avisa si
   // no se cambia nada.
+  //
+  // Se usa la función clase_para_copiar() (sql/064) en vez de una consulta
+  // directa a la tabla: una consulta directa queda sujeta a la política RLS
+  // "Ver clases activas" (estado = 'activa' o reserva propia), que bloquea
+  // la lectura de una sesión ya cancelada por el propio entrenador -y el
+  // entrenador nunca tiene una reserva propia sobre su propia sesión-, así
+  // que el formulario salía vacío al copiar justo esas. clase_para_copiar()
+  // es SECURITY DEFINER y comprueba ella misma que la sesión es del usuario
+  // autenticado, así que funciona sea cual sea su estado.
   useEffect(() => {
     async function cargarDatosCopia() {
       if (!copiarId) return
 
-      const { data } = await supabase
-        .from('clases')
-        .select(
-          'titulo, categoria, tipo_actividad, ciudad, direccion, punto_encuentro, fecha, hora, duracion, nivel, precio, plazas_max, plazas_min, material, observaciones, lat, lng'
-        )
-        .eq('id', copiarId)
-        .maybeSingle()
+      const { data: filas } = await supabase.rpc('clase_para_copiar', {
+        p_clase_id: copiarId,
+      })
+      const data = filas?.[0]
 
       if (!data) return
 
