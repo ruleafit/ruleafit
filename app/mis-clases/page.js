@@ -403,7 +403,7 @@ export default function MisClasesPage() {
           </button>
         </div>
 
-        {pestana === 'bonos' && <GestionBonos />}
+        {pestana === 'bonos' && <GestionBonos usuario={usuario} />}
 
         {pestana === 'sesiones' && (
           <>

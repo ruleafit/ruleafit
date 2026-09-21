@@ -43,7 +43,7 @@ function agruparPorBono(filas) {
   return Array.from(mapa.values())
 }
 
-export default function GestionBonos() {
+export default function GestionBonos({ usuario }) {
   const [bonos, setBonos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -95,9 +95,15 @@ export default function GestionBonos() {
       return
     }
 
+    if (!usuario) {
+      setErrorCrear('No se ha podido identificar tu sesión. Recarga la página e inténtalo de nuevo.')
+      return
+    }
+
     setCreando(true)
 
     const { error } = await supabase.from('bonos').insert({
+      trainer_id: usuario.id,
       numero_sesiones: sesionesNumero,
       plazo_dias: plazoNumero,
       precio: precioNumero,
