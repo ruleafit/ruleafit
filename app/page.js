@@ -269,7 +269,8 @@ export default function Home() {
                 <span className="whitespace-nowrap text-[#B5E600]">Sin cuotas.</span>
               </h1>
               <p className="max-w-xl text-lg text-white/90 sm:text-xl">
-                Sesiones sueltas en Sevilla y Málaga. Elige la de hoy, resérvala y ya está. Sin cuota mensual ni permanencia.
+                Sesiones sueltas o bonos en Sevilla y Málaga. Elige la de hoy, resérvala y ya está, o hazte un bono con tu
+                entrenador. Sin cuota mensual ni permanencia.
               </p>
 
               <div className="mt-2 flex flex-col gap-4 sm:flex-row">
@@ -478,7 +479,7 @@ export default function Home() {
           <div className="absolute inset-0 -z-10 bg-black/60" />
           <div className="flex flex-col items-center gap-6">
             <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              Solo, en pareja o en grupo. Pagas solo la sesión a la que vas.
+              Solo, en pareja o en grupo. Tú eliges: pagas sesión a sesión o compras un bono con tu entrenador.
             </p>
             <Link href="/clases" className={botonPrimarioClass}>
               Ver sesiones
