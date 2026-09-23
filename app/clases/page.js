@@ -44,13 +44,13 @@ const filtroLabelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wi
 
 // Filtro "solo sesiones de ruleros a los que sigo" (pedido por el usuario el
 // 23 sept 2026): botón toggle, no un desplegable como el resto de filtros,
-// ya que es un sí/no. Mismo tratamiento de color que se usa para marcar
-// "activo" en otros toggles de la web (borde+fondo lima cuando está
-// encendido).
+// ya que es un sí/no. Ajustado el mismo día a petición del usuario: el
+// botón lleva solo el icono (el texto va fuera, al lado) y se pone en verde
+// lima sólido al activarse.
 const filtroToggleActivoClass =
-  'inline-flex items-center gap-1.5 corte-btn border border-[#B5E600] bg-[#EDF5C9] px-4 py-2 text-sm font-semibold text-[#3D4A00] transition-colors'
+  'flex h-9 w-9 shrink-0 items-center justify-center corte-btn border border-[#B5E600] bg-[#B5E600] text-[#1F2400] transition-colors'
 const filtroToggleInactivoClass =
-  'inline-flex items-center gap-1.5 corte-btn border border-[#E2E6CF] bg-white px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
+  'flex h-9 w-9 shrink-0 items-center justify-center corte-btn border border-[#E2E6CF] bg-white text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
 
 function formatearFecha(fecha) {
   const anio = fecha.getFullYear()
@@ -250,15 +250,20 @@ export default function ClasesPage() {
               {usuario && (
                 <div>
                   <label className={filtroLabelClass}>Ruleros</label>
-                  <button
-                    type="button"
-                    onClick={() => setFiltroSoloSeguidos((valor) => !valor)}
-                    aria-pressed={filtroSoloSeguidos}
-                    className={filtroSoloSeguidos ? filtroToggleActivoClass : filtroToggleInactivoClass}
-                  >
-                    <UserCheck className="h-4 w-4" strokeWidth={1.75} />
-                    Solo sesiones de ruleros a los que sigo
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFiltroSoloSeguidos((valor) => !valor)}
+                      aria-pressed={filtroSoloSeguidos}
+                      aria-label="Solo sesiones de ruleros a los que sigo"
+                      className={filtroSoloSeguidos ? filtroToggleActivoClass : filtroToggleInactivoClass}
+                    >
+                      <UserCheck className="h-4 w-4" strokeWidth={1.75} />
+                    </button>
+                    <span className="text-sm font-medium text-[#3D4A00]">
+                      Solo sesiones de ruleros a los que sigo
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
