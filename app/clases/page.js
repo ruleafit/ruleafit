@@ -45,12 +45,14 @@ const filtroLabelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wi
 // Filtro "solo sesiones de ruleros a los que sigo" (pedido por el usuario el
 // 23 sept 2026): botón toggle, no un desplegable como el resto de filtros,
 // ya que es un sí/no. Ajustado el mismo día a petición del usuario: el
-// botón lleva solo el icono (el texto va fuera, al lado) y se pone en verde
-// lima sólido al activarse.
+// botón lleva solo el icono (el texto va fuera, al lado), algo más grande,
+// y con el mismo marco lima grueso que "Ver mi ubicación" en el mapa
+// (components/MapaClases.js) tanto apagado como encendido - encendido se
+// rellena también de lima.
 const filtroToggleActivoClass =
-  'flex h-9 w-9 shrink-0 items-center justify-center corte-btn border border-[#B5E600] bg-[#B5E600] text-[#1F2400] transition-colors'
+  'flex shrink-0 items-center justify-center corte-btn border-2 border-[#B5E600] bg-[#B5E600] p-2.5 text-[#1F2400] shadow-md transition-colors'
 const filtroToggleInactivoClass =
-  'flex h-9 w-9 shrink-0 items-center justify-center corte-btn border border-[#E2E6CF] bg-white text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
+  'flex shrink-0 items-center justify-center corte-btn border-2 border-[#B5E600] bg-white p-2.5 text-[#3D4A00] shadow-md transition-colors hover:bg-[#F5F7E8]'
 
 function formatearFecha(fecha) {
   const anio = fecha.getFullYear()
@@ -258,7 +260,7 @@ export default function ClasesPage() {
                       aria-label="Solo sesiones de ruleros a los que sigo"
                       className={filtroSoloSeguidos ? filtroToggleActivoClass : filtroToggleInactivoClass}
                     >
-                      <UserCheck className="h-4 w-4" strokeWidth={1.75} />
+                      <UserCheck className="h-5 w-5" strokeWidth={1.75} />
                     </button>
                     <span className="text-sm font-medium text-[#3D4A00]">
                       Solo sesiones de ruleros a los que sigo
