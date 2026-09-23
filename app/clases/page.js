@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { SearchX } from 'lucide-react'
+import { SearchX, UserCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO, ESTILO_POR_CATEGORIA, formaSVG } from '../../lib/imagenesCategoria'
 import { textoPlazas } from '../../lib/formatoPlazas'
@@ -41,6 +41,16 @@ const filtroCampoClass =
   'block w-full corte-btn border border-[#E2E6CF] bg-white px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600] sm:w-auto'
 
 const filtroLabelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wide text-[#6B7355]'
+
+// Filtro "solo sesiones de ruleros a los que sigo" (pedido por el usuario el
+// 23 sept 2026): botón toggle, no un desplegable como el resto de filtros,
+// ya que es un sí/no. Mismo tratamiento de color que se usa para marcar
+// "activo" en otros toggles de la web (borde+fondo lima cuando está
+// encendido).
+const filtroToggleActivoClass =
+  'inline-flex items-center gap-1.5 corte-btn border border-[#B5E600] bg-[#EDF5C9] px-4 py-2 text-sm font-semibold text-[#3D4A00] transition-colors'
+const filtroToggleInactivoClass =
+  'inline-flex items-center gap-1.5 corte-btn border border-[#E2E6CF] bg-white px-4 py-2 text-sm font-semibold text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400]'
 
 function formatearFecha(fecha) {
   const anio = fecha.getFullYear()
@@ -83,6 +93,8 @@ export default function ClasesPage() {
   const [filtroCategoria, setFiltroCategoria] = useState('Todas')
   const [filtroCuando, setFiltroCuando] = useState('Todas')
   const [filtroFranja, setFiltroFranja] = useState('Todas')
+  const [filtroSoloSeguidos, setFiltroSoloSeguidos] = useState(false)
+  const [seguidosIds, setSeguidosIds] = useState([])
   const [usuario, setUsuario] = useState(null)
 
   useEffect(() => {
@@ -99,6 +111,30 @@ export default function ClasesPage() {
     }
   }, [])
 
+  // Filtro "solo sesiones de ruleros a los que sigo" (pedido por el usuario
+  // el 23 sept 2026): se carga la lista de a quién sigue el usuario logueado
+  // (tabla public.seguimientos, lectura pública) y se filtra por
+  // trainer_id en esa lista. Sin sesión iniciada no hay a quién seguir, así
+  // que el botón ni se muestra (ver más abajo) y el filtro se apaga si el
+  // usuario cierra sesión con el filtro activado.
+  useEffect(() => {
+    async function cargarSeguidos() {
+      if (!usuario) {
+        setSeguidosIds([])
+        setFiltroSoloSeguidos(false)
+        return
+      }
+
+      const { data } = await supabase
+        .from('seguimientos')
+        .select('entrenador_id')
+        .eq('seguidor_id', usuario.id)
+
+      setSeguidosIds((data || []).map((fila) => fila.entrenador_id))
+    }
+    cargarSeguidos()
+  }, [usuario])
+
   function handleReservado(claseId, nuevasPlazasOcupadas) {
     setClases((prev) =>
       prev.map((c) => (c.id === claseId ? { ...c, plazas_ocupadas: nuevasPlazasOcupadas } : c))
@@ -110,6 +146,7 @@ export default function ClasesPage() {
     setFiltroCategoria('Todas')
     setFiltroCuando('Todas')
     setFiltroFranja('Todas')
+    setFiltroSoloSeguidos(false)
   }
 
   useEffect(() => {
@@ -148,8 +185,9 @@ export default function ClasesPage() {
     const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
     const coincideFecha = coincideConCuando(clase.fecha, filtroCuando, hoy)
     const coincideFranja = filtroFranja === 'Todas' || franjaDeHora(clase.hora) === filtroFranja
+    const coincideSeguidos = !filtroSoloSeguidos || seguidosIds.includes(clase.trainer_id)
 
-    return coincideCiudad && coincideCategoria && coincideFecha && coincideFranja
+    return coincideCiudad && coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos
   })
 
   return (
@@ -208,6 +246,21 @@ export default function ClasesPage() {
                   ))}
                 </select>
               </div>
+
+              {usuario && (
+                <div>
+                  <label className={filtroLabelClass}>Ruleros</label>
+                  <button
+                    type="button"
+                    onClick={() => setFiltroSoloSeguidos((valor) => !valor)}
+                    aria-pressed={filtroSoloSeguidos}
+                    className={filtroSoloSeguidos ? filtroToggleActivoClass : filtroToggleInactivoClass}
+                  >
+                    <UserCheck className="h-4 w-4" strokeWidth={1.75} />
+                    Solo sesiones de ruleros a los que sigo
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
