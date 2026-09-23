@@ -72,11 +72,16 @@ export default function CuentaPage() {
 
         setRulosSaldo(saldoFila?.saldo ?? 0)
 
+        // Solo los 5 últimos (pedido por el usuario el 23 sept 2026): con el
+        // tiempo esta lista se haría muy larga, así que se limita en la
+        // propia consulta en vez de traer todo el historial y recortarlo en
+        // el cliente.
         const { data: movimientos } = await supabase
           .from('rulos_movimientos')
           .select('id, cantidad, motivo, nota, created_at')
           .eq('usuario_id', data.user.id)
           .order('created_at', { ascending: false })
+          .limit(5)
 
         setRulosMovimientos(movimientos || [])
 
@@ -629,7 +634,7 @@ export default function CuentaPage() {
         <div className="mb-8">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1F2400]">
             <History className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
-            Historial de Rulos
+            Mis últimos Rulos
           </h2>
 
           {rulosMovimientos.length === 0 ? (
