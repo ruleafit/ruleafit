@@ -96,6 +96,7 @@ export default function ClasesPage() {
   const [filtroCuando, setFiltroCuando] = useState('Todas')
   const [filtroFranja, setFiltroFranja] = useState('Todas')
   const [filtroSoloSeguidos, setFiltroSoloSeguidos] = useState(false)
+  const [filtroSoloSeguidosFijado, setFiltroSoloSeguidosFijado] = useState(false)
   const [seguidosIds, setSeguidosIds] = useState([])
   const [usuario, setUsuario] = useState(null)
 
@@ -119,23 +120,50 @@ export default function ClasesPage() {
   // trainer_id en esa lista. Sin sesión iniciada no hay a quién seguir, así
   // que el botón ni se muestra (ver más abajo) y el filtro se apaga si el
   // usuario cierra sesión con el filtro activado.
+  //
+  // "Mantener este filtro activado siempre que entre" (pedido por el
+  // usuario el 2 oct 2026): la preferencia se guarda en la cuenta, no en
+  // este navegador (perfiles.filtro_clases_solo_seguidos, sql/065), para
+  // que siga al usuario aunque cambie de dispositivo. Si está guardada como
+  // activada, el filtro se enciende solo al entrar, sin tener que pulsar el
+  // botón.
   useEffect(() => {
-    async function cargarSeguidos() {
+    async function cargarSeguidosYPreferencia() {
       if (!usuario) {
         setSeguidosIds([])
         setFiltroSoloSeguidos(false)
+        setFiltroSoloSeguidosFijado(false)
         return
       }
 
-      const { data } = await supabase
-        .from('seguimientos')
-        .select('entrenador_id')
-        .eq('seguidor_id', usuario.id)
+      const [{ data: seguidos }, { data: perfil }] = await Promise.all([
+        supabase.from('seguimientos').select('entrenador_id').eq('seguidor_id', usuario.id),
+        supabase
+          .from('perfiles')
+          .select('filtro_clases_solo_seguidos')
+          .eq('id', usuario.id)
+          .maybeSingle(),
+      ])
 
-      setSeguidosIds((data || []).map((fila) => fila.entrenador_id))
+      setSeguidosIds((seguidos || []).map((fila) => fila.entrenador_id))
+
+      const fijado = perfil?.filtro_clases_solo_seguidos ?? false
+      setFiltroSoloSeguidosFijado(fijado)
+      if (fijado) setFiltroSoloSeguidos(true)
     }
-    cargarSeguidos()
+    cargarSeguidosYPreferencia()
   }, [usuario])
+
+  async function handleCambiarFijado(nuevoValor) {
+    setFiltroSoloSeguidosFijado(nuevoValor)
+    if (nuevoValor) setFiltroSoloSeguidos(true)
+
+    if (!usuario) return
+    await supabase
+      .from('perfiles')
+      .update({ filtro_clases_solo_seguidos: nuevoValor })
+      .eq('id', usuario.id)
+  }
 
   function handleReservado(claseId, nuevasPlazasOcupadas) {
     setClases((prev) =>
@@ -266,6 +294,15 @@ export default function ClasesPage() {
                       Solo sesiones de ruleros a los que sigo
                     </span>
                   </div>
+                  <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-[#6B7355]">
+                    <input
+                      type="checkbox"
+                      checked={filtroSoloSeguidosFijado}
+                      onChange={(e) => handleCambiarFijado(e.target.checked)}
+                      className="h-4 w-4 accent-[#B5E600]"
+                    />
+                    Mantener este filtro activado siempre que entre
+                  </label>
                 </div>
               )}
             </div>
