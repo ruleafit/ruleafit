@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { SearchX, Star, Gift } from 'lucide-react'
 import { supabase } from '../../../lib/supabaseClient'
-import { claseYaPaso } from '../../../lib/ventanaEdicionClase'
+import { claseYaPaso, horasAntesDeClase } from '../../../lib/ventanaEdicionClase'
 import { calcularNivel, calcularRango } from '../../../lib/niveles'
 import BotonSeguir from '../../../components/BotonSeguir'
 
@@ -122,18 +122,40 @@ export default function PerfilEntrenadorPage() {
 
       // Ya no depende del rol guardado (Fase 6 de la unificación de roles,
       // 11 sept 2026): lo relevante es que no sea tu propio perfil, no un
-      // rol fijo. El candado real (haber entrenado con esta persona) se
-      // calcula justo debajo de todos modos.
+      // rol fijo. El candado real (haber entrenado con esta persona, o que
+      // el entrenador cancelase tu sesión con poca antelación) se calcula
+      // justo debajo de todos modos.
+      //
+      // Dos motivos por los que se puede valorar (pedido por el usuario el
+      // 2 de octubre de 2026, RLS ampliada en
+      // sql/066_valorar_tras_cancelacion_tardia_entrenador.sql):
+      //  1) una reserva activa cuya clase ya pasó (asistencia, el caso de
+      //     siempre).
+      //  2) una reserva que el propio entrenador canceló a mano
+      //     (reservas.cancelada_por_entrenador, que NUNCA se activa en la
+      //     autocancelación por no llegar al mínimo de plazas) con menos de
+      //     2 horas de antelación respecto al inicio de la clase.
       if (userData.user && userData.user.id !== perfilData.id) {
-        const { data: reservasActivas } = await supabase
+        const { data: reservasRelevantes } = await supabase
           .from('reservas')
-          .select('id, clases(trainer_id, fecha, hora)')
+          .select('id, estado, cancelled_at, cancelada_por_entrenador, clases(trainer_id, fecha, hora)')
           .eq('cliente_id', userData.user.id)
-          .eq('estado', 'activa')
+          .in('estado', ['activa', 'cancelada'])
 
-        const haCompletadoClase = (reservasActivas || []).some(
-          (reserva) => reserva.clases?.trainer_id === perfilData.id && claseYaPaso(reserva.clases)
-        )
+        const haCompletadoClase = (reservasRelevantes || []).some((reserva) => {
+          if (reserva.clases?.trainer_id !== perfilData.id) return false
+
+          if (reserva.estado === 'activa') {
+            return claseYaPaso(reserva.clases)
+          }
+
+          if (reserva.cancelada_por_entrenador && reserva.cancelled_at) {
+            const horas = horasAntesDeClase(reserva.clases, reserva.cancelled_at)
+            return horas !== null && horas < 2
+          }
+
+          return false
+        })
 
         setPuedeValorar(haCompletadoClase)
 
@@ -460,7 +482,8 @@ export default function PerfilEntrenadorPage() {
 
           {usuarioActual && usuarioActual.id !== perfil.id && !puedeValorar && (
             <p className="mt-6 border-t border-[#E2E6CF] pt-6 text-sm text-[#6B7355]">
-              Solo puedes valorar a un rulero con el que hayas entrenado.
+              Solo puedes valorar a un rulero con el que hayas entrenado, o que te haya cancelado una
+              sesión con menos de 2 horas de antelación.
             </p>
           )}
         </div>
