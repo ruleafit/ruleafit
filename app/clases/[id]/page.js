@@ -9,6 +9,7 @@ import { supabase } from '../../../lib/supabaseClient'
 import { textoPlazas } from '../../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../../lib/confirmacionClase'
 import { claseYaPaso } from '../../../lib/ventanaEdicionClase'
+import { formatearFechaParaMostrar } from '../../../lib/formatoFecha'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../../lib/imagenesCategoria'
 import BotonReservar from '../../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../../components/BotonCopiarCoordenadas'
@@ -180,7 +181,7 @@ function DetalleClaseContenido() {
             <TituloBloque Icono={CalendarClock}>Cuándo</TituloBloque>
 
             <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-              <p className="text-lg font-bold text-[#1F2400] sm:text-xl">{clase.fecha}</p>
+              <p className="text-lg font-bold text-[#1F2400] sm:text-xl">{formatearFechaParaMostrar(clase.fecha)}</p>
               <p className="text-lg font-bold text-[#1F2400] sm:text-xl">{clase.hora}</p>
               {clase.duracion != null && (
                 <p className="text-sm text-[#6B7355]">{clase.duracion} min de duración</p>

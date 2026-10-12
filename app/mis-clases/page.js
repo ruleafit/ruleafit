@@ -19,6 +19,7 @@ import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCate
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
 import { motivoNoEditableClase, claseYaPaso } from '../../lib/ventanaEdicionClase'
+import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import GestionBonos from '../../components/GestionBonos'
 
@@ -262,7 +263,7 @@ export default function MisClasesPage() {
 
             <p className={`mt-2 inline-flex items-center gap-1.5 text-sm font-bold ${colorFecha}`}>
               <CalendarClock className="h-4 w-4" strokeWidth={2} />
-              {clase.clase_fecha} · {clase.clase_hora}
+              {formatearFechaParaMostrar(clase.clase_fecha)} · {clase.clase_hora}
             </p>
 
             <div className="mt-3">

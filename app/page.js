@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { claseYaPaso } from '../lib/ventanaEdicionClase'
+import { formatearFechaParaMostrar } from '../lib/formatoFecha'
 import RevelarAlLlegar from '../components/RevelarAlLlegar'
 import BotonInstalarApp from '../components/BotonInstalarApp'
 
@@ -345,7 +346,7 @@ export default function Home() {
                     >
                       <span className="truncate font-semibold text-[#1F2400]">{c.titulo}</span>
                       <span className="shrink-0 text-xs text-[#6B7355]">
-                        {c.fecha} · {String(c.hora).slice(0, 5)}
+                        {formatearFechaParaMostrar(c.fecha)} · {String(c.hora).slice(0, 5)}
                       </span>
                     </Link>
                   ))}
@@ -375,7 +376,7 @@ export default function Home() {
                     >
                       <span className="truncate font-semibold text-[#1F2400]">{r.clases.titulo}</span>
                       <span className="shrink-0 text-xs text-[#6B7355]">
-                        {r.clases.fecha} · {String(r.clases.hora).slice(0, 5)}
+                        {formatearFechaParaMostrar(r.clases.fecha)} · {String(r.clases.hora).slice(0, 5)}
                       </span>
                     </Link>
                   ))}

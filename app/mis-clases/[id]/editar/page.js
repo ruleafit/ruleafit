@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CircleAlert, Dumbbell, Tag, Lock } from 'lucide-react'
 import { supabase } from '../../../../lib/supabaseClient'
 import { motivoNoEditableClase } from '../../../../lib/ventanaEdicionClase'
+import { formatearFechaParaMostrar } from '../../../../lib/formatoFecha'
 
 const CATEGORIAS = [
   'Fuerza / funcional',
@@ -414,7 +415,7 @@ export default function EditarClasePage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Fecha</label>
-                <p className={soloLecturaClass}>{clase.fecha}</p>
+                <p className={soloLecturaClass}>{formatearFechaParaMostrar(clase.fecha)}</p>
               </div>
               <div>
                 <label className={labelClass}>Hora</label>

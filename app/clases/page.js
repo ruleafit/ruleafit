@@ -9,6 +9,7 @@ import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO, ESTILO_POR_CATEGORIA, formaSV
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../lib/confirmacionClase'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
+import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import BotonReservar from '../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../components/BotonCopiarCoordenadas'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
@@ -388,7 +389,7 @@ export default function ClasesPage() {
 
                         <div className="flex flex-col gap-1 text-sm text-[#6B7355]">
                           <p>
-                            Fecha: <span className="text-[#1F2400]">{clase.fecha}</span> · Hora:{' '}
+                            Fecha: <span className="text-[#1F2400]">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
                             <span className="text-[#1F2400]">{clase.hora}</span>
                           </p>
                           {clase.duracion != null && (

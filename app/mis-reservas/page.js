@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
 import { claseYaPaso, horasHastaClase } from '../../lib/ventanaEdicionClase'
+import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import BonosComprados from '../../components/BonosComprados'
 
@@ -262,7 +263,7 @@ export default function MisReservasPage() {
                         Ciudad: <span className="text-[#1F2400]">{clase.ciudad}</span>
                       </p>
                       <p>
-                        Fecha: <span className="text-[#1F2400]">{clase.fecha}</span> · Hora:{' '}
+                        Fecha: <span className="text-[#1F2400]">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
                         <span className="text-[#1F2400]">{clase.hora}</span>
                       </p>
                       {clase.duracion != null && (
@@ -348,7 +349,7 @@ export default function MisReservasPage() {
                             Ciudad: <span className="text-red-500">{clase.ciudad}</span>
                           </p>
                           <p>
-                            Fecha: <span className="text-red-500">{clase.fecha}</span> · Hora:{' '}
+                            Fecha: <span className="text-red-500">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
                             <span className="text-red-500">{clase.hora}</span>
                           </p>
                         </div>
@@ -436,7 +437,7 @@ export default function MisReservasPage() {
                             Ciudad: <span className="text-zinc-500">{clase.ciudad}</span>
                           </p>
                           <p>
-                            Fecha: <span className="text-zinc-500">{clase.fecha}</span> · Hora:{' '}
+                            Fecha: <span className="text-zinc-500">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
                             <span className="text-zinc-500">{clase.hora}</span>
                           </p>
                           {clase.duracion != null && (
