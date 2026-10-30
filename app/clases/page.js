@@ -190,6 +190,15 @@ export default function ClasesPage() {
     )
   }
 
+  // El filtrado ya se aplica al escribir; el botón "Buscar" (o Intro) cierra
+  // el teclado en móvil y lleva la vista a los resultados, para que quede
+  // claro que se ha hecho la búsqueda.
+  function handleBuscar(e) {
+    e.preventDefault()
+    document.activeElement?.blur()
+    document.getElementById('resultados-sesiones')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   function limpiarFiltros() {
     setBusqueda('')
     setFiltroCiudad('Todas')
@@ -263,20 +272,28 @@ export default function ClasesPage() {
         {!error && clases.length > 0 && (
           <>
             <div className="mb-8 flex flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5">
-              <div className="w-full">
+              <form role="search" onSubmit={handleBuscar} className="w-full">
                 <label htmlFor="busqueda-sesiones" className={filtroLabelClass}>Buscar actividad</label>
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#6B7355]" strokeWidth={1.75} />
-                  <input
-                    id="busqueda-sesiones"
-                    type="search"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    placeholder="Ej: boxeo, yoga, running…"
-                    className="block w-full corte-btn border border-[#E2E6CF] bg-white py-2 pl-9 pr-4 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
-                  />
+                <div className="flex gap-2">
+                  <div className="relative min-w-0 flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#6B7355]" strokeWidth={1.75} />
+                    <input
+                      id="busqueda-sesiones"
+                      type="search"
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
+                      placeholder="Ej: boxeo, yoga…"
+                      className="block w-full corte-btn border border-[#E2E6CF] bg-white py-2 pl-9 pr-4 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="flex shrink-0 items-center justify-center corte-btn bg-[#B5E600] px-5 text-sm font-bold text-[#1F2400] transition-colors hover:bg-[#a3d100] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2"
+                  >
+                    Buscar
+                  </button>
                 </div>
-              </div>
+              </form>
 
               <div>
                 <label className={filtroLabelClass}>Ciudad</label>
@@ -344,7 +361,7 @@ export default function ClasesPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
+            <div id="resultados-sesiones" className="grid scroll-mt-24 grid-cols-1 gap-8 md:grid-cols-2 md:items-start">
               <div className="md:sticky md:top-24 md:self-start">
                 <MapaClases clases={clasesFiltradas} />
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 corte-card border border-[#E2E6CF] bg-white/70 px-4 py-3 text-xs text-[#3D4A00]">
