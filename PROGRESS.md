@@ -542,6 +542,18 @@ Hecho:
 - CLAUDE.md actualizado: la plataforma ya no se limita a Sevilla y Málaga y se documenta la regla de ciudades.
 - Búsqueda por provincia: clases.provincia (sql/067, ejecutado) se rellena al publicar con la provincia de la ciudad elegida en el autocompletado, y el filtro de ciudad de /clases busca en ciudad y provincia (buscar "Sevilla" encuentra también Dos Hermanas o Utrera). Si la ciudad no tiene sesiones que cumplan los filtros (no solo si no tiene ninguna), se ofrecen las más cercanas. Limitaciones: Zaragoza sale con provincia "Aragón" y Ceuta sin provincia (se encuentran por su nombre); "Copiar sesión" recalcula la provincia buscando la ciudad.
 - Probado con 10 sesiones reales publicadas en 10 ciudades (cuenta lealfj1, producción) y con datos simulados para la provincia.
+
+## Compartir sesión y mejoras de Copiar sesión (30 octubre 2026)
+Hecho:
+- Compartir sesión: botón en la ficha (/clases/[id]) y en cada tarjeta de /clases (components/BotonCompartir.js). Panel (en un portal a document.body, porque dentro de la cabecera lo tapaba el resto de la página) con: menú nativo del móvil (navigator.share: Instagram, WhatsApp, Mensajes...), copiar enlace, WhatsApp, Telegram, X, Facebook y correo.
+- Imagen para historia de Instagram (lib/imagenHistoria.js): PNG vertical de 1080x1920 dibujado en un canvas con la foto de la categoría, título, ciudad, zona, fecha, hora, precio y "Pulsa el enlace y reserva tu plaza / ruleafit.com". En el móvil se comparte como archivo; en el ordenador se descarga. Una imagen no se puede pulsar, así que al generarla se copia a la vez el enlace de la sesión y el panel indica el paso siguiente: subir la imagen y pegar el enlace con el sticker "Enlace" de Instagram.
+- Vista previa del enlace (app/clases/[id]/layout.js, generateMetadata en el servidor): título "Título · Ciudad", descripción con fecha, hora, tipo y precio, y la foto de la categoría (Open Graph y Twitter card). Con un id inexistente o una sesión no visible usa los datos generales.
+- Copiar sesión: la fecha ya no se copia igual, se propone el mismo día de la semana siguiente (o la primera semana futura si la sesión copiada es antigua) con una nota bajo el campo; el aviso de fecha y hora duplicadas muestra DD/MM/YYYY.
+- Commits 8c5833d y 7c78f97. Probado en el navegador: enlaces de las redes, imagen (títulos corto y largo), panel en móvil, copia del enlace y fecha propuesta. El menú nativo del móvil se probó simulado.
+
+Pendientes:
+- Comprobar en producción la vista previa del enlace en WhatsApp/Facebook, el menú nativo y la imagen en un móvil real, y que el sticker "Enlace" de Instagram lleva a la ficha.
+- Opcional: enlaces cortos para las sesiones (ruleafit.com/s/abc123) y botón de compartir también en Mis sesiones publicadas.
 - Commit ffe0c7f. Probado en el navegador con sesiones simuladas (en producción /clases sigue vacía por no haber sesiones futuras) y sin publicar nada real.
 Pendientes:
 - Ordenar SIEMPRE las sesiones por distancia (idea del 30 octubre 2026; ya existe el caso de ciudad sin sesiones, ver arriba): hacerlo como opción voluntaria "Ordenar por: Fecha / Cercanía" que pida la ubicación solo si el usuario elige Cercanía, moviendo la lectura de ubicación de components/MapaClases.js a la página. Aplazado hasta que haya más sesiones publicadas a la vez.
