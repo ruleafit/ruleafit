@@ -5,8 +5,8 @@
 -- recorre las reservas activas de clases ya pasadas y concede los mismos 5
 -- Rulos que antes concedía marcar_asistencia() al marcar 'asistio'.
 --
--- NO EJECUTADO todavía. Preparado para revisión antes de aplicarlo en
--- Supabase (proyecto "ruleafit").
+-- EJECUTADO en Supabase (proyecto "ruleafit"); comprobado el 30 de octubre
+-- de 2026 con una consulta de solo lectura en el SQL Editor.
 --
 -- IMPORTANTE sobre nombres: el rename de sistema de puntos Open -> Rulos se
 -- hizo a mano en Supabase y no está versionado en sql/ (los archivos 006 y

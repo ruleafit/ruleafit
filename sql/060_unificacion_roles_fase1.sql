@@ -11,8 +11,8 @@
 -- el dato en sí (queda como campo sin uso, no hace falta limpiarlo), y no
 -- hace falta ninguna migración de datos de usuarios existentes.
 --
--- NO EJECUTADO todavía. Preparado para revisión y ejecución manual en el
--- SQL Editor de Supabase (proyecto "ruleafit").
+-- EJECUTADO en Supabase (proyecto "ruleafit"); comprobado el 30 de octubre
+-- de 2026 con una consulta de solo lectura en el SQL Editor.
 --
 -- Depende de: sql/001 (reservar_clase), sql/004 (reservas_de_mis_clases),
 -- sql/054 (mis_clases), sql/016 (política RLS de clases), sql/030

@@ -6,8 +6,8 @@
 -- Pedido por el usuario el 12 sept 2026: ver el nivel de otros motiva a
 -- subir el propio.
 --
--- NO EJECUTADO todavía. Preparado para revisión antes de aplicarlo en
--- Supabase (proyecto "ruleafit").
+-- EJECUTADO en Supabase (proyecto "ruleafit"); comprobado el 30 de octubre
+-- de 2026 con una consulta de solo lectura en el SQL Editor.
 -- ============================================================================
 
 

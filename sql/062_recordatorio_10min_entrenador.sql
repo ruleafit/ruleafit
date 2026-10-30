@@ -4,8 +4,8 @@
 -- empiece su sesión, para que revise los nombres de los inscritos antes de
 -- comenzar. Pedido por el usuario el 12 de septiembre de 2026.
 --
--- NO EJECUTADO todavía. Preparado para revisión antes de aplicarlo en
--- Supabase (proyecto "ruleafit").
+-- EJECUTADO en Supabase (proyecto "ruleafit"); comprobado el 30 de octubre
+-- de 2026 con una consulta de solo lectura en el SQL Editor.
 --
 -- Reutiliza TODO lo que ya existe para los demás recordatorios (24h/7h/2h):
 -- el cron `procesar-recordatorios` (sql/043, cada 5 minutos, no hay que

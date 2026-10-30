@@ -4,8 +4,8 @@
 -- sql/044): por cada usuario_id, conserva solo las 10 filas más recientes
 -- (según created_at) y borra el resto. Evita que la tabla crezca sin límite.
 --
--- NO EJECUTADO todavía. Preparado para revisión antes de aplicarlo en
--- Supabase (proyecto "ruleafit").
+-- EJECUTADO en Supabase (proyecto "ruleafit"); comprobado el 30 de octubre
+-- de 2026 con una consulta de solo lectura en el SQL Editor.
 --
 -- Depende de sql/044_tablas_historial_preferencias.sql (tabla
 -- public.notificaciones_historial). Sigue el mismo patrón de función de

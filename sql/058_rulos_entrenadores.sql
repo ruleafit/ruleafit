@@ -8,8 +8,8 @@
 --      (29 agosto 2026): sin esta guarda, un entrenador podría publicar
 --      clases vacías en bucle y cobrar Rulos sin que nadie fuera nunca.
 --
--- NO EJECUTADO todavía. Preparado para revisión antes de aplicarlo en
--- Supabase (proyecto "ruleafit").
+-- EJECUTADO en Supabase (proyecto "ruleafit"); comprobado el 30 de octubre
+-- de 2026 con una consulta de solo lectura en el SQL Editor.
 --
 -- Depende de sql/057_asistencia_automatica.sql (mismo criterio de "clase
 -- completada" en Europe/Madrid, mismo patrón de función de mantenimiento por
