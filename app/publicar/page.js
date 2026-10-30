@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { CircleCheck, CircleAlert, Dumbbell, CalendarClock, MapPin, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
+import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import BuscadorCiudad from '../../components/BuscadorCiudad'
 import { buscarCiudades } from '../../lib/geocodificar'
@@ -26,6 +27,23 @@ const CATEGORIAS = [
 // ciudad de España con el autocompletado de ciudad.
 const CIUDAD_POR_DEFECTO = 'Sevilla'
 const CENTRO_CIUDAD_POR_DEFECTO = [37.3891, -5.9845]
+
+// Fecha propuesta al copiar una sesión: el mismo día de la semana siguiente a la
+// fecha de la sesión copiada y, si aun así ya ha pasado (se copia una sesión
+// antigua), la primera semana posterior que sea futura. Se calcula con el
+// calendario sin zona horaria (UTC) para que no se desplace un día.
+function proponerFechaCopia(fechaIso, hora) {
+  const [anio, mes, dia] = String(fechaIso).split('-').map(Number)
+  if (!anio || !mes || !dia) return ''
+  let semanas = 1
+  let propuesta = ''
+  do {
+    const d = new Date(Date.UTC(anio, mes - 1, dia + 7 * semanas))
+    propuesta = d.toISOString().slice(0, 10)
+    semanas += 1
+  } while (claseYaPaso({ fecha: propuesta, hora }) && semanas < 260)
+  return propuesta
+}
 
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado', 'Todos los niveles']
 
@@ -69,6 +87,8 @@ function PublicarFormulario() {
   const [lat, setLat] = useState(null)
   const [lng, setLng] = useState(null)
   const [mensaje, setMensaje] = useState('')
+  // true mientras la fecha es la propuesta al copiar una sesión (para avisarlo).
+  const [fechaPropuesta, setFechaPropuesta] = useState(false)
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -114,8 +134,11 @@ function PublicarFormulario() {
       if (data.lat != null && data.lng != null) setCiudadCentro([data.lat, data.lng])
       setDireccion(data.direccion || '')
       setPuntoEncuentro(data.punto_encuentro || '')
-      setFecha(data.fecha || '')
-      setHora(data.hora ? String(data.hora).slice(0, 5) : '')
+      const horaCopia = data.hora ? String(data.hora).slice(0, 5) : ''
+      const fechaNueva = data.fecha ? proponerFechaCopia(data.fecha, horaCopia) : ''
+      setFecha(fechaNueva)
+      setFechaPropuesta(!!fechaNueva)
+      setHora(horaCopia)
       setDuracion(data.duracion != null ? String(data.duracion) : '')
       setNivel(data.nivel || NIVELES[0])
       setPrecio(data.precio != null ? String(data.precio) : '')
@@ -177,7 +200,7 @@ function PublicarFormulario() {
 
     if (sesionesEnElMismoHorario && sesionesEnElMismoHorario.length > 0) {
       const confirmado = window.confirm(
-        `Ya tienes otra sesión programada el ${fecha} a las ${hora}. ¿Seguro que quieres publicar esta también?`
+        `Ya tienes otra sesión programada el ${formatearFechaParaMostrar(fecha)} a las ${hora}. ¿Seguro que quieres publicar esta también?`
       )
       if (!confirmado) return
     }
@@ -316,7 +339,19 @@ function PublicarFormulario() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className={labelClass}>Fecha</label>
-                  <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required className={inputClass} />
+                  <input
+                    type="date"
+                    value={fecha}
+                    onChange={(e) => {
+                      setFecha(e.target.value)
+                      setFechaPropuesta(false)
+                    }}
+                    required
+                    className={inputClass}
+                  />
+                  {fechaPropuesta && (
+                    <p className={ayudaClass}>Propuesta: una semana después de la sesión copiada. Cámbiala si quieres.</p>
+                  )}
                 </div>
                 <div>
                   <label className={labelClass}>Hora</label>
