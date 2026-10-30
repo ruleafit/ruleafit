@@ -633,3 +633,6 @@ Pendiente:
 - Al activar los pagos, borrar cuenta debe rechazarse o conservar los datos fiscales y liquidaciones pendientes que la ley obligue a guardar.
 - Enlazar denuncias y bloqueos en los términos y condiciones (ya figuran en los borradores de legal/borradores/).
 - Mejoras futuras: acciones desde el panel (suspender un usuario, retirar una sesión) y límite de denuncias por usuario.
+
+## Selector de cuenta de Google al iniciar sesión (30 octubre 2026)
+- Fallo detectado en iPhone: al cerrar sesión y volver a entrar con Google, entraba directamente con la cuenta anterior sin preguntar. Corregido en app/login/page.js y app/registro/page.js añadiendo queryParams prompt=select_account a signInWithOAuth, para que Google pregunte siempre con qué cuenta entrar. Comprobado en local que la dirección que se abre en Google lleva prompt=select_account; la selección en sí se prueba en el iPhone una vez desplegado.
