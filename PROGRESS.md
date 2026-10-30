@@ -1,6 +1,6 @@
 # Ruleafit — Progreso del proyecto
 
-Última actualización: 29 agosto 2026
+Última actualización: 30 octubre 2026
 
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
@@ -119,7 +119,7 @@ Hecho:
 
 Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
 
-Nota (decisión de producto, 4 agosto 2026): se mantiene el marcado manual de asistencia (asistio/no_asistio) por el entrenador tal como está, a propósito; descartado implementar el marcado automático a las 24h que figuraba antes en pendientes. El marcado manual crea un incentivo cruzado sano: el entrenador marca "asistio" para que el cliente pueda valorarlo, y el cliente le presiona para que lo haga.
+Nota (decisión de producto, 4 agosto 2026) — SUPERADA el 30 octubre 2026: manda la asistencia automática (sql/057, commit 6a39dc4 del 29 agosto); la web ya no tiene marcado manual. Texto original: se mantiene el marcado manual de asistencia (asistio/no_asistio) por el entrenador tal como está, a propósito; descartado implementar el marcado automático a las 24h que figuraba antes en pendientes. El marcado manual crea un incentivo cruzado sano: el entrenador marca "asistio" para que el cliente pueda valorarlo, y el cliente le presiona para que lo haga.
 
 Nota (hallazgo técnico, resuelto el 2 agosto 2026): se creía que la tabla public.clases y sus políticas RLS no estaban versionadas en sql/, pero sí lo estaban: sql/016_tabla_clases.sql (tabla, RLS y las tres políticas), sql/019 (FK adicional a perfiles) y sql/010 (función usuario_tiene_reserva_en_clase, usada por la política de SELECT). Verificado el 2 agosto 2026 contra la definición real en Supabase, sin diferencias.
 
@@ -494,3 +494,49 @@ Hecho:
 
 Falta:
 - Confirmar en unos días en Search Console que la URL ha pasado a "Indexada" tras la reindexación manual.
+
+## Unificación de roles cliente/entrenador (11 septiembre 2026)
+Hecho (según commits del 11/9 y sql/060; reconstruido a partir del historial de git):
+- Un mismo usuario ya puede reservar Y publicar sesiones. sql/060 quita las seis barreras de rol y añade la única regla nueva: un entrenador no puede reservar su propia sesión. user_metadata.rol deja de leerse en esas funciones y políticas.
+- Fases 2 a 7 en el frontend: registro y entrada, menú y portada, publicar / mis sesiones / mis reservas, botón de reservar, directorio de usuarios y perfil público, mi cuenta y preferencias de notificaciones. Esto sustituye a la nota anterior de "un único rol por cuenta".
+- "Usuarios" pasa a llamarse "Ruleros" (directorio y perfil público); "Busca tu sesión" pasa a "Explora y reserva".
+
+## Niveles de usuario (11-12 septiembre 2026)
+Hecho:
+- Sistema de niveles 0-100 basado en Rulos (lib/niveles.js), con rango con nombre e icono (píldora lima) junto al nivel.
+- sql/061 hace público el saldo de Rulos para mostrar el nivel de cualquier usuario en el directorio y en su perfil público.
+
+## Avisos al publicar y recordatorio al entrenador (12 septiembre 2026)
+Hecho:
+- Aviso antes de publicar y recordatorio al entrenador 10 minutos antes de su sesión (sql/062).
+- Icono de silbato (lucide-react actualizado para incluir Whistle) en "Publicar sesión"; icono de lista en "Mis sesiones publicadas".
+
+## Bonos (21 septiembre 2026)
+Hecho:
+- Sistema de bonos (sql/063): el entrenador crea bonos (número de sesiones o ilimitados, plazo, precio, descripción) y los clientes los adquieren y se consumen automáticamente al reservar. Corregida la política RLS (faltaba trainer_id al crear) y actualizados los textos de la portada.
+
+## Copiar sesión y pulido visual (21 septiembre 2026)
+Hecho:
+- Copiar sesión: precarga el formulario de /publicar y avisa si la fecha y hora están duplicadas. sql/064 (clase_para_copiar) corrige que saliera vacío al copiar una sesión cancelada por el entrenador.
+- Esquinas cortadas en lugar de píldoras y esquinas redondeadas en todo el sitio; avisos sin pestaña lateral.
+- Aceptación del aviso legal también en el registro con Google.
+
+## Filtro de ruleros seguidos y otros ajustes (23 septiembre - 12 octubre 2026)
+Hecho:
+- Filtro "Solo sesiones de ruleros a los que sigo" en Explora y reserva (botón con icono, marco lima) y opción "Mantener este filtro activado siempre que entre", guardada en la cuenta (sql/065, perfiles.filtro_clases_solo_seguidos).
+- "Historial de Rulos" pasa a "Mis últimos Rulos", limitado a los 5 más recientes.
+- Se permite valorar al entrenador si cancela la sesión con menos de 2 h de antelación (sql/066).
+- Fechas de las sesiones en formato DD/MM/YYYY.
+
+## Buscador por palabra y normas de trabajo (30 octubre 2026)
+Hecho:
+- Campo "Buscar actividad" en /clases (app/clases/page.js): filtra por título, tipo de actividad, categoría, observaciones y material, sin distinguir mayúsculas ni tildes, y todas las palabras escritas deben coincidir. Se combina con el resto de filtros y "Limpiar filtros" lo vacía. Probado en escritorio y a 390 px con sesiones simuladas; la prueba en móvil detectó que la lupa quedaba tapada por el campo (arreglado con z-10).
+- CLAUDE.md: se permite arrancar npm run dev, y nueva norma de probar cada cambio visible en el navegador y ejecutar npm run build antes de proponer un commit.
+- Remoto de Git cambiado a https://ruleafit@github.com/ruleafit/ruleafit.git (la credencial guardada era de otra cuenta y daba 403).
+- Entorno local: .env.local con la URL de Supabase corregida (sin /rest/v1/, que hacía fallar el login con "Algo ha ido mal") y valores nuevos de CRON_SECRET y claves VAPID solo para local.
+
+Pendientes:
+- Ordenar las sesiones por distancia (idea del 30 octubre 2026): hacerlo como opción voluntaria "Ordenar por: Fecha / Cercanía" que pida la ubicación solo si el usuario elige Cercanía, moviendo la lectura de ubicación de components/MapaClases.js a la página. Aplazado hasta que haya más sesiones publicadas a la vez.
+- Conseguir sesiones futuras reales: hoy la base de datos solo tiene sesiones pasadas y /clases sale vacía.
+- Comprobado el 30 octubre 2026 con una consulta de solo lectura en Supabase: sql/056 a sql/062 están aplicados (las cabeceras que dicen "NO EJECUTADO todavía" están desfasadas). Una fila salió en false (marcar_asistencia sin referencias a open_), casi seguro un falso positivo de la consulta: en ILIKE el guion bajo es comodín y "open_" coincide con "v_cantidad_open " dentro del cuerpo de la función. Sin importancia: la web no usa marcar_asistencia(). Decisión de producto: manda la asistencia automática.
+- Pendientes anteriores sin cambios: reindexación de /ayuda en Search Console, Redirect URL de producción de Google, limpieza de comentarios de cabecera de sql/*.sql del rename.
