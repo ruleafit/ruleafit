@@ -14,6 +14,7 @@ import { geocodificarCiudad } from '../../lib/geocodificar'
 import { distanciaKm } from '../../lib/distancia'
 import BotonReservar from '../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../components/BotonCopiarCoordenadas'
+import BotonCompartir from '../../components/BotonCompartir'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const MapaClases = dynamic(() => import('../../components/MapaClases'), {
@@ -499,6 +500,9 @@ export default function ClasesPage() {
                             {clase.categoria}
                           </span>
                         )}
+                        <div className="absolute right-3 top-3">
+                          <BotonCompartir clase={clase} />
+                        </div>
                       </div>
 
                       <div className="p-5">

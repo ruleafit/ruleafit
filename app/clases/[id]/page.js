@@ -13,6 +13,7 @@ import { formatearFechaParaMostrar } from '../../../lib/formatoFecha'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../../lib/imagenesCategoria'
 import BotonReservar from '../../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../../components/BotonCopiarCoordenadas'
+import BotonCompartir from '../../../components/BotonCompartir'
 import RevelarAlLlegar from '../../../components/RevelarAlLlegar'
 
 const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
@@ -64,6 +65,10 @@ function CabeceraDetalle({ clase, destinoVolver }) {
       >
         {destinoVolver.label}
       </Link>
+
+      <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+        <BotonCompartir clase={clase} variante="completo" />
+      </div>
 
       <div className="relative z-10 mx-auto w-full max-w-2xl px-4 pb-6 sm:px-6">
         {clase.categoria && (
