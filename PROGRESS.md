@@ -573,12 +573,12 @@ Estado: acordado con el gestor y el asesor en lo esencial; nada implementado. Lo
 
 Modelo:
 - Ruleafit actúa como intermediaria (lo dicen los términos y condiciones, validado por el asesor). El alumno paga con tarjeta o Bizum en el TPV virtual CyberPack de CaixaBank (Redsys; concepto comercial "RULEAFIT"). Ruleafit no ve el número de tarjeta.
-- Comisión de Ruleafit: 10 % (variable RULEAFIT_COMMISSION_RATE=0.10). El resto va a la bolsa virtual del entrenador: "pendiente" hasta 48 h después de celebrarse la sesión (propuesto) y luego "disponible".
-- Liquidaciones los días 15 y último de cada mes (siguiente día hábil si es festivo o fin de semana), por remesa de transferencias. Mínimo de liquidación propuesto: 10 €, con el saldo arrastrado al periodo siguiente. El formato del fichero lo dará CaixaBank al contratar el CyberPack; se prepara el XML SEPA estándar (pain.001) con el formato intercambiable.
+- Comisión de Ruleafit: 10 % (variable RULEAFIT_COMMISSION_RATE=0.10). El resto va a la bolsa virtual del entrenador: "pendiente" hasta 48 h después de celebrarse la sesión (confirmado) y luego "disponible".
+- Liquidaciones los días 15 y último de cada mes (siguiente día hábil si es festivo o fin de semana), por remesa de transferencias. Mínimo de liquidación confirmado: 10 €, con el saldo arrastrado al periodo siguiente. El formato del fichero lo dará CaixaBank al contratar el CyberPack; se prepara el XML SEPA estándar (pain.001) con el formato intercambiable.
 - Reembolsos (propuestos): sesión cancelada por el entrenador o por no llegar al mínimo: reembolso total sin comisión; el alumno cancela con más de 2 h: reembolso; con menos de 2 h: sin reembolso. Un reembolso o contracargo posterior a la liquidación se descuenta de la siguiente.
 
 Facturación:
-- Ruleafit emite una autofactura al entrenador por cada liquidación, para dejar constancia del pago: emisor el entrenador con sus datos fiscales, receptor Ruleafit, concepto "Prestación de servicios de entrenamiento en plataforma Ruleafit", desglose de base imponible, IVA y retención de IRPF si aplica, con la mención de facturación por el destinatario. Los entrenadores aceptan esto en los términos (aceptación tácita de cada factura en un plazo, propuesto 15 días) [confirmar].
+- Ruleafit emite una autofactura al entrenador por cada liquidación, para dejar constancia del pago: emisor el entrenador con sus datos fiscales, receptor Ruleafit, concepto "Prestación de servicios de entrenamiento en plataforma Ruleafit", desglose de base imponible, IVA y retención de IRPF si aplica, con la mención de facturación por el destinatario. Los entrenadores aceptan esto en los términos (aceptación tácita de cada factura en 15 días, confirmado el plazo) [confirmar el texto].
 - Numeración: la lleva Ruleafit, una serie propia correlativa y sin saltos, con formato AF-AAAA-NNNNNN y reinicio cada año. Se asigna dentro de la misma transacción que genera la factura.
 - A los alumnos no se les emite factura salvo que la pidan (simplificada hasta 400 €; completa con sus datos si la piden o el importe lo exige) [confirmar].
 - Cada entrenador tiene sus propios modelos de factura; los desgloses se ajustarán a lo que indique el gestor.
@@ -629,10 +629,16 @@ Hecho (sql/068 ejecutado en Supabase el 30 octubre 2026):
 
 Pendiente:
 - Hecho y probado el 30 octubre 2026: sql/069 y sql/070 ejecutados; un usuario bloqueado no puede reservar (probado con un bloqueo temporal, y sin bloqueo la reserva se permite) y el correo de aviso llega al denunciar (confirmado por el administrador).
-- Probar borrar una cuenta de prueba de principio a fin.
+- Probado por el usuario el 30 octubre 2026: crear una cuenta nueva con Google y borrarla desde Mi cuenta funciona.
 - Al activar los pagos, borrar cuenta debe rechazarse o conservar los datos fiscales y liquidaciones pendientes que la ley obligue a guardar.
 - Enlazar denuncias y bloqueos en los términos y condiciones (ya figuran en los borradores de legal/borradores/).
 - Mejoras futuras: acciones desde el panel (suspender un usuario, retirar una sesión) y límite de denuncias por usuario.
 
 ## Selector de cuenta de Google al iniciar sesión (30 octubre 2026)
 - Fallo detectado en iPhone: al cerrar sesión y volver a entrar con Google, entraba directamente con la cuenta anterior sin preguntar. Corregido en app/login/page.js y app/registro/page.js añadiendo queryParams prompt=select_account a signInWithOAuth, para que Google pregunte siempre con qué cuenta entrar. Comprobado en local que la dirección que se abre en Google lleva prompt=select_account; la selección en sí se prueba en el iPhone una vez desplegado.
+
+## Pagos, fase 1: plan aprobado (30 octubre 2026)
+- Plan detallado en docs/plan-pagos-fase-1.md: tablas (sql/071), funciones (sql/072), módulo TypeScript en lib/pagos/, rutas de cobro y webhook de Redsys, pantalla de datos fiscales, y pruebas. Todo detrás de un interruptor apagado.
+- Aprobado por el usuario: tocar pagos, usar TypeScript en este módulo y añadir pdfkit (fase 2). Valores confirmados: comisión 10 %, mínimo de liquidación 10 €, 48 h hasta disponible, 15 días de aceptación tácita.
+- Decisiones por defecto: pagar primero y reservar después (si no queda plaza, se marca para reembolso); bonos en la fase 2; solo España, con Canarias, Ceuta y Melilla en revisión manual.
+- Pendiente: implementar siguiendo el orden del plan, con puntos de revisión tras redsys.ts, sql/071 y sql/072.
