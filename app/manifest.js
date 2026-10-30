@@ -2,7 +2,7 @@ export default function manifest() {
   return {
     name: "Ruleafit",
     short_name: "Ruleafit",
-    description: "Sesiones sueltas de entrenamiento en Sevilla y Málaga. Sin cuota ni permanencia.",
+    description: "Sesiones sueltas de entrenamiento. Sin cuota ni permanencia.",
     start_url: "/",
     display: "standalone",
     background_color: "#FBFAF3",

@@ -270,7 +270,7 @@ export default function Home() {
                 <span className="whitespace-nowrap text-[#B5E600]">Sin cuotas.</span>
               </h1>
               <p className="max-w-xl text-lg text-white/90 sm:text-xl">
-                Sesiones sueltas o bonos en Sevilla y Málaga. Elige la de hoy, resérvala y ya está, o hazte un bono con tu
+                Sesiones sueltas o bonos. Elige la de hoy, resérvala y ya está, o hazte un bono con tu
                 entrenador. Sin cuota mensual ni permanencia.
               </p>
 

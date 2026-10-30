@@ -7,6 +7,7 @@ import { CircleCheck, CircleAlert, Dumbbell, CalendarClock, MapPin, Tag } from '
 import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
+import BuscadorCiudad from '../../components/BuscadorCiudad'
 
 const MapaSelector = dynamic(() => import('../../components/MapaSelector'), {
   ssr: false,
@@ -20,7 +21,10 @@ const CATEGORIAS = [
   'Otros',
 ]
 
-const CIUDADES = ['Sevilla', 'Málaga']
+// Ciudad por defecto al abrir el formulario; se puede cambiar a cualquier
+// ciudad de España con el autocompletado de ciudad.
+const CIUDAD_POR_DEFECTO = 'Sevilla'
+const CENTRO_CIUDAD_POR_DEFECTO = [37.3891, -5.9845]
 
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado', 'Todos los niveles']
 
@@ -42,7 +46,11 @@ function PublicarFormulario() {
   const [titulo, setTitulo] = useState('')
   const [categoria, setCategoria] = useState(CATEGORIAS[0])
   const [tipoActividad, setTipoActividad] = useState('')
-  const [ciudad, setCiudad] = useState(CIUDADES[0])
+  // ciudad = la confirmada (la que se guarda); ciudadTexto = lo que hay escrito
+  // en el campo; ciudadCentro = dónde centrar el mapa de ubicación.
+  const [ciudad, setCiudad] = useState(CIUDAD_POR_DEFECTO)
+  const [ciudadTexto, setCiudadTexto] = useState(CIUDAD_POR_DEFECTO)
+  const [ciudadCentro, setCiudadCentro] = useState(CENTRO_CIUDAD_POR_DEFECTO)
   const [direccion, setDireccion] = useState('')
   const [puntoEncuentro, setPuntoEncuentro] = useState('')
   const [fecha, setFecha] = useState('')
@@ -95,7 +103,9 @@ function PublicarFormulario() {
       setTitulo(data.titulo || '')
       setCategoria(data.categoria || CATEGORIAS[0])
       setTipoActividad(data.tipo_actividad || '')
-      setCiudad(data.ciudad || CIUDADES[0])
+      setCiudad(data.ciudad || CIUDAD_POR_DEFECTO)
+      setCiudadTexto(data.ciudad || CIUDAD_POR_DEFECTO)
+      if (data.lat != null && data.lng != null) setCiudadCentro([data.lat, data.lng])
       setDireccion(data.direccion || '')
       setPuntoEncuentro(data.punto_encuentro || '')
       setFecha(data.fecha || '')
@@ -121,6 +131,11 @@ function PublicarFormulario() {
 
     if (!usuarioActual) {
       setMensaje('Debes iniciar sesión para publicar.')
+      return
+    }
+
+    if (ciudadTexto.trim() !== ciudad) {
+      setMensaje('Elige la ciudad de la lista de sugerencias.')
       return
     }
 
@@ -305,19 +320,27 @@ function PublicarFormulario() {
             <TituloBloque Icono={MapPin}>Dónde</TituloBloque>
             <div className="flex flex-col gap-4">
               <div>
-                <label className={labelClass}>Ciudad</label>
-                <select value={ciudad} onChange={(e) => setCiudad(e.target.value)} className={inputClass}>
-                  {CIUDADES.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
+                <label htmlFor="ciudad-sesion" className={labelClass}>Ciudad</label>
+                <BuscadorCiudad
+                  id="ciudad-sesion"
+                  valor={ciudadTexto}
+                  ciudadElegida={ciudad}
+                  onCambiarTexto={setCiudadTexto}
+                  onSeleccionar={(c) => {
+                    setCiudad(c.nombre)
+                    setCiudadTexto(c.nombre)
+                    setCiudadCentro([c.lat, c.lng])
+                  }}
+                  className={inputClass}
+                />
+                <p className={ayudaClass}>Escribe y elige tu ciudad de la lista.</p>
               </div>
 
               <div>
                 <label className={labelClass}>Ubicación en el mapa</label>
                 <div className="w-full overflow-hidden corte-card border border-[#E2E6CF]">
                   <MapaSelector
-                    ciudad={ciudad}
+                    centro={ciudadCentro}
                     lat={lat}
                     lng={lng}
                     onCambiarUbicacion={(nuevaLat, nuevaLng) => {

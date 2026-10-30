@@ -10,6 +10,8 @@ import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../lib/confirmacionClase'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
+import { geocodificarCiudad } from '../../lib/geocodificar'
+import { distanciaKm } from '../../lib/distancia'
 import BotonReservar from '../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../components/BotonCopiarCoordenadas'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
@@ -18,8 +20,6 @@ const MapaClases = dynamic(() => import('../../components/MapaClases'), {
   ssr: false,
   loading: () => <p>Cargando mapa...</p>,
 })
-
-const CIUDADES_FILTRO = ['Todas', 'Sevilla', 'Málaga']
 
 const CATEGORIAS_FILTRO = [
   'Todas',
@@ -96,6 +96,14 @@ function coincideConBusqueda(clase, busqueda) {
   return palabras.every((p) => texto.includes(p))
 }
 
+// Ciudad escrita a mano: sin tildes ni mayúsculas y por coincidencia parcial
+// ("sev" encuentra Sevilla, "malaga" encuentra Málaga). Vacío = todas.
+function coincideConCiudad(clase, textoCiudad) {
+  const buscada = normalizarTexto(textoCiudad).trim()
+  if (!buscada) return true
+  return normalizarTexto(clase.ciudad).includes(buscada)
+}
+
 function coincideConCuando(fechaClase, cuando, hoy) {
   if (cuando === 'Todas') return true
   if (cuando === 'Hoy') return fechaClase === hoy
@@ -110,7 +118,11 @@ export default function ClasesPage() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [busqueda, setBusqueda] = useState('')
-  const [filtroCiudad, setFiltroCiudad] = useState('Todas')
+  const [filtroCiudad, setFiltroCiudad] = useState('')
+  // Si en la ciudad escrita no hay ninguna sesión, se localiza esa ciudad y
+  // se muestran las sesiones más cercanas (puntoCiudad = { texto, nombre, lat, lng }).
+  const [puntoCiudad, setPuntoCiudad] = useState(null)
+  const [buscandoCiudad, setBuscandoCiudad] = useState(false)
   const [filtroCategoria, setFiltroCategoria] = useState('Todas')
   const [filtroCuando, setFiltroCuando] = useState('Todas')
   const [filtroFranja, setFiltroFranja] = useState('Todas')
@@ -190,6 +202,29 @@ export default function ClasesPage() {
     )
   }
 
+  useEffect(() => {
+    const texto = filtroCiudad.trim()
+    if (texto.length < 4 || clases.some((c) => coincideConCiudad(c, texto))) {
+      setPuntoCiudad(null)
+      setBuscandoCiudad(false)
+      return
+    }
+
+    setBuscandoCiudad(true)
+    const controlador = new AbortController()
+    const temporizador = setTimeout(async () => {
+      const resultado = await geocodificarCiudad(texto, { signal: controlador.signal })
+      if (controlador.signal.aborted) return
+      setPuntoCiudad(resultado ? { texto, ...resultado } : null)
+      setBuscandoCiudad(false)
+    }, 600)
+
+    return () => {
+      clearTimeout(temporizador)
+      controlador.abort()
+    }
+  }, [filtroCiudad, clases])
+
   // El filtrado ya se aplica al escribir; el botón "Buscar" (o Intro) cierra
   // el teclado en móvil y lleva la vista a los resultados, para que quede
   // claro que se ha hecho la búsqueda.
@@ -201,7 +236,7 @@ export default function ClasesPage() {
 
   function limpiarFiltros() {
     setBusqueda('')
-    setFiltroCiudad('Todas')
+    setFiltroCiudad('')
     setFiltroCategoria('Todas')
     setFiltroCuando('Todas')
     setFiltroFranja('Todas')
@@ -236,11 +271,15 @@ export default function ClasesPage() {
 
   const hoy = obtenerFechaHoy()
 
-  const clasesFiltradas = clases.filter((clase) => {
+  // Sugerencias del campo de ciudad: las ciudades que tienen sesiones ahora.
+  const ciudadesDisponibles = [...new Set(clases.map((c) => c.ciudad).filter(Boolean))].sort()
+
+  // Todos los filtros salvo la ciudad: sobre este conjunto se aplica la
+  // ciudad escrita o, si no hay sesiones allí, el orden por cercanía.
+  const clasesSinCiudad = clases.filter((clase) => {
     if (clase.estado !== 'activa') return false
     if (claseYaPaso(clase)) return false
 
-    const coincideCiudad = filtroCiudad === 'Todas' || clase.ciudad === filtroCiudad
     const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
     const coincideFecha = coincideConCuando(clase.fecha, filtroCuando, hoy)
     const coincideFranja = filtroFranja === 'Todas' || franjaDeHora(clase.hora) === filtroFranja
@@ -248,8 +287,20 @@ export default function ClasesPage() {
 
     const coincideTexto = coincideConBusqueda(clase, busqueda)
 
-    return coincideCiudad && coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos && coincideTexto
+    return coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos && coincideTexto
   })
+
+  const textoCiudad = filtroCiudad.trim()
+  const hayAlgunaEnLaCiudad = clases.some((c) => coincideConCiudad(c, textoCiudad))
+  const mostrandoCercanas = !!textoCiudad && !hayAlgunaEnLaCiudad && puntoCiudad?.texto === textoCiudad
+
+  const clasesFiltradas = mostrandoCercanas
+    ? clasesSinCiudad
+        .filter((c) => c.lat != null && c.lng != null)
+        .map((c) => ({ ...c, distanciaKm: distanciaKm(puntoCiudad.lat, puntoCiudad.lng, c.lat, c.lng) }))
+        .sort((a, b) => a.distanciaKm - b.distanciaKm)
+        .slice(0, 10)
+    : clasesSinCiudad.filter((c) => coincideConCiudad(c, textoCiudad))
 
   return (
     <div className="flex flex-1 flex-col">
@@ -259,7 +310,7 @@ export default function ClasesPage() {
         <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pb-6 sm:px-6">
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Sesiones disponibles</h1>
           <p className="mt-1 text-sm text-white/85 sm:text-base">
-            Sesiones en Sevilla y Málaga, sin cuota ni permanencia.
+            Sesiones sin cuota ni permanencia.
           </p>
         </div>
       </section>
@@ -296,12 +347,25 @@ export default function ClasesPage() {
               </form>
 
               <div>
-                <label className={filtroLabelClass}>Ciudad</label>
-                <select value={filtroCiudad} onChange={(e) => setFiltroCiudad(e.target.value)} className={filtroCampoClass}>
-                  {CIUDADES_FILTRO.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
+                <label htmlFor="busqueda-ciudad" className={filtroLabelClass}>Ciudad</label>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#6B7355]" strokeWidth={1.75} />
+                  <input
+                    id="busqueda-ciudad"
+                    type="search"
+                    list="ciudades-sesiones"
+                    value={filtroCiudad}
+                    onChange={(e) => setFiltroCiudad(e.target.value)}
+                    placeholder="Ej: Sevilla, Málaga…"
+                    autoComplete="off"
+                    className={`${filtroCampoClass} pl-9 placeholder:text-[#6B7355]`}
+                  />
+                  <datalist id="ciudades-sesiones">
+                    {ciudadesDisponibles.map((c) => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
+                </div>
               </div>
 
               <div>
@@ -378,7 +442,17 @@ export default function ClasesPage() {
               </div>
 
               <div className="flex flex-col gap-4">
-                {clasesFiltradas.length === 0 && (
+                {buscandoCiudad && !hayAlgunaEnLaCiudad && (
+                  <p className="text-sm text-[#6B7355]">Buscando sesiones cerca de {textoCiudad}…</p>
+                )}
+
+                {mostrandoCercanas && clasesFiltradas.length > 0 && (
+                  <p className="corte-card border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm font-medium text-[#3D4A00]">
+                    No hay sesiones en {puntoCiudad.nombre}. Te mostramos las más cercanas.
+                  </p>
+                )}
+
+                {!buscandoCiudad && clasesFiltradas.length === 0 && (
                   <RevelarAlLlegar className="flex flex-col items-center gap-3 corte-card border border-[#E2E6CF] bg-white px-6 py-14 text-center">
                     <SearchX className="h-10 w-10 text-[#B5E600]" strokeWidth={1.75} />
                     <p className="text-sm text-[#6B7355]">
@@ -421,7 +495,10 @@ export default function ClasesPage() {
                       <div className="p-5">
                         <div className="mb-1 flex items-center justify-between gap-2">
                           <h2 className="text-lg font-bold text-[#1F2400] sm:text-xl">{clase.titulo}</h2>
-                          <span className="shrink-0 text-xs text-[#6B7355]">{clase.ciudad}</span>
+                          <span className="shrink-0 text-xs text-[#6B7355]">
+                            {clase.ciudad}
+                            {clase.distanciaKm != null && ` · a ${Math.round(clase.distanciaKm)} km`}
+                          </span>
                         </div>
                         {(clase.tipo_actividad || clase.perfiles?.username) && (
                           <div className="mb-3 text-sm text-[#6B7355]">

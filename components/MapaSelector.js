@@ -14,20 +14,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-const CIUDADES_COORDS = {
-  Sevilla: [37.3891, -5.9845],
-  Málaga: [36.7213, -4.4214],
-}
+const CENTRO_POR_DEFECTO = [37.3891, -5.9845] // Sevilla
 
-const CENTRO_POR_DEFECTO = CIUDADES_COORDS.Sevilla
-
-function RecentradorMapa({ ciudad }) {
+// El centro lo da la ciudad elegida en /publicar (cualquier ciudad de España).
+function RecentradorMapa({ centro }) {
   const map = useMap()
+  const [lat, lng] = centro
 
   useEffect(() => {
-    const coords = CIUDADES_COORDS[ciudad] || CENTRO_POR_DEFECTO
-    map.setView(coords, 13)
-  }, [ciudad, map])
+    map.setView([lat, lng], 13)
+  }, [lat, lng, map])
 
   return null
 }
@@ -52,8 +48,8 @@ function CentradorBusqueda({ coords }) {
   return null
 }
 
-export default function MapaSelector({ ciudad, lat, lng, onCambiarUbicacion }) {
-  const centroInicial = CIUDADES_COORDS[ciudad] || CENTRO_POR_DEFECTO
+export default function MapaSelector({ centro = CENTRO_POR_DEFECTO, lat, lng, onCambiarUbicacion }) {
+  const centroInicial = centro
   const posicionMarcador = lat != null && lng != null ? [lat, lng] : null
   const [coordsBusqueda, setCoordsBusqueda] = useState(null)
 
@@ -78,7 +74,7 @@ export default function MapaSelector({ ciudad, lat, lng, onCambiarUbicacion }) {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <RecentradorMapa ciudad={ciudad} />
+          <RecentradorMapa centro={centro} />
           <CentradorBusqueda coords={coordsBusqueda} />
           <SelectorClic onSeleccionar={onCambiarUbicacion} />
           {posicionMarcador && <Marker position={posicionMarcador} />}
