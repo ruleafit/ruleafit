@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { SearchX, UserCheck } from 'lucide-react'
+import { Search, SearchX, UserCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO, ESTILO_POR_CATEGORIA, formaSVG } from '../../lib/imagenesCategoria'
 import { textoPlazas } from '../../lib/formatoPlazas'
@@ -79,6 +79,23 @@ function franjaDeHora(hora) {
   return 'Noche'
 }
 
+// Buscador por palabra: sin tildes ni mayúsculas, y todas las palabras
+// escritas deben aparecer en alguna parte del título, tipo de actividad,
+// categoría, observaciones o material (así "boxeo" encuentra "Entreno de
+// boxeo y cardio" sin tener que elegir categoría).
+function normalizarTexto(texto) {
+  return (texto || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
+function coincideConBusqueda(clase, busqueda) {
+  const palabras = normalizarTexto(busqueda).split(/\s+/).filter(Boolean)
+  if (palabras.length === 0) return true
+  const texto = normalizarTexto(
+    [clase.titulo, clase.tipo_actividad, clase.categoria, clase.observaciones, clase.material].join(' ')
+  )
+  return palabras.every((p) => texto.includes(p))
+}
+
 function coincideConCuando(fechaClase, cuando, hoy) {
   if (cuando === 'Todas') return true
   if (cuando === 'Hoy') return fechaClase === hoy
@@ -92,6 +109,7 @@ export default function ClasesPage() {
   const [clases, setClases] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
+  const [busqueda, setBusqueda] = useState('')
   const [filtroCiudad, setFiltroCiudad] = useState('Todas')
   const [filtroCategoria, setFiltroCategoria] = useState('Todas')
   const [filtroCuando, setFiltroCuando] = useState('Todas')
@@ -173,6 +191,7 @@ export default function ClasesPage() {
   }
 
   function limpiarFiltros() {
+    setBusqueda('')
     setFiltroCiudad('Todas')
     setFiltroCategoria('Todas')
     setFiltroCuando('Todas')
@@ -218,7 +237,9 @@ export default function ClasesPage() {
     const coincideFranja = filtroFranja === 'Todas' || franjaDeHora(clase.hora) === filtroFranja
     const coincideSeguidos = !filtroSoloSeguidos || seguidosIds.includes(clase.trainer_id)
 
-    return coincideCiudad && coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos
+    const coincideTexto = coincideConBusqueda(clase, busqueda)
+
+    return coincideCiudad && coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos && coincideTexto
   })
 
   return (
@@ -242,6 +263,21 @@ export default function ClasesPage() {
         {!error && clases.length > 0 && (
           <>
             <div className="mb-8 flex flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5">
+              <div className="w-full">
+                <label htmlFor="busqueda-sesiones" className={filtroLabelClass}>Buscar actividad</label>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#6B7355]" strokeWidth={1.75} />
+                  <input
+                    id="busqueda-sesiones"
+                    type="search"
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    placeholder="Ej: boxeo, yoga, running…"
+                    className="block w-full corte-btn border border-[#E2E6CF] bg-white py-2 pl-9 pr-4 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className={filtroLabelClass}>Ciudad</label>
                 <select value={filtroCiudad} onChange={(e) => setFiltroCiudad(e.target.value)} className={filtroCampoClass}>
