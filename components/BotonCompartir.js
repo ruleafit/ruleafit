@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Share2, Link2, Image as IconoImagen, X, Check } from 'lucide-react'
+import { Share2, Link2, Image as IconoImagen, Download, X, Check } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { formatearFechaParaMostrar } from '../lib/formatoFecha'
 import { generarImagenHistoria } from '../lib/imagenHistoria'
@@ -27,11 +27,18 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
   const [aviso, setAviso] = useState('')
   const [puedeCompartirNativo, setPuedeCompartirNativo] = useState(false)
   const [esMovil, setEsMovil] = useState(false)
+  const [puedeCompartirArchivos, setPuedeCompartirArchivos] = useState(false)
   const botonCerrarRef = useRef(null)
 
   useEffect(() => {
     setPuedeCompartirNativo(typeof navigator !== 'undefined' && typeof navigator.share === 'function')
     setEsMovil(typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent))
+    try {
+      const prueba = new File([''], 'prueba.png', { type: 'image/png' })
+      setPuedeCompartirArchivos(typeof navigator.canShare === 'function' && navigator.canShare({ files: [prueba] }))
+    } catch {
+      setPuedeCompartirArchivos(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -138,6 +145,43 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
     window.open(enlace, '_blank', 'noopener,noreferrer')
   }
 
+  // Aviso tras generar la imagen: la imagen no se puede pulsar, así que el enlace
+  // (ya copiado) se añade en Instagram con el sticker "Enlace".
+  function textoSiguientePaso(enlaceCopiado) {
+    return enlaceCopiado
+      ? 'Enlace copiado. Sube la imagen a tu historia y pégalo con el sticker "Enlace" para que se pueda pulsar.'
+      : 'Sube la imagen a tu historia y añade el enlace de la sesión con el sticker "Enlace" (usa "Copiar enlace").'
+  }
+
+  function descargarBlob(blob) {
+    const enlaceDescarga = document.createElement('a')
+    enlaceDescarga.href = URL.createObjectURL(blob)
+    enlaceDescarga.download = 'ruleafit-sesion.png'
+    document.body.appendChild(enlaceDescarga)
+    enlaceDescarga.click()
+    document.body.removeChild(enlaceDescarga)
+    setTimeout(() => URL.revokeObjectURL(enlaceDescarga.href), 1000)
+  }
+
+  // Descarga la imagen directamente, sin pasar por el menú de compartir del
+  // móvil (en el iPhone la descarga va a la app Archivos; para guardarla en
+  // Fotos, usar "Compartir imagen" y elegir "Guardar imagen"). Igual que la
+  // opción de compartir imagen, copia a la vez el enlace de la sesión.
+  async function descargarImagen() {
+    setGenerando(true)
+    setAviso('')
+    const enlaceCopiado = await copiarAlPortapapeles()
+    if (enlaceCopiado) setCopiado(true)
+    try {
+      descargarBlob(await generarImagenHistoria(clase))
+      setAviso(`Imagen descargada. ${textoSiguientePaso(enlaceCopiado)}`)
+    } catch {
+      setAviso('No se pudo crear la imagen. Inténtalo de nuevo.')
+    } finally {
+      setGenerando(false)
+    }
+  }
+
   // La imagen para historia no se puede pulsar, así que a la vez se copia el
   // enlace de la sesión: solo queda subir la imagen y pegar el enlace con el
   // sticker "Enlace" de Instagram (el único modo de que quien vea la historia
@@ -148,9 +192,7 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
     setAviso('')
     const enlaceCopiado = await copiarAlPortapapeles()
     if (enlaceCopiado) setCopiado(true)
-    const siguientePaso = enlaceCopiado
-      ? 'Enlace copiado. Sube la imagen a tu historia y pégalo con el sticker "Enlace" para que se pueda pulsar.'
-      : 'Sube la imagen a tu historia y añade el enlace de la sesión con el sticker "Enlace" (usa "Copiar enlace").'
+    const siguientePaso = textoSiguientePaso(enlaceCopiado)
     try {
       const blob = await generarImagenHistoria(clase)
       const archivo = new File([blob], 'ruleafit-sesion.png', { type: 'image/png' })
@@ -169,13 +211,7 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
       }
 
       // Sin menú nativo con archivos (ordenador): se descarga la imagen.
-      const enlaceDescarga = document.createElement('a')
-      enlaceDescarga.href = URL.createObjectURL(blob)
-      enlaceDescarga.download = 'ruleafit-sesion.png'
-      document.body.appendChild(enlaceDescarga)
-      enlaceDescarga.click()
-      document.body.removeChild(enlaceDescarga)
-      setTimeout(() => URL.revokeObjectURL(enlaceDescarga.href), 1000)
+      descargarBlob(blob)
       setAviso(`Imagen descargada. ${siguientePaso}`)
     } catch {
       setAviso('No se pudo crear la imagen. Inténtalo de nuevo.')
@@ -268,20 +304,23 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
                 {copiado ? 'Enlace copiado' : 'Copiar enlace'}
               </button>
 
-              <button type="button" onClick={imagenParaHistoria} disabled={generando || faltanDatos} className={opcionClass}>
-                <IconoImagen className="h-5 w-5 shrink-0" strokeWidth={1.75} />
-                {generando
-                  ? 'Creando imagen…'
-                  : puedeCompartirNativo
-                    ? 'Imagen para historia de Instagram'
-                    : 'Descargar imagen para historia'}
+              {puedeCompartirArchivos && (
+                <button type="button" onClick={imagenParaHistoria} disabled={generando || faltanDatos} className={opcionClass}>
+                  <IconoImagen className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                  {generando ? 'Creando imagen…' : 'Compartir imagen para historia'}
+                </button>
+              )}
+
+              <button type="button" onClick={descargarImagen} disabled={generando || faltanDatos} className={opcionClass}>
+                <Download className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                {generando ? 'Creando imagen…' : 'Descargar imagen (PNG)'}
               </button>
 
               {esMovil && (
                 <div className="mt-2 corte-card border border-[#B5E600]/60 bg-[#EDF5C9] p-3">
                   <p className="text-sm font-bold text-[#3D4A00]">Historia de Instagram con enlace</p>
                   <ol className="mt-1 list-decimal pl-5 text-xs text-[#3D4A00]">
-                    <li>Pulsa "Imagen para historia" y guárdala en tu galería.</li>
+                    <li>Guarda la imagen en tu galería: "Compartir imagen" y "Guardar imagen" (iPhone), o "Descargar imagen".</li>
                     <li>Pulsa el botón de abajo: se copia el enlace y se abre Instagram.</li>
                     <li>Elige la imagen, toca la pegatina "Enlace" y pégalo.</li>
                   </ol>
@@ -302,7 +341,7 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
 
             <p className="mt-4 text-xs text-[#6B7355]" role="status">
               {aviso ||
-                'Para una historia de Instagram: la imagen copia a la vez el enlace; súbela y pégalo con el sticker "Enlace" para que se pueda pulsar.'}
+                'Para una historia de Instagram: al usar la imagen se copia el enlace; súbela y pégalo con el sticker "Enlace" para que se pueda pulsar.'}
             </p>
           </div>
         </div>,
