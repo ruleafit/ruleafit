@@ -26,10 +26,12 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
   const [generando, setGenerando] = useState(false)
   const [aviso, setAviso] = useState('')
   const [puedeCompartirNativo, setPuedeCompartirNativo] = useState(false)
+  const [esMovil, setEsMovil] = useState(false)
   const botonCerrarRef = useRef(null)
 
   useEffect(() => {
     setPuedeCompartirNativo(typeof navigator !== 'undefined' && typeof navigator.share === 'function')
+    setEsMovil(typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent))
   }, [])
 
   useEffect(() => {
@@ -109,6 +111,27 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
     } else {
       setAviso('No se pudo copiar. Copia el enlace a mano desde la barra de direcciones.')
     }
+  }
+
+  // Instagram no permite crear una historia con un enlace desde una web: el
+  // único enlace pulsable es el sticker "Enlace", que se añade dentro de la
+  // app. Lo máximo que se puede hacer desde aquí es copiar el enlace y abrir la
+  // cámara de historias de Instagram (esquema instagram://story-camera, no
+  // documentado pero muy extendido), para que solo quede elegir la imagen y
+  // pegar el enlace. Si Instagram no está instalado no ocurre nada.
+  async function abrirInstagramHistoria() {
+    const enlaceCopiado = await copiarAlPortapapeles()
+    if (enlaceCopiado) setCopiado(true)
+    setAviso(
+      enlaceCopiado
+        ? 'Enlace copiado. En Instagram: elige la imagen de tu galería, toca la pegatina "Enlace" y pégalo.'
+        : 'En Instagram: elige la imagen, toca la pegatina "Enlace" y pega el enlace (usa "Copiar enlace" antes).'
+    )
+    const atajo = document.createElement('a')
+    atajo.href = 'instagram://story-camera'
+    document.body.appendChild(atajo)
+    atajo.click()
+    document.body.removeChild(atajo)
   }
 
   function abrirRed(enlace) {
@@ -253,6 +276,21 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
                     ? 'Imagen para historia de Instagram'
                     : 'Descargar imagen para historia'}
               </button>
+
+              {esMovil && (
+                <div className="mt-2 corte-card border border-[#B5E600]/60 bg-[#EDF5C9] p-3">
+                  <p className="text-sm font-bold text-[#3D4A00]">Historia de Instagram con enlace</p>
+                  <ol className="mt-1 list-decimal pl-5 text-xs text-[#3D4A00]">
+                    <li>Pulsa "Imagen para historia" y guárdala en tu galería.</li>
+                    <li>Pulsa el botón de abajo: se copia el enlace y se abre Instagram.</li>
+                    <li>Elige la imagen, toca la pegatina "Enlace" y pégalo.</li>
+                  </ol>
+                  <button type="button" onClick={abrirInstagramHistoria} className={`${opcionClass} mt-2 border-[#B5E600]`}>
+                    <Share2 className="h-5 w-5 shrink-0" strokeWidth={1.75} />
+                    Abrir Instagram con el enlace copiado
+                  </button>
+                </div>
+              )}
 
               <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Compartir en</p>
               {redes.map((red) => (
