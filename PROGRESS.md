@@ -641,4 +641,8 @@ Pendiente:
 - Plan detallado en docs/plan-pagos-fase-1.md: tablas (sql/071), funciones (sql/072), módulo TypeScript en lib/pagos/, rutas de cobro y webhook de Redsys, pantalla de datos fiscales, y pruebas. Todo detrás de un interruptor apagado.
 - Aprobado por el usuario: tocar pagos, usar TypeScript en este módulo y añadir pdfkit (fase 2). Valores confirmados: comisión 10 %, mínimo de liquidación 10 €, 48 h hasta disponible, 15 días de aceptación tácita.
 - Decisiones por defecto: pagar primero y reservar después (si no queda plaza, se marca para reembolso); bonos en la fase 2; solo España, con Canarias, Ceuta y Melilla en revisión manual.
-- Pendiente: implementar siguiendo el orden del plan, con puntos de revisión tras redsys.ts, sql/071 y sql/072.
+- Pasos 1 a 3 hechos (30 octubre 2026), pendientes de revisión y de commit:
+  - TypeScript configurado (tsconfig.json con allowJs; typescript y los tipos como dependencias de desarrollo; el resto del proyecto sigue en JavaScript). npm audit: 0 vulnerabilidades. next build y tsc estricto sin errores.
+  - lib/pagos/dinero.ts (céntimos enteros, reparto con comisión en puntos básicos y redondeo de mitades hacia arriba, formato de euros), lib/pagos/validaciones.ts (DNI, NIE, CIF, IBAN español, código postal, correo, coincidencia provincia-código postal y zona fiscal) y lib/pagos/redsys.ts (parámetros del comercio, concepto RULEAFIT, firma HMAC-SHA256 con clave derivada por 3DES, verificación del aviso del banco en tiempo constante, pedido aleatorio de 12 caracteres).
+  - 24 pruebas con node:test (npm run test:pagos), todas correctas. La firma está contrastada con una implementación independiente (OpenSSL), NO con un ejemplo oficial de Redsys; la validación definitiva es contra su entorno de pruebas (paso 9).
+- Pendiente: pasos 4 a 9 del plan (sql/071, sql/072, rutas, pantallas, flujo de reserva con pago y prueba completa), con revisión previa al sql/071.
