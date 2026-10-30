@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Share2, Link2, Image as IconoImagen, X, Check } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
 import { formatearFechaParaMostrar } from '../lib/formatoFecha'
 import { generarImagenHistoria } from '../lib/imagenHistoria'
 
@@ -14,7 +15,12 @@ import { generarImagenHistoria } from '../lib/imagenHistoria'
 // Instagram no tiene un enlace de "compartir" para webs: desde el móvil se usa
 // el menú nativo, y en cualquier dispositivo se puede copiar el enlace o bajar
 // la imagen para subirla a una historia.
-export default function BotonCompartir({ clase, variante = 'icono', className = '' }) {
+export default function BotonCompartir({ clase: claseRecibida, variante = 'icono', className = '' }) {
+  // Algunas listas (Mis sesiones publicadas) no traen todos los datos de la
+  // sesión (ciudad, zona, precio...). Si faltan, se leen al abrir el panel.
+  const [datosCompletos, setDatosCompletos] = useState(null)
+  const clase = { ...claseRecibida, ...datosCompletos, id: claseRecibida.id ?? claseRecibida.clase_id }
+  const faltanDatos = !claseRecibida.ciudad && !datosCompletos
   const [abierto, setAbierto] = useState(false)
   const [copiado, setCopiado] = useState(false)
   const [generando, setGenerando] = useState(false)
@@ -36,6 +42,22 @@ export default function BotonCompartir({ clase, variante = 'icono', className = 
     return () => document.removeEventListener('keydown', handleTecla)
   }, [abierto])
 
+  useEffect(() => {
+    if (!abierto || !faltanDatos) return
+    let cancelado = false
+    supabase
+      .from('clases')
+      .select('titulo, ciudad, direccion, fecha, hora, categoria, tipo_actividad, precio')
+      .eq('id', clase.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelado && data) setDatosCompletos(data)
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [abierto, faltanDatos, clase.id])
+
   function cerrar() {
     setAbierto(false)
     setAviso('')
@@ -45,7 +67,7 @@ export default function BotonCompartir({ clase, variante = 'icono', className = 
   const url = typeof window !== 'undefined' ? `${window.location.origin}/clases/${clase.id}` : ''
   const hora = clase.hora ? String(clase.hora).slice(0, 5) : ''
   const cuando = [formatearFechaParaMostrar(clase.fecha), hora && `${hora} h`].filter(Boolean).join(' a las ')
-  const texto = `${clase.titulo} · ${clase.ciudad}${cuando ? ` · ${cuando}` : ''}`
+  const texto = [clase.titulo, clase.ciudad, cuando].filter(Boolean).join(' · ')
   const textoConEnlace = `${texto} — Reserva tu plaza en Ruleafit: ${url}`
 
   async function compartirNativo() {
@@ -223,7 +245,7 @@ export default function BotonCompartir({ clase, variante = 'icono', className = 
                 {copiado ? 'Enlace copiado' : 'Copiar enlace'}
               </button>
 
-              <button type="button" onClick={imagenParaHistoria} disabled={generando} className={opcionClass}>
+              <button type="button" onClick={imagenParaHistoria} disabled={generando || faltanDatos} className={opcionClass}>
                 <IconoImagen className="h-5 w-5 shrink-0" strokeWidth={1.75} />
                 {generando
                   ? 'Creando imagen…'

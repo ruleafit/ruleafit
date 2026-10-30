@@ -22,6 +22,7 @@ import { motivoNoEditableClase, claseYaPaso } from '../../lib/ventanaEdicionClas
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import GestionBonos from '../../components/GestionBonos'
+import BotonCompartir from '../../components/BotonCompartir'
 
 const clasePestanaActiva =
   'corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#1F2400]'
@@ -355,6 +356,19 @@ export default function MisClasesPage() {
                 <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />
                 Copiar sesión
               </Link>
+              {clase.estado === 'activa' && !haPasado && (
+                <BotonCompartir
+                  clase={{
+                    id: clase.clase_id,
+                    titulo: clase.clase_titulo,
+                    fecha: clase.clase_fecha,
+                    hora: clase.clase_hora,
+                    categoria: clase.categoria,
+                  }}
+                  variante="completo"
+                  className="inline-flex items-center gap-1.5 corte-tag border border-[#E2E6CF] bg-white px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+                />
+              )}
               {esEditable && (
                 <Link
                   href={`/mis-clases/${clase.clase_id}/editar`}
