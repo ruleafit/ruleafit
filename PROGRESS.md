@@ -346,7 +346,7 @@ Falta:
 - Rediseño de Open ligado al precio: no regalar los 5 Open de asistencia en clases gratis o muy baratas; conceder Open solo por encima de un umbral de precio X, aún por decidir.
 - Al integrar el proveedor de pagos, quitar/ajustar el texto "se paga directamente al entrenador" que aparece junto al precio en el detalle de sesión (app/clases/[id]), igual que en su día se cambió "Cobras directo, sin intermediarios" -> "Cobros y reservas automáticos".
 
-Nota (investigación del modelo de cobros, 7 agosto 2026): Stripe Connect "puro" no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
+Nota (investigación del modelo de cobros, 7 agosto 2026) — SUPERADA el 30 octubre 2026 por el modelo acordado de la sección "Pagos: modelo acordado y plan": Stripe Connect "puro" no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
 
 ## Análisis de competencia (21 julio 2026)
 
@@ -567,3 +567,37 @@ Pendientes:
 - Conseguir sesiones futuras reales: hoy la base de datos solo tiene sesiones pasadas y /clases sale vacía.
 - Comprobado el 30 octubre 2026 con una consulta de solo lectura en Supabase: sql/056 a sql/062 están aplicados (las cabeceras que dicen "NO EJECUTADO todavía" están desfasadas). Una fila salió en false (marcar_asistencia sin referencias a open_), casi seguro un falso positivo de la consulta: en ILIKE el guion bajo es comodín y "open_" coincide con "v_cantidad_open " dentro del cuerpo de la función. Sin importancia: la web no usa marcar_asistencia(). Decisión de producto: manda la asistencia automática.
 - Pendientes anteriores sin cambios: reindexación de /ayuda en Search Console, Redirect URL de producción de Google, limpieza de comentarios de cabecera de sql/*.sql del rename.
+
+## Pagos: modelo acordado y plan (30 octubre 2026)
+Estado: acordado con el gestor y el asesor en lo esencial; nada implementado. Los puntos marcados [confirmar] los revisarán el gestor o el asesor antes del lanzamiento.
+
+Modelo:
+- Ruleafit actúa como intermediaria (lo dicen los términos y condiciones, validado por el asesor). El alumno paga con tarjeta o Bizum en el TPV virtual CyberPack de CaixaBank (Redsys; concepto comercial "RULEAFIT"). Ruleafit no ve el número de tarjeta.
+- Comisión de Ruleafit: 10 % (variable RULEAFIT_COMMISSION_RATE=0.10). El resto va a la bolsa virtual del entrenador: "pendiente" hasta 48 h después de celebrarse la sesión (propuesto) y luego "disponible".
+- Liquidaciones los días 15 y último de cada mes (siguiente día hábil si es festivo o fin de semana), por remesa de transferencias. Mínimo de liquidación propuesto: 10 €, con el saldo arrastrado al periodo siguiente. El formato del fichero lo dará CaixaBank al contratar el CyberPack; se prepara el XML SEPA estándar (pain.001) con el formato intercambiable.
+- Reembolsos (propuestos): sesión cancelada por el entrenador o por no llegar al mínimo: reembolso total sin comisión; el alumno cancela con más de 2 h: reembolso; con menos de 2 h: sin reembolso. Un reembolso o contracargo posterior a la liquidación se descuenta de la siguiente.
+
+Facturación:
+- Ruleafit emite una autofactura al entrenador por cada liquidación, para dejar constancia del pago: emisor el entrenador con sus datos fiscales, receptor Ruleafit, concepto "Prestación de servicios de entrenamiento en plataforma Ruleafit", desglose de base imponible, IVA y retención de IRPF si aplica, con la mención de facturación por el destinatario. Los entrenadores aceptan esto en los términos (aceptación tácita de cada factura en un plazo, propuesto 15 días) [confirmar].
+- Numeración: la lleva Ruleafit, una serie propia correlativa y sin saltos, con formato AF-AAAA-NNNNNN y reinicio cada año. Se asigna dentro de la misma transacción que genera la factura.
+- A los alumnos no se les emite factura salvo que la pidan (simplificada hasta 400 €; completa con sus datos si la piden o el importe lo exige) [confirmar].
+- Cada entrenador tiene sus propios modelos de factura; los desgloses se ajustarán a lo que indique el gestor.
+
+Impuestos (criterio de partida, a confirmar con el gestor):
+- IVA 21 % con carácter general (península y Baleares). Sin límite de ingresos para particulares: cada entrenador es responsable de su situación fiscal y de declarar sus ingresos, y lo acepta en los términos.
+- Retención de IRPF: personas físicas con actividad profesional, 15 % (7 % los tres primeros años si lo declara el entrenador); sociedades, sin retención. Ruleafit la ingresa (modelos 111 y 190).
+- Navarra y País Vasco: mismo IVA, pero las retenciones y declaraciones van a la Hacienda foral.
+- Canarias (IGIC), Ceuta y Melilla (IPSI): impuesto distinto del IVA, que depende de dónde se realiza la sesión y no del domicilio del entrenador. Casilla específica en el perfil fiscal y revisión manual; sin soporte automático en el lanzamiento hasta que el gestor dé las reglas. Se apoya en el campo provincia de las sesiones (sql/067).
+- Informe anual de operadores de plataformas (modelo 238, DAC7): probable obligación; por eso se recogen los datos necesarios desde el principio [confirmar].
+
+Datos a pedir a quien quiera publicar una sesión de pago: nombre y apellidos o razón social, NIF/NIE/CIF (con comprobación de letra o dígito de control), domicilio fiscal completo, correo, IBAN con titular (con comprobación de dígito de control; guardado cifrado), fecha de nacimiento y país de residencia fiscal si es persona física, tipo (persona física con actividad profesional, persona física con actividad empresarial, sociedad), casilla de zona fiscal especial. Casillas obligatorias: aceptación de términos y de la cláusula de autofacturación, declaración de que declarará sus ingresos y casilla de que se hace responsable de la exactitud de los datos facilitados (con fecha, versión del texto e IP). Las sesiones gratis no exigen datos fiscales.
+
+Tecnología: módulo en TypeScript (el resto del proyecto sigue en JavaScript), importes en céntimos enteros, reparto y cierre de periodo dentro de funciones SQL atómicas, webhook idempotente, firma de Redsys verificada contra el entorno de pruebas, PDF con pdfkit, interruptor general PAGOS_ACTIVOS apagado hasta el lanzamiento. Las librerías nuevas y todo lo relativo a pagos requieren confirmación explícita (ver CLAUDE.md).
+
+Orden de trabajo acordado:
+1. Documentos legales y cumplimiento común: términos y condiciones (hoy no hay), condiciones para entrenadores, política de cookies y almacenamiento, actualización de privacidad y aviso legal, y funciones que piden las tiendas (borrar la cuenta, denunciar y bloquear).
+2. Pagos, fase 1: perfil fiscal con sus casillas, tablas de cobros, bolsa y liquidaciones, firma y webhook de Redsys en entorno de pruebas, con el interruptor apagado.
+3. Aplicaciones: Android primero (versión de prueba, luego tienda) y después iPhone (notificaciones push nativas e inicio de sesión de Google nativo).
+4. Con el CyberPack contratado: credenciales, direcciones del webhook, formato del fichero del banco y pruebas con cobros reales de 1 € antes del lanzamiento.
+5. Lanzamiento al mercado con las apps ya disponibles en las tiendas.
+Los documentos legales los afino yo en borrador y los revisan el gestor y el asesor antes de lanzar (no soy asesor legal).
