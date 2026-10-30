@@ -31,7 +31,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. 
 - Trabajo en "manual mode on": cada cambio se aprueba a mano (nunca "allow all" salvo bloque acotado).
 - Frenos que requieren confirmación explícita antes de tocar: .env.local, borrado de archivos, cambios en autenticación, instalar librerías nuevas, cambios destructivos en Supabase, commit/push, y cualquier cosa relacionada con pagos/Stripe/cartera/reservas.
 - Los commits se redactan y ejecutan solo cuando se pide explícitamente ("haz commit"), y tras aprobación.
-- No arrancar el servidor de desarrollo (npm run dev), eso se hace manualmente aparte. npm run build sí se puede usar para verificar.
+- Se puede arrancar el servidor de desarrollo (npm run dev) para probar en local. npm run build también se puede usar para verificar.
 - Cambios mínimos: no refactorizar código que no se ha pedido tocar.
 
 ## Base de datos: reservas
