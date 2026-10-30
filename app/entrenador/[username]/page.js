@@ -8,6 +8,8 @@ import { supabase } from '../../../lib/supabaseClient'
 import { claseYaPaso, horasAntesDeClase } from '../../../lib/ventanaEdicionClase'
 import { calcularNivel, calcularRango } from '../../../lib/niveles'
 import BotonSeguir from '../../../components/BotonSeguir'
+import BotonDenunciar from '../../../components/BotonDenunciar'
+import BotonBloquear from '../../../components/BotonBloquear'
 
 function formatearFechaLimite(plazoDias) {
   const fecha = new Date()
@@ -323,6 +325,17 @@ export default function PerfilEntrenadorPage() {
         </div>
 
         <BotonSeguir entrenadorId={perfil.id} usuarioActual={usuarioActual} />
+
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+          <BotonDenunciar
+            tipo="usuario"
+            objetivoId={perfil.id}
+            usuarioDenunciadoId={perfil.id}
+            usuarioActual={usuarioActual}
+            etiqueta="Denunciar usuario"
+          />
+          <BotonBloquear usuarioId={perfil.id} username={perfil.username} usuarioActual={usuarioActual} />
+        </div>
       </section>
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">

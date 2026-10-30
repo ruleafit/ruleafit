@@ -6,6 +6,7 @@ import { SearchX, User } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
+import { useBloqueados } from '../../lib/useBloqueados'
 
 const filtroCampoClass =
   'block w-full corte-btn border border-[#E2E6CF] bg-white px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
@@ -19,6 +20,7 @@ export default function EntrenadoresPage() {
   const [entrenadores, setEntrenadores] = useState([])
   const [error, setError] = useState('')
   const [busqueda, setBusqueda] = useState('')
+  const bloqueadosIds = useBloqueados(usuario)
 
   useEffect(() => {
     async function cargar() {
@@ -65,6 +67,7 @@ export default function EntrenadoresPage() {
   const busquedaNormalizada = busqueda.trim().toLowerCase()
 
   const entrenadoresFiltrados = entrenadores.filter((entrenador) => {
+    if (bloqueadosIds.includes(entrenador.id)) return false
     if (!busquedaNormalizada) return true
     const username = (entrenador.username || '').toLowerCase()
     return username.includes(busquedaNormalizada)

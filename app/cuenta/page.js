@@ -10,6 +10,8 @@ import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import NotificacionesToggle from '../../components/NotificacionesToggle'
 import PreferenciasNotificaciones from '../../components/PreferenciasNotificaciones'
 import HistorialNotificaciones from '../../components/HistorialNotificaciones'
+import UsuariosBloqueados from '../../components/UsuariosBloqueados'
+import EliminarCuenta from '../../components/EliminarCuenta'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
@@ -676,6 +678,10 @@ export default function CuentaPage() {
             <HistorialNotificaciones usuarioActual={usuario} />
           </div>
         </div>
+
+        <UsuariosBloqueados usuario={usuario} />
+
+        <EliminarCuenta usuario={usuario} />
 
         <button
           type="button"

@@ -15,6 +15,7 @@ import { distanciaKm } from '../../lib/distancia'
 import BotonReservar from '../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../components/BotonCopiarCoordenadas'
 import BotonCompartir from '../../components/BotonCompartir'
+import { useBloqueados } from '../../lib/useBloqueados'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 
 const MapaClases = dynamic(() => import('../../components/MapaClases'), {
@@ -133,6 +134,7 @@ export default function ClasesPage() {
   const [filtroSoloSeguidosFijado, setFiltroSoloSeguidosFijado] = useState(false)
   const [seguidosIds, setSeguidosIds] = useState([])
   const [usuario, setUsuario] = useState(null)
+  const bloqueadosIds = useBloqueados(usuario)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -212,6 +214,7 @@ export default function ClasesPage() {
   const clasesSinCiudad = clases.filter((clase) => {
     if (clase.estado !== 'activa') return false
     if (claseYaPaso(clase)) return false
+    if (bloqueadosIds.includes(clase.trainer_id)) return false
 
     const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
     const coincideFecha = coincideConCuando(clase.fecha, filtroCuando, hoy)

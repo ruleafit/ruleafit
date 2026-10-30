@@ -14,6 +14,7 @@ import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../../lib/imagenesC
 import BotonReservar from '../../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../../components/BotonCopiarCoordenadas'
 import BotonCompartir from '../../../components/BotonCompartir'
+import BotonDenunciar from '../../../components/BotonDenunciar'
 import RevelarAlLlegar from '../../../components/RevelarAlLlegar'
 
 const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
@@ -291,6 +292,16 @@ function DetalleClaseContenido() {
             />
           </div>
         </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-2xl px-4 pb-28 sm:px-6 sm:pb-10">
+        <BotonDenunciar
+          tipo="sesion"
+          objetivoId={clase.id}
+          usuarioDenunciadoId={clase.trainer_id}
+          usuarioActual={usuario}
+          etiqueta="Denunciar esta sesión"
+        />
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-40 flex justify-center border-t border-[#E2E6CF] bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(31,36,0,0.1)] backdrop-blur sm:hidden">
