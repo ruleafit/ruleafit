@@ -104,7 +104,9 @@ export default function RegistroPage() {
     const redirectTo = `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo },
+      // prompt=select_account: Google pregunta siempre con qué cuenta entrar, en
+      // vez de usar sin preguntar la última cuenta con la que se inició sesión.
+      options: { redirectTo, queryParams: { prompt: 'select_account' } },
     })
     if (error) {
       setMensaje('No se pudo conectar con Google. Inténtalo de nuevo.')
