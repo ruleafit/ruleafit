@@ -10,6 +10,7 @@ import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import BuscadorCiudad from '../../components/BuscadorCiudad'
 import { buscarCiudades } from '../../lib/geocodificar'
+import { PAGOS_VISIBLES } from '../../components/PerfilFiscal'
 
 const MapaSelector = dynamic(() => import('../../components/MapaSelector'), {
   ssr: false,
@@ -203,6 +204,20 @@ function PublicarFormulario() {
         `Ya tienes otra sesión programada el ${formatearFechaParaMostrar(fecha)} a las ${hora}. ¿Seguro que quieres publicar esta también?`
       )
       if (!confirmado) return
+    }
+
+    // Con los pagos activados, una sesión de pago solo se puede publicar si el
+    // entrenador ya ha dado sus datos fiscales (los necesita para cobrar).
+    if (PAGOS_VISIBLES && Number(precio) > 0) {
+      const { data: fiscal } = await supabase
+        .from('perfiles_fiscales')
+        .select('estado')
+        .eq('usuario_id', usuarioActual.id)
+        .maybeSingle()
+      if (!fiscal || fiscal.estado === 'incompleto' || fiscal.estado === 'bloqueado') {
+        setMensaje('Para publicar una sesión de pago primero añade tus datos fiscales en Mi cuenta → Datos fiscales y cobros.')
+        return
+      }
     }
 
     setMensaje('Publicando...')

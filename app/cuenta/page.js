@@ -12,6 +12,7 @@ import PreferenciasNotificaciones from '../../components/PreferenciasNotificacio
 import HistorialNotificaciones from '../../components/HistorialNotificaciones'
 import UsuariosBloqueados from '../../components/UsuariosBloqueados'
 import EliminarCuenta from '../../components/EliminarCuenta'
+import PerfilFiscal from '../../components/PerfilFiscal'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
@@ -678,6 +679,8 @@ export default function CuentaPage() {
             <HistorialNotificaciones usuarioActual={usuario} />
           </div>
         </div>
+
+        <PerfilFiscal usuario={usuario} />
 
         <UsuariosBloqueados usuario={usuario} />
 
