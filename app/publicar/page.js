@@ -8,6 +8,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import BuscadorCiudad from '../../components/BuscadorCiudad'
+import { buscarCiudades } from '../../lib/geocodificar'
 
 const MapaSelector = dynamic(() => import('../../components/MapaSelector'), {
   ssr: false,
@@ -51,6 +52,9 @@ function PublicarFormulario() {
   const [ciudad, setCiudad] = useState(CIUDAD_POR_DEFECTO)
   const [ciudadTexto, setCiudadTexto] = useState(CIUDAD_POR_DEFECTO)
   const [ciudadCentro, setCiudadCentro] = useState(CENTRO_CIUDAD_POR_DEFECTO)
+  // Provincia de la ciudad elegida: se guarda con la sesión para que buscar una
+  // ciudad encuentre también las sesiones de los pueblos de su provincia.
+  const [provincia, setProvincia] = useState(CIUDAD_POR_DEFECTO)
   const [direccion, setDireccion] = useState('')
   const [puntoEncuentro, setPuntoEncuentro] = useState('')
   const [fecha, setFecha] = useState('')
@@ -105,6 +109,8 @@ function PublicarFormulario() {
       setTipoActividad(data.tipo_actividad || '')
       setCiudad(data.ciudad || CIUDAD_POR_DEFECTO)
       setCiudadTexto(data.ciudad || CIUDAD_POR_DEFECTO)
+      // clase_para_copiar no devuelve la provincia: se vuelve a calcular al publicar.
+      setProvincia(data.ciudad ? '' : CIUDAD_POR_DEFECTO)
       if (data.lat != null && data.lng != null) setCiudadCentro([data.lat, data.lng])
       setDireccion(data.direccion || '')
       setPuntoEncuentro(data.punto_encuentro || '')
@@ -178,12 +184,21 @@ function PublicarFormulario() {
 
     setMensaje('Publicando...')
 
+    // Si falta la provincia (por ejemplo al copiar una sesión), se localiza
+    // buscando la ciudad; si no se encuentra, se publica sin ella.
+    let provinciaFinal = provincia
+    if (!provinciaFinal) {
+      const candidatas = await buscarCiudades(ciudad)
+      provinciaFinal = candidatas.find((c) => c.nombre === ciudad)?.provincia || ''
+    }
+
     const { error } = await supabase.from('clases').insert({
       trainer_id: usuarioActual.id,
       titulo,
       categoria,
       tipo_actividad: tipoActividad,
       ciudad,
+      provincia: provinciaFinal || null,
       direccion,
       punto_encuentro: puntoEncuentro,
       fecha,
@@ -329,6 +344,7 @@ function PublicarFormulario() {
                   onSeleccionar={(c) => {
                     setCiudad(c.nombre)
                     setCiudadTexto(c.nombre)
+                    setProvincia(c.provincia || '')
                     setCiudadCentro([c.lat, c.lng])
                   }}
                   className={inputClass}

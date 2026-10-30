@@ -97,11 +97,13 @@ function coincideConBusqueda(clase, busqueda) {
 }
 
 // Ciudad escrita a mano: sin tildes ni mayúsculas y por coincidencia parcial
-// ("sev" encuentra Sevilla, "malaga" encuentra Málaga). Vacío = todas.
+// ("sev" encuentra Sevilla, "malaga" encuentra Málaga). Se busca en la ciudad
+// y en la provincia de la sesión, así "Sevilla" encuentra también las de Dos
+// Hermanas, Utrera... Vacío = todas.
 function coincideConCiudad(clase, textoCiudad) {
   const buscada = normalizarTexto(textoCiudad).trim()
   if (!buscada) return true
-  return normalizarTexto(clase.ciudad).includes(buscada)
+  return normalizarTexto(`${clase.ciudad} ${clase.provincia || ''}`).includes(buscada)
 }
 
 function coincideConCuando(fechaClase, cuando, hoy) {
@@ -202,9 +204,34 @@ export default function ClasesPage() {
     )
   }
 
+  const hoy = obtenerFechaHoy()
+
+  // Todos los filtros salvo la ciudad: sobre este conjunto se aplica la
+  // ciudad escrita o, si no hay sesiones allí, el orden por cercanía.
+  const clasesSinCiudad = clases.filter((clase) => {
+    if (clase.estado !== 'activa') return false
+    if (claseYaPaso(clase)) return false
+
+    const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
+    const coincideFecha = coincideConCuando(clase.fecha, filtroCuando, hoy)
+    const coincideFranja = filtroFranja === 'Todas' || franjaDeHora(clase.hora) === filtroFranja
+    const coincideSeguidos = !filtroSoloSeguidos || seguidosIds.includes(clase.trainer_id)
+
+    const coincideTexto = coincideConBusqueda(clase, busqueda)
+
+    return coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos && coincideTexto
+  })
+
+  // Si en la ciudad escrita no hay sesiones que cumplan los filtros (porque no
+  // hay ninguna o porque ninguna encaja con la actividad, categoría, fecha...),
+  // se localiza la ciudad y se ofrecen las más cercanas que sí los cumplen.
+  const textoCiudad = filtroCiudad.trim()
+  const hayAlgunaEnLaCiudad = clases.some((c) => coincideConCiudad(c, textoCiudad))
+  const hayEnLaCiudadConFiltros = clasesSinCiudad.some((c) => coincideConCiudad(c, textoCiudad))
+
   useEffect(() => {
-    const texto = filtroCiudad.trim()
-    if (texto.length < 4 || clases.some((c) => coincideConCiudad(c, texto))) {
+    const texto = textoCiudad
+    if (texto.length < 4 || hayEnLaCiudadConFiltros) {
       setPuntoCiudad(null)
       setBuscandoCiudad(false)
       return
@@ -223,7 +250,7 @@ export default function ClasesPage() {
       clearTimeout(temporizador)
       controlador.abort()
     }
-  }, [filtroCiudad, clases])
+  }, [textoCiudad, hayEnLaCiudadConFiltros])
 
   // El filtrado ya se aplica al escribir; el botón "Buscar" (o Intro) cierra
   // el teclado en móvil y lleva la vista a los resultados, para que quede
@@ -269,30 +296,10 @@ export default function ClasesPage() {
     )
   }
 
-  const hoy = obtenerFechaHoy()
+  // Sugerencias del campo de ciudad: las ciudades y provincias que tienen sesiones ahora.
+  const ciudadesDisponibles = [...new Set(clases.flatMap((c) => [c.ciudad, c.provincia]).filter(Boolean))].sort()
 
-  // Sugerencias del campo de ciudad: las ciudades que tienen sesiones ahora.
-  const ciudadesDisponibles = [...new Set(clases.map((c) => c.ciudad).filter(Boolean))].sort()
-
-  // Todos los filtros salvo la ciudad: sobre este conjunto se aplica la
-  // ciudad escrita o, si no hay sesiones allí, el orden por cercanía.
-  const clasesSinCiudad = clases.filter((clase) => {
-    if (clase.estado !== 'activa') return false
-    if (claseYaPaso(clase)) return false
-
-    const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
-    const coincideFecha = coincideConCuando(clase.fecha, filtroCuando, hoy)
-    const coincideFranja = filtroFranja === 'Todas' || franjaDeHora(clase.hora) === filtroFranja
-    const coincideSeguidos = !filtroSoloSeguidos || seguidosIds.includes(clase.trainer_id)
-
-    const coincideTexto = coincideConBusqueda(clase, busqueda)
-
-    return coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos && coincideTexto
-  })
-
-  const textoCiudad = filtroCiudad.trim()
-  const hayAlgunaEnLaCiudad = clases.some((c) => coincideConCiudad(c, textoCiudad))
-  const mostrandoCercanas = !!textoCiudad && !hayAlgunaEnLaCiudad && puntoCiudad?.texto === textoCiudad
+  const mostrandoCercanas = !!textoCiudad && !hayEnLaCiudadConFiltros && puntoCiudad?.texto === textoCiudad
 
   const clasesFiltradas = mostrandoCercanas
     ? clasesSinCiudad
@@ -442,13 +449,15 @@ export default function ClasesPage() {
               </div>
 
               <div className="flex flex-col gap-4">
-                {buscandoCiudad && !hayAlgunaEnLaCiudad && (
+                {buscandoCiudad && !hayEnLaCiudadConFiltros && (
                   <p className="text-sm text-[#6B7355]">Buscando sesiones cerca de {textoCiudad}…</p>
                 )}
 
                 {mostrandoCercanas && clasesFiltradas.length > 0 && (
                   <p className="corte-card border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm font-medium text-[#3D4A00]">
-                    No hay sesiones en {puntoCiudad.nombre}. Te mostramos las más cercanas.
+                    {hayAlgunaEnLaCiudad
+                      ? `No hay sesiones en ${puntoCiudad.nombre} con estos filtros. Te mostramos las más cercanas.`
+                      : `No hay sesiones en ${puntoCiudad.nombre}. Te mostramos las más cercanas.`}
                   </p>
                 )}
 

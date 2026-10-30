@@ -9,7 +9,7 @@ const RETARDO_DEBOUNCE_MS = 400
 // Campo de ciudad con autocompletado de toda España. El texto lo controla el
 // padre (valor / onCambiarTexto); ciudadElegida es la ya confirmada, que no se
 // vuelve a buscar. Al elegir una sugerencia se llama a
-// onSeleccionar({ nombre, lat, lng }).
+// onSeleccionar({ nombre, provincia, lat, lng }).
 export default function BuscadorCiudad({ id, valor, ciudadElegida, onCambiarTexto, onSeleccionar, className }) {
   const [sugerencias, setSugerencias] = useState([])
   const [cargando, setCargando] = useState(false)
