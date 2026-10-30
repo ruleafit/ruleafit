@@ -3,8 +3,9 @@
 -- Si un entrenador (organizador) ha bloqueado a un usuario (sql/068), ese
 -- usuario ya no puede reservar sus sesiones.
 --
--- NO EJECUTADO todavía. Preparado para revisión y ejecución manual en el SQL
--- Editor de Supabase (proyecto "ruleafit").
+-- EJECUTADO a mano en el SQL Editor de Supabase (proyecto "ruleafit") el 30 de
+-- octubre de 2026 y probado: con un bloqueo, la reserva se rechaza con el mensaje
+-- genérico; sin bloqueo, se permite.
 --
 -- Se hace con un trigger BEFORE INSERT en public.reservas, y NO modificando
 -- reservar_clase(): así no se toca la función central de reservas (que ya se ha

@@ -9,11 +9,11 @@
 -- real de la variable CRON_SECRET de producción (el mismo que usa sql/052; NO se
 -- versiona en git).
 --
--- NO EJECUTADO todavía. Preparado para revisión y ejecución manual en el SQL
--- Editor de Supabase (proyecto "ruleafit"). Requiere pg_net (ya instalado).
--- Hay que ejecutarlo DESPUÉS de desplegar app/api/avisar-denuncia, o los
--- primeros avisos darán 404 (la denuncia se guarda igualmente: pg_net es
--- asíncrono y un fallo no la deshace).
+-- EJECUTADO a mano en el SQL Editor de Supabase (proyecto "ruleafit") el 30 de
+-- octubre de 2026, con el CRON_SECRET real, y probado: al denunciar llega el
+-- correo al administrador. Requiere pg_net (ya instalado) y que esté desplegado
+-- app/api/avisar-denuncia (si no, los avisos darían 404; la denuncia se guarda
+-- igualmente porque pg_net es asíncrono).
 -- ============================================================================
 
 create or replace function public.avisar_denuncia_nueva()
