@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-
-// Los pagos online se muestran solo cuando NEXT_PUBLIC_PAGOS_ACTIVOS es "true".
-export const PAGOS_VISIBLES = process.env.NEXT_PUBLIC_PAGOS_ACTIVOS === 'true'
+import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 
 const TIPOS = [
   { valor: 'persona_fisica_profesional', texto: 'Persona física, actividad profesional (autónomo/a con IRPF)' },

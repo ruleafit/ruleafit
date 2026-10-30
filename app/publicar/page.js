@@ -10,7 +10,7 @@ import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import BuscadorCiudad from '../../components/BuscadorCiudad'
 import { buscarCiudades } from '../../lib/geocodificar'
-import { PAGOS_VISIBLES } from '../../components/PerfilFiscal'
+import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 
 const MapaSelector = dynamic(() => import('../../components/MapaSelector'), {
   ssr: false,

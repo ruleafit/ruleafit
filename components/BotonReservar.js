@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '../lib/supabaseClient'
+import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 
 const TAMANOS_BOTON = {
   normal: 'px-4 py-2 text-sm',
@@ -53,6 +54,11 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
   const [reservando, setReservando] = useState(false)
   const [errorReserva, setErrorReserva] = useState('')
   const [usadoBono, setUsadoBono] = useState(false)
+  const [tieneBono, setTieneBono] = useState(null) // null = aún sin comprobar
+  const [pagando, setPagando] = useState(false)
+
+  const precioClase = Number(clase.precio)
+  const requierePago = PAGOS_VISIBLES && precioClase > 0 && tieneBono === false
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -107,6 +113,67 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     }
   }, [usuario, esMiPropiaSesion, clase.id])
 
+  // Con los pagos activos, si el alumno tiene un bono vigente con este
+  // entrenador la reserva sigue el camino de siempre (descuenta del bono); si
+  // no, tiene que pagar la sesión.
+  useEffect(() => {
+    if (!PAGOS_VISIBLES || !usuario || esMiPropiaSesion || !(precioClase > 0)) {
+      setTieneBono(null)
+      return
+    }
+    let cancelado = false
+    supabase.rpc('mis_bonos_comprados').then(({ data, error }) => {
+      if (cancelado) return
+      if (error) {
+        setTieneBono(false) // sin saberlo, se pide pago (lo más seguro)
+        return
+      }
+      const ahora = Date.now()
+      setTieneBono(
+        (data || []).some(
+          (b) =>
+            b.trainer_id === clase.trainer_id &&
+            new Date(b.fecha_fin).getTime() >= ahora &&
+            (b.numero_sesiones == null || Number(b.sesiones_usadas) < b.numero_sesiones)
+        )
+      )
+    })
+    return () => {
+      cancelado = true
+    }
+  }, [usuario, esMiPropiaSesion, precioClase, clase.trainer_id])
+
+  // Pide al servidor el formulario firmado y lleva al alumno a la página de
+  // pago del banco. La plaza se concede cuando el banco confirma el pago.
+  async function handlePagar() {
+    setPagando(true)
+    setErrorReserva('')
+    const { data: sesion } = await supabase.auth.getSession()
+    const respuesta = await fetch('/api/payments/crear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sesion.session?.access_token || ''}` },
+      body: JSON.stringify({ claseId: clase.id }),
+    }).catch(() => null)
+    const datos = respuesta ? await respuesta.json().catch(() => ({})) : {}
+    if (!respuesta || !respuesta.ok || !datos.url || !datos.campos) {
+      setErrorReserva(datos.error || 'No se ha podido iniciar el pago. Inténtalo de nuevo.')
+      setPagando(false)
+      return
+    }
+    const formulario = document.createElement('form')
+    formulario.method = 'POST'
+    formulario.action = datos.url
+    for (const [nombre, valor] of Object.entries(datos.campos)) {
+      const campo = document.createElement('input')
+      campo.type = 'hidden'
+      campo.name = nombre
+      campo.value = valor
+      formulario.appendChild(campo)
+    }
+    document.body.appendChild(formulario)
+    formulario.submit()
+  }
+
   async function handleReservar() {
     setReservando(true)
     setErrorReserva('')
@@ -154,7 +221,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     )
   }
 
-  if (comprobandoReserva) {
+  if (comprobandoReserva || (PAGOS_VISIBLES && precioClase > 0 && tieneBono === null && !yaReservada)) {
     return <p className="text-sm text-zinc-400">Comprobando disponibilidad...</p>
   }
 
@@ -180,6 +247,19 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
         {usadoBono && (
           <p className="mt-1 text-xs text-[#6B7355]">Se ha descontado 1 sesión de tu bono con este rulero.</p>
         )}
+      </div>
+    )
+  }
+
+  if (requierePago) {
+    const importe = precioClase.toFixed(2).replace('.', ',')
+    return (
+      <div>
+        <button type="button" onClick={handlePagar} disabled={pagando} className={botonReservarClass(tamaño)}>
+          {pagando ? 'Abriendo el pago...' : `Pagar ${importe} € y reservar`}
+        </button>
+        <p className="mt-1 text-xs text-[#6B7355]">Pago seguro con tarjeta o Bizum. Cancelación gratuita hasta 2 h antes.</p>
+        {errorReserva && <p className="mt-2 text-sm text-red-600">{errorReserva}</p>}
       </div>
     )
   }
