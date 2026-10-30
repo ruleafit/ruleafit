@@ -33,6 +33,7 @@ Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. 
 - Los commits se redactan y ejecutan solo cuando se pide explícitamente ("haz commit"), y tras aprobación.
 - Se puede arrancar el servidor de desarrollo (npm run dev) para probar en local. npm run build también se puede usar para verificar.
 - Cambios mínimos: no refactorizar código que no se ha pedido tocar.
+- Después de cada cambio visible en la web, arranca el servidor si no está arrancado, ábrelo en el navegador y prueba tú mismo lo que has cambiado, como lo haría un usuario. Comprueba también que no aparecen errores en la consola. Antes de proponer un commit, ejecuta npm run build. Si para probar algo necesitas iniciar sesión, dímelo y no inventes credenciales. Dame un resumen de lo que has probado y lo que has visto.
 
 ## Base de datos: reservas
 - La tabla public.reservas existe con RLS activo.
