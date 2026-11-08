@@ -666,4 +666,11 @@ Todo está hecho y subido, pero APAGADO: los usuarios no ven ni pueden usar nada
 - Web preparada (manifiesto, /.well-known/assetlinks.json, /eliminar-cuenta) y app TWA generada con Bubblewrap (`com.ruleafit.app`, `.aab` y `.apk` firmados, fuera del repositorio). Probada en un móvil Android por el usuario; la huella de la clave está en Vercel y el enlace de verificación la sirve.
 - El usuario decide no publicar todavía. Todo lo necesario (ubicación de la clave, cómo recompilar en Windows, problemas encontrados y cómo se resolvieron, y lo pendiente para publicar) está en docs/app-android.md.
 - Pendiente para publicar: cuenta de Play Console (25 €), prueba cerrada de 12 testers y 14 días si es cuenta personal, capturas y gráficos de la ficha, formularios de Play y revisión legal.
-- Pendiente aparte: la app de iPhone (Capacitor; requiere un Mac y 99 €/año de Apple al publicar).
+
+## App de iPhone probada en un iPhone real, aparcada (8 noviembre 2026)
+- Proyecto Capacitor en `app-ios/` (bundle `com.ruleafit.app`), que carga www.ruleafit.com en una app nativa. Adaptaciones de la web: login con Google por el navegador del sistema, ubicación nativa, vibración, y `.solo-web` para ocultar en la app lo que solo vale en navegador. Detalle en docs/app-ios.md y app-ios/README.md.
+- Compilada con Xcode en un Mac prestado e instalada en el iPhone del usuario; en una primera revisión todo se veía bien. Con Apple ID gratuito caduca a los 7 días y solo se instala por cable.
+- Incidencias: el aviso `dyld_shared_cache_extract_dylibs failed` al preparar el iPhone no impidió que la app se instalara y abriera.
+- El usuario aparca esta línea. Para retomarla: `git pull`, `npx cap sync ios` y ▶ en Xcode.
+- Pendiente con cuenta de Apple Developer (99 €/año): iniciar sesión con Apple (obligatorio por tener Google), notificaciones push nativas, TestFlight para testers y ficha del App Store (capturas, cuenta de demostración, etiquetas de privacidad).
+- Pendiente de comprobar: la URL `com.ruleafit.app://auth/callback` en Supabase → Redirect URLs y la lista de pruebas del README (Google, ubicación, compartir, reservar).
