@@ -4,6 +4,8 @@ import Menu from "../components/Menu";
 import PieDePagina from "../components/PieDePagina";
 import RegistrarServiceWorker from "../components/RegistrarServiceWorker";
 import ManejadorApp from "../components/ManejadorApp";
+import GestoAtras from "../components/GestoAtras";
+import GestoRefrescar from "../components/GestoRefrescar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,6 +51,8 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col">
         <RegistrarServiceWorker />
         <ManejadorApp />
+        <GestoAtras />
+        <GestoRefrescar />
         <Menu />
         {children}
         <PieDePagina />
