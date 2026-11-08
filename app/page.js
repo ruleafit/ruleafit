@@ -314,7 +314,9 @@ export default function Home() {
         </div>
       </section>
 
-      <BotonInstalarApp className={botonPrimarioClass} />
+      <div className="solo-web">
+        <BotonInstalarApp className={botonPrimarioClass} />
+      </div>
 
       {/* Dos franjas separadas: sesiones propias publicadas (como organizador)
           y reservas propias (como participante). Antes era un único bloque

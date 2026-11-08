@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '../lib/supabaseClient'
 import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
+import { vibrar } from '../lib/nativo'
 
 const TAMANOS_BOTON = {
   normal: 'px-4 py-2 text-sm',
@@ -189,6 +190,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     setYaReservada(true)
     setUsadoBono(!!data?.usado_bono)
     setReservando(false)
+    vibrar('exito')
 
     if (onReservado) {
       const nuevasPlazasOcupadas = data?.plazas_ocupadas ?? (clase.plazas_ocupadas ?? 0) + 1

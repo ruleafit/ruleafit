@@ -11,6 +11,7 @@ import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css'
 import { ESTILO_POR_CATEGORIA, ESTILO_POR_DEFECTO } from '../lib/imagenesCategoria'
 import BuscadorDireccion from './BuscadorDireccion'
 import { iconoBusqueda } from '../lib/iconoBusqueda'
+import { obtenerPosicion } from '../lib/nativo'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -128,24 +129,19 @@ export default function MapaClases({ clases }) {
   const [coordsBusqueda, setCoordsBusqueda] = useState(null)
 
   function verMiUbicacion() {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      setErrorUbicacion('No pudimos obtener tu ubicación. Revisa los permisos del navegador.')
-      return
-    }
-
     setBuscandoUbicacion(true)
     setErrorUbicacion(null)
 
-    navigator.geolocation.getCurrentPosition(
-      (posicion) => {
-        setUbicacionUsuario({ lat: posicion.coords.latitude, lng: posicion.coords.longitude })
+    // Dentro de la app de iPhone usa el permiso nativo; en el navegador, el de siempre.
+    obtenerPosicion()
+      .then((posicion) => {
+        setUbicacionUsuario(posicion)
         setBuscandoUbicacion(false)
-      },
-      () => {
+      })
+      .catch(() => {
         setErrorUbicacion('No pudimos obtener tu ubicación. Revisa los permisos del navegador.')
         setBuscandoUbicacion(false)
-      }
-    )
+      })
   }
 
   return (

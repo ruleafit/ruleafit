@@ -7,6 +7,7 @@ import { CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
+import { esApp, entrarConGoogleEnApp } from '../../lib/nativo'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
@@ -100,6 +101,13 @@ export default function RegistroPage() {
       return
     }
     setErrorMayoria('')
+
+    // Dentro de la app de iPhone, Google se abre en el navegador del sistema.
+    if (esApp()) {
+      const { error } = await entrarConGoogleEnApp(supabase)
+      if (error) setMensaje('No se pudo conectar con Google. Inténtalo de nuevo.')
+      return
+    }
 
     const redirectTo = `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({

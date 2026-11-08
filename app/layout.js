@@ -3,6 +3,7 @@ import "./globals.css";
 import Menu from "../components/Menu";
 import PieDePagina from "../components/PieDePagina";
 import RegistrarServiceWorker from "../components/RegistrarServiceWorker";
+import ManejadorApp from "../components/ManejadorApp";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +33,22 @@ export default function RootLayout({ children }) {
     <html
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Marca la página cuando se abre dentro de la app de iPhone (user agent
+            "RuleafitApp", ver app-ios/capacitor.config.json), antes de pintar, para
+            ocultar lo que solo tiene sentido en la web (clase .solo-web). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if(/RuleafitApp/.test(navigator.userAgent))document.documentElement.classList.add('app-nativa')",
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <RegistrarServiceWorker />
+        <ManejadorApp />
         <Menu />
         {children}
         <PieDePagina />

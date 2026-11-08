@@ -1,0 +1,28 @@
+{
+  "appId": "com.ruleafit.app",
+  "appName": "Ruleafit",
+  "webDir": "www",
+  "appendUserAgent": "RuleafitApp",
+  "server": {
+    "url": "https://www.ruleafit.com",
+    "cleartext": false,
+    "allowNavigation": ["www.ruleafit.com", "ruleafit.com"]
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#FBFAF3",
+    "allowsLinkPreview": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#B5E600",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#B5E600"
+    }
+  }
+}

@@ -148,3 +148,10 @@ button {
     font-size: 16px !important;
   }
 }
+
+/* Dentro de la app de iPhone (clase puesta por el script de app/layout.js) se
+   oculta lo que solo tiene sentido en la web: instalar la web como app,
+   notificaciones web, descargar archivos. */
+.app-nativa .solo-web {
+  display: none !important;
+}

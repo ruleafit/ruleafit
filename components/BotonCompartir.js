@@ -311,7 +311,8 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
                 </button>
               )}
 
-              <button type="button" onClick={descargarImagen} disabled={generando || faltanDatos} className={opcionClass}>
+              {/* Descargar archivos no funciona dentro de la app de iPhone: allí se usa "Compartir imagen" */}
+              <button type="button" onClick={descargarImagen} disabled={generando || faltanDatos} className={`${opcionClass} solo-web`}>
                 <Download className="h-5 w-5 shrink-0" strokeWidth={1.75} />
                 {generando ? 'Creando imagen…' : 'Descargar imagen (PNG)'}
               </button>

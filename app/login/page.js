@@ -7,6 +7,7 @@ import { CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
+import { esApp, entrarConGoogleEnApp } from '../../lib/nativo'
 
 const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
@@ -53,6 +54,12 @@ function LoginFormulario() {
   }
 
   async function entrarConGoogle() {
+    // Dentro de la app de iPhone, Google se abre en el navegador del sistema.
+    if (esApp()) {
+      const { error } = await entrarConGoogleEnApp(supabase)
+      if (error) setMensaje('No se pudo conectar con Google. Inténtalo de nuevo.')
+      return
+    }
     const redirectTo = `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
