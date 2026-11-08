@@ -74,3 +74,20 @@ España. Sin gimnasio, sin cuota y sin permanencia: eliges una sesión, reservas
 ## Pendiente conocido
 - Capturas de pantalla de teléfono (mínimo 2) y gráfico de funciones 1024 × 500: se generan desde la web.
 - Revisar la política de privacidad con el asesor antes de publicar (ver `legal/borradores/`).
+
+## Estado a 8 noviembre 2026: app generada y probada, SIN publicar
+- Generada con Bubblewrap en `C:\Users\34722\ruleafit-android` (fuera del repositorio): `app-release-bundle.aab` (para Play) y `app-release-signed.apk` (para probar). Paquete `com.ruleafit.app`, versión 1 (versionCode 1; hay que subirlo en cada nueva subida a Play).
+- Clave de firma: `android.keystore`, alias `ruleafit`, en esa misma carpeta. Las contraseñas las guarda el usuario. **Sin ese archivo y su contraseña no se puede actualizar la app.** Hay que tener copia fuera del PC.
+- Huella SHA-256 de la clave (no es secreta): `41:E9:2F:04:32:06:D5:9F:17:63:01:10:92:13:4B:AC:0F:D3:23:16:FD:A7:47:67:D8:C7:BE:29:37:A7:47:30`. Está en la variable `ANDROID_SHA256_FINGERPRINTS` de Vercel y `/.well-known/assetlinks.json` la sirve (comprobado). Al subir a Play con Play App Signing hay que AÑADIR la huella que muestre Play Console (separadas por comas).
+- Probado en un móvil Android por el usuario: la web carga y todo va bien en principio.
+
+### Cómo volver a compilar (Windows)
+- Hay que lanzar Bubblewrap desde `cmd`, no desde PowerShell (PowerShell no encuentra `gradlew.bat`):
+  `cmd /c "cd /d C:\Users\34722\ruleafit-android && npx @bubblewrap/cli build"`
+- Si pregunta por aplicar cambios de `twa-manifest.json`, responder No (se retocaron a mano `minSdkVersion` a 24 en `twa-manifest.json` y `app/build.gradle`, porque la librería de Chrome lo exige, y `org.gradle.jvmargs` a `-Xmx768m` en `gradle.properties` por falta de memoria libre). Si se responde Sí, hay que repetir esos cambios.
+- Pide las dos contraseñas (almacén y clave). Cerrar programas pesados antes; si falla por memoria, reiniciar el PC.
+- Herramientas descargadas por Bubblewrap en `C:\Users\34722\.bubblewrap` (JDK 17 y SDK de Android).
+- Como la app solo abre la web, los cambios de la web llegan a la app sin recompilar. Solo hace falta una nueva versión (aumentando versionCode) si se cambia algo de la propia app: icono, nombre, permisos.
+
+### Pendiente cuando se quiera publicar
+Cuenta de Google Play Console (25 €, verificación de identidad; si es personal y nueva, prueba cerrada con 12 testers durante 14 días), capturas de pantalla, gráfico de 1024 × 500, icono de 512 × 512, formularios de Play y revisión legal.

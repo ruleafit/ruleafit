@@ -661,3 +661,9 @@ Todo está hecho y subido, pero APAGADO: los usuarios no ven ni pueden usar nada
   4. Fase 2: autofacturas en PDF (pdfkit), liquidaciones los días 15 y último, SEPA XML, bonos con pago.
   5. Revisión del asesor de los documentos legales y de la versión de aceptación (hoy "borrador-2026-10"), y auditoría de seguridad antes de cobrar dinero real.
   6. Activar: config_pagos.pagos_activos=true, PAGOS_ACTIVOS="true" y NEXT_PUBLIC_PAGOS_ACTIVOS="true".
+
+## App de Android generada y probada, sin publicar (8 noviembre 2026)
+- Web preparada (manifiesto, /.well-known/assetlinks.json, /eliminar-cuenta) y app TWA generada con Bubblewrap (`com.ruleafit.app`, `.aab` y `.apk` firmados, fuera del repositorio). Probada en un móvil Android por el usuario; la huella de la clave está en Vercel y el enlace de verificación la sirve.
+- El usuario decide no publicar todavía. Todo lo necesario (ubicación de la clave, cómo recompilar en Windows, problemas encontrados y cómo se resolvieron, y lo pendiente para publicar) está en docs/app-android.md.
+- Pendiente para publicar: cuenta de Play Console (25 €), prueba cerrada de 12 testers y 14 días si es cuenta personal, capturas y gráficos de la ficha, formularios de Play y revisión legal.
+- Pendiente aparte: la app de iPhone (Capacitor; requiere un Mac y 99 €/año de Apple al publicar).
