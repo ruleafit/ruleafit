@@ -17,7 +17,15 @@ self.addEventListener('push', function (event) {
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || '/';
+  // Solo se abren enlaces de la propia web: una notificación nunca puede llevar
+  // a un sitio externo, aunque su enlace lo diga.
+  let url = '/';
+  try {
+    const pedido = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin);
+    if (pedido.origin === self.location.origin) url = pedido.pathname + pedido.search + pedido.hash;
+  } catch (e) {
+    url = '/';
+  }
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
       for (const client of clientList) {

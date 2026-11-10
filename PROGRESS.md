@@ -674,3 +674,8 @@ Todo está hecho y subido, pero APAGADO: los usuarios no ven ni pueden usar nada
 - El usuario aparca esta línea. Para retomarla: `git pull`, `npx cap sync ios` y ▶ en Xcode.
 - Pendiente con cuenta de Apple Developer (99 €/año): iniciar sesión con Apple (obligatorio por tener Google), notificaciones push nativas, TestFlight para testers y ficha del App Store (capturas, cuenta de demostración, etiquetas de privacidad).
 - Pendiente de comprobar: la URL `com.ruleafit.app://auth/callback` en Supabase → Redirect URLs y la lista de pruebas del README (Google, ubicación, compartir, reservar).
+
+## Auditoría de seguridad de la web (9 noviembre 2026)
+- Informe completo en docs/auditoria-seguridad.md. Hallazgo principal: `otorgar_rulos` y `generar_notificacion` (y 7 funciones internas más) eran ejecutables sin iniciar sesión con la clave pública de la web (en Supabase, `revoke ... from public` no quita los permisos de `anon`/`authenticated`). Confirmado en producción con una sonda inofensiva.
+- Arreglado en código: comprobación del secreto de las rutas internas (`lib/secretoCron.js`), enlaces de notificaciones solo de la propia web (`public/sw.js`), cabeceras de seguridad (`next.config.mjs`).
+- Pendiente: el usuario debe ejecutar `sql/074_cerrar_funciones_internas.sql` en Supabase y comprobar con la sonda; decidir el hallazgo 8 (un entrenador puede actualizar cualquier columna de sus sesiones) antes de activar pagos; revisar los ajustes del panel de Supabase.

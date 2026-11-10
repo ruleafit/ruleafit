@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
+import { cronAutorizado } from '../../../lib/secretoCron'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -17,8 +18,7 @@ const MOTIVOS = {
 // trigger de la tabla denuncias (sql/070) por pg_net, con el mismo secreto que
 // el aviso de feedback (CRON_SECRET como Bearer).
 export async function POST(request) {
-  const auth = request.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronAutorizado(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 

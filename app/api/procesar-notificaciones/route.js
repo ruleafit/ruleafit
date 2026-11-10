@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { enviarPushAUsuario } from '../../../lib/enviarPush'
+import { cronAutorizado } from '../../../lib/secretoCron'
 
 // Cuantas notificaciones procesar por llamada (para no saturar).
 const LOTE = 50
@@ -9,8 +10,7 @@ const MAX_INTENTOS = 3
 
 export async function POST(request) {
   // 1. Verificar el secreto: solo el cron autorizado puede llamar aqui.
-  const auth = request.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronAutorizado(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 

@@ -1,18 +1,23 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
+import { cronAutorizado } from '../../../lib/secretoCron'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request) {
   // 1. Verificar el secreto: solo el trigger de Supabase (via pg_net) puede llamar aqui.
-  const auth = request.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronAutorizado(request)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
   // 2. Leer el feedbackId del body.
-  const { feedbackId } = await request.json()
+  let feedbackId
+  try {
+    ;({ feedbackId } = await request.json())
+  } catch {
+    return NextResponse.json({ error: 'Cuerpo no válido' }, { status: 400 })
+  }
   if (!feedbackId) {
     return NextResponse.json({ error: 'Falta feedbackId' }, { status: 400 })
   }
