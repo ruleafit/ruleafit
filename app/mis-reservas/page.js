@@ -79,7 +79,7 @@ export default function MisReservasPage() {
         .order('hora', { foreignTable: 'clases', ascending: true })
 
       if (error) {
-        setError('Error al cargar tus reservas: ' + error.message)
+        setError('No hemos podido cargar tus reservas. Recarga la página o inténtalo en unos minutos.')
       } else {
         setReservas(data || [])
       }
@@ -113,7 +113,7 @@ export default function MisReservasPage() {
     setMensaje(
       data?.reembolso_aplicable
         ? 'Reserva cancelada correctamente.'
-        : 'Reserva cancelada. Al ser con menos de 2 horas de antelación, no habría devolución cuando exista la cartera virtual (todavía no aplica ningún cargo real).'
+        : 'Reserva cancelada. Como faltaban menos de 2 horas, no habría devolución si la sesión tuviera un pago asociado.'
     )
     setCancelandoId(null)
     setTimeout(() => setMensaje(''), 6000)

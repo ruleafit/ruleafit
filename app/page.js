@@ -12,7 +12,6 @@ import {
   Clock,
   CalendarClock,
   Tag,
-  HandCoins,
   Whistle,
 } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
@@ -67,7 +66,7 @@ const PUNTOS = [
   { texto: 'Cancela hasta 2 h antes', Icono: Clock },
   { texto: 'Tu horario, tus normas', Icono: CalendarClock },
   { texto: 'Tú fijas el precio y las plazas', Icono: Tag },
-  { texto: 'Cobros y reservas automáticos', Icono: HandCoins },
+  { texto: 'Reservas sin complicaciones', Icono: CalendarCheck },
 ]
 
 // Solo para el bloque "¿Eres entrenador?" de captación (visible sin sesión
@@ -75,7 +74,7 @@ const PUNTOS = [
 const PUNTOS_CAPTACION_ENTRENADOR = [
   { texto: 'Tu horario, tus normas', Icono: CalendarClock },
   { texto: 'Tú fijas el precio y las plazas', Icono: Tag },
-  { texto: 'Cobros y reservas automáticos', Icono: HandCoins },
+  { texto: 'Reservas sin complicaciones', Icono: CalendarCheck },
 ]
 
 const botonPrimarioClass =

@@ -283,7 +283,7 @@ export default function ClasesPage() {
         .order('fecha', { ascending: true })
 
       if (error) {
-        setError('Error al cargar las sesiones: ' + error.message)
+        setError('No hemos podido cargar las sesiones. Recarga la página o inténtalo en unos minutos.')
       } else {
         setClases(data || [])
       }

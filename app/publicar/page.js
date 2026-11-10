@@ -255,9 +255,9 @@ function PublicarFormulario() {
     })
 
     if (error) {
-      setMensaje('Error: ' + error.message)
+      setMensaje('No se ha podido publicar la sesión. Revisa los datos e inténtalo de nuevo.')
     } else {
-      setMensaje('¡Sesión publicada correctamente!')
+      setMensaje('Sesión publicada correctamente.')
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('primera-accion'))
       setTitulo('')
       setTipoActividad('')
@@ -298,7 +298,7 @@ function PublicarFormulario() {
     )
   }
 
-  const esExito = mensaje === '¡Sesión publicada correctamente!'
+  const esExito = mensaje === 'Sesión publicada correctamente.'
   const esProgreso = mensaje === 'Publicando...'
   const esError = Boolean(mensaje) && !esExito && !esProgreso
 

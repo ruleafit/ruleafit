@@ -48,7 +48,7 @@ export default function AyudaPage() {
     setEnviando(false)
 
     if (errorInsercion) {
-      setError('Error: ' + errorInsercion.message)
+      setError('No hemos podido enviar tu mensaje. Inténtalo de nuevo en unos minutos.')
       return
     }
 

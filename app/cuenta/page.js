@@ -182,7 +182,7 @@ export default function CuentaPage() {
 
       if (errorDisponibilidad) {
         setGuardando(false)
-        setErrorUsername('Error: ' + errorDisponibilidad.message)
+        setErrorUsername('No hemos podido comprobar el nombre de usuario. Inténtalo de nuevo.')
         return
       }
 
@@ -207,7 +207,7 @@ export default function CuentaPage() {
       if (detalle.includes('username') || detalle.includes('perfiles') || detalle.includes('duplicate')) {
         setErrorUsername('Ese nombre de usuario ya está en uso. Prueba con otro.')
       } else {
-        setErrorUsername('Error: ' + error.message)
+        setErrorUsername('No hemos podido guardar el nombre de usuario. Inténtalo de nuevo.')
       }
       return
     }
@@ -298,7 +298,7 @@ export default function CuentaPage() {
 
         if (errorSubida) {
           setGuardandoPerfil(false)
-          setErrorPerfil('Error al subir la foto: ' + errorSubida.message)
+          setErrorPerfil('No hemos podido subir la foto. Prueba con otra imagen (JPG o PNG).')
           return
         }
 
@@ -309,7 +309,7 @@ export default function CuentaPage() {
         nuevaFotoUrl = `${publicUrl}?v=${Date.now()}`
       } catch (err) {
         setGuardandoPerfil(false)
-        setErrorPerfil('Error al procesar la imagen: ' + err.message)
+        setErrorPerfil('No hemos podido procesar la imagen. Prueba con otra (JPG o PNG).')
         return
       }
     }
@@ -322,7 +322,7 @@ export default function CuentaPage() {
     setGuardandoPerfil(false)
 
     if (error) {
-      setErrorPerfil('Error: ' + error.message)
+      setErrorPerfil('No hemos podido guardar tu perfil. Inténtalo de nuevo.')
       return
     }
 
@@ -656,7 +656,7 @@ export default function CuentaPage() {
                     className={`shrink-0 text-sm font-bold ${mov.cantidad > 0 ? 'text-[#3D4A00]' : 'text-red-700'}`}
                   >
                     {mov.cantidad > 0 ? '+' : ''}
-                    {mov.cantidad} Rulos
+                    {mov.cantidad} {Math.abs(mov.cantidad) === 1 ? 'Rulo' : 'Rulos'}
                   </span>
                 </div>
               ))}

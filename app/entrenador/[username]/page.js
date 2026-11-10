@@ -218,7 +218,7 @@ export default function PerfilEntrenadorPage() {
     setGuardandoValoracion(false)
 
     if (error) {
-      setErrorValoracion('Error: ' + error.message)
+      setErrorValoracion('No hemos podido guardar tu valoración. Inténtalo de nuevo.')
       return
     }
 

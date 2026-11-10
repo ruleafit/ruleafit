@@ -175,7 +175,11 @@ export default function MisClasesPage() {
     )
     setMensajesCancelacion((prev) => ({
       ...prev,
-      [claseId]: `Sesión cancelada. Se han cancelado ${data?.reservas_canceladas ?? 0} reservas.`,
+      [claseId]: (() => {
+        const n = data?.reservas_canceladas ?? 0
+        if (n === 0) return 'Sesión cancelada. No tenía reservas activas.'
+        return `Sesión cancelada. ${n === 1 ? 'Se ha cancelado 1 reserva.' : `Se han cancelado ${n} reservas.`}`
+      })(),
     }))
     setProcesandoCancelacionId(null)
   }
