@@ -143,9 +143,11 @@ export default function RegistroPage() {
             <>
               <form onSubmit={handleRegistro} className="flex flex-col gap-4">
                 <div>
-                  <label className={labelClass}>Nombre de usuario</label>
+                  <label htmlFor="registro-username" className={labelClass}>Nombre de usuario</label>
                   <input
+                    id="registro-username"
                     type="text"
+                    autoComplete="username"
                     placeholder="Nombre de usuario"
                     value={username}
                     onChange={(e) => {
@@ -164,9 +166,11 @@ export default function RegistroPage() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Email</label>
+                  <label htmlFor="registro-email" className={labelClass}>Email</label>
                   <input
+                    id="registro-email"
                     type="email"
+                    autoComplete="email"
                     placeholder="Tu email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -176,9 +180,11 @@ export default function RegistroPage() {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Contraseña</label>
+                  <label htmlFor="registro-password" className={labelClass}>Contraseña</label>
                   <input
+                    id="registro-password"
                     type="password"
+                    autoComplete="new-password"
                     placeholder="Tu contraseña"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

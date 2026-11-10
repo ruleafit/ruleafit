@@ -101,7 +101,7 @@ export default function BotonDenunciar({
                 <h2 className="text-lg font-extrabold text-[#1F2400]">
                   {tipo === 'usuario' ? 'Denunciar usuario' : 'Denunciar sesión'}
                 </h2>
-                <button type="button" onClick={cerrar} aria-label="Cerrar" className="shrink-0 text-[#6B7355] hover:text-[#1F2400]">
+                <button type="button" onClick={cerrar} aria-label="Cerrar ventana de denuncia" className="shrink-0 text-[#6B7355] hover:text-[#1F2400]">
                   <X className="h-5 w-5" strokeWidth={2} />
                 </button>
               </div>

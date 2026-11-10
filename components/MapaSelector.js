@@ -14,16 +14,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-const CENTRO_POR_DEFECTO = [37.3891, -5.9845] // Sevilla
+const CENTRO_POR_DEFECTO = [40.2, -3.7] // España entera, hasta que se elige ciudad
+const ZOOM_ESPANA = 6
+const ZOOM_CIUDAD = 13
 
 // El centro lo da la ciudad elegida en /publicar (cualquier ciudad de España).
 function RecentradorMapa({ centro }) {
   const map = useMap()
   const [lat, lng] = centro
+  const zoom = centro === CENTRO_POR_DEFECTO ? ZOOM_ESPANA : ZOOM_CIUDAD
 
   useEffect(() => {
-    map.setView([lat, lng], 13)
-  }, [lat, lng, map])
+    map.setView([lat, lng], zoom)
+  }, [lat, lng, zoom, map])
 
   return null
 }
@@ -69,7 +72,7 @@ export default function MapaSelector({ centro = CENTRO_POR_DEFECTO, lat, lng, on
         Busca una calle para situarte y luego pincha en el mapa para marcar el punto exacto de la sesión.
       </p>
       <div className="isolate" style={{ height: 300, width: '100%', borderRadius: 8, overflow: 'hidden' }}>
-        <MapContainer center={centroInicial} zoom={13} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={centroInicial} zoom={centro === CENTRO_POR_DEFECTO ? ZOOM_ESPANA : ZOOM_CIUDAD}style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

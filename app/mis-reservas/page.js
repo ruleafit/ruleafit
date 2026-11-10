@@ -183,7 +183,10 @@ export default function MisReservasPage() {
         {pestana === 'reservas' && (
           <>
         {mensaje && (
-          <div className="mb-4 corte-card border border-[#B5E600] bg-[#EDF5C9] px-4 py-2.5 text-sm font-medium text-[#1F2400]">
+          <div
+            role="status"
+            className="mb-4 corte-card border border-[#B5E600] bg-[#EDF5C9] px-4 py-2.5 text-sm font-medium text-[#1F2400]"
+          >
             {mensaje}
           </div>
         )}

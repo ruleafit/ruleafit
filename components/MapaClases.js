@@ -20,7 +20,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-const CENTRO_SEVILLA = [37.3891, -5.9845]
+// Vista inicial (y cuando no hay sesiones que mostrar): España entera.
+const CENTRO_ESPANA = [40.2, -3.7]
+const ZOOM_ESPANA = 6
 
 // Formas dibujadas en el tramo superior del icono (viewBox 40x48, centradas en x=20).
 const FORMAS_MARCADOR = {
@@ -110,7 +112,7 @@ function AjustarEncuadre({ clases }) {
 
   useEffect(() => {
     if (clases.length === 0) {
-      map.setView(CENTRO_SEVILLA, 12)
+      map.setView(CENTRO_ESPANA, ZOOM_ESPANA)
       return
     }
 
@@ -168,7 +170,7 @@ export default function MapaClases({ clases }) {
         </p>
       )}
       <div className="relative isolate h-[300px] w-full overflow-hidden corte-card border border-[#E2E6CF] sm:h-[500px]">
-        <MapContainer center={CENTRO_SEVILLA} zoom={12} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={CENTRO_ESPANA} zoom={ZOOM_ESPANA} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

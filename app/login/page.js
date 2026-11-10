@@ -93,9 +93,11 @@ function LoginFormulario() {
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div>
-              <label className={labelClass}>Email</label>
+              <label htmlFor="login-email" className={labelClass}>Email</label>
               <input
+                id="login-email"
                 type="email"
+                autoComplete="email"
                 placeholder="Tu email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -105,9 +107,11 @@ function LoginFormulario() {
             </div>
 
             <div>
-              <label className={labelClass}>Contraseña</label>
+              <label htmlFor="login-password" className={labelClass}>Contraseña</label>
               <input
+                id="login-password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="Tu contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

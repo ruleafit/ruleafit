@@ -140,9 +140,11 @@ export default function NuevaContrasenaPage() {
 
           <form onSubmit={handleGuardar} className="flex flex-col gap-4">
             <div>
-              <label className={labelClass}>Nueva contraseña</label>
+              <label htmlFor="nueva-password" className={labelClass}>Nueva contraseña</label>
               <input
+                id="nueva-password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Tu nueva contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -152,9 +154,11 @@ export default function NuevaContrasenaPage() {
             </div>
 
             <div>
-              <label className={labelClass}>Repite la nueva contraseña</label>
+              <label htmlFor="nueva-password2" className={labelClass}>Repite la nueva contraseña</label>
               <input
+                id="nueva-password2"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Repite la contraseña"
                 value={password2}
                 onChange={(e) => setPassword2(e.target.value)}

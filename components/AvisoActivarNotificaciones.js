@@ -119,7 +119,7 @@ export default function AvisoActivarNotificaciones({ usuarioActual, disparador }
         </div>
         <button
           onClick={ahoraNo}
-          aria-label="Ahora no"
+          aria-label="Cerrar aviso de notificaciones"
           className="shrink-0 rounded-lg p-1 text-[#162318]/50 transition-colors hover:bg-zinc-50 hover:text-[#162318]"
         >
           <X className="h-5 w-5" strokeWidth={1.75} />

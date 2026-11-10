@@ -24,10 +24,9 @@ const CATEGORIAS = [
   'Otros',
 ]
 
-// Ciudad por defecto al abrir el formulario; se puede cambiar a cualquier
-// ciudad de España con el autocompletado de ciudad.
-const CIUDAD_POR_DEFECTO = 'Sevilla'
-const CENTRO_CIUDAD_POR_DEFECTO = [37.3891, -5.9845]
+// El formulario se abre sin ciudad: quien publica elige la suya (cualquier
+// ciudad de España) con el autocompletado. Hasta entonces el mapa muestra España.
+const CIUDAD_POR_DEFECTO = ''
 
 // Fecha propuesta al copiar una sesión: el mismo día de la semana siguiente a la
 // fecha de la sesión copiada y, si aun así ya ha pasado (se copia una sesión
@@ -70,7 +69,7 @@ function PublicarFormulario() {
   // en el campo; ciudadCentro = dónde centrar el mapa de ubicación.
   const [ciudad, setCiudad] = useState(CIUDAD_POR_DEFECTO)
   const [ciudadTexto, setCiudadTexto] = useState(CIUDAD_POR_DEFECTO)
-  const [ciudadCentro, setCiudadCentro] = useState(CENTRO_CIUDAD_POR_DEFECTO)
+  const [ciudadCentro, setCiudadCentro] = useState(null)
   // Provincia de la ciudad elegida: se guarda con la sesión para que buscar una
   // ciudad encuentre también las sesiones de los pueblos de su provincia.
   const [provincia, setProvincia] = useState(CIUDAD_POR_DEFECTO)
@@ -131,7 +130,7 @@ function PublicarFormulario() {
       setCiudad(data.ciudad || CIUDAD_POR_DEFECTO)
       setCiudadTexto(data.ciudad || CIUDAD_POR_DEFECTO)
       // clase_para_copiar no devuelve la provincia: se vuelve a calcular al publicar.
-      setProvincia(data.ciudad ? '' : CIUDAD_POR_DEFECTO)
+      setProvincia('')
       if (data.lat != null && data.lng != null) setCiudadCentro([data.lat, data.lng])
       setDireccion(data.direccion || '')
       setPuntoEncuentro(data.punto_encuentro || '')
@@ -164,7 +163,7 @@ function PublicarFormulario() {
       return
     }
 
-    if (ciudadTexto.trim() !== ciudad) {
+    if (!ciudad || ciudadTexto.trim() !== ciudad) {
       setMensaje('Elige la ciudad de la lista de sugerencias.')
       return
     }
@@ -255,7 +254,11 @@ function PublicarFormulario() {
     })
 
     if (error) {
-      setMensaje('No se ha podido publicar la sesión. Revisa los datos e inténtalo de nuevo.')
+      setMensaje(
+        error.message?.includes('demasiados envíos')
+          ? error.message
+          : 'No se ha podido publicar la sesión. Revisa los datos e inténtalo de nuevo.'
+      )
     } else {
       setMensaje('Sesión publicada correctamente.')
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('primera-accion'))
@@ -406,7 +409,7 @@ function PublicarFormulario() {
                 <label className={labelClass}>Ubicación en el mapa</label>
                 <div className="w-full overflow-hidden corte-card border border-[#E2E6CF]">
                   <MapaSelector
-                    centro={ciudadCentro}
+                    centro={ciudadCentro || undefined}
                     lat={lat}
                     lng={lng}
                     onCambiarUbicacion={(nuevaLat, nuevaLng) => {

@@ -70,9 +70,11 @@ export default function RecuperarPage() {
               </p>
 
               <div>
-                <label className={labelClass}>Email</label>
+                <label htmlFor="recuperar-email" className={labelClass}>Email</label>
                 <input
+                  id="recuperar-email"
                   type="email"
+                  autoComplete="email"
                   placeholder="Tu email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}

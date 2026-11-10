@@ -367,7 +367,7 @@ export default function ClasesPage() {
                     list="ciudades-sesiones"
                     value={filtroCiudad}
                     onChange={(e) => setFiltroCiudad(e.target.value)}
-                    placeholder="Ej: Sevilla, Málaga…"
+                    placeholder="Tu ciudad o provincia"
                     autoComplete="off"
                     className={`${filtroCampoClass} pl-9 placeholder:text-[#6B7355]`}
                   />

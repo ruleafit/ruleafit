@@ -48,7 +48,11 @@ export default function AyudaPage() {
     setEnviando(false)
 
     if (errorInsercion) {
-      setError('No hemos podido enviar tu mensaje. Inténtalo de nuevo en unos minutos.')
+      setError(
+        errorInsercion.message?.includes('demasiados envíos')
+          ? errorInsercion.message
+          : 'No hemos podido enviar tu mensaje. Inténtalo de nuevo en unos minutos.'
+      )
       return
     }
 

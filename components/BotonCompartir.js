@@ -280,7 +280,7 @@ export default function BotonCompartir({ clase: claseRecibida, variante = 'icono
                 ref={botonCerrarRef}
                 type="button"
                 onClick={cerrar}
-                aria-label="Cerrar"
+                aria-label="Cerrar ventana de compartir"
                 className="shrink-0 text-[#6B7355] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
               >
                 <X className="h-5 w-5" strokeWidth={2} />
