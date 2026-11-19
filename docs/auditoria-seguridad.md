@@ -30,7 +30,7 @@ producción, usando solo llamadas que fallan o no hacen nada antes de escribir. 
 ## Recomendaciones pendientes
 1. ~~Ejecutar `sql/074`~~ **Hecho** y verificado con la sonda.
 2. ~~Hallazgo 8~~ **Hecho** con `sql/075`.
-3. ~~Ajustes del panel de Supabase~~ **Hechos** por el usuario, salvo el SMTP propio (aparcado; necesario antes de tener usuarios reales).
+3. ~~Ajustes del panel de Supabase~~ **Hechos** por el usuario, salvo comprobar el límite de correo: el SMTP propio ya existe (Resend, plan gratuito de 100 correos al día), y conviene ampliarlo antes de una campaña.
 4. ~~Límite de peticiones~~ **Hecho** para feedback, denuncias y publicar sesiones (`sql/076`); el del registro depende de los Rate Limits del panel de Supabase.
 5. Política `script-src` de CSP (hoy no se limita para no romper Next, Leaflet y el pago de Redsys): probar a fondo.
 6. Antes de dinero real: revisión legal y una segunda auditoría centrada en pagos y `eliminar_mi_cuenta` (saldo, cobros, perfil fiscal).
