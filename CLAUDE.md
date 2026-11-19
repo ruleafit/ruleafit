@@ -18,6 +18,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - `sql/071_pagos_tablas.sql`, `sql/072_pagos_funciones.sql` (comisión/cobros en BD), `sql/073_reservar_exige_pago.sql`.
 - `lib/supabaseAdmin.js` — cliente service role; solo importable desde código de servidor.
 - `lib/supabaseClient.js` — cliente público. Reservas: `components/BotonReservar.js`, `sql/001_reservas.sql`.
+- `components/` modular por pantalla: `cuenta`, `publicar`, `clases`, `entrenador`, `home`, `mis-clases`, `mis-reservas`, `editar-clase`. Cada `app/**/page.js` es solo un contenedor (<110 líneas): ve directo al subcomponente (`use*.js` = carga de datos, `Bloque*`/`Tarjeta*`/`Lista*` = UI). `BotonReservar.js` y `PerfilFiscal.js` se mantienen sin dividir a propósito (flujos de pago/fiscal).
 - `docs/plan-pagos-fase-1.md`, `docs/auditoria-seguridad.md` — plan y auditoría. Estado general: `PROGRESS.md`.
 
 ## Reglas estrictas
