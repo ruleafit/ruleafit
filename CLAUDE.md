@@ -1,58 +1,46 @@
 # Ruleafit — Contexto del proyecto
 
 ## Qué es
-Marketplace de clases sueltas de entrenamiento (sin gimnasio ni cuota), en toda España (empezó en Sevilla y Málaga; Sevilla sigue siendo la ciudad principal). Dos perfiles: cliente y entrenador. Color de marca: lima #B5E600.
-
-Visión a futuro (no implementada todavía, solo de referencia): Ruleafit contempla abrirse más adelante a gimnasios y a entrenamientos individuales o en pareja, además de al aire libre y en grupo. Por eso, los textos de la interfaz no deben prometer exclusivamente entrenamiento al aire libre ni en grupo.
+Marketplace de clases sueltas de entrenamiento (sin gimnasio ni cuota), en toda España (Sevilla es la ciudad principal). Dos perfiles: cliente y entrenador. Color de marca: lima #B5E600. Los textos de la interfaz no deben prometer solo entrenamiento al aire libre o en grupo, ni limitar el servicio a unas ciudades concretas (a futuro: gimnasios, sesiones individuales).
 
 ## Stack
-Next.js 16 + React 19 + Tailwind + Supabase + Vercel. lucide-react para iconos. Pagos online más adelante (fuera del MVP): cobro con el TPV virtual CyberPack de CaixaBank (Redsys), bolsa virtual por entrenador, comisión de Ruleafit del 10 % y liquidaciones con autofacturas; modelo acordado el 30 octubre 2026, ver PROGRESS.md ("Pagos: modelo acordado y plan"). Nada de esto está implementado todavía.
+Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (PostgreSQL con RLS + RPCs en `sql/`). Pagos: TPV virtual Redsys/CyberPack (CaixaBank), firma HMAC_SHA256_V1. Email: Resend. Push: web-push. Hosting: Vercel (https://www.ruleafit.com, deploy automático al hacer push a main). Node 24.x.
+- Repo privado: github.com/ruleafit/ruleafit. Supabase: proyecto "ruleafit", Irlanda.
+- Claves en `.env.local` (ignorado por git; nunca leerlo ni imprimir valores).
+- SEPA / pain.001 / liquidaciones a entrenadores: NO implementado todavía.
 
-## Estructura y cuentas
-- Proyecto en C:\proyectos\ruleafit.
-- Repo privado: github.com/ruleafit/ruleafit.
-- Supabase: proyecto "ruleafit", región Europa (Irlanda).
-- Conector Supabase en lib/supabaseClient.js; claves en .env.local (no se sube a git, protegido por .gitignore).
-- Desplegado en Vercel en https://www.ruleafit.com, con despliegue automático al hacer push a la rama main.
-- Imágenes estáticas del proyecto en public/imagenes (portada, fuerza, running, yoga, combate, comunidad). El mapa de imagen por categoría de clase vive en lib/imagenesCategoria.js, compartido entre /clases y /mis-reservas.
+## Mapa de carpetas críticas
+- `lib/pagos/dinero.ts` — comisión (bps) y reparto (`calcularReparto`). Única fuente TS de lógica financiera.
+- `lib/pagos/redsys.ts` — firma y parámetros Redsys. `lib/pagos/validaciones.ts` — validaciones de pago.
+- `app/api/payments/crear` — creación de cobro (el importe lo calcula la BD con `crear_cobro`).
+- `app/api/payments/redsys-webhook` — verifica firma y llama a `confirmar_cobro_pagado`.
+- `app/api/payments/perfil-fiscal` — datos fiscales del entrenador.
+- `sql/071_pagos_tablas.sql`, `sql/072_pagos_funciones.sql` (comisión/cobros en BD), `sql/073_reservar_exige_pago.sql`.
+- `lib/supabaseAdmin.js` — cliente service role; solo importable desde código de servidor.
+- `lib/supabaseClient.js` — cliente público. Reservas: `components/BotonReservar.js`, `sql/001_reservas.sql`.
+- `docs/plan-pagos-fase-1.md`, `docs/auditoria-seguridad.md` — plan y auditoría. Estado general: `PROGRESS.md`.
 
-## Decisiones de producto (MVP)
-- Sin lista de espera: clase llena = botón de reservar desactivado.
-- Cancelación con umbral de 2h: gratis antes, sin devolución después.
-- Moneda "Rulos" (puntos de fidelización, no es una cartera de dinero):
-  - MVP: los Rulos se ganan mediante retos, promociones, bienvenida o asistencia confirmada; implementado hasta ahora: bienvenida automática de 20 Rulos al registrarse, y asistencia confirmada de 5 Rulos por clase, concedida (y corregible mediante movimiento compensatorio) por el entrenador vía marcar_asistencia(); retos y promociones quedan fuera de esta fase. No se pueden comprar, recargar con dinero, retirar ni transferir; no se usan para reservar ni pagar clases. Las clases se siguen pagando directamente al entrenador, fuera de la app. Sin recargas simuladas ni descuentos de Rulos al reservar.
-  - Visión futura (no implementado todavía, solo de referencia): cuando Ruleafit integre pagos reales, el usuario podrá recargar dinero y convertirlo en Rulos (equivalencia inicial de referencia 1€ = 10 Rulos, revisable); a partir de entonces los Rulos podrán usarse para reservar clases dentro de la app. Antes de esa fase habrá que definir cómo se compensa al entrenador cuando se usen Rulos ganados gratuitamente, y revisar requisitos legales y técnicos.
-  - Aviso (30 octubre 2026): el modelo de cobro acordado no incluye recargar dinero en Rulos; la visión anterior de recarga de Rulos queda en revisión.
-- Ubicación: mapa real (Leaflet + OpenStreetMap) + dirección libre + punto de encuentro.
-- Ciudad: el entrenador la elige al publicar con un autocompletado de poblaciones de España (servicio público Nominatim, lib/geocodificar.js); no hay lista fija de ciudades. Al publicar se guarda también la provincia (clases.provincia). En /clases el filtro de ciudad es un campo de búsqueda que mira ciudad y provincia (buscar "Sevilla" incluye sus pueblos) y, si en la ciudad escrita no hay sesiones que cumplan los filtros, se muestran las más cercanas con su distancia. Los textos de la interfaz no deben limitar el servicio a unas ciudades concretas.
-- Compartir: cada sesión tiene un botón Compartir (ficha y tarjetas de /clases) con menú nativo del móvil, copiar enlace, WhatsApp, Telegram, X, Facebook, correo e imagen vertical para historias de Instagram. La imagen no es pulsable: al generarla se copia también el enlace de la sesión para pegarlo con el sticker "Enlace" de Instagram. El enlace tiene vista previa (título, fecha, foto) gracias a app/clases/[id]/layout.js.
-- Tipo de actividad (tipo_actividad): texto libre escrito por el entrenador (zumba, boxeo, running...; se muestra al cliente) + categoría general para filtros. Categorías: Fuerza / funcional, Cardio, Yoga / Pilates / movilidad, Otros.
-- Las clases pueden tener un mínimo de plazas (plazas_min) opcional; por debajo del mínimo se muestra un aviso de "pendiente de confirmación". El entrenador puede cancelar una clase entera (cancelar_clase()), lo que cancela también todas sus reservas activas y las marca con cancelada_por_entrenador = true, para que el cliente vea un aviso claro en /mis-reservas en vez de que la reserva desaparezca sin explicación.
-- Tras iniciar sesión o registrarse, la app lleva a una pantalla de inicio (/) con botones grandes según el rol del usuario, en vez de dejar al usuario en la pantalla de login/registro.
+## Reglas estrictas
+- Prohibido duplicar lógica financiera (comisión, reparto, importes) fuera de `lib/pagos/dinero.ts` y `sql/072_pagos_funciones.sql`. Si cambia una, verificar que la otra coincide.
+- El importe nunca se confía al cliente: lo calcula la BD.
+- No leer enteros archivos de más de 300 líneas: usar Grep o leer por rangos (`offset`/`limit`).
+- Antes de cualquier commit que toque pagos: `npm run test:pagos` debe pasar.
+- Antes de proponer un commit con cambios de código: `npm run build`.
+- Las escrituras de reservas solo vía RPC (`reservar_clase`, `cancelar_reserva`, `cancelar_clase`), nunca insert/update directo desde el cliente.
+- Cambios mínimos: no refactorizar lo que no se ha pedido tocar.
 
-## Reglas de trabajo en este proyecto
-- Trabajo en "manual mode on": cada cambio se aprueba a mano (nunca "allow all" salvo bloque acotado).
-- Frenos que requieren confirmación explícita antes de tocar: .env.local, borrado de archivos, cambios en autenticación, instalar librerías nuevas, cambios destructivos en Supabase, commit/push, y cualquier cosa relacionada con pagos/Stripe/cartera/reservas.
-- Los commits se redactan y ejecutan solo cuando se pide explícitamente ("haz commit"), y tras aprobación.
-- Se puede arrancar el servidor de desarrollo (npm run dev) para probar en local. npm run build también se puede usar para verificar.
-- Cambios mínimos: no refactorizar código que no se ha pedido tocar.
-- Después de cada cambio visible en la web, arranca el servidor si no está arrancado, ábrelo en el navegador y prueba tú mismo lo que has cambiado, como lo haría un usuario. Comprueba también que no aparecen errores en la consola. Antes de proponer un commit, ejecuta npm run build. Si para probar algo necesitas iniciar sesión, dímelo y no inventes credenciales. Dame un resumen de lo que has probado y lo que has visto.
+## Reglas de trabajo
+- Modo manual: cada cambio se aprueba a mano. Pedir confirmación antes de tocar `.env.local`, borrar archivos, autenticación, instalar librerías, cambios destructivos en Supabase, commit/push y todo lo de pagos/reservas.
+- Commits solo cuando se piden explícitamente.
+- Tras un cambio visible: arrancar `npm run dev`, probarlo como usuario y revisar la consola. Si hace falta login, pedirlo; no inventar credenciales.
 
-## Base de datos: reservas
-- La tabla public.reservas existe con RLS activo.
-- Las escrituras solo se hacen a través de la función reservar_clase(p_clase_id uuid) (nunca insert/update directo desde el cliente).
-- El criterio de "clase pasada" es fecha+hora exacta en zona horaria Europe/Madrid.
-- La función reservas_de_mis_clases() (sql/002_panel_entrenador.sql) permite al entrenador autenticado ver, de forma segura, las reservas activas de sus propias clases (incluye email del cliente), sin acceso a clases de otros entrenadores.
-- La función cancelar_reserva(p_reserva_id uuid) (sql/003_cancelaciones.sql) permite al cliente cancelar su propia reserva si la clase no ha pasado, calcula si quedaban 2h o más (reembolso_aplicable) para uso futuro de la cartera, y de momento no aplica ningún cargo o devolución real.
-
-## Base de datos: perfiles y nombres de usuario
-- Existe la tabla public.perfiles (username público, 3-20 caracteres, formato letras ASCII/números/guion bajo, único sin distinguir mayúsculas/minúsculas).
-- Se crea automáticamente al registrarse mediante un trigger en auth.users.
-- Hay una función username_disponible(p_username) de solo lectura, accesible sin sesión, para comprobar disponibilidad antes de registrarse o al cambiar de nombre.
-- reservas_de_mis_clases() ahora devuelve cliente_username en vez de cliente_email.
-
-## Estado actual
-Ver PROGRESS.md para saber qué fases y bloques están completados y cuáles faltan.
+## Decisiones de producto (resumen)
+- Sin lista de espera; cancelación gratis hasta 2 h antes; zona horaria Europe/Madrid.
+- Rulos: puntos de fidelización (no dinero): 20 de bienvenida y 5 por asistencia confirmada (`marcar_asistencia()`). No se compran, retiran ni transfieren.
+- Ciudad con autocompletado Nominatim (`lib/geocodificar.js`); `clases.provincia`; mapa Leaflet + OpenStreetMap.
+- Clases con `plazas_min` opcional; el entrenador puede cancelar la clase entera (`cancelar_clase()`).
+- Perfiles: `public.perfiles` (username único 3-20 caracteres), creado por trigger en auth.users.
+- Detalle histórico de decisiones y fases: PROGRESS.md.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
