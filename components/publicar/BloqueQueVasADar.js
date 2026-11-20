@@ -31,7 +31,11 @@ export default function BloqueQueVasADar({ c }) {
             value={c.tipoActividad}
             onChange={(e) => c.setTipoActividad(e.target.value)}
             className={inputClass}
-            placeholder="Ej: Zumba, boxeo, running..."
+            placeholder={
+              c.categoria === 'Quedadas deportivas'
+                ? 'Ej: fútbol, voleibol, pádel, baloncesto...'
+                : 'Ej: Zumba, boxeo, running...'
+            }
           />
           <p className={ayudaClass}>Esto lo verán quienes reserven, tal cual lo escribas.</p>
         </div>

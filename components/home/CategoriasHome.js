@@ -11,7 +11,7 @@ export default function CategoriasHome() {
         Encuentra tu entrenamiento
       </RevelarAlLlegar>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:[&>*:last-child]:col-span-2 lg:grid-cols-5 lg:[&>*:last-child]:col-span-1">
         {CATEGORIAS.map(({ nombre, imagen }, indice) => (
           <RevelarAlLlegar key={nombre} delayMs={indice * 100}>
             <Link

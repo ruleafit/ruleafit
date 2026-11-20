@@ -31,7 +31,11 @@ export default function BloqueDatosEditables({ f }) {
             value={f.tipoActividad}
             onChange={(e) => f.setTipoActividad(e.target.value)}
             className={inputClass}
-            placeholder="Ej: Zumba, boxeo, running..."
+            placeholder={
+              f.categoria === 'Quedadas deportivas'
+                ? 'Ej: fútbol, voleibol, pádel, baloncesto...'
+                : 'Ej: Zumba, boxeo, running...'
+            }
           />
           <p className={ayudaClass}>Esto lo verán quienes reserven, tal cual lo escribas.</p>
         </div>
