@@ -1,6 +1,7 @@
 'use client'
 
-import { Search, UserCheck } from 'lucide-react'
+import { useState } from 'react'
+import { Search, SlidersHorizontal, UserCheck, ChevronDown } from 'lucide-react'
 import { CATEGORIAS_FILTRO, FRANJAS_FILTRO, CUANDO_FILTRO } from './filtros'
 
 const filtroCampoClass =
@@ -22,6 +23,10 @@ const filtroToggleInactivoClass =
 
 // f = useClasesListado, seg = useUsuarioYSeguidos.
 export default function FiltrosClases({ f, seg }) {
+  // Panel cerrado por defecto. Los valores viven en useClasesListado, así que
+  // abrir/cerrar no los toca; el panel solo se oculta (no se desmonta).
+  const [abierto, setAbierto] = useState(false)
+
   // El filtrado ya se aplica al escribir; el botón "Buscar" (o Intro) cierra
   // el teclado en móvil y lleva la vista a los resultados, para que quede
   // claro que se ha hecho la búsqueda.
@@ -32,7 +37,23 @@ export default function FiltrosClases({ f, seg }) {
   }
 
   return (
-    <div className="mb-8 flex flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5">
+    <div className="mb-6">
+      <button
+        type="button"
+        onClick={() => setAbierto((v) => !v)}
+        aria-expanded={abierto}
+        aria-controls="panel-filtros-sesiones"
+        className="flex w-full items-center justify-center gap-2 corte-btn border-2 border-[#B5E600] bg-white px-5 py-2.5 text-sm font-bold text-[#3D4A00] shadow-md transition-colors hover:bg-[#F5F7E8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F2400] focus-visible:ring-offset-2 sm:w-auto"
+      >
+        <SlidersHorizontal className="h-4 w-4" strokeWidth={1.75} />
+        Filtros
+        <ChevronDown className={`h-4 w-4 transition-transform ${abierto ? 'rotate-180' : ''}`} strokeWidth={1.75} />
+      </button>
+
+      <div
+        id="panel-filtros-sesiones"
+        className={`${abierto ? 'flex' : 'hidden'} mt-4 flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5`}
+      >
       <form role="search" onSubmit={handleBuscar} className="w-full">
         <label htmlFor="busqueda-sesiones" className={filtroLabelClass}>Buscar actividad</label>
         <div className="flex gap-2">
@@ -133,6 +154,7 @@ export default function FiltrosClases({ f, seg }) {
           </label>
         </div>
       )}
+      </div>
     </div>
   )
 }
