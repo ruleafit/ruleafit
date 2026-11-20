@@ -12,6 +12,8 @@ import { ESTILO_POR_CATEGORIA, ESTILO_POR_DEFECTO } from '../lib/imagenesCategor
 import BuscadorDireccion from './BuscadorDireccion'
 import { iconoBusqueda } from '../lib/iconoBusqueda'
 import { obtenerPosicion } from '../lib/nativo'
+import { CalendarDays, Clock } from 'lucide-react'
+import { formatearFechaParaMostrar, formatearHoraParaMostrar, diaSemanaParaMostrar } from '../lib/formatoFecha'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -205,6 +207,23 @@ export default function MapaClases({ clases }) {
                     <br />
                     {clase.categoria}
                     <br />
+                    {/* Fecha y hora (hora de España): así se distinguen sesiones
+                        idénticas de un mismo centro en distintos días. */}
+                    {clase.fecha && (
+                      <span className="my-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 corte-tag bg-[#EDF5C9] px-2 py-1 text-xs font-bold text-[#1F2400]">
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                          <span className="capitalize">{diaSemanaParaMostrar(clase.fecha)}</span>{' '}
+                          {formatearFechaParaMostrar(clase.fecha)}
+                        </span>
+                        {clase.hora && (
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                            {formatearHoraParaMostrar(clase.hora)}
+                          </span>
+                        )}
+                      </span>
+                    )}
                     {clase.precio} €
                     <br />
                     {plazasLibres}/{plazasMax} plazas libres
