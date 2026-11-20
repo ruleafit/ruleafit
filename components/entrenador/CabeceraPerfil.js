@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import BotonSeguir from '../BotonSeguir'
+import BotonFavorito from '../BotonFavorito'
 import BotonDenunciar from '../BotonDenunciar'
 import BotonBloquear from '../BotonBloquear'
 
@@ -50,7 +51,12 @@ export default function CabeceraPerfil({ perfil, clasesActivas, rulosSaldo, usua
         </span>
       </div>
 
-      <BotonSeguir entrenadorId={perfil.id} usuarioActual={usuarioActual} />
+      {/* Dos acciones independientes: Seguir (social) y Favoritos (privado,
+          sql/078). */}
+      <div className="flex flex-wrap items-start justify-center gap-3">
+        <BotonSeguir entrenadorId={perfil.id} usuarioActual={usuarioActual} />
+        <BotonFavorito favoritoId={perfil.id} usuarioActual={usuarioActual} />
+      </div>
 
       <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
         <BotonDenunciar

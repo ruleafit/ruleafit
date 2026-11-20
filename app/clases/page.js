@@ -4,11 +4,11 @@ import CabeceraClases from '../../components/clases/CabeceraClases'
 import FiltrosClases from '../../components/clases/FiltrosClases'
 import MapaYLeyenda from '../../components/clases/MapaYLeyenda'
 import ListaClases from '../../components/clases/ListaClases'
-import useUsuarioYSeguidos from '../../components/clases/useUsuarioYSeguidos'
+import useUsuarioYFavoritos from '../../components/clases/useUsuarioYFavoritos'
 import useClasesListado from '../../components/clases/useClasesListado'
 
 export default function ClasesPage() {
-  const seg = useUsuarioYSeguidos()
+  const seg = useUsuarioYFavoritos()
   const f = useClasesListado(seg)
 
   if (f.cargando) {

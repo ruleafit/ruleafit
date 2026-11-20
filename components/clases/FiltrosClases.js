@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, SlidersHorizontal, UserCheck, ChevronDown } from 'lucide-react'
+import { Search, SlidersHorizontal, Star, ChevronDown, X } from 'lucide-react'
 import { CATEGORIAS_FILTRO, FRANJAS_FILTRO, CUANDO_FILTRO } from './filtros'
 
 const filtroCampoClass =
@@ -9,7 +9,7 @@ const filtroCampoClass =
 
 const filtroLabelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wide text-[#6B7355]'
 
-// Filtro "solo sesiones de ruleros a los que sigo" (pedido por el usuario el
+// Filtro "Usuarios favoritos" (antes "ruleros a los que sigo"; pedido el
 // 23 sept 2026): botón toggle, no un desplegable como el resto de filtros,
 // ya que es un sí/no. Ajustado el mismo día a petición del usuario: el
 // botón lleva solo el icono (el texto va fuera, al lado), algo más grande,
@@ -21,7 +21,7 @@ const filtroToggleActivoClass =
 const filtroToggleInactivoClass =
   'flex shrink-0 items-center justify-center corte-btn border-2 border-[#B5E600] bg-white p-2.5 text-[#3D4A00] shadow-md transition-colors hover:bg-[#F5F7E8]'
 
-// f = useClasesListado, seg = useUsuarioYSeguidos.
+// f = useClasesListado, seg = useUsuarioYFavoritos.
 export default function FiltrosClases({ f, seg }) {
   // Panel cerrado por defecto. Los valores viven en useClasesListado, así que
   // abrir/cerrar no los toca; el panel solo se oculta (no se desmonta).
@@ -38,6 +38,21 @@ export default function FiltrosClases({ f, seg }) {
 
   return (
     <div className="mb-2">
+      {f.soloRulero && (
+        <div className="mb-2 flex flex-wrap items-center gap-2 corte-tag border border-[#B5E600] bg-[#EDF5C9] px-3 py-2 text-sm font-semibold text-[#3D4A00]">
+          <span>
+            Sesiones de {f.usernameRulero ? `@${f.usernameRulero}` : 'este rulero'}
+          </span>
+          <button
+            type="button"
+            onClick={f.quitarFiltroRulero}
+            className="inline-flex items-center gap-1 text-xs font-bold underline decoration-[#B5E600] decoration-2 underline-offset-2 hover:text-[#1F2400]"
+          >
+            <X className="h-3.5 w-3.5" strokeWidth={2} />
+            Ver todas
+          </button>
+        </div>
+      )}
       <button
         type="button"
         onClick={() => setAbierto((v) => !v)}
@@ -132,21 +147,21 @@ export default function FiltrosClases({ f, seg }) {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => seg.setFiltroSoloSeguidos((valor) => !valor)}
-              aria-pressed={seg.filtroSoloSeguidos}
-              aria-label="Solo sesiones de ruleros a los que sigo"
-              className={seg.filtroSoloSeguidos ? filtroToggleActivoClass : filtroToggleInactivoClass}
+              onClick={() => seg.setFiltroSoloFavoritos((valor) => !valor)}
+              aria-pressed={seg.filtroSoloFavoritos}
+              aria-label="Usuarios favoritos"
+              className={seg.filtroSoloFavoritos ? filtroToggleActivoClass : filtroToggleInactivoClass}
             >
-              <UserCheck className="h-5 w-5" strokeWidth={1.75} />
+              <Star className="h-5 w-5" strokeWidth={1.75} />
             </button>
             <span className="text-sm font-medium text-[#3D4A00]">
-              Solo sesiones de ruleros a los que sigo
+              Usuarios favoritos
             </span>
           </div>
           <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-[#6B7355]">
             <input
               type="checkbox"
-              checked={seg.filtroSoloSeguidosFijado}
+              checked={seg.filtroSoloFavoritosFijado}
               onChange={(e) => seg.handleCambiarFijado(e.target.checked)}
               className="h-4 w-4 accent-[#B5E600]"
             />

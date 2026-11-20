@@ -12,7 +12,7 @@ import { supabase } from '../lib/supabaseClient'
 // agrupadas visualmente en dos bloques, porque un mismo usuario puede
 // tener a la vez una reserva próxima y una sesión propia próxima.
 const CATEGORIAS_PARTICIPANTE = [
-  { clave: 'publicaciones',    etiqueta: 'Nuevas sesiones de usuarios que sigo' },
+  { clave: 'publicaciones',    etiqueta: 'Nuevas sesiones de mis ruleros favoritos' },
   { clave: 'recordatorio_24h', etiqueta: 'Recordatorio 24 horas antes' },
   { clave: 'recordatorio_7h',  etiqueta: 'Recordatorio 7 horas antes' },
   { clave: 'recordatorio_2h',  etiqueta: 'Recordatorio 2 horas antes' },

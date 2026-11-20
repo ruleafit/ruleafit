@@ -69,10 +69,10 @@ export default function PerfilEntrenadorPage() {
 
         <div className="mt-8 text-center">
           <Link
-            href="/clases"
+            href={`/clases?rulero=${perfil.id}`}
             className="text-sm font-semibold text-[#3D4A00] underline decoration-[#B5E600] decoration-2 underline-offset-2 hover:text-[#1F2400]"
           >
-            Ver todas las sesiones
+            Ver las sesiones de @{perfil.username}
           </Link>
         </div>
       </div>

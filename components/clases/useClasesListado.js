@@ -14,9 +14,16 @@ import {
 } from './filtros'
 
 // Carga de sesiones, filtros y listado resultante. `seg` viene de
-// useUsuarioYSeguidos (bloqueados, seguidos y filtro de seguidos).
+// useUsuarioYFavoritos (bloqueados, favoritos y filtro de favoritos).
 export default function useClasesListado(seg) {
-  const { bloqueadosIds, seguidosIds, filtroSoloSeguidos, setFiltroSoloSeguidos } = seg
+  const { bloqueadosIds, favoritosIds, filtroSoloFavoritos, setFiltroSoloFavoritos } = seg
+  // Sesiones de un solo rulero: llega por enlace desde su perfil
+  // (/clases?rulero=<id>). Se lee en el navegador al montar.
+  const [soloRulero, setSoloRulero] = useState(null)
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('rulero')
+    if (id) setSoloRulero(id)
+  }, [])
   const [clases, setClases] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
@@ -48,11 +55,12 @@ export default function useClasesListado(seg) {
     const coincideCategoria = filtroCategoria === 'Todas' || clase.categoria === filtroCategoria
     const coincideFecha = coincideConCuando(clase.fecha, filtroCuando, hoy)
     const coincideFranja = filtroFranja === 'Todas' || franjaDeHora(clase.hora) === filtroFranja
-    const coincideSeguidos = !filtroSoloSeguidos || seguidosIds.includes(clase.trainer_id)
+    const coincideFavoritos = !filtroSoloFavoritos || favoritosIds.includes(clase.trainer_id)
+    const coincideRulero = !soloRulero || clase.trainer_id === soloRulero
 
     const coincideTexto = coincideConBusqueda(clase, busqueda)
 
-    return coincideCategoria && coincideFecha && coincideFranja && coincideSeguidos && coincideTexto
+    return coincideCategoria && coincideFecha && coincideFranja && coincideFavoritos && coincideRulero && coincideTexto
   })
 
   // Si en la ciudad escrita no hay sesiones que cumplan los filtros (porque no
@@ -91,7 +99,13 @@ export default function useClasesListado(seg) {
     setFiltroCategoria('Todas')
     setFiltroCuando('Todas')
     setFiltroFranja('Todas')
-    setFiltroSoloSeguidos(false)
+    setFiltroSoloFavoritos(false)
+    quitarFiltroRulero()
+  }
+
+  function quitarFiltroRulero() {
+    setSoloRulero(null)
+    window.history.replaceState(null, '', window.location.pathname)
   }
 
   useEffect(() => {
@@ -115,6 +129,11 @@ export default function useClasesListado(seg) {
   // Sugerencias del campo de ciudad: las ciudades y provincias que tienen sesiones ahora.
   const ciudadesDisponibles = [...new Set(clases.flatMap((c) => [c.ciudad, c.provincia]).filter(Boolean))].sort()
 
+  // Nombre del rulero filtrado (si tiene sesiones activas cargadas).
+  const usernameRulero = soloRulero
+    ? clases.find((c) => c.trainer_id === soloRulero)?.perfiles?.username || null
+    : null
+
   const mostrandoCercanas = !!textoCiudad && !hayEnLaCiudadConFiltros && puntoCiudad?.texto === textoCiudad
 
   const clasesFiltradas = mostrandoCercanas
@@ -133,5 +152,6 @@ export default function useClasesListado(seg) {
     textoCiudad, puntoCiudad, buscandoCiudad, hayAlgunaEnLaCiudad,
     hayEnLaCiudadConFiltros, mostrandoCercanas, ciudadesDisponibles,
     clasesFiltradas, limpiarFiltros, handleReservado,
+    soloRulero, usernameRulero, quitarFiltroRulero,
   }
 }

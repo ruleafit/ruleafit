@@ -18,7 +18,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - `sql/071_pagos_tablas.sql`, `sql/072_pagos_funciones.sql` (comisión/cobros en BD), `sql/073_reservar_exige_pago.sql`.
 - `lib/supabaseAdmin.js` — cliente service role; solo importable desde código de servidor.
 - `lib/supabaseClient.js` — cliente público. Reservas: `components/BotonReservar.js`, `sql/001_reservas.sql`.
-- `components/` modular por pantalla: `cuenta`, `publicar`, `clases`, `entrenador`, `home`, `mis-clases`, `mis-reservas`, `editar-clase`. Cada `app/**/page.js` es solo un contenedor (<110 líneas): ve directo al subcomponente (`use*.js` = carga de datos, `Bloque*`/`Tarjeta*`/`Lista*` = UI). `BotonReservar.js` y `PerfilFiscal.js` se mantienen sin dividir a propósito (flujos de pago/fiscal).
+- `components/` modular por pantalla: `cuenta`, `publicar`, `clases`, `entrenador`, `home`, `mis-clases`, `mis-reservas`, `editar-clase`, `ruleros`. Cada `app/**/page.js` es solo un contenedor (<110 líneas): ve directo al subcomponente (`use*.js` = carga de datos, `Bloque*`/`Tarjeta*`/`Lista*` = UI). `BotonReservar.js` y `PerfilFiscal.js` se mantienen sin dividir a propósito (flujos de pago/fiscal).
 - `docs/plan-pagos-fase-1.md`, `docs/auditoria-seguridad.md` — plan y auditoría. Estado general: `PROGRESS.md`.
 
 ## Reglas estrictas
@@ -40,6 +40,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - Rulos: puntos de fidelización (no dinero): 20 de bienvenida y 5 por asistencia confirmada (`marcar_asistencia()`). No se compran, retiran ni transfieren.
 - Ciudad con autocompletado Nominatim (`lib/geocodificar.js`); `clases.provincia`; mapa Leaflet + OpenStreetMap.
 - Clases con `plazas_min` opcional; el entrenador puede cancelar la clase entera (`cancelar_clase()`).
+- Seguir (`seguimientos`, público) y Favoritos (`favoritos`, privado, `sql/078`) son independientes. Solo Favoritos alimenta el filtro "Usuarios favoritos" de /clases y las notificaciones de nuevas sesiones (preferencia `publicaciones`).
 - Perfiles: `public.perfiles` (username único 3-20 caracteres), creado por trigger en auth.users.
 - Detalle histórico de decisiones y fases: PROGRESS.md.
 
