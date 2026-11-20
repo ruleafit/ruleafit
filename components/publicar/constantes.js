@@ -4,8 +4,8 @@ export const CATEGORIAS = [
   'Fuerza / funcional',
   'Cardio',
   'Yoga / Pilates / movilidad',
-  'Otros',
   'Quedadas deportivas',
+  'Otros',
 ]
 
 export const NIVELES = ['Principiante', 'Intermedio', 'Avanzado', 'Todos los niveles']

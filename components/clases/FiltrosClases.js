@@ -37,7 +37,7 @@ export default function FiltrosClases({ f, seg }) {
   }
 
   return (
-    <div className="mb-6">
+    <div className="mb-2">
       <button
         type="button"
         onClick={() => setAbierto((v) => !v)}
@@ -52,7 +52,7 @@ export default function FiltrosClases({ f, seg }) {
 
       <div
         id="panel-filtros-sesiones"
-        className={`${abierto ? 'flex' : 'hidden'} mt-4 flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5`}
+        className={`${abierto ? 'flex' : 'hidden'} mt-2 flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5`}
       >
       <form role="search" onSubmit={handleBuscar} className="w-full">
         <label htmlFor="busqueda-sesiones" className={filtroLabelClass}>Buscar actividad</label>

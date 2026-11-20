@@ -45,8 +45,8 @@ export const CATEGORIAS = [
   { nombre: 'Fuerza / funcional', imagen: '/imagenes/fuerza.jpg' },
   { nombre: 'Cardio', imagen: '/imagenes/running.jpg' },
   { nombre: 'Yoga / Pilates / movilidad', imagen: '/imagenes/yoga.jpg' },
-  { nombre: 'Otros', imagen: '/imagenes/combate.jpg' },
   { nombre: 'Quedadas deportivas', imagen: '/imagenes/comunidad.jpg' },
+  { nombre: 'Otros', imagen: '/imagenes/combate.jpg' },
 ]
 
 // Unificados en una sola lista (Fase 3): antes eran dos ternas alternativas

@@ -23,7 +23,7 @@ export default function ClasesPage() {
     <div className="flex flex-1 flex-col">
       <CabeceraClases />
 
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-5xl px-4 pb-10 pt-3 sm:px-6">
         {f.error && <p className="mb-4 text-sm text-red-600">{f.error}</p>}
 
         {!f.error && f.totalClases === 0 && <p className="text-sm text-[#6B7355]">No hay sesiones disponibles por ahora.</p>}

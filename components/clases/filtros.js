@@ -3,8 +3,8 @@ export const CATEGORIAS_FILTRO = [
   'Fuerza / funcional',
   'Cardio',
   'Yoga / Pilates / movilidad',
-  'Otros',
   'Quedadas deportivas',
+  'Otros',
 ]
 
 export const FRANJAS_FILTRO = [
