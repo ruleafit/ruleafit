@@ -112,7 +112,7 @@ export default function useClasesListado(seg) {
     async function cargarClases() {
       const { data, error } = await supabase
         .from('clases')
-        .select('*, perfiles(username)')
+        .select('*, perfiles(username, foto_url)')
         .eq('estado', 'activa')
         .order('fecha', { ascending: true })
 

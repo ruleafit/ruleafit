@@ -8,7 +8,6 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css'
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css'
-import { ESTILO_POR_CATEGORIA, ESTILO_POR_DEFECTO } from '../lib/imagenesCategoria'
 import BuscadorDireccion from './BuscadorDireccion'
 import { iconoBusqueda } from '../lib/iconoBusqueda'
 import { obtenerPosicion } from '../lib/nativo'
@@ -26,33 +25,36 @@ L.Icon.Default.mergeOptions({
 const CENTRO_ESPANA = [40.2, -3.7]
 const ZOOM_ESPANA = 6
 
-// Formas dibujadas en el tramo superior del icono (viewBox 40x48, centradas en x=20).
-const FORMAS_MARCADOR = {
-  circulo: (color) => `<circle cx="20" cy="19" r="17" fill="${color}" stroke="#fff" stroke-width="2" />`,
-  triangulo: (color) =>
-    `<polygon points="20,2 37,36 3,36" fill="${color}" stroke="#fff" stroke-width="2" stroke-linejoin="round" />`,
-  cuadrado: (color) => `<rect x="3" y="2" width="34" height="34" rx="4" fill="${color}" stroke="#fff" stroke-width="2" />`,
-  rombo: (color) =>
-    `<rect x="7.98" y="6.98" width="24.04" height="24.04" rx="2" fill="${color}" stroke="#fff" stroke-width="2" transform="rotate(45 20 19)" />`,
+// Marcador circular con la foto de perfil de quien publica la sesión (misma
+// foto_url que el perfil público, llega con la consulta de sesiones). Sin foto,
+// o si no carga, se ve la inicial sobre lima, como el avatar del perfil. Los
+// iconos se guardan en caché para no recrearlos en cada render.
+const TAM_MARCADOR = 44
+const cacheIconos = new Map()
+
+function escaparHtml(texto) {
+  return String(texto ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 }
 
-// Pico inferior que señala el punto exacto de la clase; su punta (20,47) es el punto de anclaje del icono.
-function picoMarcador(color) {
-  return `<polygon points="13,37 27,37 20,47" fill="${color}" stroke="#fff" stroke-width="2" stroke-linejoin="round" />`
-}
+function iconoOrganizador(perfil) {
+  const clave = `${perfil?.foto_url || ''}|${perfil?.username || ''}`
+  const guardado = cacheIconos.get(clave)
+  if (guardado) return guardado
 
-function iconoPorCategoria(categoria) {
-  const estilo = ESTILO_POR_CATEGORIA[categoria] || ESTILO_POR_DEFECTO
-  const dibujarForma = FORMAS_MARCADOR[estilo.forma] || FORMAS_MARCADOR.circulo
-  const svg = `<svg width="40" height="48" viewBox="0 0 40 48" xmlns="http://www.w3.org/2000/svg">${picoMarcador(estilo.color)}${dibujarForma(estilo.color)}</svg>`
+  const inicial = escaparHtml((perfil?.username || '?').charAt(0).toUpperCase())
+  const foto = perfil?.foto_url
+    ? `<img src="${escaparHtml(perfil.foto_url)}" alt="" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />`
+    : ''
 
-  return L.divIcon({
-    html: `<div style="width:40px;height:48px;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.45));">${svg}</div>`,
+  const icono = L.divIcon({
+    html: `<div style="position:relative;width:${TAM_MARCADOR}px;height:${TAM_MARCADOR}px;border-radius:50%;overflow:hidden;box-sizing:border-box;background:#B5E600;border:3px solid #fff;box-shadow:0 0 0 2px #3D4A00,0 2px 5px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;color:#1F2400;font-weight:800;font-size:18px;line-height:1;">${inicial}${foto}</div>`,
     className: '',
-    iconSize: [40, 48],
-    iconAnchor: [20, 47],
-    popupAnchor: [0, -44],
+    iconSize: [TAM_MARCADOR, TAM_MARCADOR],
+    iconAnchor: [TAM_MARCADOR / 2, TAM_MARCADOR / 2],
+    popupAnchor: [0, -TAM_MARCADOR / 2],
   })
+  cacheIconos.set(clave, icono)
+  return icono
 }
 
 function iconoCluster(cluster) {
@@ -201,7 +203,7 @@ export default function MapaClases({ clases }) {
               const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
 
               return (
-                <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoPorCategoria(clase.categoria)}>
+                <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoOrganizador(clase.perfiles)}>
                   <Popup>
                     <strong>{clase.titulo}</strong>
                     <br />
