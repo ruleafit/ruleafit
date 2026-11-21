@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import NotificacionesToggle from '../NotificacionesToggle'
 import PreferenciasNotificaciones from '../PreferenciasNotificaciones'
 import HistorialNotificaciones from '../HistorialNotificaciones'
+import AvisosZona from './AvisosZona'
+import { AVISOS_ZONA_VISIBLES } from '../../lib/avisosZonaVisibles'
 
 export default function NotificacionesCuenta({ usuario }) {
   const [pushActivadas, setPushActivadas] = useState(false)
@@ -33,6 +35,7 @@ export default function NotificacionesCuenta({ usuario }) {
   }, [])
 
   return (
+    <>
     <div id="notificaciones" className="solo-web mb-8 scroll-mt-24 corte-card border border-[#E2E6CF] bg-white p-6">
       <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Notificaciones</h2>
       <p className="mb-4 text-sm text-[#6B7355]">
@@ -48,5 +51,8 @@ export default function NotificacionesCuenta({ usuario }) {
         <HistorialNotificaciones usuarioActual={usuario} />
       </div>
     </div>
+    {/* Fuera del bloque solo-web: la configuración se ve también en la app de iPhone. */}
+    {AVISOS_ZONA_VISIBLES && <AvisosZona usuario={usuario} />}
+    </>
   )
 }
