@@ -75,9 +75,9 @@ export default function CuentaPage() {
 
         <EstadisticasCuenta {...datos} />
 
-        <MovimientosRulos movimientos={datos.rulosMovimientos} motivos={datos.rulosMotivos} />
-
         <NotificacionesCuenta usuario={usuario} />
+
+        <MovimientosRulos movimientos={datos.rulosMovimientos} motivos={datos.rulosMotivos} />
 
         <PerfilFiscal usuario={usuario} />
 
