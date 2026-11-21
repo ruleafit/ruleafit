@@ -47,6 +47,13 @@ export default function PerfilEntrenadorPage() {
       />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
+        <ProximasSesionesPerfil
+          perfil={perfil}
+          clases={datos.clasesProximas}
+          usuarioActual={usuarioActual}
+          onReservado={datos.actualizarPlazas}
+        />
+
         <div className="corte-card border border-[#E2E6CF] bg-white p-6">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
             Sobre @{perfil.username}
@@ -66,13 +73,6 @@ export default function PerfilEntrenadorPage() {
           puedeValorar={datos.puedeValorar}
           valoracionPropia={datos.valoracionPropia}
           onValoracionGuardada={datos.recargarValoraciones}
-        />
-
-        <ProximasSesionesPerfil
-          perfil={perfil}
-          clases={datos.clasesProximas}
-          usuarioActual={usuarioActual}
-          onReservado={datos.actualizarPlazas}
         />
 
         <div className="mt-8 text-center">
