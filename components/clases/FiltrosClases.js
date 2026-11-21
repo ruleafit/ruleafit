@@ -69,6 +69,27 @@ export default function FiltrosClases({ f, seg }) {
         id="panel-filtros-sesiones"
         className={`${abierto ? 'flex' : 'hidden'} mt-2 flex-col gap-4 corte-card border border-[#E2E6CF] bg-white/70 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-6 sm:p-5`}
       >
+      {/* Primer filtro del panel. Siempre arranca desactivado: se activa a mano. */}
+      {seg.usuario && (
+        <div>
+          <label className={filtroLabelClass}>Ruleros</label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => seg.setFiltroSoloFavoritos((valor) => !valor)}
+              aria-pressed={seg.filtroSoloFavoritos}
+              aria-label="Usuarios favoritos"
+              className={seg.filtroSoloFavoritos ? filtroToggleActivoClass : filtroToggleInactivoClass}
+            >
+              <Star className="h-5 w-5" strokeWidth={1.75} />
+            </button>
+            <span className="text-sm font-medium text-[#3D4A00]">
+              Usuarios favoritos
+            </span>
+          </div>
+        </div>
+      )}
+
       <form role="search" onSubmit={handleBuscar} className="w-full">
         <label htmlFor="busqueda-sesiones" className={filtroLabelClass}>Buscar actividad</label>
         <div className="flex gap-2">
@@ -141,34 +162,6 @@ export default function FiltrosClases({ f, seg }) {
         </select>
       </div>
 
-      {seg.usuario && (
-        <div>
-          <label className={filtroLabelClass}>Ruleros</label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => seg.setFiltroSoloFavoritos((valor) => !valor)}
-              aria-pressed={seg.filtroSoloFavoritos}
-              aria-label="Usuarios favoritos"
-              className={seg.filtroSoloFavoritos ? filtroToggleActivoClass : filtroToggleInactivoClass}
-            >
-              <Star className="h-5 w-5" strokeWidth={1.75} />
-            </button>
-            <span className="text-sm font-medium text-[#3D4A00]">
-              Usuarios favoritos
-            </span>
-          </div>
-          <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-[#6B7355]">
-            <input
-              type="checkbox"
-              checked={seg.filtroSoloFavoritosFijado}
-              onChange={(e) => seg.handleCambiarFijado(e.target.checked)}
-              className="h-4 w-4 accent-[#B5E600]"
-            />
-            Mantener este filtro activado siempre que entre
-          </label>
-        </div>
-      )}
       </div>
     </div>
   )

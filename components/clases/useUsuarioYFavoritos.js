@@ -7,7 +7,6 @@ import { useBloqueados } from '../../lib/useBloqueados'
 // Usuario con sesión, usuarios bloqueados y filtro "Usuarios favoritos".
 export default function useUsuarioYFavoritos() {
   const [filtroSoloFavoritos, setFiltroSoloFavoritos] = useState(false)
-  const [filtroSoloFavoritosFijado, setFiltroSoloFavoritosFijado] = useState(false)
   const [favoritosIds, setFavoritosIds] = useState([])
   const [usuario, setUsuario] = useState(null)
   const bloqueadosIds = useBloqueados(usuario)
@@ -32,47 +31,28 @@ export default function useUsuarioYFavoritos() {
   // la lista del usuario logueado y se filtra por trainer_id. Sin sesión no
   // hay favoritos: el botón no se muestra y el filtro se apaga.
   //
-  // "Mantener este filtro activado siempre que entre": la preferencia se
-  // guarda en la cuenta (perfiles.filtro_clases_solo_favoritos, sql/078; la
-  // columna de seguidos de sql/065 queda sin uso) para que siga al usuario
-  // aunque cambie de dispositivo.
+  // El filtro SIEMPRE arranca desactivado: ya no se guarda ni se recupera
+  // ninguna preferencia de "mantener activado". Las columnas antiguas
+  // perfiles.filtro_clases_solo_seguidos (sql/065) y
+  // perfiles.filtro_clases_solo_favoritos (sql/078) quedan sin uso en la
+  // base de datos (no se borran) y esta pantalla no las lee.
   useEffect(() => {
-    async function cargarFavoritosYPreferencia() {
+    async function cargarFavoritos() {
       if (!usuario) {
         setFavoritosIds([])
         setFiltroSoloFavoritos(false)
-        setFiltroSoloFavoritosFijado(false)
         return
       }
 
-      const [{ data: favoritos }, { data: perfil }] = await Promise.all([
-        supabase.from('favoritos').select('favorito_id').eq('usuario_id', usuario.id),
-        supabase
-          .from('perfiles')
-          .select('filtro_clases_solo_favoritos')
-          .eq('id', usuario.id)
-          .maybeSingle(),
-      ])
+      const { data: favoritos } = await supabase
+        .from('favoritos')
+        .select('favorito_id')
+        .eq('usuario_id', usuario.id)
 
       setFavoritosIds((favoritos || []).map((fila) => fila.favorito_id))
-
-      const fijado = perfil?.filtro_clases_solo_favoritos ?? false
-      setFiltroSoloFavoritosFijado(fijado)
-      if (fijado) setFiltroSoloFavoritos(true)
     }
-    cargarFavoritosYPreferencia()
+    cargarFavoritos()
   }, [usuario])
-
-  async function handleCambiarFijado(nuevoValor) {
-    setFiltroSoloFavoritosFijado(nuevoValor)
-    if (nuevoValor) setFiltroSoloFavoritos(true)
-
-    if (!usuario) return
-    await supabase
-      .from('perfiles')
-      .update({ filtro_clases_solo_favoritos: nuevoValor })
-      .eq('id', usuario.id)
-  }
 
   return {
     usuario,
@@ -80,7 +60,5 @@ export default function useUsuarioYFavoritos() {
     favoritosIds,
     filtroSoloFavoritos,
     setFiltroSoloFavoritos,
-    filtroSoloFavoritosFijado,
-    handleCambiarFijado,
   }
 }
