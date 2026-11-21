@@ -36,7 +36,7 @@ export default function NotificacionesCuenta({ usuario }) {
     <div id="notificaciones" className="solo-web mb-8 scroll-mt-24 corte-card border border-[#E2E6CF] bg-white p-6">
       <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Notificaciones</h2>
       <p className="mb-4 text-sm text-[#6B7355]">
-        Recibe avisos en tu móvil cuando los usuarios que sigues publiquen sesiones y sobre tus reservas.
+        Recibe avisos en tu móvil cuando tus usuarios favoritos publiquen sesiones y sobre tus reservas.
       </p>
       <NotificacionesToggle usuarioActual={usuario} onCambioEstado={setPushActivadas} />
       <div className="mt-6">
