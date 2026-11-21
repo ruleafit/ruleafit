@@ -14,6 +14,7 @@ export default function usePerfilEntrenador(username) {
   const [perfil, setPerfil] = useState(null)
   const [rulosSaldo, setRulosSaldo] = useState(0)
   const [clasesActivas, setClasesActivas] = useState(0)
+  const [clasesProximas, setClasesProximas] = useState([])
   const [cargando, setCargando] = useState(true)
   const [noEncontrado, setNoEncontrado] = useState(false)
   const [promedioEstrellas, setPromedioEstrellas] = useState(null)
@@ -69,12 +70,19 @@ export default function usePerfilEntrenador(username) {
 
       const { data: clasesData } = await supabase
         .from('clases')
-        .select('fecha, hora')
+        .select('*, perfiles(username)')
         .eq('trainer_id', perfilData.id)
         .eq('estado', 'activa')
 
-      const activas = (clasesData || []).filter((clase) => !claseYaPaso(clase)).length
-      setClasesActivas(activas)
+      // Misma consulta de siempre, ahora con los datos completos para pintar
+      // las tarjetas del calendario: solo activas que aún no han empezado.
+      const proximas = (clasesData || [])
+        .filter((clase) => !claseYaPaso(clase))
+        .sort((a, b) =>
+          `${a.fecha} ${String(a.hora).slice(0, 5)}` < `${b.fecha} ${String(b.hora).slice(0, 5)}` ? -1 : 1
+        )
+      setClasesProximas(proximas)
+      setClasesActivas(proximas.length)
 
       const { data: bonosData } = await supabase
         .from('bonos')
@@ -106,6 +114,11 @@ export default function usePerfilEntrenador(username) {
     perfil,
     rulosSaldo,
     clasesActivas,
+    clasesProximas,
+    actualizarPlazas: (claseId, plazasOcupadas) =>
+      setClasesProximas((prev) =>
+        prev.map((c) => (c.id === claseId ? { ...c, plazas_ocupadas: plazasOcupadas } : c))
+      ),
     cargando,
     noEncontrado,
     promedioEstrellas,

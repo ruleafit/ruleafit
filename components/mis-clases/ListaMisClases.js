@@ -1,7 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { ClipboardList, CircleAlert } from 'lucide-react'
+import CalendarioSesiones from '../CalendarioSesiones'
+import BarraDiaCalendario from '../BarraDiaCalendario'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import TituloBloque from '../publicar/TituloBloque'
@@ -23,6 +26,17 @@ export default function ListaMisClases({ m }) {
   const clasesRealizadas = clasesConAlumnos.filter(
     (c) => c.estado !== 'cancelada' && claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora })
   ).length
+
+  // Calendario: días con sesiones futuras activas en lima. Con un día elegido
+  // solo se listan las sesiones de esa fecha (por hora); las ya empezadas de
+  // hoy salen atenuadas y sin botón de cancelar (lo decide TarjetaMisClase).
+  const [diaSel, setDiaSel] = useState(null)
+  const diasConSesiones = new Set(clasesProximas.map((c) => c.clase_fecha))
+  const clasesDelDia = diaSel
+    ? clasesConAlumnos
+        .filter((c) => c.clase_fecha === diaSel)
+        .sort((a, b) => (claveFechaHora(a) < claveFechaHora(b) ? -1 : 1))
+    : []
 
   function tarjeta(clase, indice, atenuada) {
     return (
@@ -63,13 +77,31 @@ export default function ListaMisClases({ m }) {
 
       {!error && clasesConAlumnos.length > 0 && (
         <>
+          <CalendarioSesiones
+            diasConSesiones={diasConSesiones}
+            seleccionado={diaSel}
+            onSeleccionar={setDiaSel}
+          />
+
           <TituloBloque Icono={ClipboardList}>Tus sesiones</TituloBloque>
 
+          {diaSel && <BarraDiaCalendario fecha={diaSel} onVerTodas={() => setDiaSel(null)} />}
+
+          {diaSel && clasesDelDia.length === 0 && (
+            <p className="corte-card border border-[#E2E6CF] bg-white px-4 py-6 text-center text-sm text-[#6B7355]">
+              No hay sesiones para esta fecha.
+            </p>
+          )}
+
           <div className="flex flex-col gap-5">
-            {clasesProximas.map((clase, indice) => tarjeta(clase, indice, false))}
+            {diaSel
+              ? clasesDelDia.map((clase, indice) =>
+                  tarjeta(clase, indice, claseYaPaso({ fecha: clase.clase_fecha, hora: clase.clase_hora }))
+                )
+              : clasesProximas.map((clase, indice) => tarjeta(clase, indice, false))}
           </div>
 
-          {clasesPasadas.length > 0 && (
+          {!diaSel && clasesPasadas.length > 0 && (
             <div className="mt-10">
               <div className="mb-4 flex items-center justify-between border-b border-[#E2E6CF] pb-2">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Historial</h2>

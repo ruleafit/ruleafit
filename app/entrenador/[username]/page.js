@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { SearchX } from 'lucide-react'
 import usePerfilEntrenador from '../../../components/entrenador/usePerfilEntrenador'
 import CabeceraPerfil from '../../../components/entrenador/CabeceraPerfil'
+import ProximasSesionesPerfil from '../../../components/entrenador/ProximasSesionesPerfil'
 import BonosEntrenador from '../../../components/entrenador/BonosEntrenador'
 import ValoracionesEntrenador from '../../../components/entrenador/ValoracionesEntrenador'
 
@@ -65,6 +66,13 @@ export default function PerfilEntrenadorPage() {
           puedeValorar={datos.puedeValorar}
           valoracionPropia={datos.valoracionPropia}
           onValoracionGuardada={datos.recargarValoraciones}
+        />
+
+        <ProximasSesionesPerfil
+          perfil={perfil}
+          clases={datos.clasesProximas}
+          usuarioActual={usuarioActual}
+          onReservado={datos.actualizarPlazas}
         />
 
         <div className="mt-8 text-center">
