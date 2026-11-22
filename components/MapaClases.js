@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -11,8 +11,10 @@ import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css'
 import BuscadorDireccion from './BuscadorDireccion'
 import { iconoBusqueda } from '../lib/iconoBusqueda'
 import { obtenerPosicion } from '../lib/nativo'
-import { CalendarDays, Clock } from 'lucide-react'
-import { formatearFechaParaMostrar, formatearHoraParaMostrar, diaSemanaParaMostrar } from '../lib/formatoFecha'
+import { iconoOrganizador } from './mapa/iconosMapa'
+import ContenidoPopupSesion from './mapa/ContenidoPopupSesion'
+import CapaMaximoZoom from './mapa/CapaMaximoZoom'
+import PanelSesionesMapa from './mapa/PanelSesionesMapa'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -24,38 +26,6 @@ L.Icon.Default.mergeOptions({
 // Vista inicial (y cuando no hay sesiones que mostrar): España entera.
 const CENTRO_ESPANA = [40.2, -3.7]
 const ZOOM_ESPANA = 6
-
-// Marcador circular con la foto de perfil de quien publica la sesión (misma
-// foto_url que el perfil público, llega con la consulta de sesiones). Sin foto,
-// o si no carga, se ve la inicial sobre lima, como el avatar del perfil. Los
-// iconos se guardan en caché para no recrearlos en cada render.
-const TAM_MARCADOR = 44
-const cacheIconos = new Map()
-
-function escaparHtml(texto) {
-  return String(texto ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
-}
-
-function iconoOrganizador(perfil) {
-  const clave = `${perfil?.foto_url || ''}|${perfil?.username || ''}`
-  const guardado = cacheIconos.get(clave)
-  if (guardado) return guardado
-
-  const inicial = escaparHtml((perfil?.username || '?').charAt(0).toUpperCase())
-  const foto = perfil?.foto_url
-    ? `<img src="${escaparHtml(perfil.foto_url)}" alt="" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />`
-    : ''
-
-  const icono = L.divIcon({
-    html: `<div style="position:relative;width:${TAM_MARCADOR}px;height:${TAM_MARCADOR}px;border-radius:50%;overflow:hidden;box-sizing:border-box;background:#B5E600;border:3px solid #fff;box-shadow:0 0 0 2px #3D4A00,0 2px 5px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;color:#1F2400;font-weight:800;font-size:18px;line-height:1;">${inicial}${foto}</div>`,
-    className: '',
-    iconSize: [TAM_MARCADOR, TAM_MARCADOR],
-    iconAnchor: [TAM_MARCADOR / 2, TAM_MARCADOR / 2],
-    popupAnchor: [0, -TAM_MARCADOR / 2],
-  })
-  cacheIconos.set(clave, icono)
-  return icono
-}
 
 function iconoCluster(cluster) {
   const cantidad = cluster.getChildCount()
@@ -113,6 +83,9 @@ function CentradorBusqueda({ coords }) {
 
 function AjustarEncuadre({ clases }) {
   const map = useMap()
+  // Solo se reencuadra cuando cambia QUÉ sesiones hay (filtros), no cada vez que el componente se
+  // vuelve a pintar (abrir/cerrar el panel, cambiar de zoom...): así se conserva la posición.
+  const firma = clases.map((c) => `${c.id}:${c.lat},${c.lng}`).join('|')
 
   useEffect(() => {
     if (clases.length === 0) {
@@ -122,17 +95,37 @@ function AjustarEncuadre({ clases }) {
 
     const bounds = L.latLngBounds(clases.map((c) => [c.lat, c.lng]))
     map.fitBounds(bounds, { padding: [40, 40] })
-  }, [clases, map])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firma, map])
 
   return null
 }
 
+// Avisa de si el mapa está en su zoom máximo. Solo ahí interviene la agrupación por organizador.
+function ObservadorZoomMaximo({ onCambio }) {
+  const map = useMap()
+  const evaluar = () => {
+    const max = map.getMaxZoom()
+    onCambio(Number.isFinite(max) && map.getZoom() >= max)
+  }
+  useMapEvents({ zoomend: evaluar })
+  useEffect(evaluar, [map])
+  return null
+}
+
 export default function MapaClases({ clases }) {
-  const conCoordenadas = clases.filter((c) => c.lat != null && c.lng != null)
+  const conCoordenadas = useMemo(() => clases.filter((c) => c.lat != null && c.lng != null), [clases])
   const [ubicacionUsuario, setUbicacionUsuario] = useState(null)
   const [buscandoUbicacion, setBuscandoUbicacion] = useState(false)
   const [errorUbicacion, setErrorUbicacion] = useState(null)
   const [coordsBusqueda, setCoordsBusqueda] = useState(null)
+  const [enZoomMaximo, setEnZoomMaximo] = useState(false)
+  const [panel, setPanel] = useState(null)
+
+  // Al salir del zoom máximo se recupera el comportamiento normal: el panel se cierra solo.
+  useEffect(() => {
+    if (!enZoomMaximo) setPanel(null)
+  }, [enZoomMaximo])
 
   function verMiUbicacion() {
     setBuscandoUbicacion(true)
@@ -196,52 +189,30 @@ export default function MapaClases({ clases }) {
               <Popup>Estás aquí</Popup>
             </Marker>
           )}
-          <MarkerClusterGroup iconCreateFunction={iconoCluster}>
-            {conCoordenadas.map((clase) => {
-              const plazasMax = clase.plazas_max ?? 0
-              const plazasOcupadas = clase.plazas_ocupadas ?? 0
-              const plazasLibres = Math.max(plazasMax - plazasOcupadas, 0)
-
-              return (
+          <ObservadorZoomMaximo onCambio={setEnZoomMaximo} />
+          {enZoomMaximo ? (
+            <CapaMaximoZoom
+              clases={conCoordenadas}
+              onAbrirSesiones={(org) =>
+                setPanel({ tipo: 'sesiones', trainerId: org.trainerId, ids: org.sesiones.map((c) => c.id) })
+              }
+              onAbrirOrganizadores={(orgs) =>
+                setPanel({ tipo: 'organizadores', ids: orgs.flatMap((o) => o.sesiones.map((c) => c.id)) })
+              }
+            />
+          ) : (
+            <MarkerClusterGroup iconCreateFunction={iconoCluster}>
+              {conCoordenadas.map((clase) => (
                 <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoOrganizador(clase.perfiles)}>
                   <Popup>
-                    <strong>{clase.titulo}</strong>
-                    <br />
-                    {clase.categoria}
-                    <br />
-                    {/* Fecha y hora (hora de España): así se distinguen sesiones
-                        idénticas de un mismo centro en distintos días. */}
-                    {clase.fecha && (
-                      <span className="my-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 corte-tag bg-[#EDF5C9] px-2 py-1 text-xs font-bold text-[#1F2400]">
-                        <span className="inline-flex items-center gap-1">
-                          <CalendarDays className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                          <span className="capitalize">{diaSemanaParaMostrar(clase.fecha)}</span>{' '}
-                          {formatearFechaParaMostrar(clase.fecha)}
-                        </span>
-                        {clase.hora && (
-                          <span className="inline-flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                            {formatearHoraParaMostrar(clase.hora)}
-                          </span>
-                        )}
-                      </span>
-                    )}
-                    {clase.precio} €
-                    <br />
-                    {plazasLibres}/{plazasMax} plazas libres
-                    <br />
-                    <Link
-                      href={`/clases/${clase.id}?from=clases`}
-                      className="mt-2 block corte-btn bg-[#B5E600] px-4 py-2 text-center font-bold !text-white"
-                    >
-                      Ver detalles
-                    </Link>
+                    <ContenidoPopupSesion clase={clase} />
                   </Popup>
                 </Marker>
-              )
-            })}
-          </MarkerClusterGroup>
+              ))}
+            </MarkerClusterGroup>
+          )}
         </MapContainer>
+        <PanelSesionesMapa panel={panel} clases={conCoordenadas} onCerrar={() => setPanel(null)} />
       </div>
     </div>
   )
