@@ -65,7 +65,7 @@ export default function CuentaPage() {
       />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
-        <BloqueDesplegable id="tu-perfil" titulo="Tu perfil" abiertoInicial>
+        <BloqueDesplegable id="tu-perfil" titulo="Tu perfil">
           <PerfilCuenta
             usuario={usuario}
             username={username}
