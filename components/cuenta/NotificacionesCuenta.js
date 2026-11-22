@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MapPin } from 'lucide-react'
+import { MapPin, Bell, FolderTree } from 'lucide-react'
 import NotificacionesToggle from '../NotificacionesToggle'
 import PreferenciasNotificaciones from '../PreferenciasNotificaciones'
 import HistorialNotificaciones from '../HistorialNotificaciones'
@@ -56,7 +56,7 @@ export default function NotificacionesCuenta({ usuario }) {
         <NotificacionesToggle usuarioActual={usuario} onCambioEstado={setPushActivadas} />
       </div>
 
-      <BloqueDesplegable id="notificaciones-ajustes" titulo="Notificaciones" className="solo-web">
+      <BloqueDesplegable id="notificaciones-ajustes" titulo="Notificaciones" icono={Bell} className="solo-web">
         <h3 className="mb-3 text-sm font-semibold text-[#162318]">Qué notificaciones quieres recibir</h3>
         <PreferenciasNotificaciones usuarioActual={usuario} pushActivadas={pushActivadas} />
       </BloqueDesplegable>
@@ -71,6 +71,7 @@ export default function NotificacionesCuenta({ usuario }) {
       <BloqueDesplegable
         id="ultimas-notificaciones"
         titulo="Últimas notificaciones"
+        icono={FolderTree}
         abrirConHash={['notificaciones']}
         className="solo-web"
       >

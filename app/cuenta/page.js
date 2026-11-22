@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { History } from 'lucide-react'
+import { History, User, ChartColumn } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import PerfilFiscal from '../../components/PerfilFiscal'
@@ -65,7 +65,7 @@ export default function CuentaPage() {
       />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
-        <BloqueDesplegable id="tu-perfil" titulo="Tu perfil">
+        <BloqueDesplegable id="tu-perfil" titulo="Tu perfil" icono={User}>
           <PerfilCuenta
             usuario={usuario}
             username={username}
@@ -81,7 +81,7 @@ export default function CuentaPage() {
           <UsuariosBloqueados usuario={usuario} />
         </BloqueDesplegable>
 
-        <BloqueDesplegable id="estadisticas" titulo="Estadísticas y valoraciones">
+        <BloqueDesplegable id="estadisticas" titulo="Estadísticas y valoraciones" icono={ChartColumn}>
           <EstadisticasCuenta {...datos} />
         </BloqueDesplegable>
 
