@@ -16,6 +16,7 @@ export default function robots() {
         '/nueva-contrasena',
         '/pagos',
         '/publicar',
+        '/sesiones-en-mi-zona',
       ],
     },
     sitemap: 'https://www.ruleafit.com/sitemap.xml',
