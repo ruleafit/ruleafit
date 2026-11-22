@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import useResumenZona from '../../components/sesiones-zona/useResumenZona'
 import ListaResumenZona from '../../components/sesiones-zona/ListaResumenZona'
+import { AVISOS_ZONA_VISIBLES } from '../../lib/avisosZonaVisibles'
 
 function Contenido() {
   const r = useResumenZona()
@@ -18,6 +19,14 @@ function Contenido() {
 }
 
 export default function SesionesEnMiZonaPage() {
+  // Hasta el lanzamiento la función no se muestra en Producción (mismo interruptor que Mi cuenta).
+  if (!AVISOS_ZONA_VISIBLES) {
+    return (
+      <div className="flex min-h-[60vh] flex-1 items-center justify-center px-4">
+        <p className="text-[#6B7355]">Esta página todavía no está disponible.</p>
+      </div>
+    )
+  }
   return (
     <div className="flex flex-1 flex-col">
       <section className="relative isolate flex h-[140px] items-end overflow-hidden sm:h-[170px]">

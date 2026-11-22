@@ -10,6 +10,7 @@ Estos textos **no están enlazados en la web** y no sustituyen todavía al aviso
 | `condiciones-entrenadores.md` | Entrenadores que publican y cobran | Borrador |
 | `politica-cookies.md` | Todos | Borrador |
 | `cambios-privacidad-y-aviso-legal.md` | Lista de cambios a hacer en los textos actuales | Borrador |
+| `privacidad-avisos-zona.md` | Cambios de privacidad por los avisos de sesiones en mi zona | Borrador (21 nov 2026 en adelante) |
 
 Convenciones:
 - `[CORCHETES]`: dato que falta o decisión pendiente.

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../lib/supabaseClient'
+import { cargarNotificaciones } from '../lib/consultaNotificaciones'
 
 export default function HistorialNotificaciones({ usuarioActual }) {
   const router = useRouter()
@@ -13,12 +13,7 @@ export default function HistorialNotificaciones({ usuarioActual }) {
     let vivo = true
     async function cargar() {
       try {
-        const { data } = await supabase
-          .from('notificaciones_historial')
-          .select('id, tipo, titulo, cuerpo, url, leido, created_at')
-          .eq('usuario_id', usuarioActual.id)
-          .order('created_at', { ascending: false })
-          .limit(10)
+        const data = await cargarNotificaciones(usuarioActual.id)
         if (vivo && data) setItems(data)
       } catch (e) {
         // silencioso

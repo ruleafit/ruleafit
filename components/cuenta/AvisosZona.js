@@ -81,7 +81,8 @@ export default function AvisosZona({ usuario }) {
       </div>
       <p className="mb-4 text-sm text-[#6B7355]">
         Elige una zona donde sueles entrenar y te avisaremos de las sesiones nuevas que encajen contigo. Solo
-        avisamos de sesiones que empiecen en los próximos 7 días.
+        avisamos de sesiones que empiecen en los próximos 7 días. Tu zona solo la usamos para avisarte: no se
+        comparte con nadie y puedes desactivar los avisos cuando quieras.
       </p>
 
       {a.cargando ? (

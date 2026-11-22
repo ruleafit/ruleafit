@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { cargarNotificaciones } from '../lib/consultaNotificaciones'
 
 export default function CampanaNotificaciones({ usuarioActual }) {
   const router = useRouter()
@@ -15,13 +16,7 @@ export default function CampanaNotificaciones({ usuarioActual }) {
   // Carga solo las no leidas.
   async function cargar() {
     try {
-      const { data } = await supabase
-        .from('notificaciones_historial')
-        .select('id, tipo, titulo, cuerpo, url, leido, created_at')
-        .eq('usuario_id', usuarioActual.id)
-        .eq('leido', false)
-        .order('created_at', { ascending: false })
-        .limit(10)
+      const data = await cargarNotificaciones(usuarioActual.id, { soloNoLeidas: true })
       if (data) {
         setItems(data)
         setNoLeidas(data.length)
