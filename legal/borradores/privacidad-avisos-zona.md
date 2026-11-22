@@ -1,33 +1,35 @@
-# Borrador: cambios de la política de privacidad por «Avisos de sesiones en mi zona»
+# Texto propuesto de la política de privacidad por «Avisos de sesiones en mi zona»
 
-**NO PUBLICADO.** No modifica `legal/politica-privacidad.md` ni `app/privacidad/page.js`. Debe revisarlo el gestor o asesor jurídico y aprobarlo el titular antes de publicar, y **antes de activar la función en Producción**. No es asesoramiento legal. `[REVISAR: ...]` = punto a confirmar.
+**PENDIENTE DE APROBACIÓN. NO PUBLICADO.** No modifica `legal/politica-privacidad.md` ni `app/privacidad/page.js`. No es asesoramiento legal: conviene que lo revise el gestor o asesor antes del lanzamiento. Actualizado el 22-nov-2026.
 
-## 1. Qué trata la función (hechos comprobados en el código y la base de datos)
-- Datos que el usuario introduce **voluntariamente** al activar los avisos (tabla `avisos_zona`, visible solo para él por RLS): nombre y **coordenadas de su zona habitual** (la que elige en el buscador de direcciones; no usa GPS ni el seguimiento continuo), radio (1/5/10/20 km), categorías, franja horaria de inicio y modalidad (inmediata o resumen diario).
-- Funciona **desactivada por defecto**; el usuario la activa y la desactiva cuando quiera. Al desactivarla o eliminar la cuenta, la configuración se elimina con la cuenta (borrado en cascada). (Comprobado: `eliminar_mi_cuenta()` en `sql/068` borra el usuario de `auth.users` y las tablas de avisos lo referencian con `on delete cascade`.)
-- La ubicación solo se compara en el servidor con la de las sesiones publicadas para decidir si avisar. **No se comparte con otros usuarios, entrenadores ni terceros**, y no se usa para publicidad ni perfiles comerciales.
-- Datos derivados: avisos enviados (campana y notificación push), resumen diario con la lista de sesiones incluidas y registros técnicos de control para evitar duplicados.
-- Las notificaciones push pasan por los servicios de entrega del navegador o sistema (Google, Apple, Mozilla) mediante la suscripción que el usuario ya concede al activar las notificaciones. El contenido es el título de la sesión, ciudad, fecha y hora y el nombre público del organizador.
+## Hechos que describe (comprobados en el código y la base de datos)
+- La función está **desactivada por defecto** y la activa el propio usuario.
+- Guarda, solo para él (acceso restringido por RLS): nombre y coordenadas de la **zona habitual que él elige** en el buscador de direcciones (no usa GPS ni seguimiento), radio (1, 5, 10 o 20 km), categorías, franja horaria y modalidad.
+- La ubicación solo se compara en el servidor con la de las sesiones publicadas; no se comparte con otros usuarios, entrenadores ni terceros, ni se usa para publicidad o perfiles comerciales.
+- Genera avisos en la campana y, si hay permiso, notificaciones push (título, ciudad, fecha, hora de la sesión y nombre público del organizador) y un resumen diario con las sesiones incluidas.
+- Al eliminar la cuenta se borran en cascada la configuración, los resúmenes y las notificaciones (`eliminar_mi_cuenta()`, `sql/068`).
+- Retención técnica: avisos de zona en la campana, los 5 más recientes por usuario; registros de control, entre 14 y 90 días; resúmenes diarios, 60 días; cola de envío de avisos de zona, 14 días.
 
-## 2. Texto propuesto (añadir/modificar en la política)
+## Cambios propuestos en el texto
 
-**Categorías de datos personales** — sustituir «únicamente datos identificativos» por:
-> Se tratan datos identificativos (correo electrónico, contraseña cifrada, nombre de usuario público, tipo de perfil y registro de clases publicadas o reservadas) y, **solo si el Usuario activa «Avisos de sesiones en mi zona»**, su zona habitual (nombre y coordenadas aproximadas del lugar que él elige), el radio, las categorías y la franja horaria preferidos y la modalidad de aviso.
+**1. Categorías de datos personales** — sustituir el primer párrafo por:
+> Las categorías de datos que se tratan en Ruleafit son: datos identificativos (dirección de correo electrónico, contraseña almacenada de forma cifrada, nombre de usuario público, tipo de perfil y registro de las clases publicadas o reservadas por el Usuario) y, únicamente si el Usuario activa la función «Avisos de sesiones en mi zona», la zona habitual que él mismo elige (su nombre y coordenadas aproximadas), el radio, las categorías deportivas y la franja horaria preferidos y la modalidad de aviso elegida (inmediata o resumen diario). Ruleafit no accede a la ubicación del dispositivo del Usuario para esta función.
 
-**Fines del tratamiento** — añadir:
-> Si el Usuario activa «Avisos de sesiones en mi zona», Ruleafit utiliza su zona habitual y sus preferencias exclusivamente para avisarle, por la campana de la aplicación y, si ha permitido las notificaciones, por notificación push, de nuevas sesiones publicadas cerca de él (de forma inmediata o en un resumen diario a las 20:30, hora de España peninsular). No se utilizan con fines publicitarios ni se comparten con otros usuarios o terceros.
+**2. Fines del tratamiento** — añadir al final del apartado de fines concretos:
+> Si el Usuario activa «Avisos de sesiones en mi zona», Ruleafit utiliza su zona habitual y sus preferencias exclusivamente para avisarle, en la campana de la aplicación y, si ha permitido las notificaciones, mediante notificación push, de las nuevas sesiones publicadas cerca de él, ya sea de forma inmediata o en un resumen diario a las 20:30 (hora de España peninsular). Estos datos no se utilizan con fines publicitarios ni se muestran a otros usuarios o a los entrenadores.
 
-**Base legal** — añadir:
-> El tratamiento de la zona habitual y las preferencias de aviso se basa en el consentimiento del Usuario, que se otorga al activar esta función y se retira en cualquier momento desde Mi cuenta → Notificaciones, sin afectar al resto del servicio.
+**3. Base legal** — añadir:
+> El tratamiento de la zona habitual y de las preferencias de aviso se basa en el consentimiento del Usuario, que se otorga al activar «Avisos de sesiones en mi zona» y puede retirarse en cualquier momento desactivándola en Mi cuenta, sin que ello afecte al resto del servicio.
 
-**Períodos de retención** — añadir:
-> La zona y las preferencias se conservan mientras la función esté activada y la cuenta exista; se eliminan al eliminar la cuenta. Los avisos de zona del historial de notificaciones se limitan a los 5 más recientes por usuario; los registros técnicos de control se eliminan automáticamente a los 14-90 días según su tipo y los resúmenes diarios a los 60 días. `[REVISAR: confirmar plazos antes de activar la limpieza (sql/083)]`.
+**4. Períodos de retención** — añadir:
+> La zona habitual y las preferencias de aviso se conservan mientras el Usuario mantenga la función activada y su cuenta abierta, y se eliminan al eliminar la cuenta. Los avisos recibidos se conservan en el historial de notificaciones de forma limitada (los más recientes) y los registros técnicos asociados a su envío se eliminan automáticamente en un plazo máximo de 90 días.
 
-**Destinatarios** — añadir:
-> Para entregar notificaciones push se utilizan los servicios de mensajería del navegador o del sistema operativo del Usuario (Google, Apple, Mozilla u otros), que reciben el contenido de la notificación y un identificador técnico del dispositivo. `[REVISAR: transferencias internacionales]`.
+**5. Destinatarios** — añadir:
+> Para entregar las notificaciones push se utilizan los servicios de mensajería del navegador o del sistema operativo del dispositivo del Usuario (como Google o Apple), que reciben el contenido de la notificación y un identificador técnico del dispositivo.
 
-## 3. Otros puntos
-- Actualizar la fecha de «Última actualización» al publicar.
-- `legal/borradores/cambios-privacidad-y-aviso-legal.md` ya lista cambios por pagos; integrar este borrador en el mismo paquete de revisión.
-- Si Apple exige etiquetas de privacidad en la app de iPhone: añadir «Ubicación aproximada, no vinculada a seguimiento» `[REVISAR]`.
-- El texto de la pantalla de configuración ya explica qué se guarda; revisar que coincida con esta política.
+**6.** Actualizar la fecha de «Última actualización» al publicar.
+
+## Para el asesor `[REVISAR]`
+- Si la «zona habitual» (barrio o dirección elegida, no el domicilio exacto) debe tratarse como dato de localización con información reforzada.
+- Transferencias internacionales de los servicios push (Google/Apple).
+- Etiquetas de privacidad de la app de iPhone («ubicación aproximada, no vinculada al usuario»).
