@@ -1,15 +1,8 @@
 'use client'
 
-import { History } from 'lucide-react'
-
 export default function MovimientosRulos({ movimientos, motivos }) {
   return (
     <div className="mb-8">
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-[#1F2400]">
-        <History className="h-5 w-5 text-[#B5E600]" strokeWidth={1.75} />
-        Mis últimos Rulos
-      </h2>
-
       {movimientos.length === 0 ? (
         <div className="corte-card border border-dashed border-[#E2E6CF] px-6 py-8 text-center text-sm text-[#6B7355]">
           Todavía no tienes movimientos de Rulos. Cuando reserves o asistas a una sesión, aparecerán aquí.

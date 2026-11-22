@@ -47,8 +47,8 @@ export default function UsuariosBloqueados({ usuario }) {
   if (bloqueados.length === 0) return null
 
   return (
-    <div className="mb-8 corte-card border border-[#E2E6CF] bg-white p-6">
-      <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Usuarios bloqueados</h2>
+    <div className="mb-8 border-t border-[#E2E6CF] pt-6">
+      <h3 className="mb-2 text-base font-bold text-[#1F2400]">Usuarios bloqueados</h3>
       <p className="mb-4 text-sm text-[#6B7355]">No ves sus sesiones en los listados. Puedes desbloquearlos cuando quieras.</p>
       <ul className="flex flex-col gap-2">
         {bloqueados.map((b) => (

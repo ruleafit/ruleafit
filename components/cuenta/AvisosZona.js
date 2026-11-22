@@ -74,11 +74,7 @@ export default function AvisosZona({ usuario }) {
   const buscando = cambiandoZona || !form.zona
 
   return (
-    <div id="avisos-zona" className="mb-8 scroll-mt-24 corte-card border border-[#E2E6CF] bg-white p-6">
-      <div className="mb-2 flex items-center gap-2">
-        <MapPin className="h-5 w-5 shrink-0 text-[#B5E600]" strokeWidth={2} />
-        <h2 className="text-lg font-bold text-[#1F2400]">Avisos de sesiones en mi zona</h2>
-      </div>
+    <div>
       <p className="mb-4 text-sm text-[#6B7355]">
         Elige una zona donde sueles entrenar y te avisaremos de las sesiones nuevas que encajen contigo. Solo
         avisamos de sesiones que empiecen en los próximos 7 días. Tu zona solo la usamos para avisarte: no se
@@ -299,7 +295,7 @@ export default function AvisosZona({ usuario }) {
               <p className="rounded-lg bg-[#3D4A00]/16 px-3 py-2 text-sm font-semibold text-[#3D4A00]">
                 {enApp
                   ? 'Las notificaciones push de la app de iPhone llegarán más adelante. Mientras tanto verás los avisos en la campana de notificaciones.'
-                  : 'Los avisos llegarán a tu campana de notificaciones y, si tienes activadas las notificaciones push, también a tu dispositivo.'}
+                  : 'Los avisos llegarán siempre a tu campana de notificaciones. Para recibirlos también como notificación en el móvil, activa las notificaciones en el interruptor que hay sobre el apartado «Notificaciones».'}
               </p>
             </>
           )}

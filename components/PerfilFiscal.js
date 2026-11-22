@@ -125,8 +125,8 @@ export default function PerfilFiscal({ usuario }) {
   }
 
   return (
-    <div className="mb-8 corte-card border border-[#E2E6CF] bg-white p-6">
-      <h2 className="mb-2 text-lg font-bold text-[#1F2400]">Datos fiscales y cobros</h2>
+    <div className="mb-8 border-t border-[#E2E6CF] pt-6">
+      <h3 className="mb-2 text-base font-bold text-[#1F2400]">Datos fiscales y cobros</h3>
       <p className="mb-4 text-sm text-[#6B7355]">
         Si organizas sesiones de pago necesitamos estos datos para emitir las autofacturas en tu nombre y transferirte
         tus ingresos.

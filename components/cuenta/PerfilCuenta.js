@@ -92,8 +92,7 @@ export default function PerfilCuenta({ usuario, username, setUsername, descripci
   }
 
   return (
-    <div className="mb-8 corte-card border border-[#E2E6CF] bg-white p-6">
-      <h2 className="mb-4 text-lg font-bold text-[#1F2400]">Tu perfil</h2>
+    <div className="mb-8">
 
       <form onSubmit={guardarPerfil} className="flex flex-col gap-4">
         <div className="flex items-center gap-4">

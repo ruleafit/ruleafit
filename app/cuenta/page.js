@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { History } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import PerfilFiscal from '../../components/PerfilFiscal'
@@ -12,6 +13,7 @@ import PerfilCuenta from '../../components/cuenta/PerfilCuenta'
 import EstadisticasCuenta from '../../components/cuenta/EstadisticasCuenta'
 import MovimientosRulos from '../../components/cuenta/MovimientosRulos'
 import NotificacionesCuenta from '../../components/cuenta/NotificacionesCuenta'
+import BloqueDesplegable from '../../components/cuenta/BloqueDesplegable'
 
 export default function CuentaPage() {
   const datos = useDatosCuenta()
@@ -63,25 +65,33 @@ export default function CuentaPage() {
       />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
-        <PerfilCuenta
-          usuario={usuario}
-          username={username}
-          setUsername={datos.setUsername}
-          descripcionInicial={datos.descripcionPerfil}
-          fotoUrl={fotoUrl}
-          setFotoUrl={datos.setFotoUrl}
-          inicial={inicial}
-        />
+        <BloqueDesplegable id="tu-perfil" titulo="Tu perfil" abiertoInicial>
+          <PerfilCuenta
+            usuario={usuario}
+            username={username}
+            setUsername={datos.setUsername}
+            descripcionInicial={datos.descripcionPerfil}
+            fotoUrl={fotoUrl}
+            setFotoUrl={datos.setFotoUrl}
+            inicial={inicial}
+          />
 
-        <EstadisticasCuenta {...datos} />
+          <PerfilFiscal usuario={usuario} />
+
+          <UsuariosBloqueados usuario={usuario} />
+        </BloqueDesplegable>
+
+        <BloqueDesplegable id="estadisticas" titulo="Estadísticas y valoraciones">
+          <EstadisticasCuenta {...datos} />
+        </BloqueDesplegable>
 
         <NotificacionesCuenta usuario={usuario} />
 
-        <MovimientosRulos movimientos={datos.rulosMovimientos} motivos={datos.rulosMotivos} />
+        <BloqueDesplegable id="mis-rulos" titulo="Mis últimos Rulos" icono={History}>
+          <MovimientosRulos movimientos={datos.rulosMovimientos} motivos={datos.rulosMotivos} />
+        </BloqueDesplegable>
 
-        <PerfilFiscal usuario={usuario} />
-
-        <UsuariosBloqueados usuario={usuario} />
+        <div className="mt-8" />
 
         <EliminarCuenta usuario={usuario} />
 
