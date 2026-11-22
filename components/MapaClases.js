@@ -201,7 +201,11 @@ export default function MapaClases({ clases }) {
               }
             />
           ) : (
-            <MarkerClusterGroup iconCreateFunction={iconoCluster}>
+            // spiderfyOnMaxZoom={false}: al pulsar un grupo que no se puede separar ampliando (sesiones con la
+            // misma ubicación), el mapa hace zoom hasta el máximo y allí toma el relevo CapaMaximoZoom (agrupa por
+            // organizador). Con el valor por defecto de la librería, el grupo se dispersaba sesión a sesión al
+            // instante, sin ampliar, y la agrupación por organizador nunca llegaba a verse.
+            <MarkerClusterGroup iconCreateFunction={iconoCluster} spiderfyOnMaxZoom={false}>
               {conCoordenadas.map((clase) => (
                 <Marker key={clase.id} position={[clase.lat, clase.lng]} icon={iconoOrganizador(clase.perfiles)}>
                   <Popup>
