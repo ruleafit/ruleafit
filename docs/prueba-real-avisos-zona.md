@@ -1,23 +1,18 @@
 # Prueba real controlada de «Avisos de sesiones en mi zona» (campana + push)
 
-**Estado: preparada, NO ejecutada.** Cada bloque SQL necesita la autorización expresa del titular. Cuentas: `rubenpersonatEn` (En) y `rubenpersonatCl` (Cl). Proyecto Supabase `fjedrczlbyxevjuqqhra`. `sql/083` ya está aplicado (23-nov-2026).
+**Estado: preparada, NO ejecutada.** Cada bloque SQL necesita la autorización expresa del titular. Cuentas: `rubenpersonatEn` (En) y `rubenpersonatCl` (Cl). Proyecto Supabase `fjedrczlbyxevjuqqhra`. `sql/083` ya está aplicado.
 
-## Diseño de la prueba (4 pasos, sin cambiar de modalidad)
-Las dos cuentas se avisan entre sí, así que con **una sola activación** se prueban las dos modalidades:
-- **En** recibe en modalidad **Inmediata** cuando Cl publica una sesión (campana + push).
-- **Cl** (que ya tiene configurado «Resumen diario», Sevilla 5 km, Cardio) recibe el **resumen** cuando En publica una sesión.
+## Hallazgo que cambia el diseño (comprobado en solo lectura el 22-nov-2026)
+**En tiene a Cl en Favoritos** (y la preferencia «publicaciones» está activa por defecto). Por diseño, cuando Cl publica, En recibe el aviso normal de favoritos y el sistema de zona **no** le avisa (es la regla anti-duplicado). Por tanto **En no puede ser receptor de avisos de zona de Cl**. Cl sí puede serlo de En (Cl solo tiene a `lealfj1` en Favoritos). Receptor de la prueba: **Cl**; publicador: **En**. Como Cl es una sola cuenta, se prueba una modalidad detrás de otra (un cambio de modalidad en la web). No se modifica ningún dato de las cuentas por SQL.
 
-Estado comprobado antes de empezar: En tiene 1 suscripción push y aún no tiene configuración; Cl tiene 2 suscripciones push y su configuración activa; ninguno tiene al otro en Favoritos ni hay bloqueos; Cl es el único usuario con avisos activos; interruptores apagados.
+Estado actual: En → Inmediata, Sevilla (Plaza de España) 5 km, Cardio, todo el día (1 push). Cl → Resumen diario, misma zona/radio/categoría (2 push). Sin bloqueos. Interruptores apagados, modo prueba activo, lista vacía. 0 avisos de zona. Las sesiones actuales de En (Málaga, Fuerza) y de Cl no interfieren.
 
 ## Garantías de aislamiento
-- `solo_usuarios_prueba = true` y `usuarios_prueba = {En, Cl}`: ningún otro usuario puede recibir avisos de zona, aunque active la función. Lo comprueban dos puertas independientes (evaluación y, otra vez, dentro de `generar_aviso_zona` / `generar_resumen_zona`).
-- Comprobación final obligatoria (paso 4): 0 avisos de zona para cualquier otro usuario.
-- Parada de emergencia al final de este documento.
+- `solo_usuarios_prueba = true` y `usuarios_prueba = {En, Cl}`: ningún otro usuario puede recibir avisos de zona (doble comprobación: evaluación y de nuevo dentro de `generar_aviso_zona` / `generar_resumen_zona`). Hoy solo En y Cl tienen avisos activos.
+- Comprobación final obligatoria (paso 6): 0 avisos de zona para cualquier otro usuario.
+- Si algún usuario real publica una sesión Cardio a ≤ 5 km de Plaza de España durante la prueba, Cl también recibirá su aviso (es correcto y es solo para Cl); por eso el resumen puede contar más de 1 sesión.
 
-## Paso 1 · En configura sus avisos (web, sin SQL)
-En el **Preview** de `prueba-avisos-zona` (la sección solo existe ahí), con En: Mi cuenta → «Avisos de sesiones en mi zona» → activar, zona Sevilla (Plaza de España), radio 5 km, categoría **Cardio**, franja completa, modalidad **Inmediata**. Guardar. Comprobar que En y Cl tienen las notificaciones push activadas en los móviles donde van a mirar. (Cl tiene 2 suscripciones Apple: el push puede llegar a dos dispositivos; no es un fallo.)
-
-## Paso 2 · Activar (SQL, una sola vez)
+## Paso 1 · Activar (SQL, una vez)
 ```sql
 do $$
 declare v uuid[];
@@ -30,16 +25,26 @@ begin
 end $$;
 ```
 
-## Paso 3 · Publicar y comprobar (las dos sesiones, gratuitas, Cardio, Sevilla, que empiecen dentro de 40-60 h, título «PRUEBA interna, no reservar»)
-**3a · Inmediata.** Cl publica una sesión. En 1-2 minutos, En debe ver 1 aviso en la campana («Nueva sesión cerca de ti»), recibir 1 push y, al tocarlo, abrirse la sesión.
-
-**3b · Resumen.** En publica otra sesión. Lanzar el resumen a mano (equivale a las 20:35 de hoy; entre las 20:30 y las 22:30 de Madrid lo haría solo el cron):
+## Paso 2 · Resumen diario (Cl ya está en «Resumen diario»)
+En publica la **sesión A**: gratuita, categoría **Cardio**, **Sevilla** (a menos de 5 km de Plaza de España; sirve el mismo lugar de las sesiones de Cl), que empiece dentro de **40-60 h**, título «PRUEBA A interna, no reservar».
+Después se lanza el resumen a mano (antes de las 20:30 de Madrid se simula el de las 20:35 de hoy; después de las 20:30, el de mañana, que ya incluye lo publicado hoy):
 ```sql
-select public.procesar_avisos_zona_resumen(((now() at time zone 'Europe/Madrid')::date + time '20:35') at time zone 'Europe/Madrid');
+select public.procesar_avisos_zona_resumen(
+  case when (now() at time zone 'Europe/Madrid')::time < time '20:30'
+       then ((now() at time zone 'Europe/Madrid')::date + time '20:35') at time zone 'Europe/Madrid'
+       else (((now() at time zone 'Europe/Madrid')::date + 1) + time '20:35') at time zone 'Europe/Madrid' end);
 ```
-Esperado: `resumenes_enviados = 1`. Cl ve en la campana «Nuevas sesiones cerca de ti: 1 sesión nueva en tu zona» (el resumen recoge las sesiones de las últimas 24 h que encajan: solo la de En, porque la de Cl es suya), recibe el push y, al tocarlo, se abre `/sesiones-en-mi-zona?r=…` con la sesión. Repetir la llamada no genera un segundo resumen.
+Esperado: `resumenes_enviados = 1`. Cl ve en la campana «Nuevas sesiones cerca de ti — 1 sesión nueva en tu zona. Toca para verla.», recibe el push y, al tocarlo, se abre `/sesiones-en-mi-zona?r=…` con la sesión A. Repetir la llamada no genera otro resumen.
 
-Consultas de comprobación:
+## Paso 3 · Cl cambia a «Inmediata» (web, Preview)
+Mi cuenta → Avisos → modalidad **Inmediata** → Guardar (reinicia su `activo_desde`: solo cuentan las sesiones publicadas a partir de ahora).
+
+## Paso 4 · Aviso inmediato
+En publica la **sesión B** (mismas condiciones que la A, título «PRUEBA B interna, no reservar»). En 1-2 minutos Cl debe ver 1 aviso en la campana «Nueva sesión cerca de ti — … (de @rubenpersonatEn)», recibir 1 push y, al tocarlo, abrirse la sesión B.
+
+(Opcional, comprueba el anti-duplicado de favoritos: Cl publica una sesión y En recibe SOLO el aviso normal de favoritos, ningún aviso de zona.)
+
+## Paso 5 · Comprobación (solo lectura)
 ```sql
 select u.username, h.tipo, h.titulo, h.cuerpo, h.url, h.created_at
   from public.notificaciones_historial h join public.perfiles u on u.id = h.usuario_id
@@ -48,7 +53,7 @@ select tipo, estado, intentos from public.notificaciones_cola where tipo in ('se
 select public.avisos_zona_estado_motor(), public.avisos_zona_estado_resumen();
 ```
 
-## Paso 4 · Apagar, limpiar y comprobar aislamiento
+## Paso 6 · Apagar y comprobar aislamiento
 ```sql
 update public.config_avisos_zona
    set inmediatos_activos = false, resumen_activo = false, solo_usuarios_prueba = true, usuarios_prueba = '{}';
@@ -60,7 +65,9 @@ select count(*) as avisos_a_otros_usuarios   -- debe ser 0
 select inmediatos_activos, resumen_activo, solo_usuarios_prueba, cardinality(usuarios_prueba)
   from public.config_avisos_zona;   -- false, false, true, 0
 ```
-Cl y En cancelan sus sesiones de prueba desde la web (comprobar que tienen 0 reservas).
+Limpieza (con autorización): En cancela las sesiones A y B desde la web (0 reservas). Si el resumen se lanzó con la fecha de mañana, borrar su fila para que no bloquee el resumen real de ese día:
+`delete from public.avisos_zona_resumenes where usuario_id in (select id from public.perfiles where username in ('rubenpersonatEn','rubenpersonatCl'));`
+Cl vuelve a «Resumen diario» o desactiva su configuración si lo desea.
 
 ## Parada de emergencia (en cualquier momento)
 ```sql
