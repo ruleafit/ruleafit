@@ -83,10 +83,6 @@ export default function CuentaPage() {
 
         </BloqueDesplegable>
 
-        <BloqueDesplegable id="ruleros-bloqueados" titulo="Ruleros bloqueados" icono={Lock}>
-          <UsuariosBloqueados usuario={usuario} />
-        </BloqueDesplegable>
-
         <BloqueDesplegable id="estadisticas" titulo="Estadísticas y valoraciones" icono={ChartColumn}>
           <EstadisticasCuenta {...datos} />
         </BloqueDesplegable>
@@ -95,6 +91,10 @@ export default function CuentaPage() {
 
         <BloqueDesplegable id="mis-rulos" titulo="Mis últimos Rulos" icono={History}>
           <MovimientosRulos movimientos={datos.rulosMovimientos} motivos={datos.rulosMotivos} />
+        </BloqueDesplegable>
+
+        <BloqueDesplegable id="ruleros-bloqueados" titulo="Ruleros bloqueados" icono={Lock}>
+          <UsuariosBloqueados usuario={usuario} />
         </BloqueDesplegable>
 
         <div className="mt-8" />
