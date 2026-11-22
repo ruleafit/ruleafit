@@ -41,9 +41,23 @@ export default function PrivacidadParticipante({ usuario }) {
     setGuardando(true)
     setError('')
     setMostrar(nuevo)
-    const { error: err } = await supabase
+    // Sin upsert: la tabla solo permite insertar o actualizar la columna del ajuste (un upsert
+    // intenta también reescribir usuario_id y la base de datos lo rechaza). Primero se
+    // actualiza la fila propia y, si aún no existe, se crea.
+    let err = null
+    const { data: filas, error: errUpd } = await supabase
       .from('perfil_privacidad')
-      .upsert({ usuario_id: usuario.id, mostrar_arroba_participantes: nuevo }, { onConflict: 'usuario_id' })
+      .update({ mostrar_arroba_participantes: nuevo })
+      .eq('usuario_id', usuario.id)
+      .select('usuario_id')
+    if (errUpd) {
+      err = errUpd
+    } else if (!filas || filas.length === 0) {
+      const { error: errIns } = await supabase
+        .from('perfil_privacidad')
+        .insert({ usuario_id: usuario.id, mostrar_arroba_participantes: nuevo })
+      err = errIns
+    }
     if (err) {
       setMostrar(!nuevo)
       setError('No se ha podido guardar. Inténtalo de nuevo.')
