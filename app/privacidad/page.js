@@ -1,3 +1,5 @@
+import { AVISOS_ZONA_VISIBLES } from '../../lib/avisosZonaVisibles'
+
 export const metadata = {
   title: 'Política de privacidad · Ruleafit',
 }
@@ -16,7 +18,7 @@ export default function PoliticaPrivacidadPage() {
         <strong>Sitio web:</strong> https://www.ruleafit.com
       </p>
       <p className="mb-8 text-sm text-zinc-500">
-        <strong>Última actualización:</strong> 21 de julio de 2026
+        <strong>Última actualización:</strong> {AVISOS_ZONA_VISIBLES ? '22 de noviembre de 2026' : '21 de julio de 2026'}
       </p>
 
       <h2 className={h2Class}>I. POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS</h2>
@@ -64,9 +66,15 @@ export default function PoliticaPrivacidadPage() {
       </ul>
 
       <h3 className={h3Class}>Categorías de datos personales</h3>
+      {AVISOS_ZONA_VISIBLES ? (
+      <p className={pClass}>
+        Las categorías de datos que se tratan en Ruleafit son: datos identificativos (dirección de correo electrónico, contraseña almacenada de forma cifrada, nombre de usuario público, tipo de perfil —cliente o entrenador— y el registro de las sesiones publicadas o reservadas por el Usuario) y, únicamente si el Usuario activa la función «Avisos de sesiones en mi zona», la zona habitual que él mismo elige (su nombre y coordenadas aproximadas), el radio, las categorías deportivas y la franja horaria preferidos y la modalidad de aviso elegida (inmediata o resumen diario). Ruleafit no accede a la ubicación del dispositivo del Usuario para esta función.
+      </p>
+      ) : (
       <p className={pClass}>
         Las categorías de datos que se tratan en Ruleafit son únicamente datos identificativos. En concreto, se recogen: dirección de correo electrónico, contraseña (almacenada de forma cifrada), nombre de usuario público, tipo de perfil (cliente o entrenador) y el registro de las sesiones publicadas o reservadas por el Usuario.
       </p>
+      )}
       <p className={pClass}>
         En ningún caso se tratan categorías especiales de datos personales en el sentido del artículo 9 del RGPD.
       </p>
@@ -78,6 +86,11 @@ export default function PoliticaPrivacidadPage() {
       <p className={pClass}>
         El Usuario tendrá derecho a retirar su consentimiento en cualquier momento. Será tan fácil retirar el consentimiento como darlo. Como regla general, la retirada del consentimiento no condicionará el uso del Sitio Web.
       </p>
+      {AVISOS_ZONA_VISIBLES && (
+        <p className={pClass}>
+          El tratamiento de la zona habitual y de las preferencias de aviso de «Avisos de sesiones en mi zona» se basa en el consentimiento del Usuario, que se otorga al activar esa función y puede retirarse en cualquier momento desactivándola en Mi cuenta, sin que ello afecte al resto del servicio.
+        </p>
+      )}
       <p className={pClass}>
         En las ocasiones en las que el Usuario deba o pueda facilitar sus datos a través de formularios para realizar consultas, solicitar información o por motivos relacionados con el contenido del Sitio Web, se le informará en caso de que la cumplimentación de alguno de ellos sea obligatoria debido a que los mismos sean imprescindibles para el correcto desarrollo de la operación realizada.
       </p>
@@ -92,6 +105,11 @@ export default function PoliticaPrivacidadPage() {
       <p className={pClass}>
         Ruleafit <strong>no</strong> utiliza los datos personales del Usuario con fines publicitarios, no realiza estudios de marketing, no elabora perfiles comerciales y no cede datos a terceros con fines comerciales.
       </p>
+      {AVISOS_ZONA_VISIBLES && (
+        <p className={pClass}>
+          Si el Usuario activa «Avisos de sesiones en mi zona», Ruleafit utiliza su zona habitual y sus preferencias exclusivamente para avisarle, en la campana de la aplicación y, si ha permitido las notificaciones, mediante notificación push, de las nuevas sesiones publicadas cerca de él, ya sea de forma inmediata o en un resumen diario a las 20:30 (hora de España peninsular). Estos datos no se utilizan con fines publicitarios ni se muestran a otros usuarios o a los entrenadores.
+        </p>
+      )}
       <p className={pClass}>
         En el momento en que se obtengan los datos personales, se informará al Usuario acerca del fin o fines específicos del tratamiento a que se destinarán los datos personales; es decir, del uso o usos que se dará a la información recopilada.
       </p>
@@ -100,6 +118,11 @@ export default function PoliticaPrivacidadPage() {
       <p className={pClass}>
         Los datos personales solo serán retenidos durante el tiempo mínimo necesario para los fines de su tratamiento y, en todo caso, únicamente durante el siguiente plazo: mientras el Usuario mantenga su cuenta activa y, tras su baja, durante los plazos legalmente exigibles, o hasta que el Usuario solicite su supresión.
       </p>
+      {AVISOS_ZONA_VISIBLES && (
+        <p className={pClass}>
+          La zona habitual y las preferencias de «Avisos de sesiones en mi zona» se conservan mientras la cuenta esté abierta. Si el Usuario desactiva la función, deja de recibir avisos y esos datos dejan de utilizarse para enviarlos, pero la configuración permanece guardada e inactiva en su cuenta para que pueda reactivarla; el Usuario puede solicitar su supresión en cualquier momento ejerciendo sus derechos conforme a esta política, y se eliminan siempre al eliminar la cuenta. Los avisos recibidos se conservan en el historial de notificaciones de forma limitada (los más recientes) y los registros técnicos asociados a su envío se eliminan automáticamente en un plazo máximo de 90 días.
+        </p>
+      )}
       <p className={pClass}>
         En el momento en que se obtengan los datos personales, se informará al Usuario acerca del plazo durante el cual se conservarán los datos personales o, cuando eso no sea posible, los criterios utilizados para determinar este plazo.
       </p>
@@ -112,6 +135,11 @@ export default function PoliticaPrivacidadPage() {
         <li><strong>Vercel Inc.</strong>, con domicilio en 440 N Barranca Avenue #4133, Covina, CA 91723, Estados Unidos. Contacto: privacy@vercel.com. Finalidad: alojamiento del sitio web.</li>
         <li><strong>Supabase, Inc.</strong>, Estados Unidos. Contacto: privacy@supabase.com. Finalidad: alojamiento de la base de datos y gestión de la autenticación de usuarios. Los servidores de base de datos están ubicados en la Unión Europea (Irlanda).</li>
       </ol>
+      {AVISOS_ZONA_VISIBLES && (
+        <p className={pClass}>
+          Si el Usuario activa las notificaciones push, para entregarlas se utilizan los servicios de mensajería del navegador o del sistema operativo de su dispositivo (como Google o Apple), que reciben el contenido de la notificación y un identificador técnico del dispositivo.
+        </p>
+      )}
 
       <h3 className={h3Class}>Transferencias internacionales de datos</h3>
       <p className={pClass}>

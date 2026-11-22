@@ -78,6 +78,6 @@ Además se pueden dar de baja los crons con `sql/081_avisos_zona_inmediatos_cron
 ## Lanzamiento público (tras la prueba, con autorización)
 1. Política de privacidad aprobada y publicada (`legal/borradores/privacidad-avisos-zona.md`).
 2. (Opcional) cron de limpieza `sql/083_avisos_zona_mantenimiento_cron.sql`.
-3. `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES=true` en Producción de Vercel y llevar la rama a `main`.
+3. `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES=true` en Producción de Vercel y llevar la rama a `main`. **Orden obligatorio: la página `/sesiones-en-mi-zona` debe estar ya en Producción (fusión a `main` desplegada) ANTES de abrir los interruptores**: las notificaciones push del resumen abren `www.ruleafit.com/sesiones-en-mi-zona`, que hoy da 404 en Producción (comprobado el 22-nov-2026).
 4. `update public.config_avisos_zona set solo_usuarios_prueba = false, inmediatos_activos = true, resumen_activo = true;`
 5. Desactivar = el UPDATE de parada de emergencia.
