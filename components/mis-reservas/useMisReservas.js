@@ -10,6 +10,7 @@ export default function useMisReservas() {
   const [usuario, setUsuario] = useState(null)
   const [cargandoSesion, setCargandoSesion] = useState(true)
   const [reservas, setReservas] = useState([])
+  const [canceladasAjenas, setCanceladasAjenas] = useState([])
   const [cargandoReservas, setCargandoReservas] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -54,6 +55,10 @@ export default function useMisReservas() {
       } else {
         setReservas(data || [])
       }
+      // Reservas canceladas que no has cancelado tú, con el estado de su reembolso. Si la
+      // función aún no existe o falla, simplemente no se muestran.
+      const { data: ajenas } = await supabase.rpc('mis_reservas_canceladas_por_bloqueo')
+      setCanceladasAjenas(Array.isArray(ajenas) ? ajenas : [])
       setCargandoReservas(false)
     }
     cargarReservas()
@@ -93,6 +98,7 @@ export default function useMisReservas() {
   return {
     cargando: cargandoSesion || cargandoReservas,
     reservas,
+    canceladasAjenas,
     error,
     mensaje,
     cancelandoId,

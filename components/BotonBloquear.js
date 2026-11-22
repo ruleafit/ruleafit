@@ -44,7 +44,7 @@ export default function BotonBloquear({ usuarioId, username, usuarioActual, onCa
 
     if (!bloqueado) {
       const confirmado = window.confirm(
-        `¿Bloquear a ${username ? '@' + username : 'este usuario'}? Dejarás de ver sus sesiones en los listados. Puedes desbloquearlo cuando quieras desde Mi cuenta.`
+        `¿Bloquear a ${username ? '@' + username : 'este usuario'}? Dejarás de ver sus sesiones y él dejará de ver las tuyas y tu perfil. Si tiene reservas futuras en tus sesiones, se cancelarán (con reembolso íntegro si las pagó). Puedes desbloquearlo cuando quieras desde Mi cuenta.`
       )
       if (!confirmado) return
     }

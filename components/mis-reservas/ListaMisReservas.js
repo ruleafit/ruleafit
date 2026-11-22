@@ -7,11 +7,12 @@ import RevelarAlLlegar from '../RevelarAlLlegar'
 import TarjetaReservaProxima from './TarjetaReservaProxima'
 import TarjetaReservaCancelada from './TarjetaReservaCancelada'
 import TarjetaReservaPasada from './TarjetaReservaPasada'
+import TarjetaReservaCanceladaAjena from './TarjetaReservaCanceladaAjena'
 import { claveFechaHora } from './datos'
 
 // m = useMisReservas.
 export default function ListaMisReservas({ m }) {
-  const { reservas, error, mensaje } = m
+  const { reservas, canceladasAjenas = [], error, mensaje } = m
 
   const reservasActivas = reservas.filter((r) => r.estado === 'activa' && r.clases)
   const reservasCanceladasPorEntrenador = reservas.filter(
@@ -21,7 +22,8 @@ export default function ListaMisReservas({ m }) {
       r.clases &&
       horasHastaClase(r.clases) > -1
   )
-  const sinReservas = reservasActivas.length === 0 && reservasCanceladasPorEntrenador.length === 0
+  const sinReservas =
+    reservasActivas.length === 0 && reservasCanceladasPorEntrenador.length === 0 && canceladasAjenas.length === 0
 
   const reservasProximas = reservasActivas
     .filter((r) => !claseYaPaso(r.clases))
@@ -83,6 +85,20 @@ export default function ListaMisReservas({ m }) {
           <div className="flex flex-col gap-4">
             {reservasCanceladasPorEntrenador.map((reserva, indice) => (
               <TarjetaReservaCancelada key={reserva.id} reserva={reserva} indice={indice} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {canceladasAjenas.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-4 border-b border-[#E2E6CF] pb-2 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">
+            Reservas canceladas
+          </h2>
+
+          <div className="flex flex-col gap-4">
+            {canceladasAjenas.map((reserva, indice) => (
+              <TarjetaReservaCanceladaAjena key={reserva.reserva_id} reserva={reserva} indice={indice} />
             ))}
           </div>
         </div>

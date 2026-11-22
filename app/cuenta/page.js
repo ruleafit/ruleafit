@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { History, User, ChartColumn } from 'lucide-react'
+import { History, User, ChartColumn, Lock } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import PerfilFiscal from '../../components/PerfilFiscal'
@@ -81,6 +81,9 @@ export default function CuentaPage() {
 
           <PerfilFiscal usuario={usuario} />
 
+        </BloqueDesplegable>
+
+        <BloqueDesplegable id="ruleros-bloqueados" titulo="Ruleros bloqueados" icono={Lock}>
           <UsuariosBloqueados usuario={usuario} />
         </BloqueDesplegable>
 
