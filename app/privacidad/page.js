@@ -105,6 +105,9 @@ export default function PoliticaPrivacidadPage() {
       <p className={pClass}>
         Ruleafit <strong>no</strong> utiliza los datos personales del Usuario con fines publicitarios, no realiza estudios de marketing, no elabora perfiles comerciales y no cede datos a terceros con fines comerciales.
       </p>
+      <p className={pClass}>
+        Si el Usuario reserva una sesión, su nombre de usuario público (@) solo se muestra a otros participantes si el Usuario lo activa voluntariamente en Mi cuenta (opción «Mostrar mi @ a otros participantes»); en caso contrario aparece como «Usuario anónimo», sin ningún otro dato que lo identifique. Cuando lo activa, se muestra, en el detalle de las sesiones que reserva, a otros usuarios que hayan iniciado sesión. El organizador de la sesión puede ver siempre el usuario de quienes han reservado. La preferencia está desactivada por defecto, se aplica a todas las reservas del Usuario (presentes y futuras), puede cambiarse en cualquier momento y se conserva mientras la cuenta esté abierta.
+      </p>
       {AVISOS_ZONA_VISIBLES && (
         <p className={pClass}>
           Si el Usuario activa «Avisos de sesiones en mi zona», Ruleafit utiliza su zona habitual y sus preferencias exclusivamente para avisarle, en la campana de la aplicación y, si ha permitido las notificaciones, mediante notificación push, de las nuevas sesiones publicadas cerca de él, ya sea de forma inmediata o en un resumen diario a las 20:30 (hora de España peninsular). Estos datos no se utilizan con fines publicitarios ni se muestran a otros usuarios o a los entrenadores.

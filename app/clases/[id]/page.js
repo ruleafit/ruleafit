@@ -16,6 +16,7 @@ import BotonCopiarCoordenadas from '../../../components/BotonCopiarCoordenadas'
 import BotonCompartir from '../../../components/BotonCompartir'
 import BotonDenunciar from '../../../components/BotonDenunciar'
 import RevelarAlLlegar from '../../../components/RevelarAlLlegar'
+import ParticipantesSesion from '../../../components/clases/ParticipantesSesion'
 
 const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
   ssr: false,
@@ -281,6 +282,14 @@ function DetalleClaseContenido() {
               )}
             </div>
           </RevelarAlLlegar>
+
+          <ParticipantesSesion
+            claseId={clase.id}
+            usuario={usuario}
+            esOrganizador={esEntrenador}
+            plazasOcupadas={clase.plazas_ocupadas}
+            className={tarjetaClass}
+          />
 
           <div className="hidden sm:block">
             <BotonReservar

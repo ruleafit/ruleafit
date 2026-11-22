@@ -14,6 +14,7 @@ import EstadisticasCuenta from '../../components/cuenta/EstadisticasCuenta'
 import MovimientosRulos from '../../components/cuenta/MovimientosRulos'
 import NotificacionesCuenta from '../../components/cuenta/NotificacionesCuenta'
 import BloqueDesplegable from '../../components/cuenta/BloqueDesplegable'
+import PrivacidadParticipante from '../../components/cuenta/PrivacidadParticipante'
 
 export default function CuentaPage() {
   const datos = useDatosCuenta()
@@ -75,6 +76,8 @@ export default function CuentaPage() {
             setFotoUrl={datos.setFotoUrl}
             inicial={inicial}
           />
+
+          <PrivacidadParticipante usuario={usuario} />
 
           <PerfilFiscal usuario={usuario} />
 
