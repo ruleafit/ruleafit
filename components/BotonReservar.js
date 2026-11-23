@@ -7,6 +7,7 @@ import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 import { vibrar } from '../lib/nativo'
 import { plazoCancelacion } from '../lib/plazoCancelacion'
 import AvisoPlazoCancelacion from './AvisoPlazoCancelacion'
+import BotonCalendario from './BotonCalendario'
 
 const TAMANOS_BOTON = {
   normal: 'px-4 py-2 text-sm',
@@ -51,13 +52,16 @@ function claseYaPaso(clase) {
 }
 
 // mostrarPlazo: solo en el detalle de la sesión (/clases/[id]); las tarjetas de Explorar no lo llevan.
-export default function BotonReservar({ clase, onReservado, tamaño = 'normal', mostrarPlazo = false }) {
+// mostrarCalendario: solo en el detalle (/clases/[id]): «Añadir al calendario» cuando la reserva está confirmada.
+export default function BotonReservar({ clase, onReservado, tamaño = 'normal', mostrarPlazo = false, mostrarCalendario = false }) {
   const [usuario, setUsuario] = useState(null)
   const [yaReservada, setYaReservada] = useState(false)
   const [comprobandoReserva, setComprobandoReserva] = useState(true)
   const [reservando, setReservando] = useState(false)
   const [errorReserva, setErrorReserva] = useState('')
   const [usadoBono, setUsadoBono] = useState(false)
+  // true solo cuando el servidor acaba de confirmar la reserva desde esta pantalla (para la pregunta del calendario).
+  const [acabaDeReservar, setAcabaDeReservar] = useState(false)
   const [tieneBono, setTieneBono] = useState(null) // null = aún sin comprobar
   const [pagando, setPagando] = useState(false)
   // Con menos de 2 h para empezar, la reserva se podrá cancelar pero sin derecho a devolución: se pide una confirmación expresa.
@@ -215,6 +219,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     }
 
     setYaReservada(true)
+    setAcabaDeReservar(true)
     setUsadoBono(!!data?.usado_bono)
     setReservando(false)
     vibrar('exito')
@@ -276,6 +281,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
         {usadoBono && (
           <p className="mt-1 text-xs text-[#6B7355]">Se ha descontado 1 sesión de tu bono con este rulero.</p>
         )}
+        {mostrarCalendario && <BotonCalendario clase={clase} pregunta={acabaDeReservar} className="mt-2" />}
       </div>
     )
   }

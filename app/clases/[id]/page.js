@@ -296,6 +296,7 @@ function DetalleClaseContenido() {
               clase={clase}
               tamaño="grande"
               mostrarPlazo
+              mostrarCalendario
               onReservado={(nuevasPlazasOcupadas) =>
                 setClase((prev) => ({ ...prev, plazas_ocupadas: nuevasPlazasOcupadas }))
               }
@@ -319,6 +320,7 @@ function DetalleClaseContenido() {
           clase={clase}
           tamaño="grande"
           mostrarPlazo
+          mostrarCalendario
           onReservado={(nuevasPlazasOcupadas) =>
             setClase((prev) => ({ ...prev, plazas_ocupadas: nuevasPlazasOcupadas }))
           }
