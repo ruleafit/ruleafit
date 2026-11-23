@@ -3,8 +3,10 @@ import { CircleCheck, CircleAlert } from 'lucide-react'
 export default function MensajePublicar({ mensaje }) {
   if (!mensaje) return null
 
-  const esExito = mensaje === 'Sesión publicada correctamente.'
-  const esProgreso = mensaje === 'Publicando...'
+  // Éxito: «Sesión publicada correctamente.» o «N sesiones publicadas correctamente. …» (series).
+  // Progreso: «Publicando...» o «Publicando N sesiones...». Cualquier otro texto es un error (rojo).
+  const esExito = /^(Sesión publicada|\d+ sesión publicada|\d+ sesiones publicadas) correctamente\./.test(mensaje)
+  const esProgreso = /^Publicando\b.*\.\.\.$/.test(mensaje)
   const esError = !esExito && !esProgreso
 
   return (
