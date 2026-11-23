@@ -25,7 +25,7 @@ export default function BloqueQueVasADar({ c }) {
         </div>
 
         <div>
-          <label className={labelClass}>Tipo de actividad</label>
+          <label className={labelClass}>Tipo de actividad<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
           <input
             type="text"
             value={c.tipoActividad}

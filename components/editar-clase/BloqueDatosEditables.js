@@ -25,7 +25,7 @@ export default function BloqueDatosEditables({ f }) {
         </div>
 
         <div>
-          <label className={labelClass}>Tipo de actividad</label>
+          <label className={labelClass}>Tipo de actividad<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
           <input
             type="text"
             value={f.tipoActividad}
@@ -50,12 +50,12 @@ export default function BloqueDatosEditables({ f }) {
         </div>
 
         <div>
-          <label className={labelClass}>Material necesario</label>
+          <label className={labelClass}>Material necesario<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
           <input type="text" value={f.material} onChange={(e) => f.setMaterial(e.target.value)} className={inputClass} />
         </div>
 
         <div>
-          <label className={labelClass}>Observaciones</label>
+          <label className={labelClass}>Observaciones<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
           <textarea
             value={f.observaciones}
             onChange={(e) => f.setObservaciones(e.target.value)}
@@ -64,7 +64,7 @@ export default function BloqueDatosEditables({ f }) {
         </div>
 
         <div>
-          <label className={labelClass}>Punto de encuentro</label>
+          <label className={labelClass}>Punto de encuentro<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
           <input
             type="text"
             value={f.puntoEncuentro}

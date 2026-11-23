@@ -42,12 +42,12 @@ export default function BloquePlazasPrecio({ c }) {
         </div>
 
         <div>
-          <label className={labelClass}>Material necesario</label>
+          <label className={labelClass}>Material necesario<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
           <input type="text" value={c.material} onChange={(e) => c.setMaterial(e.target.value)} className={inputClass} />
         </div>
 
         <div>
-          <label className={labelClass}>Observaciones</label>
+          <label className={labelClass}>Observaciones<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
           <textarea
             value={c.observaciones}
             onChange={(e) => c.setObservaciones(e.target.value)}
