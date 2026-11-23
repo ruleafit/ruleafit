@@ -1,3 +1,13 @@
+import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
+
+// Tipo de reserva para adaptar los textos de cancelación: con bono, de pago (solo cuando los pagos
+// online están activos: hoy nadie paga) o gratuita.
+export function tipoReserva(reserva, clase) {
+  if (reserva?.bono_cliente_id) return 'bono'
+  if (PAGOS_VISIBLES && Number(clase?.precio) > 0) return 'pago'
+  return 'gratuita'
+}
+
 export function claveFechaHora(clase) {
   return `${clase.fecha} ${String(clase.hora).slice(0, 5)}`
 }

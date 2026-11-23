@@ -38,7 +38,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - Tras un cambio visible: arrancar `npm run dev`, probarlo como usuario y revisar la consola. Si hace falta login, pedirlo; no inventar credenciales.
 
 ## Decisiones de producto (resumen)
-- Sin lista de espera; cancelación gratis hasta 2 h antes; zona horaria Europe/Madrid. El plazo se muestra al usuario con `lib/plazoCancelacion.js` (mismo cálculo que la barrera de `cancelar_reserva`: se cancela con ≥ 2 h; cambiar ambos a la vez).
+- Sin lista de espera; zona horaria Europe/Madrid. Cancelación (sql/087): se puede cancelar hasta el comienzo de la sesión; con ≥ 2 h hay derecho a devolución (cobro pagado → `requiere_reembolso`), con < 2 h es tardía (`reservas.cancelacion_tardia`): sin devolución (el cobro sigue `pagado`) y la sesión de un bono queda consumida; la plaza se libera siempre. El aviso al usuario usa `lib/plazoCancelacion.js` (mismo cálculo que `cancelar_reserva`: cambiar ambos a la vez). Cancelaciones por organizador, mínimo de plazas y bloqueo tienen reglas propias (no son tardías).
 - Rulos: puntos de fidelización (no dinero): 20 de bienvenida y 5 por asistencia confirmada (`marcar_asistencia()`). No se compran, retiran ni transfieren.
 - Ciudad con autocompletado Nominatim (`lib/geocodificar.js`); `clases.provincia`; mapa Leaflet + OpenStreetMap.
 - Clases con `plazas_min` opcional; el entrenador puede cancelar la clase entera (`cancelar_clase()`).

@@ -55,7 +55,7 @@ export const CATEGORIAS = [
 export const PUNTOS = [
   { texto: 'Sin cuota mensual', Icono: Wallet },
   { texto: 'Elige tu entrenador', Icono: UserRoundSearch },
-  { texto: 'Cancela hasta 2 h antes', Icono: Clock },
+  { texto: 'Cancela gratis hasta 2 h antes', Icono: Clock },
   { texto: 'Tu horario, tus normas', Icono: CalendarClock },
   { texto: 'Tú fijas el precio y las plazas', Icono: Tag },
   { texto: 'Reservas sin complicaciones', Icono: CalendarCheck },

@@ -60,7 +60,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   const [usadoBono, setUsadoBono] = useState(false)
   const [tieneBono, setTieneBono] = useState(null) // null = aún sin comprobar
   const [pagando, setPagando] = useState(false)
-  // Con menos de 2 h para empezar, la reserva no se podrá cancelar: se pide una confirmación expresa.
+  // Con menos de 2 h para empezar, la reserva se podrá cancelar pero sin derecho a devolución: se pide una confirmación expresa.
   const [confirmandoTarde, setConfirmandoTarde] = useState(false)
   const [, setTic] = useState(0)
 

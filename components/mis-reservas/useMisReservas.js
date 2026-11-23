@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabaseClient'
+import { plazoCancelacion } from '../../lib/plazoCancelacion'
+import { tipoReserva } from './datos'
 
 // Sesión, carga de reservas propias y cancelación de una reserva.
 export default function useMisReservas() {
@@ -43,7 +45,7 @@ export default function useMisReservas() {
       const { data, error } = await supabase
         .from('reservas')
         .select(
-          'id, estado, cancelled_at, cancelada_por_entrenador, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_min, plazas_ocupadas, trainer_id, perfiles(username))'
+          'id, estado, cancelled_at, cancelada_por_entrenador, bono_cliente_id, clases(id, titulo, categoria, fecha, hora, duracion, ciudad, direccion, punto_encuentro, precio, plazas_max, plazas_min, plazas_ocupadas, trainer_id, perfiles(username))'
         )
         .eq('cliente_id', usuario.id)
         .or('estado.eq.activa,and(estado.eq.cancelada,cancelada_por_entrenador.eq.true)')
@@ -65,9 +67,21 @@ export default function useMisReservas() {
   }, [usuario])
 
   async function handleCancelar(reserva, clase) {
-    const confirmado = window.confirm(
-      `¿Seguro que quieres cancelar tu reserva de ${clase.titulo}? Esta acción no se puede deshacer.`
-    )
+    // Con menos de 2 h se puede cancelar igualmente, pero sin devolución (o con la sesión del bono
+    // consumida): se avisa antes de confirmar.
+    const tipo = tipoReserva(reserva, clase)
+    const tardia = plazoCancelacion(clase).estado === 'cerrado'
+    let pregunta = `¿Seguro que quieres cancelar tu reserva de ${clase.titulo}? Esta acción no se puede deshacer.`
+    if (tardia) {
+      const consecuencia =
+        tipo === 'bono'
+          ? ', pero la sesión de tu bono se considerará consumida'
+          : tipo === 'pago'
+            ? ', pero no recibirás la devolución del importe pagado'
+            : ''
+      pregunta = `¿Seguro que quieres cancelar? Tu plaza quedará libre para otra persona${consecuencia}.`
+    }
+    const confirmado = window.confirm(pregunta)
     if (!confirmado) return
 
     setCancelandoId(reserva.id)
@@ -87,9 +101,13 @@ export default function useMisReservas() {
 
     setReservas((prev) => prev.filter((r) => r.id !== reserva.id))
     setMensaje(
-      data?.reembolso_aplicable
+      !data?.cancelacion_tardia
         ? 'Reserva cancelada correctamente.'
-        : 'Reserva cancelada. Como faltaban menos de 2 horas, no habría devolución si la sesión tuviera un pago asociado.'
+        : data?.usaba_bono
+          ? 'Reserva cancelada. Faltaban menos de 2 horas, así que la sesión de tu bono se considera consumida.'
+          : data?.reembolso === 'sin_derecho'
+            ? 'Reserva cancelada. Faltaban menos de 2 horas, así que no tienes derecho a devolución.'
+            : 'Reserva cancelada correctamente. Tu plaza ha quedado libre para otra persona.'
     )
     setCancelandoId(null)
     setTimeout(() => setMensaje(''), 6000)

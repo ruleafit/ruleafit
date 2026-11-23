@@ -36,8 +36,8 @@ Ruleafit es una plataforma en línea que pone en contacto a **entrenadores indep
 
 | Situación | Reembolso |
 |---|---|
-| Cancelas con **más de 2 horas** de antelación | Reembolso íntegro |
-| Cancelas con **menos de 2 horas** | Sin reembolso |
+| Cancelas con **2 horas o más** de antelación | Reembolso íntegro |
+| Cancelas con **menos de 2 horas** (y antes de que empiece la sesión) | La reserva se cancela y la plaza queda libre, pero **sin reembolso**; si usaste un bono, la sesión del bono se considera consumida |
 | Cancela el entrenador o la sesión no alcanza el mínimo | Reembolso íntegro |
 | No te presentas | Sin reembolso |
 

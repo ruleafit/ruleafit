@@ -7,7 +7,7 @@ import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/con
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import AvisoPlazoCancelacion from '../AvisoPlazoCancelacion'
-import { etiquetaCuentaAtras } from './datos'
+import { etiquetaCuentaAtras, tipoReserva } from './datos'
 
 export default function TarjetaReservaProxima({ reserva, indice, cancelando, errorCancelacion, onCancelar }) {
   const clase = reserva.clases
@@ -91,7 +91,7 @@ export default function TarjetaReservaProxima({ reserva, indice, cancelando, err
             )}
           </div>
 
-          <AvisoPlazoCancelacion clase={clase} variante="reserva" className="mt-3" />
+          <AvisoPlazoCancelacion clase={clase} variante="reserva" tipo={tipoReserva(reserva, clase)} className="mt-3" />
 
           <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-[#E2E6CF] pt-3">
             <Link
