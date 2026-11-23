@@ -33,6 +33,11 @@ export default function useFormularioPublicar(copiarId) {
   const [lng, setLng] = useState(null)
   // true mientras la fecha es la propuesta al copiar una sesión (para avisarlo).
   const [fechaPropuesta, setFechaPropuesta] = useState(false)
+  // Repetición semanal (C07). Por defecto se publica una sola sesión.
+  const [repetir, setRepetir] = useState(false)
+  const [repInicio, setRepInicio] = useState('')
+  const [repFin, setRepFin] = useState('')
+  const [patron, setPatron] = useState({ dias: [], personalizado: false, horas: [], horasPorDia: {} })
 
   // Copiar sesión (pedido por el usuario el 21 sept 2026): si se llega aquí
   // desde "Copiar sesión" en Mis sesiones publicadas, se precarga el
@@ -104,9 +109,14 @@ export default function useFormularioPublicar(copiarId) {
     setObservaciones('')
     setLat(null)
     setLng(null)
+    setRepetir(false)
+    setRepInicio('')
+    setRepFin('')
+    setPatron({ dias: [], personalizado: false, horas: [], horasPorDia: {} })
   }
 
   return {
+    repetir, setRepetir, repInicio, setRepInicio, repFin, setRepFin, patron, setPatron,
     titulo, setTitulo, categoria, setCategoria, tipoActividad, setTipoActividad,
     ciudad, setCiudad, ciudadTexto, setCiudadTexto, ciudadCentro, setCiudadCentro,
     provincia, setProvincia, direccion, setDireccion, puntoEncuentro, setPuntoEncuentro,

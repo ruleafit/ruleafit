@@ -9,19 +9,41 @@ import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import TituloBloque from '../publicar/TituloBloque'
 import TarjetaMisClase from './TarjetaMisClase'
+import SerieMisClases from './SerieMisClases'
 import { claveFechaHora } from './datos'
 
 // m = useMisClases.
 export default function ListaMisClases({ m }) {
   const { error, clasesConAlumnos } = m
 
-  const clasesProximas = clasesConAlumnos
+  // Series de sesiones recurrentes (C07): sus sesiones se agrupan en UNA tarjeta por serie; las
+  // sesiones individuales se muestran como siempre. (Sin datos de la serie, se tratan como sueltas.)
+  const esDeSerie = (c) => !!(c.serie_id && m.series?.[c.serie_id])
+  const sesionesPorSerie = {}
+  for (const c of clasesConAlumnos) {
+    if (esDeSerie(c)) (sesionesPorSerie[c.serie_id] ||= []).push(c)
+  }
+  const individuales = clasesConAlumnos.filter((c) => !esDeSerie(c))
+  const futura = (c) => !claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }) && c.estado !== 'cancelada'
+  const proximaDe = (lista) => lista.filter(futura).map(claveFechaHora).sort()[0]
+  const seriesConFuturas = Object.keys(sesionesPorSerie)
+    .filter((id) => sesionesPorSerie[id].some(futura))
+    .sort((a, b) => (proximaDe(sesionesPorSerie[a]) < proximaDe(sesionesPorSerie[b]) ? -1 : 1))
+  const seriesSinFuturas = Object.keys(sesionesPorSerie).filter((id) => !sesionesPorSerie[id].some(futura))
+
+  const clasesProximas = individuales
     .filter((c) => !claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }) && c.estado !== 'cancelada')
     .sort((a, b) => (claveFechaHora(a) < claveFechaHora(b) ? -1 : 1))
 
-  const clasesPasadas = clasesConAlumnos
+  const clasesPasadas = individuales
     .filter((c) => claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora }))
     .sort((a, b) => (claveFechaHora(a) > claveFechaHora(b) ? -1 : 1))
+
+  // Lista de «Próximas»: sesiones sueltas y series mezcladas por su próxima fecha.
+  const elementosProximos = [
+    ...clasesProximas.map((c) => ({ tipo: 'clase', clave: claveFechaHora(c), c })),
+    ...seriesConFuturas.map((id) => ({ tipo: 'serie', clave: proximaDe(sesionesPorSerie[id]), id })),
+  ].sort((a, b) => (a.clave < b.clave ? -1 : 1))
 
   const clasesRealizadas = clasesConAlumnos.filter(
     (c) => c.estado !== 'cancelada' && claseYaPaso({ fecha: c.clase_fecha, hora: c.clase_hora })
@@ -31,7 +53,7 @@ export default function ListaMisClases({ m }) {
   // solo se listan las sesiones de esa fecha (por hora); las ya empezadas de
   // hoy salen atenuadas y sin botón de cancelar (lo decide TarjetaMisClase).
   const [diaSel, setDiaSel] = useState(null)
-  const diasConSesiones = new Set(clasesProximas.map((c) => c.clase_fecha))
+  const diasConSesiones = new Set(clasesConAlumnos.filter(futura).map((c) => c.clase_fecha))
   const clasesDelDia = diaSel
     ? clasesConAlumnos
         .filter((c) => c.clase_fecha === diaSel)
@@ -98,10 +120,16 @@ export default function ListaMisClases({ m }) {
               ? clasesDelDia.map((clase, indice) =>
                   tarjeta(clase, indice, claseYaPaso({ fecha: clase.clase_fecha, hora: clase.clase_hora }))
                 )
-              : clasesProximas.map((clase, indice) => tarjeta(clase, indice, false))}
+              : elementosProximos.map((el, indice) =>
+                  el.tipo === 'serie' ? (
+                    <SerieMisClases key={el.id} serie={m.series[el.id]} sesiones={sesionesPorSerie[el.id]} m={m} />
+                  ) : (
+                    tarjeta(el.c, indice, false)
+                  )
+                )}
           </div>
 
-          {!diaSel && clasesPasadas.length > 0 && (
+          {!diaSel && clasesPasadas.length + seriesSinFuturas.length > 0 && (
             <div className="mt-10">
               <div className="mb-4 flex items-center justify-between border-b border-[#E2E6CF] pb-2">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Historial</h2>
@@ -111,6 +139,9 @@ export default function ListaMisClases({ m }) {
               </div>
 
               <div className="flex flex-col gap-5">
+                {seriesSinFuturas.map((id) => (
+                  <SerieMisClases key={id} serie={m.series[id]} sesiones={sesionesPorSerie[id]} m={m} />
+                ))}
                 {clasesPasadas.map((clase, indice) => tarjeta(clase, indice, true))}
               </div>
             </div>

@@ -11,6 +11,8 @@ import BloquePlazasPrecio from '../../components/publicar/BloquePlazasPrecio'
 import MensajePublicar from '../../components/publicar/MensajePublicar'
 import useFormularioPublicar from '../../components/publicar/useFormularioPublicar'
 import { publicarSesion } from '../../components/publicar/enviarSesion'
+import { publicarSerie } from '../../components/publicar/enviarSerie'
+import useVistaPreviaSerie from '../../components/publicar/useVistaPreviaSerie'
 import { botonPrimarioClass } from '../../components/publicar/constantes'
 
 function PublicarFormulario() {
@@ -21,6 +23,8 @@ function PublicarFormulario() {
   const [cargando, setCargando] = useState(true)
   const [mensaje, setMensaje] = useState('')
   const campos = useFormularioPublicar(copiarId)
+  const previa = useVistaPreviaSerie(campos)
+  const numSesiones = previa.validacion.sesiones.length
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -33,6 +37,7 @@ function PublicarFormulario() {
 
   function handlePublicar(e) {
     e.preventDefault()
+    if (campos.repetir) return publicarSerie(campos, previa, setMensaje)
     return publicarSesion(campos, setMensaje)
   }
 
@@ -65,7 +70,7 @@ function PublicarFormulario() {
       <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
         <form onSubmit={handlePublicar} className="flex flex-col gap-6">
           <BloqueQueVasADar c={campos} />
-          <BloqueCuando c={campos} />
+          <BloqueCuando c={campos} previa={previa} />
           <BloqueDonde c={campos} />
           <BloquePlazasPrecio c={campos} />
 
@@ -81,8 +86,16 @@ function PublicarFormulario() {
             </span>
           </div>
 
-          <button type="submit" className={botonPrimarioClass}>
-            Publicar sesión
+          <button
+            type="submit"
+            disabled={campos.repetir && (previa.validacion.errores.length > 0 || numSesiones === 0)}
+            className={`${botonPrimarioClass} disabled:cursor-not-allowed disabled:opacity-60`}
+          >
+            {campos.repetir
+              ? numSesiones > 0
+                ? `Publicar ${numSesiones} ${numSesiones === 1 ? 'sesión' : 'sesiones'}`
+                : 'Publicar sesiones'
+              : 'Publicar sesión'}
           </button>
         </form>
 

@@ -16,6 +16,9 @@ export default function useMisClases() {
   const [procesandoCancelacionId, setProcesandoCancelacionId] = useState(null)
   const [erroresCancelacion, setErroresCancelacion] = useState({})
   const [mensajesCancelacion, setMensajesCancelacion] = useState({})
+  // Series de sesiones recurrentes (C07): id de serie → { id, titulo, patron }.
+  const [series, setSeries] = useState({})
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -40,9 +43,10 @@ export default function useMisClases() {
         return
       }
 
-      const [respuestaClases, respuestaAlumnos] = await Promise.all([
+      const [respuestaClases, respuestaAlumnos, respuestaSeries] = await Promise.all([
         supabase.rpc('mis_clases'),
         supabase.rpc('reservas_de_mis_clases'),
+        cargarSeries(usuario.id),
       ])
 
       if (respuestaClases.error) {
@@ -58,11 +62,21 @@ export default function useMisClases() {
       }
 
       const alumnosPorClase = agruparAlumnosPorClase(respuestaAlumnos.data || [])
-      setClasesConAlumnos(combinarClasesConAlumnos(respuestaClases.data || [], alumnosPorClase))
+      const combinadas = combinarClasesConAlumnos(respuestaClases.data || [], alumnosPorClase).map((cl) => ({
+        ...cl,
+        serie_id: respuestaSeries.serieDeClase.get(cl.clase_id) || null,
+      }))
+      setClasesConAlumnos(combinadas)
+      setSeries(respuestaSeries.series)
       setCargandoDatos(false)
     }
     cargarClases()
-  }, [usuario])
+  }, [usuario, version])
+
+  // Vuelve a cargar todo (tras editar, cancelar o cambiar el patrón de una serie).
+  function recargar() {
+    setVersion((v) => v + 1)
+  }
 
   async function handleCancelarClase(claseId) {
     const confirmado = window.confirm(
@@ -109,5 +123,30 @@ export default function useMisClases() {
     erroresCancelacion,
     mensajesCancelacion,
     handleCancelarClase,
+    series,
+    recargar,
   }
+}
+
+// Sesiones que pertenecen a una serie y datos de las series del organizador. La lectura va por
+// páginas de 1000 filas (límite de la API) para no perder sesiones en series largas.
+async function cargarSeries(usuarioId) {
+  const serieDeClase = new Map()
+  for (let desde = 0; desde < 20000; desde += 1000) {
+    const { data } = await supabase
+      .from('clases')
+      .select('id, serie_id')
+      .eq('trainer_id', usuarioId)
+      .not('serie_id', 'is', null)
+      .order('id')
+      .range(desde, desde + 999)
+    for (const f of data || []) serieDeClase.set(f.id, f.serie_id)
+    if (!data || data.length < 1000) break
+  }
+  const series = {}
+  if (serieDeClase.size > 0) {
+    const { data } = await supabase.from('series_sesiones').select('id, titulo, patron').eq('trainer_id', usuarioId)
+    for (const s of data || []) series[s.id] = s
+  }
+  return { serieDeClase, series }
 }
