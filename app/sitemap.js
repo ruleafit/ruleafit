@@ -10,6 +10,7 @@ export const revalidate = 3600
 const PAGINAS = [
   { ruta: '', frecuencia: 'daily', prioridad: 1 },
   { ruta: '/clases', frecuencia: 'hourly', prioridad: 0.9 },
+  { ruta: '/centros', frecuencia: 'monthly', prioridad: 0.5 },
   { ruta: '/ayuda', frecuencia: 'monthly', prioridad: 0.4 },
   { ruta: '/privacidad', frecuencia: 'yearly', prioridad: 0.2 },
   { ruta: '/aviso-legal', frecuencia: 'yearly', prioridad: 0.2 },

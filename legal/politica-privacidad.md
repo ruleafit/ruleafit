@@ -2,7 +2,7 @@
 
 **Sitio web:** https://www.ruleafit.com
 
-**Última actualización:** 22 de noviembre de 2026
+**Última actualización:** 23 de noviembre de 2026
 
 ## I. POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS
 
@@ -66,6 +66,8 @@ Ruleafit **no** utiliza los datos personales del Usuario con fines publicitarios
 
 Si el Usuario reserva una sesión, su nombre de usuario público (@) solo se muestra a otros participantes si el Usuario lo activa voluntariamente en Mi cuenta (opción «Mostrar mi @ a otros participantes»); en caso contrario aparece como «Usuario anónimo», sin ningún otro dato que lo identifique. Cuando lo activa, se muestra, en el detalle de las sesiones que reserva, a otros usuarios que hayan iniciado sesión. El organizador de la sesión puede ver siempre el usuario de quienes han reservado. La preferencia está desactivada por defecto, se aplica a todas las reservas del Usuario (presentes y futuras), puede cambiarse en cualquier momento y se conserva mientras la cuenta esté abierta.
 
+Si una persona representante de un gimnasio o centro deportivo envía el formulario de la página «Para centros» (/centros), Ruleafit trata el nombre del centro, la ciudad o municipio, el nombre de la persona de contacto, su correo electrónico, su teléfono y mensaje (ambos opcionales) y el tipo de solicitud únicamente para responder a esa solicitud de información o demostración. La base legal es el consentimiento, que se otorga al aceptar esta política al enviar el formulario. Estos datos no se utilizan para enviar comunicaciones comerciales ni se muestran públicamente; se guardan en una base de datos privada y se notifican por correo electrónico al equipo de Ruleafit. Enviar el formulario no es necesario para crear una cuenta.
+
 Si el Usuario activa «Avisos de sesiones en mi zona», Ruleafit utiliza su zona habitual y sus preferencias exclusivamente para avisarle, en la campana de la aplicación y, si ha permitido las notificaciones, mediante notificación push, de las nuevas sesiones publicadas cerca de él, ya sea de forma inmediata o en un resumen diario a las 20:30 (hora de España peninsular). Estos datos no se utilizan con fines publicitarios ni se muestran a otros usuarios o a los entrenadores.
 
 En el momento en que se obtengan los datos personales, se informará al Usuario acerca del fin o fines específicos del tratamiento a que se destinarán los datos personales; es decir, del uso o usos que se dará a la información recopilada.
@@ -75,6 +77,8 @@ En el momento en que se obtengan los datos personales, se informará al Usuario 
 Los datos personales solo serán retenidos durante el tiempo mínimo necesario para los fines de su tratamiento y, en todo caso, únicamente durante el siguiente plazo: mientras el Usuario mantenga su cuenta activa y, tras su baja, durante los plazos legalmente exigibles, o hasta que el Usuario solicite su supresión.
 
 La zona habitual y las preferencias de «Avisos de sesiones en mi zona» se conservan mientras la cuenta esté abierta. Si el Usuario desactiva la función, deja de recibir avisos y esos datos dejan de utilizarse para enviarlos, pero la configuración permanece guardada e inactiva en su cuenta para que pueda reactivarla; el Usuario puede solicitar su supresión en cualquier momento ejerciendo sus derechos conforme a esta política, y se eliminan siempre al eliminar la cuenta. Los avisos recibidos se conservan en el historial de notificaciones de forma limitada (los más recientes) y los registros técnicos asociados a su envío se eliminan automáticamente en un plazo máximo de 90 días.
+
+Las solicitudes del formulario de centros que no lleguen a convertirse en una relación con Ruleafit se conservan, como criterio general, durante un máximo de 12 meses desde el último contacto, salvo que existan obligaciones legales aplicables, y se revisan y eliminan pasado ese plazo o antes si la persona interesada solicita su supresión. Si el centro se registra y establece una relación con Ruleafit, sus datos se gestionan conforme a la política aplicable a esa relación.
 
 En el momento en que se obtengan los datos personales, se informará al Usuario acerca del plazo durante el cual se conservarán los datos personales o, cuando eso no sea posible, los criterios utilizados para determinar este plazo.
 
@@ -86,11 +90,13 @@ Los datos personales del Usuario serán compartidos con los siguientes destinata
 
 2. **Supabase, Inc.**, Estados Unidos. Contacto: privacy@supabase.com. Finalidad: alojamiento de la base de datos y gestión de la autenticación de usuarios. Los servidores de base de datos están ubicados en la Unión Europea (Irlanda).
 
+Los datos enviados mediante el formulario de centros se envían, además, por correo electrónico al equipo de Ruleafit a través de Resend (Resend, Inc., Estados Unidos), que actúa como encargado del tratamiento con la finalidad de enviar correo electrónico transaccional.
+
 Si el Usuario activa las notificaciones push, para entregarlas se utilizan los servicios de mensajería del navegador o del sistema operativo de su dispositivo (como Google o Apple), que reciben el contenido de la notificación y un identificador técnico del dispositivo.
 
 ### Transferencias internacionales de datos
 
-Ambos proveedores son entidades constituidas en Estados Unidos, por lo que puede producirse una transferencia internacional de datos personales fuera del Espacio Económico Europeo. Dichas transferencias se realizan al amparo de las garantías adecuadas previstas en el capítulo V del RGPD, en particular mediante las cláusulas contractuales tipo aprobadas por la Comisión Europea, recogidas en los acuerdos de tratamiento de datos publicados por cada proveedor.
+Estos proveedores son entidades constituidas en Estados Unidos, por lo que puede producirse una transferencia internacional de datos personales fuera del Espacio Económico Europeo. Dichas transferencias se realizan al amparo de las garantías adecuadas previstas en el capítulo V del RGPD, en particular mediante las cláusulas contractuales tipo aprobadas por la Comisión Europea, recogidas en los acuerdos de tratamiento de datos publicados por cada proveedor.
 
 ### Datos personales de menores de edad
 

@@ -8,6 +8,7 @@ import HeroHome from '../components/home/HeroHome'
 import ProximasSesionesReservas from '../components/home/ProximasSesionesReservas'
 import CategoriasHome from '../components/home/CategoriasHome'
 import CaptacionEntrenadores from '../components/home/CaptacionEntrenadores'
+import GuiaOrganizador from '../components/home/GuiaOrganizador'
 import BannerComunidad from '../components/home/BannerComunidad'
 import PuntosHome from '../components/home/PuntosHome'
 import { botonPrimarioClass } from '../components/home/constantes'
@@ -49,6 +50,8 @@ export default function Home() {
       <div className="solo-web">
         <BotonInstalarApp className={botonPrimarioClass} />
       </div>
+
+      {usuario && !datos.cargandoMisClases && <GuiaOrganizador usuario={usuario} misClases={misClases} />}
 
       {usuario && !datos.cargandoMisClases && !datos.cargandoMisReservas && (
         <ProximasSesionesReservas

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import RevelarAlLlegar from '../RevelarAlLlegar'
-import { PUNTOS_CAPTACION_ENTRENADOR, botonPrimarioClass } from './constantes'
+import { PUNTOS_CAPTACION_ENTRENADOR, botonPrimarioClass, botonSecundarioClass } from './constantes'
 
 export default function CaptacionEntrenadores() {
   return (
@@ -41,6 +41,16 @@ export default function CaptacionEntrenadores() {
         <Link href="/registro" className={`${botonPrimarioClass} mt-4`}>
           Publica tu primera sesión
         </Link>
+
+        <div className="mt-10 flex w-full flex-col items-center gap-3 border-t border-white/15 pt-10">
+          <p className="text-sm font-bold uppercase tracking-wide text-[#B5E600] sm:text-base">
+            ¿Tienes un gimnasio o centro deportivo?
+          </p>
+          <p className="text-xl font-extrabold text-white sm:text-2xl">Llena tus clases. Simplifica tus reservas.</p>
+          <Link href="/centros" className={`${botonSecundarioClass} mt-2`}>
+            Descubre RuleaFit para tu centro
+          </Link>
+        </div>
       </div>
     </RevelarAlLlegar>
   )

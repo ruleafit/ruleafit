@@ -18,7 +18,7 @@ export default function PoliticaPrivacidadPage() {
         <strong>Sitio web:</strong> https://www.ruleafit.com
       </p>
       <p className="mb-8 text-sm text-zinc-500">
-        <strong>Última actualización:</strong> {AVISOS_ZONA_VISIBLES ? '22 de noviembre de 2026' : '21 de julio de 2026'}
+        <strong>Última actualización:</strong> 23 de noviembre de 2026
       </p>
 
       <h2 className={h2Class}>I. POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS</h2>
@@ -108,6 +108,9 @@ export default function PoliticaPrivacidadPage() {
       <p className={pClass}>
         Si el Usuario reserva una sesión, su nombre de usuario público (@) solo se muestra a otros participantes si el Usuario lo activa voluntariamente en Mi cuenta (opción «Mostrar mi @ a otros participantes»); en caso contrario aparece como «Usuario anónimo», sin ningún otro dato que lo identifique. Cuando lo activa, se muestra, en el detalle de las sesiones que reserva, a otros usuarios que hayan iniciado sesión. El organizador de la sesión puede ver siempre el usuario de quienes han reservado. La preferencia está desactivada por defecto, se aplica a todas las reservas del Usuario (presentes y futuras), puede cambiarse en cualquier momento y se conserva mientras la cuenta esté abierta.
       </p>
+      <p className={pClass}>
+        Si una persona representante de un gimnasio o centro deportivo envía el formulario de la página «Para centros» (/centros), Ruleafit trata el nombre del centro, la ciudad o municipio, el nombre de la persona de contacto, su correo electrónico, su teléfono y mensaje (ambos opcionales) y el tipo de solicitud únicamente para responder a esa solicitud de información o demostración. La base legal es el consentimiento, que se otorga al aceptar esta política al enviar el formulario. Estos datos no se utilizan para enviar comunicaciones comerciales ni se muestran públicamente; se guardan en una base de datos privada y se notifican por correo electrónico al equipo de Ruleafit. Enviar el formulario no es necesario para crear una cuenta.
+      </p>
       {AVISOS_ZONA_VISIBLES && (
         <p className={pClass}>
           Si el Usuario activa «Avisos de sesiones en mi zona», Ruleafit utiliza su zona habitual y sus preferencias exclusivamente para avisarle, en la campana de la aplicación y, si ha permitido las notificaciones, mediante notificación push, de las nuevas sesiones publicadas cerca de él, ya sea de forma inmediata o en un resumen diario a las 20:30 (hora de España peninsular). Estos datos no se utilizan con fines publicitarios ni se muestran a otros usuarios o a los entrenadores.
@@ -127,6 +130,9 @@ export default function PoliticaPrivacidadPage() {
         </p>
       )}
       <p className={pClass}>
+        Las solicitudes del formulario de centros que no lleguen a convertirse en una relación con Ruleafit se conservan, como criterio general, durante un máximo de 12 meses desde el último contacto, salvo que existan obligaciones legales aplicables, y se revisan y eliminan pasado ese plazo o antes si la persona interesada solicita su supresión. Si el centro se registra y establece una relación con Ruleafit, sus datos se gestionan conforme a la política aplicable a esa relación.
+      </p>
+      <p className={pClass}>
         En el momento en que se obtengan los datos personales, se informará al Usuario acerca del plazo durante el cual se conservarán los datos personales o, cuando eso no sea posible, los criterios utilizados para determinar este plazo.
       </p>
 
@@ -138,6 +144,9 @@ export default function PoliticaPrivacidadPage() {
         <li><strong>Vercel Inc.</strong>, con domicilio en 440 N Barranca Avenue #4133, Covina, CA 91723, Estados Unidos. Contacto: privacy@vercel.com. Finalidad: alojamiento del sitio web.</li>
         <li><strong>Supabase, Inc.</strong>, Estados Unidos. Contacto: privacy@supabase.com. Finalidad: alojamiento de la base de datos y gestión de la autenticación de usuarios. Los servidores de base de datos están ubicados en la Unión Europea (Irlanda).</li>
       </ol>
+      <p className={pClass}>
+        Los datos enviados mediante el formulario de centros se envían, además, por correo electrónico al equipo de Ruleafit a través de Resend (Resend, Inc., Estados Unidos), que actúa como encargado del tratamiento con la finalidad de enviar correo electrónico transaccional.
+      </p>
       {AVISOS_ZONA_VISIBLES && (
         <p className={pClass}>
           Si el Usuario activa las notificaciones push, para entregarlas se utilizan los servicios de mensajería del navegador o del sistema operativo de su dispositivo (como Google o Apple), que reciben el contenido de la notificación y un identificador técnico del dispositivo.
@@ -146,7 +155,7 @@ export default function PoliticaPrivacidadPage() {
 
       <h3 className={h3Class}>Transferencias internacionales de datos</h3>
       <p className={pClass}>
-        Ambos proveedores son entidades constituidas en Estados Unidos, por lo que puede producirse una transferencia internacional de datos personales fuera del Espacio Económico Europeo. Dichas transferencias se realizan al amparo de las garantías adecuadas previstas en el capítulo V del RGPD, en particular mediante las cláusulas contractuales tipo aprobadas por la Comisión Europea, recogidas en los acuerdos de tratamiento de datos publicados por cada proveedor.
+        Estos proveedores son entidades constituidas en Estados Unidos, por lo que puede producirse una transferencia internacional de datos personales fuera del Espacio Económico Europeo. Dichas transferencias se realizan al amparo de las garantías adecuadas previstas en el capítulo V del RGPD, en particular mediante las cláusulas contractuales tipo aprobadas por la Comisión Europea, recogidas en los acuerdos de tratamiento de datos publicados por cada proveedor.
       </p>
 
       <h3 className={h3Class}>Datos personales de menores de edad</h3>

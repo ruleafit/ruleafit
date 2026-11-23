@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CircleAlert, CircleCheck, Loader2 } from 'lucide-react'
@@ -39,6 +39,15 @@ export default function RegistroPage() {
   const [errorUsername, setErrorUsername] = useState('')
   const [errorMayoria, setErrorMayoria] = useState('')
   const [cargando, setCargando] = useState(false)
+  // /registro?tipo=organizador (viene de /centros): solo guarda el interés; no cambia roles ni permisos.
+  const [interesOrganizador, setInteresOrganizador] = useState(false)
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tipo') === 'organizador') {
+      setInteresOrganizador(true)
+      try { localStorage.setItem('ruleafit_interes_organizador', '1') } catch {}
+    }
+  }, [])
 
   async function handleRegistro(e) {
     e.preventDefault()
@@ -80,7 +89,7 @@ export default function RegistroPage() {
       email: email,
       password: password,
       options: {
-        data: { username: username },
+        data: interesOrganizador ? { username: username, interes: 'organizador' } : { username: username },
       },
     })
 
@@ -130,6 +139,12 @@ export default function RegistroPage() {
           <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#1F2400]">
             Crear cuenta en Ruleafit
           </h1>
+
+          {interesOrganizador && !registroExitoso && (
+            <p className="-mt-3 mb-5 text-sm text-[#3d4426]">
+              Crea tu cuenta para publicar las actividades de tu centro. Después te guiaremos para empezar.
+            </p>
+          )}
 
           {registroExitoso ? (
             <div className="flex items-start gap-2 corte-card border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00]">
