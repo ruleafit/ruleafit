@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { cargarNotificaciones } from '../lib/consultaNotificaciones'
+import { IconoNotificacion, AccionNotificacion } from './IconoNotificacion'
 
 export default function HistorialNotificaciones({ usuarioActual }) {
   const router = useRouter()
@@ -51,11 +52,15 @@ export default function HistorialNotificaciones({ usuarioActual }) {
         <li key={n.id}>
           <button
             onClick={() => { if (n.url) router.push(n.url) }}
-            className="flex w-full flex-col gap-0.5 px-4 py-3 text-left transition-colors hover:bg-zinc-50"
+            className="flex w-full items-start gap-2 px-4 py-3 text-left transition-colors hover:bg-zinc-50"
           >
-            <span className="text-sm font-medium text-[#162318]">{n.titulo}</span>
-            <span className="text-xs text-[#162318]/70">{n.cuerpo}</span>
-            <span className="text-[11px] text-[#162318]/40">{tiempoRelativo(n.created_at)}</span>
+            <IconoNotificacion tipo={n.tipo} />
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-sm font-medium text-[#162318]">{n.titulo}</span>
+              <span className="break-words text-xs text-[#162318]/70">{n.cuerpo}</span>
+              <AccionNotificacion tipo={n.tipo} />
+              <span className="text-[11px] text-[#162318]/40">{tiempoRelativo(n.created_at)}</span>
+            </span>
           </button>
         </li>
       ))}

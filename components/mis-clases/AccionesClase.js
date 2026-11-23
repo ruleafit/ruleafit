@@ -1,11 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { Ban, Pencil, Copy } from 'lucide-react'
+import { useState } from 'react'
+import { Ban, Pencil, Copy, Megaphone } from 'lucide-react'
 import { motivoNoEditableClase } from '../../lib/ventanaEdicionClase'
 import BotonCompartir from '../BotonCompartir'
+import PanelAvisosParticipantes from './PanelAvisosParticipantes'
 
 export default function AccionesClase({ clase, haPasado, procesandoCancelacion, errorCancelacion, onCancelar }) {
+  const [avisoAbierto, setAvisoAbierto] = useState(false)
   const esEditable = !motivoNoEditableClase({
     fecha: clase.clase_fecha,
     hora: clase.clase_hora,
@@ -43,6 +46,17 @@ export default function AccionesClase({ clase, haPasado, procesandoCancelacion, 
             className="inline-flex items-center gap-1.5 corte-tag border border-[#E2E6CF] bg-white px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
           />
         )}
+        {clase.estado === 'activa' && !haPasado && (
+          <button
+            type="button"
+            onClick={() => setAvisoAbierto((v) => !v)}
+            aria-expanded={avisoAbierto}
+            className="inline-flex items-center gap-1.5 corte-tag border border-[#E2E6CF] bg-white px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
+          >
+            <Megaphone className="h-3.5 w-3.5" strokeWidth={1.75} />
+            Enviar aviso a participantes
+          </button>
+        )}
         {esEditable && (
           <Link
             href={`/mis-clases/${clase.clase_id}/editar`}
@@ -53,6 +67,10 @@ export default function AccionesClase({ clase, haPasado, procesandoCancelacion, 
           </Link>
         )}
       </div>
+
+      {avisoAbierto && clase.estado === 'activa' && !haPasado && (
+        <PanelAvisosParticipantes clase={clase} onCerrar={() => setAvisoAbierto(false)} />
+      )}
 
       {clase.estado === 'activa' && !haPasado && (
         <div className="mt-3 flex flex-col items-end gap-1.5 border-t border-[#E2E6CF] pt-3">

@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Users, Pencil, Ban, ChevronDown } from 'lucide-react'
+import { Users, Pencil, Ban, ChevronDown, Megaphone } from 'lucide-react'
 import { claseYaPaso, motivoNoEditableClase } from '../../lib/ventanaEdicionClase'
 import { formatearFechaParaMostrar, diaSemanaParaMostrar } from '../../lib/formatoFecha'
 import AlumnosClase from './AlumnosClase'
 import DialogoCancelarSerie from './DialogoCancelarSerie'
+import PanelAvisosParticipantes from './PanelAvisosParticipantes'
 
 const botonFila =
   'inline-flex items-center gap-1 corte-tag border border-[#E2E6CF] px-2.5 py-1 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]'
@@ -15,6 +16,7 @@ const botonFila =
 export default function FilaSesionSerie({ clase, m, onResultado }) {
   const [verAlumnos, setVerAlumnos] = useState(false)
   const [cancelando, setCancelando] = useState(false)
+  const [aviso, setAviso] = useState(false)
   const haPasado = claseYaPaso({ fecha: clase.clase_fecha, hora: clase.clase_hora })
   const cancelada = clase.estado === 'cancelada'
   const editable = !motivoNoEditableClase({ fecha: clase.clase_fecha, hora: clase.clase_hora, estado: clase.estado })
@@ -53,6 +55,12 @@ export default function FilaSesionSerie({ clase, m, onResultado }) {
               Ver
             </Link>
           )}
+          {puedeCancelar && (
+            <button type="button" onClick={() => setAviso((v) => !v)} aria-expanded={aviso} className={botonFila}>
+              <Megaphone className="h-3.5 w-3.5" strokeWidth={2} />
+              Enviar aviso a participantes
+            </button>
+          )}
           {editable && (
             <Link href={`/mis-clases/${clase.clase_id}/editar`} className={botonFila}>
               <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
@@ -74,6 +82,8 @@ export default function FilaSesionSerie({ clase, m, onResultado }) {
       </div>
 
       {verAlumnos && <AlumnosClase clase={clase} haPasado={haPasado} />}
+
+      {aviso && puedeCancelar && <PanelAvisosParticipantes clase={clase} onCerrar={() => setAviso(false)} />}
 
       {cancelando && (
         <DialogoCancelarSerie

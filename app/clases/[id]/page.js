@@ -17,6 +17,7 @@ import BotonCompartir from '../../../components/BotonCompartir'
 import BotonDenunciar from '../../../components/BotonDenunciar'
 import RevelarAlLlegar from '../../../components/RevelarAlLlegar'
 import ParticipantesSesion from '../../../components/clases/ParticipantesSesion'
+import AvisosRecibidos from '../../../components/clases/AvisosRecibidos'
 
 const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
   ssr: false,
@@ -282,6 +283,8 @@ function DetalleClaseContenido() {
               )}
             </div>
           </RevelarAlLlegar>
+
+          <AvisosRecibidos claseId={clase.id} usuario={usuario} className={tarjetaClass} />
 
           <ParticipantesSesion
             claseId={clase.id}

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
 import { Star } from 'lucide-react'
 import FormularioValoracion from './FormularioValoracion'
 
@@ -13,9 +14,33 @@ export default function ValoracionesEntrenador({
   valoracionPropia,
   onValoracionGuardada,
 }) {
+  // C16: la notificación «¿Qué tal tu entrenamiento?» abre el perfil con ?valorar=1: se lleva a la
+  // persona directamente a este bloque (el formulario de siempre; si ya valoró, el de editar su valoración).
+  const raiz = useRef(null)
+  const [vieneDeAviso, setVieneDeAviso] = useState(false)
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('valorar') !== '1') return undefined
+    setVieneDeAviso(true)
+    const t = setTimeout(() => raiz.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350)
+    return () => clearTimeout(t)
+  }, [puedeValorar])
+
   return (
-    <div className="mt-8 corte-card border border-[#E2E6CF] bg-white p-6">
+    <div id="valorar" ref={raiz} className={`mt-8 corte-card border bg-white p-6 ${vieneDeAviso ? 'border-[#B5E600] ring-2 ring-[#B5E600]/40' : 'border-[#E2E6CF]'}`}>
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#6B7355]">Valoraciones</h2>
+
+      {vieneDeAviso && usuarioActual && puedeValorar && (
+        <p className="mb-4 corte-tag border border-[#B5E600] bg-[#EDF5C9] px-3 py-2 text-sm font-medium text-[#3D4A00]">
+          {valoracionPropia
+            ? `Ya has valorado a @${perfil.username}. Aquí puedes actualizar tu valoración.`
+            : `¿Qué tal tu entrenamiento con @${perfil.username}? Déjanos tu valoración aquí abajo.`}
+        </p>
+      )}
+      {vieneDeAviso && !usuarioActual && (
+        <p className="mb-4 text-sm text-[#6B7355]">
+          <Link href="/login" className="font-semibold text-[#3D4A00] underline">Inicia sesión</Link> para valorar tu experiencia.
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1.5">

@@ -16,6 +16,8 @@ const CATEGORIAS_PARTICIPANTE = [
   { clave: 'recordatorio_24h', etiqueta: 'Recordatorio 24 horas antes' },
   { clave: 'recordatorio_7h',  etiqueta: 'Recordatorio 7 horas antes' },
   { clave: 'recordatorio_2h',  etiqueta: 'Recordatorio 2 horas antes' },
+  { clave: 'solicitud_valoracion', etiqueta: 'Solicitud de valoración tras la sesión', ayuda: 'Solo desactiva la notificación push: el aviso seguirá apareciendo en la campana.' },
+  { clave: 'avisos_organizador',   etiqueta: 'Avisos del organizador de mis sesiones', ayuda: 'Solo desactiva la notificación push: los avisos seguirán en la campana y en la ficha de la sesión.' },
 ]
 const CATEGORIAS_ORGANIZADOR = [
   { clave: 'recordatorio_24h_entrenador',   etiqueta: 'Recordatorio 24 horas antes' },
@@ -105,7 +107,10 @@ export default function PreferenciasNotificaciones({ usuarioActual, pushActivada
           <h4 className="text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Como participante</h4>
           {CATEGORIAS_PARTICIPANTE.map((cat) => (
             <div key={cat.clave} className="flex items-center justify-between gap-4">
-              <span className="text-sm text-[#162318]">{cat.etiqueta}</span>
+              <span className="min-w-0">
+                <span className="block text-sm text-[#162318]">{cat.etiqueta}</span>
+                {cat.ayuda && <span className="block text-xs text-[#6B7355]">{cat.ayuda}</span>}
+              </span>
               <button
                 onClick={() => alternar(cat.clave)}
                 disabled={guardando === cat.clave || !pushActivadas}
