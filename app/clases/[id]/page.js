@@ -295,6 +295,7 @@ function DetalleClaseContenido() {
             <BotonReservar
               clase={clase}
               tamaño="grande"
+              mostrarPlazo
               onReservado={(nuevasPlazasOcupadas) =>
                 setClase((prev) => ({ ...prev, plazas_ocupadas: nuevasPlazasOcupadas }))
               }
@@ -303,7 +304,7 @@ function DetalleClaseContenido() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-2xl px-4 pb-28 sm:px-6 sm:pb-10">
+      <div className="mx-auto w-full max-w-2xl px-4 pb-44 sm:px-6 sm:pb-10">
         <BotonDenunciar
           tipo="sesion"
           objetivoId={clase.id}
@@ -313,10 +314,11 @@ function DetalleClaseContenido() {
         />
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 flex justify-center border-t border-[#E2E6CF] bg-white/95 px-4 py-3 shadow-[0_-4px_16px_rgba(31,36,0,0.1)] backdrop-blur sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 flex justify-center border-t border-[#E2E6CF] bg-white/95 px-4 py-3 text-center shadow-[0_-4px_16px_rgba(31,36,0,0.1)] backdrop-blur sm:hidden">
         <BotonReservar
           clase={clase}
           tamaño="grande"
+          mostrarPlazo
           onReservado={(nuevasPlazasOcupadas) =>
             setClase((prev) => ({ ...prev, plazas_ocupadas: nuevasPlazasOcupadas }))
           }

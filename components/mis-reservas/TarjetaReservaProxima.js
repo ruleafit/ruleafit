@@ -6,6 +6,7 @@ import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCate
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
+import AvisoPlazoCancelacion from '../AvisoPlazoCancelacion'
 import { etiquetaCuentaAtras } from './datos'
 
 export default function TarjetaReservaProxima({ reserva, indice, cancelando, errorCancelacion, onCancelar }) {
@@ -90,7 +91,9 @@ export default function TarjetaReservaProxima({ reserva, indice, cancelando, err
             )}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#E2E6CF] pt-3">
+          <AvisoPlazoCancelacion clase={clase} variante="reserva" className="mt-3" />
+
+          <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-[#E2E6CF] pt-3">
             <Link
               href={`/clases/${clase.id}?from=mis-reservas`}
               className="corte-tag border border-[#E2E6CF] px-2.5 py-1 text-xs font-medium text-[#6B7355] transition-colors hover:border-[#B5E600] hover:text-[#1F2400] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"

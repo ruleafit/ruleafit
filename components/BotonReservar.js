@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { supabase } from '../lib/supabaseClient'
 import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 import { vibrar } from '../lib/nativo'
+import { plazoCancelacion } from '../lib/plazoCancelacion'
+import AvisoPlazoCancelacion from './AvisoPlazoCancelacion'
 
 const TAMANOS_BOTON = {
   normal: 'px-4 py-2 text-sm',
@@ -48,7 +50,8 @@ function claseYaPaso(clase) {
   return inicioClase < obtenerAhoraMadridComoTexto()
 }
 
-export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }) {
+// mostrarPlazo: solo en el detalle de la sesión (/clases/[id]); las tarjetas de Explorar no lo llevan.
+export default function BotonReservar({ clase, onReservado, tamaño = 'normal', mostrarPlazo = false }) {
   const [usuario, setUsuario] = useState(null)
   const [yaReservada, setYaReservada] = useState(false)
   const [comprobandoReserva, setComprobandoReserva] = useState(true)
@@ -57,6 +60,9 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
   const [usadoBono, setUsadoBono] = useState(false)
   const [tieneBono, setTieneBono] = useState(null) // null = aún sin comprobar
   const [pagando, setPagando] = useState(false)
+  // Con menos de 2 h para empezar, la reserva no se podrá cancelar: se pide una confirmación expresa.
+  const [confirmandoTarde, setConfirmandoTarde] = useState(false)
+  const [, setTic] = useState(0)
 
   const precioClase = Number(clase.precio)
   const requierePago = PAGOS_VISIBLES && precioClase > 0 && tieneBono === false
@@ -146,7 +152,23 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
 
   // Pide al servidor el formulario firmado y lleva al alumno a la página de
   // pago del banco. La plaza se concede cuando el banco confirma el pago.
+  useEffect(() => {
+    if (!mostrarPlazo) return
+    const id = setInterval(() => setTic((t) => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [mostrarPlazo])
+
+  // Devuelve true si hay que pedir confirmación antes de reservar/pagar (faltan menos de 2 h).
+  function requiereConfirmarTarde() {
+    return mostrarPlazo && !confirmandoTarde && plazoCancelacion(clase).estado === 'cerrado'
+  }
+
   async function handlePagar() {
+    if (requiereConfirmarTarde()) {
+      setConfirmandoTarde(true)
+      return
+    }
+    setConfirmandoTarde(false)
     setPagando(true)
     setErrorReserva('')
     const { data: sesion } = await supabase.auth.getSession()
@@ -176,6 +198,11 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
   }
 
   async function handleReservar() {
+    if (requiereConfirmarTarde()) {
+      setConfirmandoTarde(true)
+      return
+    }
+    setConfirmandoTarde(false)
     setReservando(true)
     setErrorReserva('')
 
@@ -258,9 +285,10 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
     return (
       <div>
         <button type="button" onClick={handlePagar} disabled={pagando} className={botonReservarClass(tamaño)}>
-          {pagando ? 'Abriendo el pago...' : `Pagar ${importe} € y reservar`}
+          {pagando ? 'Abriendo el pago...' : confirmandoTarde ? 'Entiendo, pagar y reservar' : `Pagar ${importe} € y reservar`}
         </button>
-        <p className="mt-1 text-xs text-[#6B7355]">Pago seguro con tarjeta o Bizum. Cancelación gratuita hasta 2 h antes.</p>
+        <p className="mt-1 text-xs text-[#6B7355]">Pago seguro con tarjeta o Bizum.</p>
+        {mostrarPlazo && <AvisoPlazoCancelacion clase={clase} condicionesPago className="mt-1.5" />}
         {errorReserva && <p className="mt-2 text-sm text-red-600">{errorReserva}</p>}
       </div>
     )
@@ -269,8 +297,9 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal' }
   return (
     <div>
       <button type="button" onClick={handleReservar} disabled={reservando} className={botonReservarClass(tamaño)}>
-        {reservando ? 'Reservando...' : 'Reservar'}
+        {reservando ? 'Reservando...' : confirmandoTarde ? 'Entiendo, reservar' : 'Reservar'}
       </button>
+      {mostrarPlazo && <AvisoPlazoCancelacion clase={clase} className="mt-1.5" />}
       {errorReserva && <p className="mt-2 text-sm text-red-600">{errorReserva}</p>}
     </div>
   )
