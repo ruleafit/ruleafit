@@ -75,3 +75,49 @@ export function coincideConCuando(fechaClase, cuando, hoy) {
   if (cuando === 'Próximos 30 días') return fechaClase >= hoy && fechaClase <= sumarDias(hoy, 29)
   return true
 }
+
+// ---- Precio, duración y plazas libres (N10) ----
+
+// Rango que muestra la barra de precio. Sin tocar la barra NO hay restricción de precio (precioRango = null):
+// salen también las sesiones de más de 50 €. Con un rango explícito, se aplican sus límites (ambos incluidos).
+export const PRECIO_MINIMO = 0
+export const PRECIO_MAXIMO = 50
+
+// Las sesiones gratuitas tienen precio 0 (un precio vacío cuenta como gratuita).
+export function coincideConPrecio(clase, precioRango) {
+  if (!precioRango) return true
+  const precio = Number(clase.precio ?? 0) || 0
+  return precio >= precioRango.min && precio <= precioRango.max
+}
+
+export const DURACION_FILTRO = [
+  { valor: 'Todas', etiqueta: 'Cualquier duración' },
+  { valor: 'hasta30', etiqueta: 'Hasta 30 minutos' },
+  { valor: '31a60', etiqueta: 'De 31 a 60 minutos' },
+  { valor: '61a90', etiqueta: 'De 61 a 90 minutos' },
+  { valor: 'mas90', etiqueta: 'Más de 90 minutos' },
+]
+
+// Con «Cualquier duración» entran todas, también las que no tienen duración informada; con un tramo elegido,
+// solo las que tienen una duración real dentro de él.
+export function coincideConDuracion(clase, tramo) {
+  if (!tramo || tramo === 'Todas') return true
+  const minutos = Number(clase.duracion)
+  if (!(minutos > 0)) return false
+  if (tramo === 'hasta30') return minutos <= 30
+  if (tramo === '31a60') return minutos >= 31 && minutos <= 60
+  if (tramo === '61a90') return minutos >= 61 && minutos <= 90
+  if (tramo === 'mas90') return minutos > 90
+  return true
+}
+
+// Plazas libres: no completa. (Las canceladas, inactivas y pasadas ya las descartan los filtros de siempre.)
+export function tienePlazasLibres(clase) {
+  if (clase.plazas_max == null) return true
+  return (clase.plazas_ocupadas ?? 0) < clase.plazas_max
+}
+
+export function textoPrecioRango(precioRango) {
+  if (!precioRango) return 'Cualquier precio'
+  return `${precioRango.min} € – ${precioRango.max} €`
+}

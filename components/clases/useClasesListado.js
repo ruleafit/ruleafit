@@ -11,6 +11,9 @@ import {
   coincideConBusqueda,
   coincideConCiudad,
   coincideConCuando,
+  coincideConPrecio,
+  coincideConDuracion,
+  tienePlazasLibres,
 } from './filtros'
 
 // Carga de sesiones, filtros y listado resultante. `seg` viene de
@@ -36,6 +39,10 @@ export default function useClasesListado(seg) {
   const [filtroCategoria, setFiltroCategoria] = useState('Todas')
   const [filtroCuando, setFiltroCuando] = useState('Todas')
   const [filtroFranja, setFiltroFranja] = useState('Todas')
+  // N10: precio (null = sin restricción), duración ('Todas' = cualquiera) y solo con plazas libres.
+  const [precioRango, setPrecioRango] = useState(null)
+  const [filtroDuracion, setFiltroDuracion] = useState('Todas')
+  const [soloPlazasLibres, setSoloPlazasLibres] = useState(false)
 
   function handleReservado(claseId, nuevasPlazasOcupadas) {
     setClases((prev) =>
@@ -59,8 +66,14 @@ export default function useClasesListado(seg) {
     const coincideRulero = !soloRulero || clase.trainer_id === soloRulero
 
     const coincideTexto = coincideConBusqueda(clase, busqueda)
+    const coincidePrecio = coincideConPrecio(clase, precioRango)
+    const coincideDuracion = coincideConDuracion(clase, filtroDuracion)
+    const coincidePlazas = !soloPlazasLibres || tienePlazasLibres(clase)
 
-    return coincideCategoria && coincideFecha && coincideFranja && coincideFavoritos && coincideRulero && coincideTexto
+    return (
+      coincideCategoria && coincideFecha && coincideFranja && coincideFavoritos && coincideRulero && coincideTexto &&
+      coincidePrecio && coincideDuracion && coincidePlazas
+    )
   })
 
   // Si en la ciudad escrita no hay sesiones que cumplan los filtros (porque no
@@ -99,6 +112,9 @@ export default function useClasesListado(seg) {
     setFiltroCategoria('Todas')
     setFiltroCuando('Todas')
     setFiltroFranja('Todas')
+    setPrecioRango(null)
+    setFiltroDuracion('Todas')
+    setSoloPlazasLibres(false)
     setFiltroSoloFavoritos(false)
     quitarFiltroRulero()
   }
@@ -149,6 +165,7 @@ export default function useClasesListado(seg) {
     busqueda, setBusqueda, filtroCiudad, setFiltroCiudad,
     filtroCategoria, setFiltroCategoria, filtroCuando, setFiltroCuando,
     filtroFranja, setFiltroFranja,
+    precioRango, setPrecioRango, filtroDuracion, setFiltroDuracion, soloPlazasLibres, setSoloPlazasLibres,
     textoCiudad, puntoCiudad, buscandoCiudad, hayAlgunaEnLaCiudad,
     hayEnLaCiudadConFiltros, mostrandoCercanas, ciudadesDisponibles,
     clasesFiltradas, limpiarFiltros, handleReservado,

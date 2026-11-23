@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, SlidersHorizontal, Star, ChevronDown, X } from 'lucide-react'
-import { CATEGORIAS_FILTRO, FRANJAS_FILTRO, CUANDO_FILTRO } from './filtros'
+import { Search, SlidersHorizontal, Star, ChevronDown, X, Timer, Users } from 'lucide-react'
+import { CATEGORIAS_FILTRO, FRANJAS_FILTRO, CUANDO_FILTRO, DURACION_FILTRO } from './filtros'
+import SelectorRangoPrecio from './SelectorRangoPrecio'
 
 const filtroCampoClass =
   'block w-full corte-btn border border-[#E2E6CF] bg-white px-4 py-2 text-sm text-[#1F2400] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600] sm:w-auto'
@@ -160,6 +161,41 @@ export default function FiltrosClases({ f, seg }) {
             <option key={fr.valor} value={fr.valor}>{fr.etiqueta}</option>
           ))}
         </select>
+      </div>
+
+      {/* N10: precio, duración y plazas libres, en la misma zona de filtros (sin otro desplegable). */}
+      <SelectorRangoPrecio
+        rango={f.precioRango}
+        onChange={f.setPrecioRango}
+        onRestablecer={() => f.setPrecioRango(null)}
+      />
+
+      <div>
+        <label htmlFor="filtro-duracion" className={`${filtroLabelClass} inline-flex items-center gap-1`}>
+          <Timer className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+          Duración
+        </label>
+        <select id="filtro-duracion" value={f.filtroDuracion} onChange={(e) => f.setFiltroDuracion(e.target.value)} className={filtroCampoClass}>
+          {DURACION_FILTRO.map((d) => (
+            <option key={d.valor} value={d.valor}>{d.etiqueta}</option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className={`${filtroLabelClass} inline-flex items-center gap-1`}>
+          <Users className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
+          Disponibilidad
+        </label>
+        <label className="flex cursor-pointer items-center gap-2.5 py-1.5 text-sm font-medium text-[#3D4A00]">
+          <input
+            type="checkbox"
+            checked={f.soloPlazasLibres}
+            onChange={(e) => f.setSoloPlazasLibres(e.target.checked)}
+            className="h-5 w-5 shrink-0 accent-[#B5E600]"
+          />
+          Solo sesiones con plazas libres
+        </label>
       </div>
 
       </div>
