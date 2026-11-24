@@ -17,6 +17,7 @@ const CATEGORIAS_PARTICIPANTE = [
   { clave: 'recordatorio_7h',  etiqueta: 'Recordatorio 7 horas antes' },
   { clave: 'recordatorio_2h',  etiqueta: 'Recordatorio 2 horas antes' },
   { clave: 'solicitud_valoracion', etiqueta: 'Solicitud de valoración tras la sesión', ayuda: 'Solo desactiva la notificación push: el aviso seguirá apareciendo en la campana.' },
+  { clave: 'avisos_plazas',        etiqueta: 'Aviso cuando se libera una plaza en una sesión completa', ayuda: 'Solo desactiva la notificación push: el aviso seguirá apareciendo en la campana.' },
   { clave: 'avisos_organizador',   etiqueta: 'Avisos del organizador de mis sesiones', ayuda: 'Solo desactiva la notificación push: los avisos seguirán en la campana y en la ficha de la sesión.' },
 ]
 const CATEGORIAS_ORGANIZADOR = [

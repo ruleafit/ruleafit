@@ -14,8 +14,14 @@ export default function AvisoRetorno({ className = '' }) {
   if (!retorno) return null
   return (
     <p className={`rounded-lg border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00] ${className}`}>
-      {retorno.titulo ? <>Vas a reservar <strong>{retorno.titulo}</strong>. </> : 'Tienes una sesión seleccionada. '}
-      Al terminar volverás a ella para confirmar tu reserva.
+      {retorno.titulo ? (
+        <>{retorno.intencion === 'avisar' ? 'Vas a activar un aviso para' : 'Vas a reservar'} <strong>{retorno.titulo}</strong>. </>
+      ) : (
+        'Tienes una sesión seleccionada. '
+      )}
+      {retorno.intencion === 'avisar'
+        ? 'Al terminar volverás a ella para confirmar la activación del aviso.'
+        : 'Al terminar volverás a ella para confirmar tu reserva.'}
     </p>
   )
 }

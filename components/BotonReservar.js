@@ -7,7 +7,11 @@ import { vibrar } from '../lib/nativo'
 import { plazoCancelacion } from '../lib/plazoCancelacion'
 import AvisoPlazoCancelacion from './AvisoPlazoCancelacion'
 import BotonCalendario from './BotonCalendario'
+import { Bell } from 'lucide-react'
+import BotonAvisoPlaza from './reserva/BotonAvisoPlaza'
 import PanelIdentificacion from './reserva/PanelIdentificacion'
+import AvisoUltimaHora from './reserva/AvisoUltimaHora'
+import { esReservaDeUltimaHora } from '../lib/ultimaHora'
 import { leerRetorno, borrarRetorno } from '../lib/retorno'
 
 const TAMANOS_BOTON = {
@@ -69,6 +73,13 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   // C03: panel para visitantes sin sesión y aviso al volver tras identificarse.
   const [panelAbierto, setPanelAbierto] = useState(false)
   const [avisoRetorno, setAvisoRetorno] = useState(false)
+  const [intencionRetorno, setIntencionRetorno] = useState('reservar')
+  // C15: el visitante pulsó «Avísame…» (panel con intención «avisar») y, si al reservar alguien se adelanta, la sesión pasa a completa.
+  const [panelAvisoAbierto, setPanelAvisoAbierto] = useState(false)
+  const [completaSobrevenida, setCompletaSobrevenida] = useState(false)
+  // Última hora (<30 min): segunda confirmación previa al procedimiento habitual.
+  const [avisoUltimaHora, setAvisoUltimaHora] = useState(false)
+  const [ultimaHoraAceptada, setUltimaHoraAceptada] = useState(false)
 
   const precioClase = Number(clase.precio)
   const requierePago = PAGOS_VISIBLES && precioClase > 0 && tieneBono === false
@@ -91,8 +102,10 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   // No se reserva nada: la confirmación sigue siendo suya.
   useEffect(() => {
     if (!usuario || !mostrarPlazo) return
-    if (leerRetorno()?.ruta === `/clases/${clase.id}`) {
+    const pendiente = leerRetorno()
+    if (pendiente?.ruta === `/clases/${clase.id}`) {
       setAvisoRetorno(true)
+      setIntencionRetorno(pendiente.intencion) // «reservar» o «avisar» (C15): no se confunden
       borrarRetorno()
     }
   }, [usuario, mostrarPlazo, clase.id])
@@ -179,7 +192,29 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     return mostrarPlazo && !confirmandoTarde && plazoCancelacion(clase).estado === 'cerrado'
   }
 
+  // Devuelve true si hay que mostrar antes el aviso de última hora (falta menos de 30 min y aún no se ha aceptado).
+  function requiereAvisoUltimaHora() {
+    if (ultimaHoraAceptada || !esReservaDeUltimaHora(clase)) return false
+    setAvisoUltimaHora(true)
+    return true
+  }
+
+  // «Sí, continuar»: NO reserva. Deja el botón en su paso de confirmación habitual («Entiendo, …»), que es el que reserva.
+  function continuarTrasAvisoUltimaHora() {
+    setAvisoUltimaHora(false)
+    setUltimaHoraAceptada(true)
+    setConfirmandoTarde(true)
+  }
+
+  // «Volver»: no se hace nada (ni reserva, ni pago, ni bono).
+  function volverDeAvisoUltimaHora() {
+    setAvisoUltimaHora(false)
+    setUltimaHoraAceptada(false)
+    setConfirmandoTarde(false)
+  }
+
   async function handlePagar() {
+    if (requiereAvisoUltimaHora()) return
     if (requiereConfirmarTarde()) {
       setConfirmandoTarde(true)
       return
@@ -214,6 +249,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   }
 
   async function handleReservar() {
+    if (requiereAvisoUltimaHora()) return
     if (requiereConfirmarTarde()) {
       setConfirmandoTarde(true)
       return
@@ -225,7 +261,13 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     const { data, error } = await supabase.rpc('reservar_clase', { p_clase_id: clase.id })
 
     if (error) {
-      setErrorReserva(error.message)
+      // C15: si otra persona se ha adelantado, se explica y se ofrece el aviso de plaza.
+      if (/completa/i.test(error.message || '')) {
+        setCompletaSobrevenida(true)
+        setErrorReserva('Otra persona se ha adelantado y la sesión se ha completado. Puedes pedir que te avisemos si queda una plaza.')
+      } else {
+        setErrorReserva(error.message)
+      }
       setReservando(false)
       return
     }
@@ -247,6 +289,27 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     if (clase.estado !== 'activa' || claseYaPaso(clase)) {
       return <p className="text-sm text-zinc-500">Esta sesión ya no está disponible</p>
     }
+    // C15: sesión completa → el visitante no puede reservar, pero sí pedir un aviso (reutiliza el panel de C03).
+    if ((clase.plazas_ocupadas ?? 0) >= (clase.plazas_max ?? 0)) {
+      return (
+        <div>
+          <button type="button" disabled className={botonCompletaClass(tamaño)}>
+            Completa
+          </button>
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => setPanelAvisoAbierto(true)}
+              className="inline-flex items-center justify-center gap-2 corte-btn border-2 border-[#1F2400] bg-white px-4 py-2 text-sm font-bold text-[#1F2400] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2"
+            >
+              <Bell className="h-4 w-4" aria-hidden="true" />
+              Avísame si queda una plaza
+            </button>
+          </div>
+          {panelAvisoAbierto && <PanelIdentificacion clase={clase} intencion="avisar" onCerrar={() => setPanelAvisoAbierto(false)} />}
+        </div>
+      )
+    }
     return (
       <div>
         <button type="button" onClick={() => setPanelAbierto(true)} className={botonReservarClass(tamaño)}>
@@ -265,13 +328,26 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     return <p className="text-sm text-zinc-500">Esta sesión ya no está disponible</p>
   }
 
-  if ((clase.plazas_ocupadas ?? 0) >= (clase.plazas_max ?? 0)) {
+  // Sesión completa (o completada por otra persona mientras reservabas). Quien YA tiene reserva sigue al bloque
+  // «Ya tienes esta sesión reservada» de más abajo y no ve el aviso.
+  if (((clase.plazas_ocupadas ?? 0) >= (clase.plazas_max ?? 0) || completaSobrevenida) && !yaReservada) {
     return (
       <div>
-        {avisoRetorno && <p className="mb-2 text-sm text-amber-800">Mientras te identificabas, la sesión se ha completado.</p>}
+        {avisoRetorno && intencionRetorno === 'reservar' && (
+          <p className="mb-2 text-sm text-amber-800">Mientras te identificabas, la sesión se ha completado.</p>
+        )}
+        {errorReserva && <p className="mb-2 text-sm text-red-600">{errorReserva}</p>}
         <button type="button" disabled className={botonCompletaClass(tamaño)}>
           Completa
         </button>
+        {!comprobandoReserva && (
+          <BotonAvisoPlaza
+            clase={clase}
+            usuario={usuario}
+            retornoAviso={avisoRetorno && intencionRetorno === 'avisar'}
+            compacto={!mostrarPlazo}
+          />
+        )}
       </div>
     )
   }
@@ -307,9 +383,15 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     )
   }
 
+  const ventanaUltimaHora = avisoUltimaHora && (
+    <AvisoUltimaHora clase={clase} onVolver={volverDeAvisoUltimaHora} onContinuar={continuarTrasAvisoUltimaHora} />
+  )
+
   const avisoListo = avisoRetorno && (
     <p role="status" className="mb-2 corte-tag border border-[#B5E600]/60 bg-[#EDF5C9] px-3 py-1.5 text-sm font-medium text-[#3D4A00]">
-      ¡Ya puedes reservar! Tu sesión sigue seleccionada.
+      {intencionRetorno === 'avisar'
+        ? '¡Buenas noticias! Ahora hay plazas libres: ya puedes reservar.'
+        : '¡Ya puedes reservar! Tu sesión sigue seleccionada.'}
     </p>
   )
 
@@ -318,6 +400,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     return (
       <div>
         {avisoListo}
+        {ventanaUltimaHora}
         <button type="button" onClick={handlePagar} disabled={pagando} className={botonReservarClass(tamaño)}>
           {pagando ? 'Abriendo el pago...' : confirmandoTarde ? 'Entiendo, pagar y reservar' : `Pagar ${importe} € y reservar`}
         </button>
@@ -331,6 +414,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   return (
     <div>
       {avisoListo}
+      {ventanaUltimaHora}
       <button type="button" onClick={handleReservar} disabled={reservando} className={botonReservarClass(tamaño)}>
         {reservando ? 'Reservando...' : confirmandoTarde ? 'Entiendo, reservar' : 'Reservar'}
       </button>

@@ -15,7 +15,9 @@ const botonSecundario =
 // C03 · Panel para visitantes que pulsan «Reservar». Solo recuerda la sesión (ruta interna, validada) y lleva a
 // los formularios de registro / inicio de sesión de siempre; no reserva nada ni crea sesiones por su cuenta.
 // Panel inferior en móvil, ventana centrada en escritorio.
-export default function PanelIdentificacion({ clase, onCerrar }) {
+// intencion: 'reservar' (por defecto) o 'avisar' (C15: el visitante quiere activar un aviso de plaza, no reservar).
+export default function PanelIdentificacion({ clase, onCerrar, intencion = 'reservar' }) {
+  const avisar = intencion === 'avisar'
   const ref = useRef(null)
   const cerrarRef = useRef(onCerrar)
   cerrarRef.current = onCerrar
@@ -39,7 +41,7 @@ export default function PanelIdentificacion({ clase, onCerrar }) {
   }, [])
 
   function recordar() {
-    guardarRetorno({ ruta, titulo: clase.titulo || '' })
+    guardarRetorno({ ruta, titulo: clase.titulo || '', intencion })
   }
 
   // En un portal: las tarjetas de Explora tienen transformaciones CSS que atraparían un panel fixed.
@@ -64,7 +66,7 @@ export default function PanelIdentificacion({ clase, onCerrar }) {
         </button>
 
         <h2 id="panel-identificacion-titulo" className="pr-8 text-xl font-extrabold text-[#1F2400]">
-          ¡Estás a un paso de reservar!
+          {avisar ? '¡Estás a un paso de activar tu aviso!' : '¡Estás a un paso de reservar!'}
         </h2>
 
         <dl className="mt-4 space-y-1 rounded-xl border border-[#E2E6CF] bg-[#F7F9EC] p-4 text-sm">
@@ -76,16 +78,18 @@ export default function PanelIdentificacion({ clase, onCerrar }) {
         </dl>
 
         <div className="mt-5 flex flex-col gap-3">
-          <Link href={`/registro?volver=${ruta}`} onClick={recordar} className={botonPrimario}>
+          <Link href={`/registro?volver=${ruta}&intencion=${intencion}`} onClick={recordar} className={botonPrimario}>
             Soy nuevo
           </Link>
-          <Link href={`/login?volver=${ruta}`} onClick={recordar} className={botonSecundario}>
+          <Link href={`/login?volver=${ruta}&intencion=${intencion}`} onClick={recordar} className={botonSecundario}>
             Ya tengo cuenta
           </Link>
         </div>
 
         <p className="mt-4 text-center text-xs text-[#6B7355]">
-          Podrás usar Google o tu correo. Al terminar volverás a esta sesión y confirmarás tu reserva tú mismo: no se reserva nada antes.
+          {avisar
+            ? 'Podrás usar Google o tu correo. Al terminar volverás a esta sesión y confirmarás tú mismo la activación del aviso. El aviso no reserva ni garantiza una plaza.'
+            : 'Podrás usar Google o tu correo. Al terminar volverás a esta sesión y confirmarás tu reserva tú mismo: no se reserva nada antes.'}
         </p>
       </div>
     </div>,

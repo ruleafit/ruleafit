@@ -4,7 +4,7 @@ import { enviarPushAUsuario } from '../../../lib/enviarPush'
 import { cronAutorizado } from '../../../lib/secretoCron'
 
 // Cuantas notificaciones procesar por llamada (para no saturar).
-const LOTE = 50
+const LOTE = 100
 // Maximo de intentos antes de marcar una notificacion como error definitivo.
 const MAX_INTENTOS = 3
 
@@ -35,11 +35,30 @@ export async function POST(request) {
 
   // 3. Procesar cada una.
   for (const noti of pendientes) {
-    const resultado = await enviarPushAUsuario(noti.usuario_id, {
-      title: noti.titulo,
-      body: noti.cuerpo,
-      url: noti.url,
-    })
+    // Reclamo atómico (C15): el procesador se ejecuta también al instante tras un cambio y cada pocos segundos, así que
+    // dos ejecuciones pueden solaparse. Solo sigue quien consigue subir `intentos` desde el valor leído: la otra se salta
+    // esa notificación y no hay push duplicado. (El intento queda contado, igual que antes se contaba al fallar.)
+    const { data: reclamada } = await supabaseAdmin
+      .from('notificaciones_cola')
+      .update({ intentos: noti.intentos + 1 })
+      .eq('id', noti.id)
+      .eq('estado', 'pendiente')
+      .eq('intentos', noti.intentos)
+      .select('id')
+    if (!reclamada || reclamada.length === 0) continue
+
+    let resultado
+    try {
+      resultado = await enviarPushAUsuario(noti.usuario_id, {
+        title: noti.titulo,
+        body: noti.cuerpo,
+        url: noti.url,
+      })
+    } catch (e) {
+      // Error de configuración (p. ej. faltan claves VAPID): se devuelve el intento reclamado y queda pendiente, como antes.
+      await supabaseAdmin.from('notificaciones_cola').update({ intentos: noti.intentos }).eq('id', noti.id)
+      throw e
+    }
 
     procesadas++
     totalEnviadas += resultado.enviadas

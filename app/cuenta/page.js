@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { History, User, ChartColumn, Lock } from 'lucide-react'
+import { History, User, ChartColumn, Lock, Bell } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import PerfilFiscal from '../../components/PerfilFiscal'
@@ -15,6 +15,7 @@ import MovimientosRulos from '../../components/cuenta/MovimientosRulos'
 import NotificacionesCuenta from '../../components/cuenta/NotificacionesCuenta'
 import BloqueDesplegable from '../../components/cuenta/BloqueDesplegable'
 import PrivacidadParticipante from '../../components/cuenta/PrivacidadParticipante'
+import AvisosPlazas from '../../components/cuenta/AvisosPlazas'
 
 export default function CuentaPage() {
   const datos = useDatosCuenta()
@@ -88,6 +89,10 @@ export default function CuentaPage() {
         </BloqueDesplegable>
 
         <NotificacionesCuenta usuario={usuario} />
+
+        <BloqueDesplegable id="avisos-plazas" titulo="Avisos de plazas" icono={Bell}>
+          <AvisosPlazas />
+        </BloqueDesplegable>
 
         <BloqueDesplegable id="mis-rulos" titulo="Mis últimos Rulos" icono={History}>
           <MovimientosRulos movimientos={datos.rulosMovimientos} motivos={datos.rulosMotivos} />
