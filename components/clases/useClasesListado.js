@@ -126,16 +126,32 @@ export default function useClasesListado(seg) {
 
   useEffect(() => {
     async function cargarClases() {
-      const { data, error } = await supabase
-        .from('clases')
-        .select('*, perfiles(username, foto_url)')
-        .eq('estado', 'activa')
-        .order('fecha', { ascending: true })
+      // Por páginas: PostgREST corta en 1000 filas y un gimnasio con series recurrentes puede superarlas
+      // (N11). Orden estable (fecha, hora, id) para que ninguna sesión se repita ni se pierda entre páginas.
+      const TAM = 1000
+      let todas = []
+      let fallo = null
+      for (let desde = 0; ; desde += TAM) {
+        const { data, error } = await supabase
+          .from('clases')
+          .select('*, perfiles(username, foto_url)')
+          .eq('estado', 'activa')
+          .order('fecha', { ascending: true })
+          .order('hora', { ascending: true })
+          .order('id', { ascending: true })
+          .range(desde, desde + TAM - 1)
+        if (error) {
+          fallo = error
+          break
+        }
+        todas = todas.concat(data || [])
+        if (!data || data.length < TAM) break
+      }
 
-      if (error) {
+      if (fallo) {
         setError('No hemos podido cargar las sesiones. Recarga la página o inténtalo en unos minutos.')
       } else {
-        setClases(data || [])
+        setClases(todas)
       }
       setCargando(false)
     }

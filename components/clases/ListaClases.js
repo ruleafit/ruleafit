@@ -2,10 +2,20 @@
 
 import { SearchX } from 'lucide-react'
 import RevelarAlLlegar from '../RevelarAlLlegar'
-import TarjetaClase from './TarjetaClase'
+import { useState, useMemo } from 'react'
+import GrupoSesiones from './GrupoSesiones'
+import { agruparSesiones, firmaGrupo } from './agruparSesiones'
 
 // f = useClasesListado.
 export default function ListaClases({ f, usuario }) {
+  // N11: una tarjeta por organizador y día, calculada sobre la lista YA filtrada (el mapa recibe la lista completa).
+  const grupos = useMemo(
+    () => agruparSesiones(f.clasesFiltradas, { cronologico: !f.mostrandoCercanas }),
+    [f.clasesFiltradas, f.mostrandoCercanas]
+  )
+  // clave del grupo -> firma de sus sesiones cuando se abrió: si los filtros cambian las sesiones, se cierra.
+  const [abiertos, setAbiertos] = useState({})
+
   return (
     <div className="flex flex-col gap-4">
       {f.buscandoCiudad && !f.hayEnLaCiudadConFiltros && (
@@ -36,16 +46,26 @@ export default function ListaClases({ f, usuario }) {
         </RevelarAlLlegar>
       )}
 
-      {f.clasesFiltradas.map((clase, indice) => (
-        <TarjetaClase
-          key={clase.id}
-          clase={clase}
-          indice={indice}
-          usuario={usuario}
-          onReservado={f.handleReservado}
-          onErrorCoordenadas={() => f.setError('No se pudieron copiar las coordenadas.')}
-        />
-      ))}
+      {grupos.map((grupo, indice) => {
+        const firma = firmaGrupo(grupo)
+        return (
+          <GrupoSesiones
+            key={grupo.clave}
+            grupo={grupo}
+            indice={indice}
+            usuario={usuario}
+            onReservado={f.handleReservado}
+            onErrorCoordenadas={() => f.setError('No se pudieron copiar las coordenadas.')}
+            abierto={abiertos[grupo.clave] === firma}
+            alternar={() =>
+              setAbiertos((prev) => {
+                const { [grupo.clave]: _, ...resto } = prev
+                return prev[grupo.clave] === firma ? resto : { ...resto, [grupo.clave]: firma }
+              })
+            }
+          />
+        )
+      })}
     </div>
   )
 }

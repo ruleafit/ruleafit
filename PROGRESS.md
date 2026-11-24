@@ -843,3 +843,11 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - Privacidad actualizada (23-nov-2026): finalidad, base legal (consentimiento), Resend como destinatario y criterio de conservación.
 - **Conservación (criterio inicial, NO plazo legal, sujeto a revisión jurídica):** máx. 12 meses desde el último contacto para solicitudes que no acaben en relación comercial. **Revisión periódica manual** (mensual/trimestral): `select id, centro, estado, updated_at from solicitudes_centros where estado in ('nuevo','contactado','demo_pendiente') and updated_at < now() - interval '12 months';` y borrar esas filas (o antes si la persona lo pide). Registrado/activo se rigen por la política de esa relación. Sin campañas comerciales con estos datos sin consentimiento.
 - **Pendiente jurídico:** revisión de la base legal y de la transferencia internacional (Resend, EE. UU.), junto a los 3 puntos ya abiertos de la política.
+
+## N11 · Agrupación de sesiones por organizador y día en Explora · PUBLICADO (24 noviembre 2026; sin SQL)
+- Listado de /clases: una tarjeta principal por organizador (`trainer_id`) y fecha, con botón «Ver X sesiones más de este día» / «Ocultar sesiones» que despliega las demás (compactas: hora, título, precio, plazas, Ver detalle y reservar). Es solo presentación: `components/clases/agruparSesiones.js` agrupa la lista YA filtrada (`clasesFiltradas`), `GrupoSesiones.js` pinta el grupo y `ListaClases.js` lo cablea. Sin selector de vista ni SQL.
+- Orden: fecha y hora; las tarjetas principales por la hora de su primera sesión que cumple los filtros; dentro del desplegable por hora. En modo «más cercanas» se respeta el orden por distancia entre grupos.
+- El desplegable se cierra solo si cambian las sesiones del grupo (firma de ids). Renderizado progresivo: 10 en 10 con «Mostrar más».
+- El MAPA no se ha tocado y sigue recibiendo todas las sesiones filtradas. No hay contador de sesiones en el listado.
+- La carga de sesiones ahora pagina de 1000 en 1000 con orden estable (fecha, hora, id): antes un límite oculto de PostgREST (1000 filas) podía dejar fuera sesiones.
+- Pruebas: `node --test components/clases/*.test.js` (agruparSesiones.test.js).
