@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabaseClient'
+import { destinoTrasLogin } from '../../../lib/retorno'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -22,7 +23,8 @@ export default function AuthCallbackPage() {
         return
       }
 
-      router.replace('/')
+      // C03: sesión pendiente (ruta interna validada) o portada. La ficha limpia el recuerdo al mostrar el aviso.
+      router.replace(destinoTrasLogin())
     }
     procesar()
     return () => { activo = false }

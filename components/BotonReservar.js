@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { supabase } from '../lib/supabaseClient'
 import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 import { vibrar } from '../lib/nativo'
 import { plazoCancelacion } from '../lib/plazoCancelacion'
 import AvisoPlazoCancelacion from './AvisoPlazoCancelacion'
 import BotonCalendario from './BotonCalendario'
+import PanelIdentificacion from './reserva/PanelIdentificacion'
+import { leerRetorno, borrarRetorno } from '../lib/retorno'
 
 const TAMANOS_BOTON = {
   normal: 'px-4 py-2 text-sm',
@@ -26,8 +27,6 @@ function botonReservarClass(tamaño) {
 function botonCompletaClass(tamaño) {
   return `inline-flex cursor-not-allowed items-center justify-center corte-btn bg-zinc-200 font-bold text-zinc-500 ${TAMANOS_BOTON[tamaño]}`
 }
-
-const enlaceLoginClass = 'text-sm font-semibold text-[#7a9900] hover:underline'
 
 function obtenerAhoraMadridComoTexto() {
   const formateador = new Intl.DateTimeFormat('en-CA', {
@@ -67,6 +66,9 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   // Con menos de 2 h para empezar, la reserva se podrá cancelar pero sin derecho a devolución: se pide una confirmación expresa.
   const [confirmandoTarde, setConfirmandoTarde] = useState(false)
   const [, setTic] = useState(0)
+  // C03: panel para visitantes sin sesión y aviso al volver tras identificarse.
+  const [panelAbierto, setPanelAbierto] = useState(false)
+  const [avisoRetorno, setAvisoRetorno] = useState(false)
 
   const precioClase = Number(clase.precio)
   const requierePago = PAGOS_VISIBLES && precioClase > 0 && tieneBono === false
@@ -84,6 +86,16 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
       listener.subscription.unsubscribe()
     }
   }, [])
+
+  // C03: si el usuario acaba de identificarse para reservar ESTA sesión, se avisa (una vez) y se limpia el recuerdo.
+  // No se reserva nada: la confirmación sigue siendo suya.
+  useEffect(() => {
+    if (!usuario || !mostrarPlazo) return
+    if (leerRetorno()?.ruta === `/clases/${clase.id}`) {
+      setAvisoRetorno(true)
+      borrarRetorno()
+    }
+  }, [usuario, mostrarPlazo, clase.id])
 
   // Ya no depende del rol guardado (Fase 5 de la unificación de roles, 11
   // sept 2026): cualquier usuario puede organizar unas sesiones y
@@ -232,10 +244,16 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   }
 
   if (!usuario) {
+    if (clase.estado !== 'activa' || claseYaPaso(clase)) {
+      return <p className="text-sm text-zinc-500">Esta sesión ya no está disponible</p>
+    }
     return (
-      <Link href="/login" className={enlaceLoginClass}>
-        Inicia sesión para reservar
-      </Link>
+      <div>
+        <button type="button" onClick={() => setPanelAbierto(true)} className={botonReservarClass(tamaño)}>
+          Reservar
+        </button>
+        {panelAbierto && <PanelIdentificacion clase={clase} onCerrar={() => setPanelAbierto(false)} />}
+      </div>
     )
   }
 
@@ -249,9 +267,12 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
 
   if ((clase.plazas_ocupadas ?? 0) >= (clase.plazas_max ?? 0)) {
     return (
-      <button type="button" disabled className={botonCompletaClass(tamaño)}>
-        Completa
-      </button>
+      <div>
+        {avisoRetorno && <p className="mb-2 text-sm text-amber-800">Mientras te identificabas, la sesión se ha completado.</p>}
+        <button type="button" disabled className={botonCompletaClass(tamaño)}>
+          Completa
+        </button>
+      </div>
     )
   }
 
@@ -286,10 +307,17 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     )
   }
 
+  const avisoListo = avisoRetorno && (
+    <p role="status" className="mb-2 corte-tag border border-[#B5E600]/60 bg-[#EDF5C9] px-3 py-1.5 text-sm font-medium text-[#3D4A00]">
+      ¡Ya puedes reservar! Tu sesión sigue seleccionada.
+    </p>
+  )
+
   if (requierePago) {
     const importe = precioClase.toFixed(2).replace('.', ',')
     return (
       <div>
+        {avisoListo}
         <button type="button" onClick={handlePagar} disabled={pagando} className={botonReservarClass(tamaño)}>
           {pagando ? 'Abriendo el pago...' : confirmandoTarde ? 'Entiendo, pagar y reservar' : `Pagar ${importe} € y reservar`}
         </button>
@@ -302,6 +330,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
 
   return (
     <div>
+      {avisoListo}
       <button type="button" onClick={handleReservar} disabled={reservando} className={botonReservarClass(tamaño)}>
         {reservando ? 'Reservando...' : confirmandoTarde ? 'Entiendo, reservar' : 'Reservar'}
       </button>

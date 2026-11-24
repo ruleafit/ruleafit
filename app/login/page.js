@@ -8,6 +8,8 @@ import { supabase } from '../../lib/supabaseClient'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
 import { esApp, entrarConGoogleEnApp } from '../../lib/nativo'
+import { destinoTrasLogin } from '../../lib/retorno'
+import AvisoRetorno from '../../components/reserva/AvisoRetorno'
 
 const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
@@ -49,7 +51,8 @@ function LoginFormulario() {
       setMensaje(traducirErrorLogin(error.message, error.code))
       setCargando(false)
     } else {
-      router.push('/')
+      // C03: si venía de pulsar «Reservar», vuelve a esa sesión (ruta interna validada); si no, a la portada.
+      router.push(destinoTrasLogin())
     }
   }
 
@@ -81,6 +84,8 @@ function LoginFormulario() {
           <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#1F2400]">
             Iniciar sesión
           </h1>
+
+          <AvisoRetorno className="mb-4" />
 
           {restablecida && (
             <div className="mb-4 flex items-start gap-2 corte-card border border-[#B5E600]/50 bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00]">

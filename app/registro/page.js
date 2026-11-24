@@ -8,6 +8,8 @@ import { supabase } from '../../lib/supabaseClient'
 import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
 import { esApp, entrarConGoogleEnApp } from '../../lib/nativo'
+import { destinoTrasLogin, leerRetorno } from '../../lib/retorno'
+import AvisoRetorno from '../../components/reserva/AvisoRetorno'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
 
@@ -90,6 +92,9 @@ export default function RegistroPage() {
       password: password,
       options: {
         data: interesOrganizador ? { username: username, interes: 'organizador' } : { username: username },
+        // C03: el enlace de confirmación del correo pasa por /auth/callback (ya autorizada para Google) y desde allí
+        // se vuelve a la sesión pendiente. Sin sesión pendiente no se cambia nada respecto a antes.
+        ...(leerRetorno() ? { emailRedirectTo: `${window.location.origin}/auth/callback` } : {}),
       },
     })
 
@@ -97,7 +102,7 @@ export default function RegistroPage() {
       setMensaje(traducirErrorRegistro(error.message))
       setCargando(false)
     } else if (data.session) {
-      router.push('/')
+      router.push(destinoTrasLogin())
     } else {
       setRegistroExitoso(true)
       setCargando(false)
@@ -139,6 +144,8 @@ export default function RegistroPage() {
           <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-[#1F2400]">
             Crear cuenta en Ruleafit
           </h1>
+
+          {!registroExitoso && <AvisoRetorno className="-mt-3 mb-5" />}
 
           {interesOrganizador && !registroExitoso && (
             <p className="-mt-3 mb-5 text-sm text-[#3d4426]">
