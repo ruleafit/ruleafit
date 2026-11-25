@@ -45,7 +45,7 @@ export const CATEGORIAS = [
   { nombre: 'Fuerza / funcional', imagen: '/imagenes/fuerza.jpg' },
   { nombre: 'Cardio', imagen: '/imagenes/running.jpg' },
   { nombre: 'Yoga / Pilates / movilidad', imagen: '/imagenes/yoga.jpg' },
-  { nombre: 'Quedadas deportivas', imagen: '/imagenes/comunidad.jpg' },
+  { nombre: 'Quedadas deportivas', imagen: '/imagenes/quedadas-deportivas.jpg' },
   { nombre: 'Otros', imagen: '/imagenes/combate.jpg' },
 ]
 
