@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CircleAlert } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import BloqueDatosEditables from './BloqueDatosEditables'
 import BloquePlazasEditar from './BloquePlazasEditar'
 import BloqueNoEditable from './BloqueNoEditable'
+import BloqueUbicacionEditar from './BloqueUbicacionEditar'
+import { prepararUbicacionParaPublicar } from '../publicar/ubicacionPublicar'
 import BloqueSerieEditar from './BloqueSerieEditar'
 import { CATEGORIAS, NIVELES, botonPrimarioClass, botonSecundarioClass } from './constantes'
 
@@ -44,6 +46,12 @@ export default function FormularioEditarClase({ id, clase }) {
   const [resultadoSerie, setResultadoSerie] = useState(null)
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState('')
+  // Ubicación (cambiarla es posible solo en sesiones sin reservas: lo decide el servidor al guardar).
+  const ubicacionRef = useRef(null)
+  const [ubicacionModificada, setUbicacionModificada] = useState(false)
+  const [confirmandoParcial, setConfirmandoParcial] = useState(null) // { aplicar, conservar } mientras se pide confirmación
+  const [versionReservas, setVersionReservas] = useState(0)
+  const alCambiarUbicacion = useCallback((m) => setUbicacionModificada(m), [])
 
   useEffect(() => {
     const a = new URLSearchParams(window.location.search).get('alcance')
@@ -63,10 +71,11 @@ export default function FormularioEditarClase({ id, clase }) {
       plazasMin,
       plazasMax,
     }) !== valoresInicialesJSON ||
-    (esDeSerie && (precio !== (clase.precio != null ? String(clase.precio) : '') || duracion !== (clase.duracion != null ? String(clase.duracion) : '') || alcance !== 'solo_esta'))
+    (esDeSerie && (precio !== (clase.precio != null ? String(clase.precio) : '') || duracion !== (clase.duracion != null ? String(clase.duracion) : '') || alcance !== 'solo_esta')) ||
+    ubicacionModificada
 
-  async function handleGuardar(e) {
-    e.preventDefault()
+  async function handleGuardar(e, { parcialConfirmado = false } = {}) {
+    e?.preventDefault?.()
 
     const plazasMinNum = Number(plazasMin)
     const plazasMaxNum = Number(plazasMax)
@@ -104,21 +113,56 @@ export default function FormularioEditarClase({ id, clase }) {
     setGuardando(true)
     setMensaje('')
 
-    if (esDeSerie) {
+    // Cambio de ubicación (una sola ubicación: coordenadas + municipio + provincia + zona). Se lee del gestor AL GUARDAR,
+    // esperando a que termine la identificación del municipio si el pin se acaba de mover.
+    const bloque = ubicacionRef.current
+    let ubicacion = null
+    if (bloque && bloque.modificada && !bloque.bloqueada) {
+      const prep = await prepararUbicacionParaPublicar(bloque.gestor, setMensaje)
+      if (!prep.ok) {
+        setMensaje(prep.mensaje)
+        setGuardando(false)
+        return
+      }
+      ubicacion = { ...prep.ubicacion, direccion: bloque.zona }
+      // Con sesiones que tienen reservas en el alcance, la modificación es PARCIAL: se pide confirmación expresa.
+      if (bloque.parcial && !parcialConfirmado) {
+        setConfirmandoParcial({ aplicar: bloque.previa.sin_reservas, conservar: bloque.previa.con_reservas })
+        setMensaje('')
+        setGuardando(false)
+        return
+      }
+    }
+    setConfirmandoParcial(null)
+
+    if (esDeSerie || ubicacion) {
       // Mismas reglas que editar_clase para cada sesión; precio y duración solo en sesiones sin reservas.
       const campos = {
         titulo, tipo_actividad: tipoActividad, categoria, nivel, material, observaciones,
         punto_encuentro: puntoEncuentro, plazas_min: plazasMinNum, plazas_max: plazasMaxNum,
       }
-      if (precio !== (clase.precio != null ? String(clase.precio) : '')) campos.precio = precio
-      if (duracion !== (clase.duracion != null ? String(clase.duracion) : '')) campos.duracion = duracion
+      if (esDeSerie && precio !== (clase.precio != null ? String(clase.precio) : '')) campos.precio = precio
+      if (esDeSerie && duracion !== (clase.duracion != null ? String(clase.duracion) : '')) campos.duracion = duracion
+      if (ubicacion) {
+        campos.ubicacion = ubicacion
+        if (parcialConfirmado) campos.confirmar_parcial = true
+      }
+      // Una sesión suelta con cambio de ubicación también pasa por editar_serie (alcance «solo_esta»): hace las mismas
+      // comprobaciones que editar_clase y, además, bloquea la sesión y comprueba las reservas en la propia operación.
       const { data, error: errorSerie } = await supabase.rpc('editar_serie', {
         p_clase_id: id,
-        p_alcance: alcance,
+        p_alcance: esDeSerie ? alcance : 'solo_esta',
         p_campos: campos,
       })
       if (errorSerie) {
         setMensaje(errorSerie.message)
+        setVersionReservas((v) => v + 1) // vuelve a consultar las reservas (pudo aparecer alguna mientras se editaba)
+        setGuardando(false)
+        return
+      }
+      if (!esDeSerie && (data?.editadas ?? 0) === 0) {
+        // Sesión suelta: si no se pudo editar, editar_serie lo cuenta como omitida; se muestra el motivo.
+        setMensaje(data?.omitidas?.[0]?.motivo || 'No se han podido guardar los cambios.')
         setGuardando(false)
         return
       }
@@ -158,6 +202,8 @@ export default function FormularioEditarClase({ id, clase }) {
     puntoEncuentro, setPuntoEncuentro, plazasMin, setPlazasMin, plazasMax, setPlazasMax,
     alcance, setAlcance, precio, setPrecio, duracion, setDuracion,
   }
+  // Alcance efectivo de la ubicación: el elegido en una serie; «solo esta» en una sesión suelta.
+  const alcanceUbicacion = esDeSerie ? alcance : 'solo_esta'
 
   if (resultadoSerie) {
     const omitidas = resultadoSerie.omitidas || []
@@ -192,6 +238,15 @@ export default function FormularioEditarClase({ id, clase }) {
         {esDeSerie && <BloqueSerieEditar f={f} />}
         <BloqueDatosEditables f={f} />
         <BloquePlazasEditar f={f} clase={clase} sinMinimoDefinido={sinMinimoDefinido} />
+        <BloqueUbicacionEditar
+          id={id}
+          clase={clase}
+          alcance={alcanceUbicacion}
+          esDeSerie={esDeSerie}
+          estadoRef={ubicacionRef}
+          onCambio={alCambiarUbicacion}
+          version={versionReservas}
+        />
         <BloqueNoEditable clase={clase} />
 
         <div className="flex flex-col gap-3">
@@ -207,6 +262,24 @@ export default function FormularioEditarClase({ id, clase }) {
           </button>
         </div>
       </form>
+
+      {confirmandoParcial && (
+        <div role="alertdialog" aria-labelledby="titulo-parcial" className="mt-4 corte-card border-2 border-[#B5E600] bg-[#EDF5C9] px-4 py-3 text-sm text-[#3D4A00]">
+          <p id="titulo-parcial" className="font-bold">Modificación parcial de la ubicación</p>
+          <p className="mt-1">
+            Se actualizará la ubicación de {confirmandoParcial.aplicar} {confirmandoParcial.aplicar === 1 ? 'sesión' : 'sesiones'}.{' '}
+            {confirmandoParcial.conservar} {confirmandoParcial.conservar === 1 ? 'sesión ya tiene reservas y conservará' : 'sesiones ya tienen reservas y conservarán'} su ubicación original.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <button type="button" disabled={guardando} onClick={() => handleGuardar(null, { parcialConfirmado: true })} className="corte-btn bg-[#B5E600] px-5 py-2 text-sm font-bold text-[#1F2400] hover:bg-[#a3d100] disabled:opacity-60">
+              {guardando ? 'Guardando...' : 'Confirmar cambios'}
+            </button>
+            <button type="button" onClick={() => setConfirmandoParcial(null)} className="corte-btn border border-[#3D4A00]/30 bg-white px-5 py-2 text-sm font-bold text-[#3D4A00]">
+              Volver
+            </button>
+          </div>
+        </div>
+      )}
 
       {mensaje && (
         <div className="mt-4 flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

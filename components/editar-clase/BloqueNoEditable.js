@@ -23,17 +23,6 @@ export default function BloqueNoEditable({ clase }) {
           <p className={soloLecturaClass}>{clase.duracion != null ? `${clase.duracion} min` : '—'}</p>
         </div>
         <div>
-          <label className={labelClass}>Municipio</label>
-          <p className={soloLecturaClass}>
-            {clase.ciudad || '—'}
-            {clase.provincia && clase.provincia !== clase.ciudad ? `, ${clase.provincia}` : ''}
-          </p>
-        </div>
-        <div className="sm:col-span-2">
-          <label className={labelClass}>Zona<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
-          <p className={soloLecturaClass}>{clase.direccion || '—'}</p>
-        </div>
-        <div>
           <label className={labelClass}>Precio</label>
           <p className={soloLecturaClass}>{clase.precio != null ? `${clase.precio} €` : '—'}</p>
         </div>
