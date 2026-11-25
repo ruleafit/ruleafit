@@ -301,7 +301,8 @@ begin
         v_total := v_total + 1;
       end if;
     exception when others then
-      null; -- se reintentará en la siguiente pasada
+      -- Queda en el registro de Postgres (se ve en los logs de Supabase) y se reintentará en la siguiente pasada.
+      raise warning 'recuperar_invitaciones: fallo con la cuenta % (%): %', v_cuenta.id, sqlstate, sqlerrm;
     end;
   end loop;
   return v_total;
