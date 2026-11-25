@@ -66,7 +66,7 @@ export function GuardarUbicacion({ c, ub }) {
   const [error, setError] = useState('')
   const [exito, setExito] = useState('')
 
-  const listo = c.lat != null && c.lng != null && c.ciudad && c.ciudadTexto.trim() === c.ciudad
+  const listo = c.lat != null && c.lng != null && !!c.ciudad && c.ubi.estado !== 'resolviendo'
   if (!ub.disponible || !ub.cargado) return null
   if (!listo || c.ubicacionElegidaId) {
     return exito ? <p role="status" className={`mt-2 ${msgOk}`}>{exito}</p> : null
@@ -222,7 +222,7 @@ export function PanelUbicaciones({ c, ub, editandoId, onEditarEnMapa, onCerrar }
 export function BannerEdicionUbicacion({ c, ub, ubicacion, onTerminar }) {
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState('')
-  const listo = c.lat != null && c.lng != null && c.ciudad && c.ciudadTexto.trim() === c.ciudad
+  const listo = c.lat != null && c.lng != null && !!c.ciudad && c.ubi.estado !== 'resolviendo'
 
   async function actualizar() {
     setMensaje('')
@@ -245,7 +245,7 @@ export function BannerEdicionUbicacion({ c, ub, ubicacion, onTerminar }) {
   return (
     <div className="mt-2 corte-card border border-[#B5E600] bg-[#EDF5C9] p-3 text-sm text-[#3D4A00]" role="status">
       <p className="font-semibold">Editando «{ubicacion.nombre}»</p>
-      <p className="text-xs">Mueve el marcador o cambia la ciudad y pulsa «Actualizar ubicación». Las sesiones ya publicadas no cambian.</p>
+      <p className="text-xs">Toca otro punto del mapa y pulsa «Actualizar ubicación». Las sesiones ya publicadas no cambian.</p>
       {mensaje && <p className="mt-1 font-medium text-red-700">{mensaje}</p>}
       <div className="mt-2 flex flex-wrap gap-2">
         <button type="button" onClick={actualizar} disabled={!listo || guardando} className="inline-flex items-center gap-1.5 corte-btn bg-[#B5E600] px-4 py-1.5 text-xs font-bold text-[#1F2400] hover:bg-[#a3d100] disabled:opacity-50">

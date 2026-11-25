@@ -16,6 +16,8 @@ export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholde
   const controladorRef = useRef(null)
   const contenedorRef = useRef(null)
   const teniaTextoRef = useRef(false)
+  // Texto del resultado elegido: al ponerlo en el campo NO se vuelve a buscar (evita una petición innecesaria a Nominatim).
+  const elegidoRef = useRef('')
 
   useEffect(() => {
     const textoNormalizado = texto.trim()
@@ -24,6 +26,12 @@ export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholde
       onLimpiar?.()
     }
     teniaTextoRef.current = textoNormalizado.length > 0
+
+    if (textoNormalizado !== '' && textoNormalizado === elegidoRef.current) {
+      setCargando(false)
+      setAbierto(false)
+      return
+    }
 
     if (textoNormalizado.length < MINIMO_CARACTERES) {
       setSugerencias([])
@@ -66,6 +74,7 @@ export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholde
   }, [])
 
   function handleSeleccionar(sugerencia) {
+    elegidoRef.current = String(sugerencia.nombre || '').trim()
     onSeleccionar(sugerencia)
     setTexto(sugerencia.nombre)
     setAbierto(false)
@@ -73,6 +82,7 @@ export default function BuscadorDireccion({ onSeleccionar, onLimpiar, placeholde
   }
 
   function handleLimpiar() {
+    elegidoRef.current = ''
     setTexto('')
     setSugerencias([])
     setAbierto(false)

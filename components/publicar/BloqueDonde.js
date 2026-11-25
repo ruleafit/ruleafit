@@ -4,8 +4,8 @@ import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { MapPin } from 'lucide-react'
 import RevelarAlLlegar from '../RevelarAlLlegar'
-import BuscadorCiudad from '../BuscadorCiudad'
 import TituloBloque from './TituloBloque'
+import DatosUbicacion from './DatosUbicacion'
 import useUbicacionesHabituales from './useUbicacionesHabituales'
 import { SelectorUbicaciones, GuardarUbicacion, PanelUbicaciones, BannerEdicionUbicacion } from './UbicacionesHabituales'
 import { inputClass, labelClass, ayudaClass, tarjetaClass } from './constantes'
@@ -46,39 +46,18 @@ export default function BloqueDonde({ c }) {
         )}
 
         <div>
-          <label htmlFor="ciudad-sesion" className={labelClass}>Ciudad</label>
-          <BuscadorCiudad
-            id="ciudad-sesion"
-            valor={c.ciudadTexto}
-            ciudadElegida={c.ciudad}
-            onCambiarTexto={c.alEscribirCiudad}
-            onSeleccionar={c.alElegirCiudadDeLista}
-            className={inputClass}
-          />
-          {c.detectando ? (
-            <p className={ayudaClass} role="status">Detectando la ciudad desde el mapa…</p>
-          ) : c.avisoGeo ? (
-            <p
-              role="status"
-              className={`mt-1 text-xs ${c.avisoGeo.tipo === 'ok' ? 'font-medium text-[#3D4A00]' : 'text-amber-800'}`}
-            >
-              {c.avisoGeo.texto}
-            </p>
-          ) : (
-            <p className={ayudaClass}>Escribe y elige tu ciudad de la lista, o marca el punto en el mapa y la detectamos.</p>
-          )}
-        </div>
-
-        <div>
-          <label className={labelClass}>Ubicación en el mapa</label>
+          <label className={labelClass}>Ubicación</label>
           <div className="w-full overflow-hidden corte-card border border-[#E2E6CF]">
             <MapaSelector
-              centro={c.ciudadCentro || undefined}
               lat={c.lat}
               lng={c.lng}
+              foco={c.ubi.foco}
               onCambiarUbicacion={c.alElegirPuntoEnMapa}
+              onSeleccionarBusqueda={c.alElegirResultadoBusqueda}
             />
           </div>
+          {/* Una sola ubicación: del pin salen las coordenadas, el municipio y la provincia (sin buscador de ciudad). */}
+          <DatosUbicacion c={c} />
           {enEdicion && (
             <BannerEdicionUbicacion
               key={enEdicion.id}

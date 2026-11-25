@@ -1,16 +1,16 @@
 import { supabase } from '../../lib/supabaseClient'
-import { buscarCiudades } from '../../lib/geocodificar'
 import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 import { normalizarHoras } from '../../lib/seriesSesiones'
 import { precioValido } from './precio'
+import { prepararUbicacionParaPublicar } from './ubicacionPublicar'
 
 // Publicación de una serie de sesiones (C07). Comparte las comprobaciones del formulario con
 // publicarSesion (enviarSesion.js) y crea TODAS las sesiones en una sola operación del servidor
 // (publicar_serie): o se crean todas o ninguna. `previa` = useVistaPreviaSerie (validación ya hecha).
 export async function publicarSerie(c, previa, setMensaje) {
-  const { titulo, categoria, tipoActividad, ciudad, ciudadTexto, provincia, direccion } = c
+  const { titulo, categoria, tipoActividad, direccion } = c
   const { puntoEncuentro, duracion, nivel, precio, plazasMax, plazasMin } = c
-  const { material, observaciones, lat, lng, patron, repInicio, repFin } = c
+  const { material, observaciones, patron, repInicio, repFin } = c
 
   const { data } = await supabase.auth.getUser()
   const usuarioActual = data.user
@@ -19,14 +19,13 @@ export async function publicarSerie(c, previa, setMensaje) {
     return
   }
 
-  if (!ciudad || ciudadTexto.trim() !== ciudad) {
-    setMensaje('Elige la ciudad de la lista de sugerencias.')
+  // Una sola ubicación (el pin) para TODAS las sesiones de la serie: coordenadas, municipio y provincia.
+  const prep = await prepararUbicacionParaPublicar(c.gestorUbicacion, setMensaje)
+  if (!prep.ok) {
+    setMensaje(prep.mensaje)
     return
   }
-  if (lat == null || lng == null) {
-    setMensaje('Selecciona una ubicación en el mapa antes de publicar.')
-    return
-  }
+  const { lat, lng, ciudad, provincia } = prep.ubicacion
 
   const plazasMaxNum = Number(plazasMax)
   const plazasMinNum = plazasMin === '' ? 0 : Number(plazasMin)
@@ -66,12 +65,6 @@ export async function publicarSerie(c, previa, setMensaje) {
 
   setMensaje(`Publicando ${sesiones.length} ${sesiones.length === 1 ? 'sesión' : 'sesiones'}...`)
 
-  let provinciaFinal = provincia
-  if (!provinciaFinal) {
-    const candidatas = await buscarCiudades(ciudad)
-    provinciaFinal = candidatas.find((ciu) => ciu.nombre === ciudad)?.provincia || ''
-  }
-
   const patronGuardado = {
     version: 1,
     dias: [...patron.dias].sort((a, b) => a - b),
@@ -88,7 +81,7 @@ export async function publicarSerie(c, previa, setMensaje) {
       categoria,
       tipo_actividad: tipoActividad,
       ciudad,
-      provincia: provinciaFinal || null,
+      provincia: provincia || null,
       direccion,
       punto_encuentro: puntoEncuentro,
       duracion: duracion === '' ? null : Number(duracion),

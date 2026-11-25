@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { geocodificarInversa } from '../../lib/geocodificarInversa'
-import { CATEGORIAS, NIVELES, CIUDAD_POR_DEFECTO, proponerFechaCopia } from './constantes'
+import { crearUbicacion } from '../../lib/ubicacionSesion'
+import { CATEGORIAS, NIVELES, proponerFechaCopia } from './constantes'
 
 // Estado de todos los campos del formulario de publicar y precarga al copiar
 // una sesión. Devuelve cada valor con su setter.
@@ -11,14 +12,6 @@ export default function useFormularioPublicar(copiarId) {
   const [titulo, setTitulo] = useState('')
   const [categoria, setCategoria] = useState(CATEGORIAS[0])
   const [tipoActividad, setTipoActividad] = useState('')
-  // ciudad = la confirmada (la que se guarda); ciudadTexto = lo que hay escrito
-  // en el campo; ciudadCentro = dónde centrar el mapa de ubicación.
-  const [ciudad, setCiudad] = useState(CIUDAD_POR_DEFECTO)
-  const [ciudadTexto, setCiudadTexto] = useState(CIUDAD_POR_DEFECTO)
-  const [ciudadCentro, setCiudadCentro] = useState(null)
-  // Provincia de la ciudad elegida: se guarda con la sesión para que buscar una
-  // ciudad encuentre también las sesiones de los pueblos de su provincia.
-  const [provincia, setProvincia] = useState(CIUDAD_POR_DEFECTO)
   const [direccion, setDireccion] = useState('')
   const [puntoEncuentro, setPuntoEncuentro] = useState('')
   const [fecha, setFecha] = useState('')
@@ -30,8 +23,6 @@ export default function useFormularioPublicar(copiarId) {
   const [plazasMin, setPlazasMin] = useState('0')
   const [material, setMaterial] = useState('')
   const [observaciones, setObservaciones] = useState('')
-  const [lat, setLat] = useState(null)
-  const [lng, setLng] = useState(null)
   // true mientras la fecha es la propuesta al copiar una sesión (para avisarlo).
   const [fechaPropuesta, setFechaPropuesta] = useState(false)
   // Repetición semanal (C07). Por defecto se publica una sola sesión.
@@ -40,118 +31,37 @@ export default function useFormularioPublicar(copiarId) {
   const [repFin, setRepFin] = useState('')
   const [patron, setPatron] = useState({ dias: [], personalizado: false, horas: [], horasPorDia: {} })
 
-  // ---- Ubicación y detección automática de la ciudad (N09) ----
-  // ciudadOrigen: quién ha fijado la ciudad → '' (nadie) | 'auto' (detectada desde el mapa) | 'manual'
-  // (escrita o elegida de la lista por la persona, o la de una sesión copiada) | 'guardada' (de una
-  // ubicación habitual). La detección solo actúa si la ciudad no es 'manual' ni 'guardada': nunca pisa
-  // lo que ha decidido la persona, ni una respuesta lenta o antigua del servicio una corrección posterior.
-  const [ciudadOrigen, setCiudadOrigenEstado] = useState('')
-  const origenRef = useRef('')
-  const [detectando, setDetectando] = useState(false)
-  const [avisoGeo, setAvisoGeo] = useState(null) // { tipo: 'ok' | 'fallo', texto }
+  // ---- Ubicación de la sesión: UNA sola ubicación (el pin) determina coordenadas, municipio y provincia ----
+  // Toda la lógica (resultado del buscador = ubicación definitiva, geocodificación inversa, respuestas antiguas
+  // descartadas, ubicación habitual, copia, corrección manual) está en lib/ubicacionSesion.js.
+  const [ubi, setUbi] = useState({ lat: null, lng: null, ciudad: '', provincia: '', lugar: '', origen: '', estado: 'vacio', aviso: '', foco: null })
   const [ubicacionElegidaId, setUbicacionElegidaId] = useState('')
-  const secuenciaGeo = useRef(0)
-  const temporizadorGeo = useRef(null)
-  const controladorGeo = useRef(null)
+  const gestorRef = useRef(null)
+  if (!gestorRef.current) gestorRef.current = crearUbicacion({ resolver: geocodificarInversa, alCambiar: setUbi })
+  const gestor = gestorRef.current
+  useEffect(() => () => gestor.destruir(), [gestor])
 
-  function fijarOrigen(o) {
-    origenRef.current = o
-    setCiudadOrigenEstado(o)
-  }
-
-  // Cancela cualquier detección pendiente o en curso (sus respuestas, si llegan, se descartan).
-  function invalidarDeteccion() {
-    secuenciaGeo.current += 1
-    clearTimeout(temporizadorGeo.current)
-    controladorGeo.current?.abort()
-    setDetectando(false)
-  }
-
-  useEffect(
-    () => () => {
-      clearTimeout(temporizadorGeo.current)
-      controladorGeo.current?.abort()
-    },
-    []
-  )
-
-  // Programa la detección del municipio del punto (con retardo, para no consultar en cada clic seguido).
-  // soloProvincia: rellena solo la provincia (ubicación guardada sin ella), sin tocar la ciudad.
-  function programarDeteccion(nuevaLat, nuevaLng, { soloProvincia = false } = {}) {
-    invalidarDeteccion()
-    if (!soloProvincia && (origenRef.current === 'manual' || origenRef.current === 'guardada')) return
-    const miSecuencia = secuenciaGeo.current
-    setDetectando(!soloProvincia)
-    if (!soloProvincia) setAvisoGeo(null)
-    temporizadorGeo.current = setTimeout(async () => {
-      const controlador = new AbortController()
-      controladorGeo.current = controlador
-      const r = await geocodificarInversa(nuevaLat, nuevaLng, { signal: controlador.signal })
-      if (miSecuencia !== secuenciaGeo.current) return // respuesta antigua: se ignora
-      setDetectando(false)
-      if (soloProvincia) {
-        if (r?.provincia) setProvincia(r.provincia)
-        return
-      }
-      if (origenRef.current === 'manual' || origenRef.current === 'guardada') return // la persona decidió mientras tanto
-      if (r?.nombre) {
-        setCiudad(r.nombre)
-        setCiudadTexto(r.nombre)
-        setProvincia(r.provincia || '')
-        fijarOrigen('auto')
-        setAvisoGeo({ tipo: 'ok', texto: `Ciudad detectada desde el mapa: ${r.nombre}. Puedes corregirla si no es la correcta.` })
-      } else {
-        setAvisoGeo({ tipo: 'fallo', texto: 'No hemos podido detectar la ciudad desde el mapa. Escríbela tú: puedes publicar igualmente.' })
-      }
-    }, 700)
-  }
-
-  // Clic en el mapa: se guardan las coordenadas exactas y se intenta detectar la ciudad.
-  function alElegirPuntoEnMapa(nuevaLat, nuevaLng) {
-    setLat(nuevaLat)
-    setLng(nuevaLng)
+  // Resultado del buscador de direcciones: el pin queda YA como ubicación definitiva.
+  function alElegirResultadoBusqueda(resultado) {
     setUbicacionElegidaId('')
-    if (origenRef.current === 'guardada') fijarOrigen('') // otro punto: la ciudad guardada ya no vale por defecto
-    programarDeteccion(nuevaLat, nuevaLng)
+    gestor.elegirBusqueda(resultado)
   }
 
-  // La persona escribe o elige la ciudad: es una decisión manual y anula cualquier detección en curso.
-  function alEscribirCiudad(texto) {
-    invalidarDeteccion()
-    fijarOrigen('manual')
-    setAvisoGeo(null)
-    setCiudadTexto(texto)
+  // Toque en el mapa: otro punto (se guardan las coordenadas exactas y se obtienen municipio y provincia).
+  function alElegirPuntoEnMapa(nuevaLat, nuevaLng) {
+    setUbicacionElegidaId('')
+    gestor.elegirMapa(nuevaLat, nuevaLng)
   }
 
-  function alElegirCiudadDeLista(ciu) {
-    invalidarDeteccion()
-    fijarOrigen('manual')
-    setAvisoGeo(null)
-    setCiudad(ciu.nombre)
-    setCiudadTexto(ciu.nombre)
-    setProvincia(ciu.provincia || '')
-    setCiudadCentro([ciu.lat, ciu.lng])
-  }
-
-  // Ubicación habitual elegida: coordenadas, ciudad y provincia; el mapa se centra en ella.
+  // Ubicación habitual elegida: coordenadas, municipio y provincia; el mapa se centra en ella.
   // NO se tocan «Zona» ni «Punto de encuentro».
   function elegirUbicacionHabitual(u) {
-    invalidarDeteccion()
-    fijarOrigen('guardada')
-    setAvisoGeo(null)
     setUbicacionElegidaId(u.id)
-    setLat(u.lat)
-    setLng(u.lng)
-    setCiudad(u.ciudad)
-    setCiudadTexto(u.ciudad)
-    setProvincia(u.provincia || '')
-    setCiudadCentro([u.lat, u.lng])
-    if (!u.provincia) programarDeteccion(u.lat, u.lng, { soloProvincia: true })
+    gestor.elegirGuardada(u)
   }
 
   function quitarUbicacionHabitual() {
     setUbicacionElegidaId('')
-    if (origenRef.current === 'guardada') fijarOrigen('')
   }
 
   // Copiar sesión (pedido por el usuario el 21 sept 2026): si se llega aquí
@@ -182,12 +92,9 @@ export default function useFormularioPublicar(copiarId) {
       setTitulo(data.titulo || '')
       setCategoria(data.categoria || CATEGORIAS[0])
       setTipoActividad(data.tipo_actividad || '')
-      setCiudad(data.ciudad || CIUDAD_POR_DEFECTO)
-      if (data.ciudad) fijarOrigen('manual')
-      setCiudadTexto(data.ciudad || CIUDAD_POR_DEFECTO)
-      // clase_para_copiar no devuelve la provincia: se vuelve a calcular al publicar.
-      setProvincia('')
-      if (data.lat != null && data.lng != null) setCiudadCentro([data.lat, data.lng])
+      // La ubicación (pin, municipio) de la sesión copiada; clase_para_copiar no devuelve la provincia: se obtiene del
+      // punto con la geocodificación inversa.
+      gestor.cargar({ lat: data.lat ?? null, lng: data.lng ?? null, ciudad: data.ciudad || '', provincia: '' })
       setDireccion(data.direccion || '')
       setPuntoEncuentro(data.punto_encuentro || '')
       const horaCopia = data.hora ? String(data.hora).slice(0, 5) : ''
@@ -202,14 +109,12 @@ export default function useFormularioPublicar(copiarId) {
       setPlazasMin(data.plazas_min != null ? String(data.plazas_min) : '0')
       setMaterial(data.material || '')
       setObservaciones(data.observaciones || '')
-      setLat(data.lat ?? null)
-      setLng(data.lng ?? null)
     }
     cargarDatosCopia()
-  }, [copiarId])
+  }, [copiarId, gestor])
 
-  // Tras publicar se vacían los mismos campos que antes (categoría, ciudad,
-  // nivel y centro del mapa se conservan para publicar otra seguida).
+  // Tras publicar se vacían los campos (categoría y nivel se conservan para publicar otra seguida). La ubicación
+  // también se vacía: la siguiente sesión debe elegir la suya (o una ubicación habitual) y no arrastrar datos antiguos.
   function reiniciarTrasPublicar() {
     setTitulo('')
     setTipoActividad('')
@@ -223,12 +128,8 @@ export default function useFormularioPublicar(copiarId) {
     setPlazasMin('0')
     setMaterial('')
     setObservaciones('')
-    setLat(null)
-    setLng(null)
+    gestor.limpiar()
     setUbicacionElegidaId('')
-    setAvisoGeo(null)
-    invalidarDeteccion()
-    if (origenRef.current === 'guardada') fijarOrigen('')
     setRepetir(false)
     setRepInicio('')
     setRepFin('')
@@ -236,15 +137,17 @@ export default function useFormularioPublicar(copiarId) {
   }
 
   return {
-    ciudadOrigen, detectando, avisoGeo, ubicacionElegidaId, alElegirPuntoEnMapa, alEscribirCiudad, alElegirCiudadDeLista,
+    // Ubicación (una sola fuente): lat, lng, ciudad (municipio) y provincia salen del pin.
+    ubi, lat: ubi.lat, lng: ubi.lng, ciudad: ubi.ciudad, provincia: ubi.provincia,
+    gestorUbicacion: gestor, ubicacionElegidaId, alElegirResultadoBusqueda, alElegirPuntoEnMapa,
     elegirUbicacionHabitual, quitarUbicacionHabitual,
+    corregirUbicacionManual: gestor.corregirManual, reintentarUbicacion: gestor.reintentar,
     repetir, setRepetir, repInicio, setRepInicio, repFin, setRepFin, patron, setPatron,
     titulo, setTitulo, categoria, setCategoria, tipoActividad, setTipoActividad,
-    ciudad, setCiudad, ciudadTexto, setCiudadTexto, ciudadCentro, setCiudadCentro,
-    provincia, setProvincia, direccion, setDireccion, puntoEncuentro, setPuntoEncuentro,
+    direccion, setDireccion, puntoEncuentro, setPuntoEncuentro,
     fecha, setFecha, hora, setHora, duracion, setDuracion, nivel, setNivel,
     precio, setPrecio, plazasMax, setPlazasMax, plazasMin, setPlazasMin,
-    material, setMaterial, observaciones, setObservaciones, lat, setLat, lng, setLng,
+    material, setMaterial, observaciones, setObservaciones,
     fechaPropuesta, setFechaPropuesta, reiniciarTrasPublicar,
   }
 }

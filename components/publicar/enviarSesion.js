@@ -1,16 +1,16 @@
 import { supabase } from '../../lib/supabaseClient'
 import { claseYaPaso } from '../../lib/ventanaEdicionClase'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
-import { buscarCiudades } from '../../lib/geocodificar'
 import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 import { precioValido } from './precio'
+import { prepararUbicacionParaPublicar } from './ubicacionPublicar'
 
 // Validaciones y envío del formulario de publicar. `c` son los campos del
 // formulario (useFormularioPublicar); `setMensaje` muestra el resultado.
 export async function publicarSesion(c, setMensaje) {
-  const { titulo, categoria, tipoActividad, ciudad, ciudadTexto, provincia, direccion } = c
+  const { titulo, categoria, tipoActividad, direccion } = c
   const { puntoEncuentro, fecha, hora, duracion, nivel, precio, plazasMax, plazasMin } = c
-  const { material, observaciones, lat, lng } = c
+  const { material, observaciones } = c
 
   const { data } = await supabase.auth.getUser()
   const usuarioActual = data.user
@@ -20,15 +20,13 @@ export async function publicarSesion(c, setMensaje) {
     return
   }
 
-  if (!ciudad || ciudadTexto.trim() !== ciudad) {
-    setMensaje('Elige la ciudad de la lista de sugerencias.')
+  // Una sola ubicación (el pin) determina coordenadas, municipio y provincia; se leen del gestor al publicar.
+  const prep = await prepararUbicacionParaPublicar(c.gestorUbicacion, setMensaje)
+  if (!prep.ok) {
+    setMensaje(prep.mensaje)
     return
   }
-
-  if (lat == null || lng == null) {
-    setMensaje('Selecciona una ubicación en el mapa antes de publicar.')
-    return
-  }
+  const { lat, lng, ciudad, provincia } = prep.ubicacion
 
   const plazasMaxNum = Number(plazasMax)
   const plazasMinNum = plazasMin === '' ? 0 : Number(plazasMin)
@@ -84,21 +82,13 @@ export async function publicarSesion(c, setMensaje) {
 
   setMensaje('Publicando...')
 
-  // Si falta la provincia (por ejemplo al copiar una sesión), se localiza
-  // buscando la ciudad; si no se encuentra, se publica sin ella.
-  let provinciaFinal = provincia
-  if (!provinciaFinal) {
-    const candidatas = await buscarCiudades(ciudad)
-    provinciaFinal = candidatas.find((ciu) => ciu.nombre === ciudad)?.provincia || ''
-  }
-
   const { error } = await supabase.from('clases').insert({
     trainer_id: usuarioActual.id,
     titulo,
     categoria,
     tipo_actividad: tipoActividad,
     ciudad,
-    provincia: provinciaFinal || null,
+    provincia: provincia || null,
     direccion,
     punto_encuentro: puntoEncuentro,
     fecha,

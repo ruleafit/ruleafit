@@ -243,7 +243,11 @@ function DetalleClaseContenido() {
             <TituloBloque Icono={MapPin}>Dónde</TituloBloque>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1 text-sm">
-                <p className="font-semibold text-[#1F2400]">{clase.ciudad}</p>
+                {/* Municipio y provincia vienen del pin de la sesión (se guardan al publicar). */}
+                <p className="font-semibold text-[#1F2400]">
+                  {clase.ciudad}
+                  {clase.provincia && clase.provincia !== clase.ciudad ? `, ${clase.provincia}` : ''}
+                </p>
                 {clase.direccion && (
                   <p className="text-[#1F2400]">
                     Zona: <span className="text-[#1F2400]">{clase.direccion}</span>
