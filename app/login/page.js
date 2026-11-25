@@ -9,6 +9,7 @@ import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
 import { esApp, entrarConGoogleEnApp } from '../../lib/nativo'
 import { destinoTrasLogin } from '../../lib/retorno'
+import { reclamarInvitacionPendiente } from '../../lib/invitacion'
 import AvisoRetorno from '../../components/reserva/AvisoRetorno'
 
 const inputClass =
@@ -52,6 +53,9 @@ function LoginFormulario() {
       setCargando(false)
     } else {
       // C03: si venía de pulsar «Reservar», vuelve a esa sesión (ruta interna validada); si no, a la portada.
+      // C25: si venía de una invitación y esta es su primera entrada tras confirmar el correo, se reclama; el servidor
+      // rechaza cuentas anteriores (no hay recompensa por un registro previo).
+      await reclamarInvitacionPendiente(supabase)
       router.push(destinoTrasLogin())
     }
   }

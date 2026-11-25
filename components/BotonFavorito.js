@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Star } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import PanelIdentificacion from './reserva/PanelIdentificacion'
 
 // "Añadir a favoritos": lista PRIVADA del usuario (tabla public.favoritos,
 // sql/078), independiente de "Seguir" (BotonSeguir). El favorito no recibe
 // aviso ni puede saber quién lo tiene guardado.
-export default function BotonFavorito({ favoritoId, usuarioActual }) {
+// username (C25): para visitantes sin sesión, abre el panel de identificación y, tras entrar, vuelve a este perfil.
+export default function BotonFavorito({ favoritoId, usuarioActual, username }) {
+  const [panelAbierto, setPanelAbierto] = useState(false)
   const [esFavorito, setEsFavorito] = useState(false)
   const [cargando, setCargando] = useState(true)
   const [procesando, setProcesando] = useState(false)
@@ -38,6 +41,22 @@ export default function BotonFavorito({ favoritoId, usuarioActual }) {
   }, [usuarioActual, favoritoId, esSuPropioPerfil])
 
   if (esSuPropioPerfil) return null
+
+  if (!usuarioActual && username) {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setPanelAbierto(true)}
+          className="inline-flex items-center gap-2 corte-btn border-2 border-[#B5E600] bg-white px-5 py-2 text-sm font-semibold text-[#3D4A00] transition hover:bg-[#F5F7E8]"
+        >
+          <Star className="h-4 w-4" strokeWidth={1.75} />
+          Añadir a favoritos
+        </button>
+        {panelAbierto && <PanelIdentificacion perfil={{ username }} intencion="favorito" onCerrar={() => setPanelAbierto(false)} />}
+      </div>
+    )
+  }
 
   if (!usuarioActual) {
     return (

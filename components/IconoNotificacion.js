@@ -1,9 +1,10 @@
-import { Star, Megaphone, Bell } from 'lucide-react'
+import { Star, Megaphone, Bell, Gift } from 'lucide-react'
 
 // Icono por tipo de notificación (solo las nuevas de C16 y C18; el resto sigue sin icono, como siempre).
 export function IconoNotificacion({ tipo }) {
   if (tipo === 'solicitud_valoracion') return <Star className="mt-0.5 h-4 w-4 shrink-0 text-[#B5E600]" fill="#B5E600" strokeWidth={1.5} aria-hidden="true" />
   if (tipo === 'aviso_organizador') return <Megaphone className="mt-0.5 h-4 w-4 shrink-0 text-[#3D4A00]" strokeWidth={2} aria-hidden="true" />
+  if (tipo === 'invitacion_recompensa') return <Gift className="mt-0.5 h-4 w-4 shrink-0 text-[#3D4A00]" strokeWidth={2} aria-hidden="true" />
   if (tipo === 'plaza_libre') return <Bell className="mt-0.5 h-4 w-4 shrink-0 text-[#3D4A00]" strokeWidth={2} aria-hidden="true" />
   return null
 }

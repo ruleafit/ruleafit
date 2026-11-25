@@ -11,6 +11,7 @@ export default function robots() {
         '/cuenta',
         '/completar-perfil',
         '/eliminar-cuenta',
+        '/invita',
         '/mis-clases',
         '/mis-reservas',
         '/nueva-contrasena',

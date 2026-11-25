@@ -15,14 +15,16 @@ const botonSecundario =
 // C03 · Panel para visitantes que pulsan «Reservar». Solo recuerda la sesión (ruta interna, validada) y lleva a
 // los formularios de registro / inicio de sesión de siempre; no reserva nada ni crea sesiones por su cuenta.
 // Panel inferior en móvil, ventana centrada en escritorio.
-// intencion: 'reservar' (por defecto) o 'avisar' (C15: el visitante quiere activar un aviso de plaza, no reservar).
-export default function PanelIdentificacion({ clase, onCerrar, intencion = 'reservar' }) {
+// intencion: 'reservar' (por defecto), 'avisar' (C15: activar un aviso de plaza) o, con `perfil={{ username }}`, 'seguir' /
+// 'favorito' (C25: perfil público de un rulero; son dos acciones distintas y no se mezclan).
+export default function PanelIdentificacion({ clase, perfil, onCerrar, intencion = 'reservar' }) {
   const avisar = intencion === 'avisar'
+  const esPerfil = !!perfil
   const ref = useRef(null)
   const cerrarRef = useRef(onCerrar)
   cerrarRef.current = onCerrar
-  const ruta = `/clases/${clase.id}`
-  const precio = Number(clase.precio)
+  const ruta = esPerfil ? `/entrenador/${perfil.username}` : `/clases/${clase.id}`
+  const precio = esPerfil ? 0 : Number(clase.precio)
 
   useEffect(() => {
     const anterior = document.activeElement
@@ -41,7 +43,7 @@ export default function PanelIdentificacion({ clase, onCerrar, intencion = 'rese
   }, [])
 
   function recordar() {
-    guardarRetorno({ ruta, titulo: clase.titulo || '', intencion })
+    guardarRetorno({ ruta, titulo: esPerfil ? `@${perfil.username}` : clase.titulo || '', intencion })
   }
 
   // En un portal: las tarjetas de Explora tienen transformaciones CSS que atraparían un panel fixed.
@@ -66,16 +68,26 @@ export default function PanelIdentificacion({ clase, onCerrar, intencion = 'rese
         </button>
 
         <h2 id="panel-identificacion-titulo" className="pr-8 text-xl font-extrabold text-[#1F2400]">
-          {avisar ? '¡Estás a un paso de activar tu aviso!' : '¡Estás a un paso de reservar!'}
+          {esPerfil
+            ? intencion === 'favorito'
+              ? `¡Estás a un paso de añadir a @${perfil.username} a favoritos!`
+              : `¡Estás a un paso de seguir a @${perfil.username}!`
+            : avisar
+              ? '¡Estás a un paso de activar tu aviso!'
+              : '¡Estás a un paso de reservar!'}
         </h2>
 
-        <dl className="mt-4 space-y-1 rounded-xl border border-[#E2E6CF] bg-[#F7F9EC] p-4 text-sm">
-          <div className="font-bold text-[#1F2400]">{clase.titulo}</div>
-          <div className="text-[#6B7355]">
-            {formatearFechaParaMostrar(clase.fecha)} · {String(clase.hora).slice(0, 5)}
-          </div>
-          <div className="font-semibold text-[#1F2400]">{precio > 0 ? `${clase.precio} €` : 'Gratis'}</div>
-        </dl>
+        {esPerfil ? (
+          <p className="mt-4 rounded-xl border border-[#E2E6CF] bg-[#F7F9EC] p-4 text-sm font-bold text-[#1F2400]">@{perfil.username}</p>
+        ) : (
+          <dl className="mt-4 space-y-1 rounded-xl border border-[#E2E6CF] bg-[#F7F9EC] p-4 text-sm">
+            <div className="font-bold text-[#1F2400]">{clase.titulo}</div>
+            <div className="text-[#6B7355]">
+              {formatearFechaParaMostrar(clase.fecha)} · {String(clase.hora).slice(0, 5)}
+            </div>
+            <div className="font-semibold text-[#1F2400]">{precio > 0 ? `${clase.precio} €` : 'Gratis'}</div>
+          </dl>
+        )}
 
         <div className="mt-5 flex flex-col gap-3">
           <Link href={`/registro?volver=${ruta}&intencion=${intencion}`} onClick={recordar} className={botonPrimario}>
@@ -87,9 +99,11 @@ export default function PanelIdentificacion({ clase, onCerrar, intencion = 'rese
         </div>
 
         <p className="mt-4 text-center text-xs text-[#6B7355]">
-          {avisar
-            ? 'Podrás usar Google o tu correo. Al terminar volverás a esta sesión y confirmarás tú mismo la activación del aviso. El aviso no reserva ni garantiza una plaza.'
-            : 'Podrás usar Google o tu correo. Al terminar volverás a esta sesión y confirmarás tu reserva tú mismo: no se reserva nada antes.'}
+          {esPerfil
+            ? 'Podrás usar Google o tu correo. Al terminar volverás a este perfil y confirmarás tú mismo la acción: no se activa nada antes.'
+            : avisar
+              ? 'Podrás usar Google o tu correo. Al terminar volverás a esta sesión y confirmarás tú mismo la activación del aviso. El aviso no reserva ni garantiza una plaza.'
+              : 'Podrás usar Google o tu correo. Al terminar volverás a esta sesión y confirmarás tu reserva tú mismo: no se reserva nada antes.'}
         </p>
       </div>
     </div>,

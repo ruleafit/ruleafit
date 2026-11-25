@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../lib/supabaseClient'
+import PanelIdentificacion from './reserva/PanelIdentificacion'
 
-export default function BotonSeguir({ entrenadorId, usuarioActual }) {
+// username (C25): para visitantes sin sesión, abre el panel de identificación y, tras entrar, vuelve a este perfil.
+export default function BotonSeguir({ entrenadorId, usuarioActual, username }) {
+  const [panelAbierto, setPanelAbierto] = useState(false)
   const [siguiendo, setSiguiendo] = useState(false)
   const [cargando, setCargando] = useState(true)
   const [procesando, setProcesando] = useState(false)
@@ -38,6 +41,21 @@ export default function BotonSeguir({ entrenadorId, usuarioActual }) {
   }, [usuarioActual, entrenadorId, esSuPropioPerfil])
 
   if (esSuPropioPerfil) return null
+
+  if (!usuarioActual && username) {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => setPanelAbierto(true)}
+          className="inline-block corte-btn border border-[#16231B]/30 px-5 py-2 text-sm font-medium text-[#16231B] transition hover:bg-[#16231B]/5"
+        >
+          Sigue a este rulero
+        </button>
+        {panelAbierto && <PanelIdentificacion perfil={{ username }} intencion="seguir" onCerrar={() => setPanelAbierto(false)} />}
+      </div>
+    )
+  }
 
   if (!usuarioActual) {
     return (

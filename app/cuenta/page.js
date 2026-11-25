@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { History, User, ChartColumn, Lock, Bell } from 'lucide-react'
+import { History, User, ChartColumn, Lock, Bell, Share2 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import PerfilFiscal from '../../components/PerfilFiscal'
@@ -16,6 +16,7 @@ import NotificacionesCuenta from '../../components/cuenta/NotificacionesCuenta'
 import BloqueDesplegable from '../../components/cuenta/BloqueDesplegable'
 import PrivacidadParticipante from '../../components/cuenta/PrivacidadParticipante'
 import AvisosPlazas from '../../components/cuenta/AvisosPlazas'
+import CompartirYCrecer from '../../components/cuenta/CompartirYCrecer'
 
 export default function CuentaPage() {
   const datos = useDatosCuenta()
@@ -92,6 +93,10 @@ export default function CuentaPage() {
 
         <BloqueDesplegable id="avisos-plazas" titulo="Avisos de plazas" icono={Bell}>
           <AvisosPlazas />
+        </BloqueDesplegable>
+
+        <BloqueDesplegable id="compartir" titulo="Compartir y crecer" icono={Share2}>
+          <CompartirYCrecer username={username} />
         </BloqueDesplegable>
 
         <BloqueDesplegable id="mis-rulos" titulo="Mis últimos Rulos" icono={History}>

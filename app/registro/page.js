@@ -9,6 +9,7 @@ import RevelarAlLlegar from '../../components/RevelarAlLlegar'
 import CabeceraAuth from '../../components/CabeceraAuth'
 import { esApp, entrarConGoogleEnApp } from '../../lib/nativo'
 import { destinoTrasLogin, leerRetorno } from '../../lib/retorno'
+import { leerInvitacion, reclamarInvitacionPendiente } from '../../lib/invitacion'
 import AvisoRetorno from '../../components/reserva/AvisoRetorno'
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]{3,20}$/
@@ -87,14 +88,20 @@ export default function RegistroPage() {
       return
     }
 
+    // C25: invitación pendiente (solo el código; el servidor lo valida y concede los Rulos cuando la cuenta queda confirmada).
+    const codigoInvitacion = leerInvitacion()
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
       options: {
-        data: interesOrganizador ? { username: username, interes: 'organizador' } : { username: username },
+        data: {
+          username: username,
+          ...(interesOrganizador ? { interes: 'organizador' } : {}),
+          ...(codigoInvitacion ? { invitacion: codigoInvitacion } : {}),
+        },
         // C03: el enlace de confirmación del correo pasa por /auth/callback (ya autorizada para Google) y desde allí
         // se vuelve a la sesión pendiente. Sin sesión pendiente no se cambia nada respecto a antes.
-        ...(leerRetorno() ? { emailRedirectTo: `${window.location.origin}/auth/callback` } : {}),
+        ...(leerRetorno() || codigoInvitacion ? { emailRedirectTo: `${window.location.origin}/auth/callback` } : {}),
       },
     })
 
@@ -102,6 +109,7 @@ export default function RegistroPage() {
       setMensaje(traducirErrorRegistro(error.message))
       setCargando(false)
     } else if (data.session) {
+      await reclamarInvitacionPendiente(supabase) // respaldo idempotente (el alta ya la habrá aplicado)
       router.push(destinoTrasLogin())
     } else {
       setRegistroExitoso(true)
@@ -145,7 +153,7 @@ export default function RegistroPage() {
             Crear cuenta en Ruleafit
           </h1>
 
-          {!registroExitoso && <AvisoRetorno className="-mt-3 mb-5" />}
+          {!registroExitoso && <AvisoRetorno className="-mt-3 mb-5" mostrarInvitacion />}
 
           {interesOrganizador && !registroExitoso && (
             <p className="-mt-3 mb-5 text-sm text-[#3d4426]">
