@@ -219,3 +219,99 @@ export function verificarNotificacion(
     codigoAutorizacion: buscar('Ds_AuthorisationCode'),
   }
 }
+
+// ---------------------------------------------------------------------------
+// Devoluciones (transacción tipo 3) por el servicio REST de Redsys.
+// ---------------------------------------------------------------------------
+
+const TRANSACCION_DEVOLUCION = '3'
+
+/** Dirección del servicio REST: REDSYS_REST_URL o, si falta, derivada de REDSYS_URL. */
+export function urlRestRedsys(cfg: ConfigRedsys, env: NodeJS.ProcessEnv = process.env): string {
+  if (env.REDSYS_REST_URL) return env.REDSYS_REST_URL
+  return cfg.urlPasarela.replace(/\/sis\/realizarPago\/?$/, '/sis/rest/trataPeticionREST')
+}
+
+/** Petición firmada de devolución total o parcial de un pedido ya cobrado. */
+export function crearPeticionDevolucion(
+  cfg: ConfigRedsys,
+  datos: { pedido: string; importeCentimos: number }
+): FormularioRedsys['campos'] {
+  if (!esPedidoValido(datos.pedido)) throw new Error('Número de pedido no válido para Redsys')
+  if (!Number.isInteger(datos.importeCentimos) || datos.importeCentimos <= 0) {
+    throw new Error('El importe debe ser un número entero de céntimos mayor que cero')
+  }
+  const parametros = {
+    DS_MERCHANT_AMOUNT: String(datos.importeCentimos),
+    DS_MERCHANT_ORDER: datos.pedido,
+    DS_MERCHANT_MERCHANTCODE: cfg.codigoComercio,
+    DS_MERCHANT_CURRENCY: MONEDA_EURO,
+    DS_MERCHANT_TRANSACTIONTYPE: TRANSACCION_DEVOLUCION,
+    DS_MERCHANT_TERMINAL: cfg.terminal,
+  }
+  const parametrosBase64 = Buffer.from(JSON.stringify(parametros), 'utf8').toString('base64')
+  return {
+    Ds_SignatureVersion: 'HMAC_SHA256_V1',
+    Ds_MerchantParameters: parametrosBase64,
+    Ds_Signature: firmarParametros(cfg.claveSecreta, datos.pedido, parametrosBase64),
+  }
+}
+
+export type ResultadoDevolucion = {
+  /** 'confirmada': el banco la aceptó (0900). 'rechazada': el banco dijo que no. 'desconocido': sin respuesta fiable. */
+  resultado: 'confirmada' | 'rechazada' | 'desconocido'
+  codigoRespuesta: string | null
+  detalle?: string
+}
+
+/** Interpreta la respuesta del banco a una devolución. Solo "0900" confirma. */
+export function interpretarRespuestaDevolucion(
+  claveSecretaBase64: string,
+  pedido: string,
+  cuerpo: unknown
+): ResultadoDevolucion {
+  const c = (cuerpo ?? {}) as Record<string, unknown>
+  // Error de formato/firma devuelto por el banco antes de procesar: no se movió dinero.
+  if (typeof c.errorCode === 'string') {
+    return { resultado: 'rechazada', codigoRespuesta: c.errorCode, detalle: 'error del banco' }
+  }
+  const n = verificarNotificacion(claveSecretaBase64, {
+    Ds_MerchantParameters: typeof c.Ds_MerchantParameters === 'string' ? c.Ds_MerchantParameters : undefined,
+    Ds_Signature: typeof c.Ds_Signature === 'string' ? c.Ds_Signature : undefined,
+  })
+  if (!n.valida || n.pedido !== pedido) {
+    return { resultado: 'desconocido', codigoRespuesta: null, detalle: 'respuesta sin firma válida' }
+  }
+  if (n.codigoRespuesta === '0900') return { resultado: 'confirmada', codigoRespuesta: '0900' }
+  return { resultado: 'rechazada', codigoRespuesta: n.codigoRespuesta }
+}
+
+/** Envía la devolución al banco. Nunca lanza por fallos de red: devuelve 'desconocido'. */
+export async function solicitarDevolucion(
+  cfg: ConfigRedsys,
+  datos: { pedido: string; importeCentimos: number },
+  llamar: typeof fetch = fetch
+): Promise<ResultadoDevolucion> {
+  const campos = crearPeticionDevolucion(cfg, datos)
+  let respuesta: Response
+  try {
+    respuesta = await llamar(urlRestRedsys(cfg), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(campos),
+      signal: AbortSignal.timeout(20_000),
+    })
+  } catch {
+    return { resultado: 'desconocido', codigoRespuesta: null, detalle: 'sin respuesta del banco' }
+  }
+  if (!respuesta.ok) {
+    return { resultado: 'desconocido', codigoRespuesta: null, detalle: `HTTP ${respuesta.status}` }
+  }
+  let cuerpo: unknown
+  try {
+    cuerpo = await respuesta.json()
+  } catch {
+    return { resultado: 'desconocido', codigoRespuesta: null, detalle: 'respuesta no válida' }
+  }
+  return interpretarRespuestaDevolucion(cfg.claveSecreta, datos.pedido, cuerpo)
+}

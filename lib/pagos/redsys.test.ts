@@ -176,3 +176,50 @@ test('configRedsysDesdeEntorno', () => {
   assert.equal(cfg.terminal, '1') // por defecto
   assert.throws(() => configRedsysDesdeEntorno({} as NodeJS.ProcessEnv), /REDSYS_MERCHANT_CODE, REDSYS_SECRET_KEY, REDSYS_URL/)
 })
+
+import {
+  crearPeticionDevolucion,
+  interpretarRespuestaDevolucion,
+  solicitarDevolucion,
+  urlRestRedsys,
+} from './redsys.ts'
+
+function respuestaBanco(pedido: string, codigo: string) {
+  const params = Buffer.from(
+    JSON.stringify({ Ds_Order: pedido, Ds_Response: codigo, Ds_Amount: '145' })
+  ).toString('base64')
+  return {
+    Ds_SignatureVersion: 'HMAC_SHA256_V1',
+    Ds_MerchantParameters: params,
+    Ds_Signature: firmarParametros(CLAVE_PRUEBAS, pedido, params),
+  }
+}
+
+test('devolución: la petición es tipo 3, con importe y firma verificable', () => {
+  const c = crearPeticionDevolucion(CFG, { pedido: '1446117555', importeCentimos: 145 })
+  const p = JSON.parse(Buffer.from(c.Ds_MerchantParameters, 'base64').toString())
+  assert.equal(p.DS_MERCHANT_TRANSACTIONTYPE, '3')
+  assert.equal(p.DS_MERCHANT_AMOUNT, '145')
+  assert.equal(c.Ds_Signature, firmarParametros(CLAVE_PRUEBAS, '1446117555', c.Ds_MerchantParameters))
+  assert.throws(() => crearPeticionDevolucion(CFG, { pedido: '1446117555', importeCentimos: 0 }))
+})
+
+test('devolución: URL REST derivada de la de pago', () => {
+  assert.equal(urlRestRedsys(CFG, {}), 'https://sis-t.redsys.es:25443/sis/rest/trataPeticionREST')
+})
+
+test('devolución: solo 0900 con firma válida confirma', () => {
+  assert.equal(interpretarRespuestaDevolucion(CLAVE_PRUEBAS, '1446117555', respuestaBanco('1446117555', '0900')).resultado, 'confirmada')
+  assert.equal(interpretarRespuestaDevolucion(CLAVE_PRUEBAS, '1446117555', respuestaBanco('1446117555', '0101')).resultado, 'rechazada')
+  const mala = { ...respuestaBanco('1446117555', '0900'), Ds_Signature: 'x' }
+  assert.equal(interpretarRespuestaDevolucion(CLAVE_PRUEBAS, '1446117555', mala).resultado, 'desconocido')
+  assert.equal(interpretarRespuestaDevolucion(CLAVE_PRUEBAS, '1446117555', respuestaBanco('9999999999', '0900')).resultado, 'desconocido')
+  assert.equal(interpretarRespuestaDevolucion(CLAVE_PRUEBAS, '1446117555', { errorCode: 'SIS0051' }).resultado, 'rechazada')
+})
+
+test('devolución: un fallo de red es desconocido, nunca confirmada', async () => {
+  const roto = (async () => { throw new Error('red') }) as unknown as typeof fetch
+  assert.equal((await solicitarDevolucion(CFG, { pedido: '1446117555', importeCentimos: 145 }, roto)).resultado, 'desconocido')
+  const ok = (async () => new Response(JSON.stringify(respuestaBanco('1446117555', '0900')))) as unknown as typeof fetch
+  assert.equal((await solicitarDevolucion(CFG, { pedido: '1446117555', importeCentimos: 145 }, ok)).resultado, 'confirmada')
+})

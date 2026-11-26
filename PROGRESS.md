@@ -903,3 +903,9 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 
 ## Imagen de «Quedadas deportivas» (25 noviembre 2026; sin SQL)
 - Nueva imagen predeterminada de la categoría (vóley playa + fútbol sala): `public/imagenes/quedadas-deportivas.jpg` (1536×1024), definida en `lib/imagenesCategoria.js` (tarjetas, listado, detalle, Mis sesiones/reservas, vista previa al compartir) y en la tarjeta de categoría de la portada (`components/home/constantes.js`). `comunidad.jpg` se conserva para sus otros usos (banner, Ruleros, Mis reservas) y como imagen por defecto de categorías desconocidas. Las demás categorías no cambian.
+
+## Devoluciones reales por Redsys · PREPARADO EN RAMA `devoluciones-redsys` (26 nov 2026), NO publicado ni aplicado
+- `lib/pagos/redsys.ts`: devolución tipo 3 por REST (solo 0900 con firma válida confirma; fallo de red = dudosa, nunca reembolsado). Pruebas en `redsys.test.ts`.
+- `sql/096_devoluciones.sql` (+ reversión y verificación), SIN ejecutar: tabla `devoluciones` (1 por cobro), `reclamar_devolucion()`, `completar_devolucion()` (cobro → `reembolsado` y ajuste de bolsa solo con confirmación del banco).
+- `app/api/payments/devolver` (cron, `CRON_SECRET`). Guía de prueba: `docs/prueba-devoluciones.md`.
+- Pendiente: probar en el TPV de pruebas con credenciales, programar el cron y revisar textos. El aviso ⛔ sigue vigente hasta entonces.
