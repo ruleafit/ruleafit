@@ -62,7 +62,8 @@ export default function EliminarCuenta({ usuario }) {
           <p className="text-sm text-[#1F2400]">
             Se borrarán de forma <strong>definitiva</strong> tu perfil, tus reservas, las sesiones que hayas publicado, tus
             valoraciones, seguidores, Rulos y notificaciones. No se puede deshacer. Si tienes sesiones próximas con
-            reservas, cancélalas antes.
+            reservas, cancélalas antes. Si has usado pagos, se conservarán sin tu nombre los registros de
+            facturación que la ley obliga a guardar.
           </p>
           <label htmlFor="confirmar-eliminar" className="text-sm font-medium text-[#1F2400]">
             Para confirmar, escribe {PALABRA_CONFIRMACION}

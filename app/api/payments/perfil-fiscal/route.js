@@ -27,6 +27,11 @@ function error(mensaje) {
 // servidor valida los datos y llama a guardar_perfil_fiscal() con la clave de
 // servicio, que cifra el IBAN.
 export async function POST(request) {
+  // Mientras los pagos estén apagados no se guardan datos fiscales ni IBAN.
+  if (process.env.PAGOS_ACTIVOS !== 'true') {
+    return NextResponse.json({ error: 'Los pagos online no están activados todavía.' }, { status: 503 })
+  }
+
   const cabecera = request.headers.get('authorization') || ''
   const token = cabecera.startsWith('Bearer ') ? cabecera.slice(7).trim() : ''
   if (!token) return NextResponse.json({ error: 'Debes iniciar sesión.' }, { status: 401 })
