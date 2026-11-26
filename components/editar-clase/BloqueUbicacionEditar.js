@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { MapPin, Lock } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
@@ -104,6 +105,9 @@ export default function BloqueUbicacionEditar({ id, clase, alcance, esDeSerie = 
             <label className={labelClass}>Zona<span className="font-normal text-[#6B7355]"> (Opcional)</span></label>
             <p className={soloLecturaClass}>{clase.direccion || '—'}</p>
           </div>
+          <Link href={`/mis-clases/${id}/reprogramar`} className="text-sm font-semibold text-[#3D4A00] underline">
+            ¿Tienes que cambiar el lugar, el día o la hora? Reprograma la sesión
+          </Link>
         </div>
       ) : (
         <div className="flex flex-col gap-4">

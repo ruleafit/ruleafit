@@ -9,9 +9,10 @@ import RevelarAlLlegar from '../RevelarAlLlegar'
 import AvisoPlazoCancelacion from '../AvisoPlazoCancelacion'
 import BotonCalendario from '../BotonCalendario'
 import BotonReclamar from './BotonReclamar'
+import AvisoReprogramacion from './AvisoReprogramacion'
 import { etiquetaCuentaAtras, tipoReserva } from './datos'
 
-export default function TarjetaReservaProxima({ reserva, indice, cancelando, errorCancelacion, onCancelar, onReclamar }) {
+export default function TarjetaReservaProxima({ reserva, indice, cancelando, errorCancelacion, onCancelar, onReclamar, cambio, respondiendo, errorCambio, onResponder }) {
   const clase = reserva.clases
   const cuentaAtras = etiquetaCuentaAtras(clase.fecha)
   const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
@@ -93,7 +94,18 @@ export default function TarjetaReservaProxima({ reserva, indice, cancelando, err
             )}
           </div>
 
-          <AvisoPlazoCancelacion clase={clase} variante="reserva" tipo={tipoReserva(reserva, clase)} className="mt-3" />
+          {/* Con un cambio sin responder, la salida es sin coste: se sustituyen el plazo y la cancelación normales. */}
+          {cambio ? (
+            <AvisoReprogramacion
+              cambio={cambio}
+              tipo={tipoReserva(reserva, clase)}
+              respondiendo={respondiendo}
+              error={errorCambio}
+              onResponder={onResponder}
+            />
+          ) : (
+            <AvisoPlazoCancelacion clase={clase} variante="reserva" tipo={tipoReserva(reserva, clase)} className="mt-3" />
+          )}
 
           <BotonCalendario clase={clase} className="mt-3" />
 
@@ -105,14 +117,16 @@ export default function TarjetaReservaProxima({ reserva, indice, cancelando, err
               Ver detalle
             </Link>
 
-            <button
-              type="button"
-              onClick={() => onCancelar(reserva, clase)}
-              disabled={cancelando}
-              className="corte-tag border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {cancelando ? 'Cancelando...' : 'Cancelar reserva'}
-            </button>
+            {!cambio && (
+              <button
+                type="button"
+                onClick={() => onCancelar(reserva, clase)}
+                disabled={cancelando}
+                className="corte-tag border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cancelando ? 'Cancelando...' : 'Cancelar reserva'}
+              </button>
+            )}
             <BotonReclamar reservaId={reserva.id} onReclamar={onReclamar} />
           </div>
 

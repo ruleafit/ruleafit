@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Ban, Pencil, Copy, Megaphone } from 'lucide-react'
+import { Ban, Pencil, Copy, Megaphone, CalendarClock } from 'lucide-react'
 import { motivoNoEditableClase } from '../../lib/ventanaEdicionClase'
 import BotonCompartir from '../BotonCompartir'
 import PanelAvisosParticipantes from './PanelAvisosParticipantes'
@@ -64,6 +64,15 @@ export default function AccionesClase({ clase, haPasado, procesandoCancelacion, 
           >
             <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} />
             Editar
+          </Link>
+        )}
+        {esEditable && (
+          <Link
+            href={`/mis-clases/${clase.clase_id}/reprogramar`}
+            className="inline-flex items-center gap-1.5 corte-tag border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] transition-colors hover:border-[#B5E600] hover:bg-[#EDF5C9]"
+          >
+            <CalendarClock className="h-3.5 w-3.5" strokeWidth={1.75} />
+            Reprogramar
           </Link>
         )}
       </div>

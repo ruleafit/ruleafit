@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabaseClient'
 import { plazoCancelacion } from '../../lib/plazoCancelacion'
 import { tipoReserva } from './datos'
+import useReprogramaciones from './useReprogramaciones'
 
 // Sesión, carga de reservas propias y cancelación de una reserva.
 export default function useMisReservas() {
@@ -18,6 +19,18 @@ export default function useMisReservas() {
   const [mensaje, setMensaje] = useState('')
   const [cancelandoId, setCancelandoId] = useState(null)
   const [erroresCancelacion, setErroresCancelacion] = useState({})
+  // Cambios de fecha, hora o lugar pendientes de respuesta (sql/100).
+  const reprogramaciones = useReprogramaciones(usuario, (reservaId, data) => {
+    setReservas((prev) => prev.filter((r) => r.id !== reservaId))
+    setMensaje(
+      data?.usaba_bono
+        ? 'Reserva cancelada sin coste. La sesión de tu bono vuelve a estar disponible.'
+        : data?.reembolso === 'pendiente'
+          ? 'Reserva cancelada sin coste. La devolución de tu pago queda pendiente de tramitar.'
+          : 'Reserva cancelada sin coste.'
+    )
+    setTimeout(() => setMensaje(''), 8000)
+  })
 
   useEffect(() => {
     async function comprobarSesion() {
@@ -122,5 +135,6 @@ export default function useMisReservas() {
     cancelandoId,
     erroresCancelacion,
     handleCancelar,
+    reprogramaciones,
   }
 }

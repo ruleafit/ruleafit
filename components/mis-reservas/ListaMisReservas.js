@@ -73,6 +73,10 @@ export default function ListaMisReservas({ m, onReclamar }) {
             errorCancelacion={m.erroresCancelacion[reserva.id]}
             onCancelar={m.handleCancelar}
             onReclamar={onReclamar}
+            cambio={m.reprogramaciones?.pendientes[reserva.id]}
+            respondiendo={m.reprogramaciones?.respondiendoId === reserva.id}
+            errorCambio={m.reprogramaciones?.errores[reserva.id]}
+            onResponder={(aceptar) => m.reprogramaciones.responder(reserva.id, aceptar)}
           />
         ))}
       </div>

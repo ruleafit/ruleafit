@@ -926,3 +926,9 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - Parada segura: `config_pagos.parada_cobros` (trigger en `cobros`) y `parada_devoluciones` (lo lee `/api/payments/devolver`; si no puede leerlo, no devuelve). NO se usa `pagos_activos` como freno (apagarlo dejaría reservar sin pagar). Las confirmaciones del banco nunca se paran. Se activan solos y se quitan solo a mano; si la causa sigue, la revisión vuelve a frenar.
 - Web: webhook, devoluciones y cola registran alertas (`lib/pagos/alertas.ts`); `/api/alertas` (cron cada 5 min, `CRON_SECRET`) envía un correo por Resend a `ALERTAS_ADMIN_EMAIL` o `FEEDBACK_ADMIN_EMAIL`; panel `/admin/alertas`.
 - Límites: las liquidaciones (SEPA) no existen, se vigila su paso previo; si pg_cron o la web caen del todo no sale correo (haría falta un monitor externo).
+
+## Pendiente 38 · Reprogramaciones con aceptación o salida sin coste · EN RAMA `feat/pagos-mejoras`, NO publicado ni aplicado
+- `sql/100_reprogramaciones.sql` (+ reversión y verificación): `reprogramar_sesion()` (una sesión; fecha, hora o ubicación; con reservas, 24 h de antelación sobre el horario anterior y el nuevo; sin reservas, 2 h; máx. 3), `responder_reprogramacion()` (aceptar o cancelar sin coste: vuelve el bono y un cobro pagado pasa a `requiere_reembolso`), `mis_reprogramaciones_pendientes()`. No responder no es aceptar: se puede salir hasta que empiece.
+- `cancelar_reserva()`: igual que sql/087 salvo que con un cambio sin responder la cancelación nunca es tardía. Un pago iniciado antes del cambio y confirmado después también queda pendiente.
+- `editar_serie` (sql/094) no cambia. Web: `/mis-clases/[id]/reprogramar` y aviso en Mis reservas (`lib/reprogramacion.js`). Esta función SÍ es visible con pagos desactivados: aplicar el SQL ANTES de publicar la web.
+- Pruebas de 35, 36 y 38: SQL en base local aislada (PGlite) y `node --test`. Sin probar en producción ni con cuentas reales.
