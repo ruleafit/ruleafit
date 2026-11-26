@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin'
 import { configRedsysDesdeEntorno, verificarNotificacion } from '../../../../lib/pagos/redsys.ts'
+import { ALERTAS } from '../../../../lib/pagos/alertas.ts'
+import { registrarAlerta } from '../../../../lib/pagos/registrarAlerta.ts'
 
 // Aviso del banco (Redsys) al terminar un pago. Es la ÚNICA fuente de verdad de
 // que un pago se ha hecho: el regreso del alumno a /pagos/ok no confirma nada.
@@ -12,6 +14,7 @@ export async function POST(request) {
     cfg = configRedsysDesdeEntorno()
   } catch (e) {
     console.error('Webhook Redsys sin configurar:', e.message)
+    await registrarAlerta(supabaseAdmin, ALERTAS.webhookSinConfigurar())
     return NextResponse.json({ error: 'No configurado' }, { status: 503 })
   }
 
@@ -37,6 +40,7 @@ export async function POST(request) {
   })
   if (!n.valida) {
     console.warn('Webhook Redsys con firma no válida')
+    await registrarAlerta(supabaseAdmin, ALERTAS.webhookFirmaNoValida())
     return NextResponse.json({ error: 'Firma no válida' }, { status: 400 })
   }
 
@@ -49,11 +53,13 @@ export async function POST(request) {
   })
   if (error) {
     console.error('confirmar_cobro_pagado falló:', error.code)
+    await registrarAlerta(supabaseAdmin, ALERTAS.webhookErrorConfirmando(error.code))
     return NextResponse.json({ error: 'Error al procesar' }, { status: 500 })
   }
 
   if (data?.resultado === 'importe_no_coincide' || data?.resultado === 'desconocido') {
     console.error('Webhook Redsys con resultado anómalo:', data.resultado, n.pedido)
+    await registrarAlerta(supabaseAdmin, ALERTAS.webhookAnomalo(data.resultado, n.pedido))
   }
   return NextResponse.json({ ok: true, resultado: data?.resultado })
 }

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../lib/supabaseAdmin'
 import { enviarPushAUsuario } from '../../../lib/enviarPush'
 import { cronAutorizado } from '../../../lib/secretoCron'
+import { ALERTAS } from '../../../lib/pagos/alertas.ts'
+import { registrarAlerta } from '../../../lib/pagos/registrarAlerta.ts'
 
 // Cuantas notificaciones procesar por llamada (para no saturar).
 const LOTE = 100
@@ -57,6 +59,7 @@ export async function POST(request) {
     } catch (e) {
       // Error de configuración (p. ej. faltan claves VAPID): se devuelve el intento reclamado y queda pendiente, como antes.
       await supabaseAdmin.from('notificaciones_cola').update({ intentos: noti.intentos }).eq('id', noti.id)
+      await registrarAlerta(supabaseAdmin, ALERTAS.colaSinEnvio())
       throw e
     }
 
