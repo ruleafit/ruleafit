@@ -11,6 +11,8 @@ import { Bell } from 'lucide-react'
 import BotonAvisoPlaza from './reserva/BotonAvisoPlaza'
 import PanelIdentificacion from './reserva/PanelIdentificacion'
 import AvisoUltimaHora from './reserva/AvisoUltimaHora'
+import DesglosePago from './reserva/DesglosePago'
+import { calcularDesglose, formatearEuros } from '../lib/pagos/dinero.ts'
 import { esReservaDeUltimaHora } from '../lib/ultimaHora'
 import { leerRetorno, borrarRetorno } from '../lib/retorno'
 
@@ -67,6 +69,8 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   const [acabaDeReservar, setAcabaDeReservar] = useState(false)
   const [tieneBono, setTieneBono] = useState(null) // null = aún sin comprobar
   const [pagando, setPagando] = useState(false)
+  // Desglose del precio final: se muestra SIEMPRE antes de ir al banco.
+  const [desgloseAbierto, setDesgloseAbierto] = useState(false)
   // Con menos de 2 h para empezar, la reserva se podrá cancelar pero sin derecho a devolución: se pide una confirmación expresa.
   const [confirmandoTarde, setConfirmandoTarde] = useState(false)
   const [, setTic] = useState(0)
@@ -204,6 +208,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     setAvisoUltimaHora(false)
     setUltimaHoraAceptada(true)
     setConfirmandoTarde(true)
+    if (requierePago) setDesgloseAbierto(true)
   }
 
   // «Volver»: no se hace nada (ni reserva, ni pago, ni bono).
@@ -213,12 +218,17 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     setConfirmandoTarde(false)
   }
 
-  async function handlePagar() {
+  // Primer paso: enseñar el desglose (precio, política de cancelación y total). No cobra nada.
+  function abrirDesglose() {
     if (requiereAvisoUltimaHora()) return
-    if (requiereConfirmarTarde()) {
-      setConfirmandoTarde(true)
-      return
-    }
+    setErrorReserva('')
+    setDesgloseAbierto(true)
+  }
+
+  // Segundo paso, solo desde el desglose. El total que ha visto el alumno viaja al servidor, que lo compara con el suyo.
+  async function handlePagar() {
+    const desglose = calcularDesglose(clase.precio)
+    if (!desglose) return
     setConfirmandoTarde(false)
     setPagando(true)
     setErrorReserva('')
@@ -226,7 +236,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     const respuesta = await fetch('/api/payments/crear', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sesion.session?.access_token || ''}` },
-      body: JSON.stringify({ claseId: clase.id }),
+      body: JSON.stringify({ claseId: clase.id, totalCentimos: desglose.totalCentimos }),
     }).catch(() => null)
     const datos = respuesta ? await respuesta.json().catch(() => ({})) : {}
     if (!respuesta || !respuesta.ok || !datos.url || !datos.campos) {
@@ -396,16 +406,34 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   )
 
   if (requierePago) {
-    const importe = precioClase.toFixed(2).replace('.', ',')
+    const desglose = calcularDesglose(clase.precio)
+    if (!desglose) {
+      return <p className="text-sm text-red-600">No podemos calcular el precio de esta sesión. Escríbenos desde Ayuda.</p>
+    }
     return (
       <div>
         {avisoListo}
         {ventanaUltimaHora}
-        <button type="button" onClick={handlePagar} disabled={pagando} className={botonReservarClass(tamaño)}>
-          {pagando ? 'Abriendo el pago...' : confirmandoTarde ? 'Entiendo, pagar y reservar' : `Pagar ${importe} € y reservar`}
-        </button>
-        <p className="mt-1 text-xs text-[#6B7355]">Pago seguro con tarjeta o Bizum.</p>
-        {mostrarPlazo && <AvisoPlazoCancelacion clase={clase} condicionesPago className="mt-1.5" />}
+        {desgloseAbierto ? (
+          <DesglosePago
+            clase={clase}
+            desglose={desglose}
+            pagando={pagando}
+            onConfirmar={handlePagar}
+            onVolver={() => {
+              setDesgloseAbierto(false)
+              setConfirmandoTarde(false)
+            }}
+          />
+        ) : (
+          <>
+            <button type="button" onClick={abrirDesglose} className={botonReservarClass(tamaño)}>
+              {`Reservar por ${formatearEuros(desglose.totalCentimos)}`}
+            </button>
+            <p className="mt-1 text-xs text-[#6B7355]">Verás el desglose antes de pagar. Pago con tarjeta o Bizum.</p>
+            {mostrarPlazo && <AvisoPlazoCancelacion clase={clase} condicionesPago className="mt-1.5" />}
+          </>
+        )}
         {errorReserva && <p className="mt-2 text-sm text-red-600">{errorReserva}</p>}
       </div>
     )
@@ -418,6 +446,9 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
       <button type="button" onClick={handleReservar} disabled={reservando} className={botonReservarClass(tamaño)}>
         {reservando ? 'Reservando...' : confirmandoTarde ? 'Entiendo, reservar' : 'Reservar'}
       </button>
+      {PAGOS_VISIBLES && precioClase > 0 && tieneBono && (
+        <p className="mt-1 text-xs font-medium text-[#3D4A00]">Total a pagar ahora: 0,00 € (se descuenta 1 sesión de tu bono).</p>
+      )}
       {mostrarPlazo && <AvisoPlazoCancelacion clase={clase} className="mt-1.5" />}
       {errorReserva && <p className="mt-2 text-sm text-red-600">{errorReserva}</p>}
     </div>

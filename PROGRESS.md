@@ -909,3 +909,9 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - `sql/096_devoluciones.sql` (+ reversión y verificación), SIN ejecutar: tabla `devoluciones` (1 por cobro), `reclamar_devolucion()`, `completar_devolucion()` (cobro → `reembolsado` y ajuste de bolsa solo con confirmación del banco).
 - `app/api/payments/devolver` (cron, `CRON_SECRET`). Guía de prueba: `docs/prueba-devoluciones.md`.
 - Pendiente: probar en el TPV de pruebas con credenciales, programar el cron y revisar textos. El aviso ⛔ sigue vigente hasta entonces.
+
+## Pendiente 37 · Desglose del precio antes de pagar · EN RAMA `feat/pagos-mejoras`, NO publicado (sin SQL)
+- `calcularDesglose()` / `totalCoincide()` en `lib/pagos/dinero.ts`: la misma función en navegador y servidor. Total = precio publicado (impuestos incluidos); recargo al alumno 0,00 €; la comisión sale de la parte del organizador. No se calculan impuestos aparte.
+- `components/reserva/DesglosePago.js`: precio, gestión, impuestos, total y política de cancelación; solo desde ahí se va al banco.
+- `/api/payments/crear` exige `totalCentimos` y responde 409 si no coincide con el precio actual o con el importe de `crear_cobro()`.
+- Solo visible con `NEXT_PUBLIC_PAGOS_ACTIVOS="true"` (hoy no).

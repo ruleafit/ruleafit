@@ -44,6 +44,38 @@ export function calcularReparto(importeCentimos: number, comisionBps: number): R
   return { importe: importeCentimos, comision, neto: importeCentimos - comision }
 }
 
+export type Desglose = {
+  /** Precio de la sesión publicado por quien la organiza, impuestos incluidos. */
+  precioCentimos: number
+  /** Recargo al alumno por gestión: hoy ninguno (la comisión sale de la parte del organizador). */
+  recargoCentimos: number
+  /** Lo que se cobra al alumno. Debe coincidir con crear_cobro() (sql/072). */
+  totalCentimos: number
+}
+
+/**
+ * Desglose que ve el alumno antes de pagar. Es la MISMA función en el navegador y en el servidor.
+ * No calcula impuestos aparte: el precio publicado es el final (impuestos incluidos, si proceden).
+ * Devuelve null si el precio no es un importe de pago válido.
+ */
+export function calcularDesglose(precioEuros: number | string | null | undefined): Desglose | null {
+  if (precioEuros === null || precioEuros === undefined) return null
+  let precioCentimos: number
+  try {
+    precioCentimos = eurosACentimos(precioEuros)
+  } catch {
+    return null
+  }
+  if (precioCentimos <= 0) return null
+  const recargoCentimos = 0
+  return { precioCentimos, recargoCentimos, totalCentimos: precioCentimos + recargoCentimos }
+}
+
+/** ¿El total que ha visto el alumno es exactamente el que toca cobrar? */
+export function totalCoincide(totalVisto: unknown, totalReal: unknown): boolean {
+  return typeof totalVisto === 'number' && Number.isInteger(totalVisto) && totalVisto > 0 && totalVisto === totalReal
+}
+
 /** Formato para mostrar: 1250 -> "12,50 €". */
 export function formatearEuros(centimos: number): string {
   if (!Number.isInteger(centimos)) throw new Error('Los céntimos deben ser un número entero')

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { calcularReparto, eurosACentimos, formatearEuros } from './dinero.ts'
+import { calcularDesglose, calcularReparto, eurosACentimos, formatearEuros, totalCoincide } from './dinero.ts'
 
 test('eurosACentimos convierte sin errores de coma flotante', () => {
   assert.equal(eurosACentimos(6), 600)
@@ -49,4 +49,30 @@ test('formatearEuros', () => {
   assert.equal(formatearEuros(5), '0,05 €')
   assert.equal(formatearEuros(0), '0,00 €')
   assert.equal(formatearEuros(-250), '-2,50 €')
+})
+
+test('calcularDesglose: el total es el precio publicado, sin recargos al alumno', () => {
+  assert.deepEqual(calcularDesglose(12.5), { precioCentimos: 1250, recargoCentimos: 0, totalCentimos: 1250 })
+  assert.deepEqual(calcularDesglose('6,10'), { precioCentimos: 610, recargoCentimos: 0, totalCentimos: 610 })
+})
+
+test('calcularDesglose: sin importe de pago válido no hay desglose', () => {
+  for (const malo of [0, '0', null, undefined, '', 'gratis', -3, 1.234]) {
+    assert.equal(calcularDesglose(malo as never), null, String(malo))
+  }
+})
+
+test('calcularDesglose coincide con el redondeo de crear_cobro, round(precio * 100)', () => {
+  for (let c = 1; c <= 20000; c++) {
+    const euros = Number((c / 100).toFixed(2))
+    assert.equal(calcularDesglose(euros)?.totalCentimos, Math.round(euros * 100))
+  }
+})
+
+test('totalCoincide solo acepta el entero exacto', () => {
+  assert.equal(totalCoincide(600, 600), true)
+  for (const visto of [599, 601, '600', 600.5, 0, -600, null, undefined]) {
+    assert.equal(totalCoincide(visto, 600), false, String(visto))
+  }
+  assert.equal(totalCoincide(undefined, undefined), false)
 })

@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { configRedsysDesdeEntorno, crearPeticionPago, nuevoPedido } from '../../../../lib/pagos/redsys.ts'
+import { calcularDesglose, totalCoincide } from '../../../../lib/pagos/dinero.ts'
+
+const PRECIO_CAMBIADO = 'El precio no coincide con el que se te ha mostrado. Recarga la página y revisa el desglose antes de pagar.'
 
 // Inicia el pago de una sesión. El alumno envía su token de sesión de Supabase
 // (Authorization: Bearer ...) y el id de la sesión. El importe NUNCA viene del
-// navegador: lo calcula la base de datos desde el precio de la sesión.
+// navegador: lo calcula la base de datos desde el precio de la sesión. El navegador
+// envía además el total que ha ENSEÑADO (totalCentimos), solo para comprobarlo: si no
+// coincide con el del servidor no se redirige al banco.
 // Devuelve el formulario firmado al que el navegador redirige al banco.
 // Mientras PAGOS_ACTIVOS no sea "true" responde 503 y no hace nada.
 export async function POST(request) {
@@ -18,9 +23,9 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Debes iniciar sesión para pagar.' }, { status: 401 })
   }
 
-  let claseId, metodo
+  let claseId, metodo, totalCentimos
   try {
-    ;({ claseId, metodo } = await request.json())
+    ;({ claseId, metodo, totalCentimos } = await request.json())
   } catch {
     return NextResponse.json({ error: 'Cuerpo no válido' }, { status: 400 })
   }
@@ -45,6 +50,20 @@ export async function POST(request) {
   } catch (e) {
     console.error('Redsys sin configurar:', e.message)
     return NextResponse.json({ error: 'El pago no está disponible ahora mismo.' }, { status: 503 })
+  }
+
+  // Antes de crear el cobro: el total visto debe ser el que sale del precio actual (misma función que el navegador).
+  const { data: sesionActual, error: errorSesion } = await supabaseUsuario
+    .from('clases')
+    .select('precio')
+    .eq('id', claseId)
+    .maybeSingle()
+  if (errorSesion) {
+    return NextResponse.json({ error: 'No se ha podido iniciar el pago.' }, { status: 500 })
+  }
+  const desglose = calcularDesglose(sesionActual?.precio)
+  if (!desglose || !totalCoincide(totalCentimos, desglose.totalCentimos)) {
+    return NextResponse.json({ error: PRECIO_CAMBIADO }, { status: 409 })
   }
 
   // El pedido es aleatorio; si choca con otro (casi imposible) se reintenta.
@@ -73,6 +92,12 @@ export async function POST(request) {
       { error: permitido ? errorCobro.message : 'No se ha podido iniciar el pago.' },
       { status: permitido ? 400 : 500 }
     )
+  }
+
+  // Y el importe que ha calculado la base de datos también (el precio pudo cambiar entre medias). El cobro queda
+  // en 'creado' sin enviarse al banco, así que nunca se llega a pagar.
+  if (!totalCoincide(totalCentimos, cobro.importe_centimos)) {
+    return NextResponse.json({ error: PRECIO_CAMBIADO }, { status: 409 })
   }
 
   const sitio = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ruleafit.com').replace(/\/$/, '')
