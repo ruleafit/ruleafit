@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
+import BotonReclamar from './BotonReclamar'
 
-export default function TarjetaReservaPasada({ reserva, indice }) {
+export default function TarjetaReservaPasada({ reserva, indice, onReclamar }) {
   const clase = reserva.clases
   const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
 
@@ -53,6 +54,7 @@ export default function TarjetaReservaPasada({ reserva, indice }) {
               Precio: <span className="text-zinc-500">{clase.precio} €</span>
             </p>
           </div>
+          <BotonReclamar reservaId={reserva.id} onReclamar={onReclamar} className="mt-3" />
         </div>
       </div>
     </RevelarAlLlegar>

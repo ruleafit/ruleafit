@@ -8,9 +8,10 @@ import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import AvisoPlazoCancelacion from '../AvisoPlazoCancelacion'
 import BotonCalendario from '../BotonCalendario'
+import BotonReclamar from './BotonReclamar'
 import { etiquetaCuentaAtras, tipoReserva } from './datos'
 
-export default function TarjetaReservaProxima({ reserva, indice, cancelando, errorCancelacion, onCancelar }) {
+export default function TarjetaReservaProxima({ reserva, indice, cancelando, errorCancelacion, onCancelar, onReclamar }) {
   const clase = reserva.clases
   const cuentaAtras = etiquetaCuentaAtras(clase.fecha)
   const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
@@ -112,6 +113,7 @@ export default function TarjetaReservaProxima({ reserva, indice, cancelando, err
             >
               {cancelando ? 'Cancelando...' : 'Cancelar reserva'}
             </button>
+            <BotonReclamar reservaId={reserva.id} onReclamar={onReclamar} />
           </div>
 
           {errorCancelacion && <p className="mt-2 text-xs text-red-600">{errorCancelacion}</p>}

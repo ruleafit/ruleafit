@@ -3,6 +3,7 @@
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
+import BotonReclamar from './BotonReclamar'
 
 // Reserva cancelada que no se debe a ti (public.mis_reservas_canceladas_por_bloqueo):
 // muestra qué sesión era y el estado del reembolso. A propósito NO enseña quién
@@ -12,7 +13,7 @@ const TEXTO_REEMBOLSO = {
   reembolsado: 'Reembolso íntegro del importe pagado: completado.',
 }
 
-export default function TarjetaReservaCanceladaAjena({ reserva, indice }) {
+export default function TarjetaReservaCanceladaAjena({ reserva, indice, onReclamar }) {
   const imagenClase = IMAGEN_POR_CATEGORIA[reserva.categoria] || IMAGEN_POR_DEFECTO
   const textoReembolso =
     TEXTO_REEMBOLSO[reserva.reembolso] ||
@@ -49,6 +50,7 @@ export default function TarjetaReservaCanceladaAjena({ reserva, indice }) {
           <p className="mt-3 border-t border-red-200 pt-3 text-sm text-red-500">
             Tu reserva para esta sesión ha sido cancelada. {textoReembolso}
           </p>
+          <BotonReclamar reservaId={reserva.reserva_id} onReclamar={onReclamar} className="mt-3" />
         </div>
       </div>
     </RevelarAlLlegar>

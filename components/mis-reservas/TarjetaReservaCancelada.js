@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
+import BotonReclamar from './BotonReclamar'
 
-export default function TarjetaReservaCancelada({ reserva, indice }) {
+export default function TarjetaReservaCancelada({ reserva, indice, onReclamar }) {
   const clase = reserva.clases
   const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
 
@@ -53,13 +54,14 @@ export default function TarjetaReservaCancelada({ reserva, indice }) {
             {reserva.cancelled_at && <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>}
           </p>
 
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap items-center gap-3">
             <Link
               href={`/clases/${clase.id}?from=mis-reservas`}
               className="corte-tag border border-red-200 px-2.5 py-1 text-xs font-medium text-red-400 transition-colors hover:border-red-300 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600]"
             >
               Ver detalle
             </Link>
+            <BotonReclamar reservaId={reserva.id} onReclamar={onReclamar} />
           </div>
         </div>
       </div>

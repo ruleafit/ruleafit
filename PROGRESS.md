@@ -915,3 +915,8 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - `components/reserva/DesglosePago.js`: precio, gestión, impuestos, total y política de cancelación; solo desde ahí se va al banco.
 - `/api/payments/crear` exige `totalCentimos` y responde 409 si no coincide con el precio actual o con el importe de `crear_cobro()`.
 - Solo visible con `NEXT_PUBLIC_PAGOS_ACTIVOS="true"` (hoy no).
+
+## Pendiente 35 · Centro de reclamaciones económicas · EN RAMA `feat/pagos-mejoras`, NO publicado ni aplicado
+- `sql/098_incidencias_pago.sql` (+ reversión y verificación): `incidencias_pago` (número RF-AAAA-NNNNNN; motivo cobro/cancelación/reembolso; estado recibida/en revisión/resuelta/no procede), historial, `abrir_incidencia()` (solo reservas propias; un caso abierto por reserva y motivo; máx. 5 al día y 10 abiertos), `actualizar_incidencia()` (solo servicio; cerrar exige respuesta). No mueve dinero. Al borrar la cuenta se elimina el texto y el vínculo con la persona.
+- Separado del feedback general. Alumno: pestaña «Reclamaciones» y botón en cada reserva de Mis reservas (solo con pagos visibles). Administración: `/admin/incidencias` (`ADMIN_EMAILS`).
+- Pendiente: mencionar en la política de privacidad y fijar plazo de conservación (revisión jurídica).
