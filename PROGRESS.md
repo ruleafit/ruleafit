@@ -932,3 +932,11 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - `cancelar_reserva()`: igual que sql/087 salvo que con un cambio sin responder la cancelación nunca es tardía. Un pago iniciado antes del cambio y confirmado después también queda pendiente.
 - `editar_serie` (sql/094) no cambia. Web: `/mis-clases/[id]/reprogramar` y aviso en Mis reservas (`lib/reprogramacion.js`). Esta función SÍ es visible con pagos desactivados: aplicar el SQL ANTES de publicar la web.
 - Pruebas de 35, 36 y 38: SQL en base local aislada (PGlite) y `node --test`. Sin probar en producción ni con cuentas reales.
+
+## Pendiente 33 · Simulador del TPV de Redsys · EN RAMA `feat/pagos-mejoras`, NO publicado
+- `/api/payments/mock-tpv`: 404 salvo local (`next dev`) o Vercel Preview, con `MOCK_TPV_ACTIVO=true`, `REDSYS_URL=/api/payments/mock-tpv` y `MOCK_TPV_SUPABASE_REF` igual a una base que NO sea la de producción (`lib/pagos/mockTpv.ts`).
+- Firma con `redsys.ts` y entrega el aviso al manejador real de `/api/payments/redsys-webhook` (no existe una ruta «notificacion»). Escenarios: autorizado, rechazado, aviso repetido, última plaza a la vez y devolución hasta `completada` con banco simulado.
+- La lógica de devoluciones pasa a `lib/pagos/procesarDevoluciones.ts` (la usan la ruta real y el simulador).
+- Guía: `docs/pruebas-preview.md`; base de pruebas: `sql/pruebas/preparar_base_de_pruebas.sql`.
+- Pruebas: `npm run test:pagos` y prueba local de principio a fin (web compilada + Supabase simulado sobre PGlite). Sin probar en Vercel.
+- Pendiente: los Preview de Vercel de las ramas de pagos fallaban al compilar (probable: faltan variables de Supabase en Preview).
