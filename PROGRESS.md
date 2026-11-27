@@ -944,4 +944,10 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 ## Aprobación automática de datos fiscales y bancarios · EN RAMA `feat/pagos-mejoras` (27 nov 2026), SQL 101 sin aplicar en producción
 - Al guardar, el servidor evalúa (`lib/pagos/evaluarPerfilFiscal.ts`): NIF/NIE/CIF con control y sin duplicar en otra cuenta, IBAN español (24 caracteres, módulo 97-10), nombre y apellidos (persona física) o razón social, titular de la cuenta, dirección, código postal 01-52 y provincia, correo, mayoría de edad y casillas.
 - Cumple: estado `activo` al instante (`sql/101`). No cumple: respuesta `rechazado` con motivos y NO se guarda nada (un perfil ya aprobado sigue como estaba). `bloqueado` sigue siendo manual.
-- No comprueba que el NIF o el IBAN sean de la persona: valorar una verificación antes del primer pago. Canarias, Ceuta, Melilla, Navarra y País Vasco se aprueban igual, aunque la pantalla sigue avisando de revisión antes de pagar (decidir).
+- No comprueba que el NIF o el IBAN sean de la persona: valorar una verificación antes del primer pago.
+
+## SQL 102 · Devoluciones al cancelar sesiones, borrado de cuenta y zonas especiales · EN RAMA (27 nov 2026), sin aplicar en producción
+- Sesión `cancelada` por cualquier vía → sus cobros `pagado` pasan a `requiere_reembolso` (trigger; corrige los anteriores).
+- No se borra la cuenta con reclamación de pago abierta (con devolución pendiente ya no se podía).
+- Canarias, Ceuta y Melilla: revisión manual (`pendiente_revision`); Navarra y País Vasco se aprueban solos. Solo `activo` permite publicar y cobrar sesiones de pago.
+- Sigue pendiente: programar el cron de `/api/payments/devolver`; reclamar un cobro sin reserva.

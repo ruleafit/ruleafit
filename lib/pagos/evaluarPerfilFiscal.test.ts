@@ -1,6 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { evaluarPerfilFiscal, motivoIban } from './evaluarPerfilFiscal.ts'
+import { requiereRevisionManual } from './validaciones.ts'
 
 const HOY = new Date('2026-11-27T12:00:00Z')
 const PERSONA = {
@@ -98,6 +100,15 @@ test('correo, edad y casillas', () => {
   rechaza({ fechaNacimiento: '1990-02-31' }, /fecha de nacimiento/)
   rechaza({ declaraIngresos: false }, /casillas/)
   rechaza({ aceptaAutofactura: 'true' }, /casillas/)
+})
+
+test('revisión manual solo en Canarias, Ceuta y Melilla', () => {
+  for (const cp of ['35001', '38001', '51001', '52001']) assert.equal(requiereRevisionManual(cp), true, cp)
+  for (const cp of ['41001', '07001', '01001', '20001', '31001', '48001', '', '35', '99999']) {
+    assert.equal(requiereRevisionManual(cp), false, cp)
+  }
+  const sql = readFileSync(new URL('../../sql/102_devoluciones_por_cancelacion.sql', import.meta.url), 'utf8')
+  assert.ok(sql.includes("p_zona_fiscal not in ('canarias', 'ceuta_melilla') then 'activo'"))
 })
 
 test('se devuelven todos los motivos a la vez y nunca falla con entradas raras', () => {

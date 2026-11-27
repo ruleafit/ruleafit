@@ -74,8 +74,12 @@ export async function publicarSesion(c, setMensaje) {
       .select('estado')
       .eq('usuario_id', usuarioActual.id)
       .maybeSingle()
-    if (!fiscal || fiscal.estado === 'incompleto' || fiscal.estado === 'bloqueado') {
-      setMensaje('Para publicar una sesión de pago primero añade tus datos fiscales en Mi cuenta → Datos fiscales y cobros.')
+    if (fiscal?.estado !== 'activo') {
+      setMensaje(
+        fiscal?.estado === 'pendiente_revision'
+          ? 'Tus datos fiscales están pendientes de revisión. Podrás publicar sesiones de pago cuando estén aprobados.'
+          : 'Para publicar una sesión de pago primero añade tus datos fiscales en Mi cuenta → Datos fiscales y cobros.'
+      )
       return
     }
   }

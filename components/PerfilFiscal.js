@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
+import { requiereRevisionManual } from '../lib/pagos/validaciones.ts'
 
 const TIPOS = [
   { valor: 'persona_fisica_profesional', texto: 'Persona física, actividad profesional (autónomo/a con IRPF)' },
@@ -11,7 +12,7 @@ const TIPOS = [
 ]
 
 const ESTADOS = {
-  pendiente_revision: 'Vuelve a guardar tus datos para aprobarlos',
+  pendiente_revision: 'Datos pendientes de revisión: todavía no puedes publicar sesiones de pago',
   activo: 'Datos aprobados: ya puedes publicar sesiones de pago',
   bloqueado: 'Bloqueado: escríbenos desde Ayuda',
   incompleto: 'Incompleto',
@@ -94,7 +95,7 @@ export default function PerfilFiscal({ usuario }) {
     setF((previo) => ({ ...previo, [campo]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
 
   const esSociedad = f.tipo === 'sociedad'
-  const zonaEspecial = /^(35|38|51|52|01|20|31|48)/.test(f.codigoPostal)
+  const zonaEspecial = requiereRevisionManual(f.codigoPostal)
 
   async function guardar(e) {
     e.preventDefault()
@@ -126,7 +127,13 @@ export default function PerfilFiscal({ usuario }) {
       responsableDatos: false,
       aceptaAutofactura: false,
     }))
-    setOk(datos.estado === 'activo' ? 'Datos aprobados al instante.' : 'Datos guardados.')
+    setOk(
+      datos.estado === 'activo'
+        ? 'Datos aprobados al instante.'
+        : datos.estado === 'pendiente_revision'
+          ? 'Datos recibidos. Los revisaremos a mano antes de que puedas cobrar.'
+          : 'Datos guardados.'
+    )
     setAbierto(false)
   }
 
@@ -198,8 +205,8 @@ export default function PerfilFiscal({ usuario }) {
           </div>
           {zonaEspecial && (
             <p className="text-sm text-[#6B7355]">
-              Tu zona (Canarias, Ceuta, Melilla, Navarra o País Vasco) tiene un régimen fiscal propio: revisaremos tus
-              datos a mano antes de pagarte.
+              Canarias, Ceuta y Melilla tienen un régimen fiscal propio: revisaremos tus datos a mano y podrás publicar
+              sesiones de pago cuando los aprobemos.
             </p>
           )}
           <div>

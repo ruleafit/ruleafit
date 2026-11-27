@@ -117,6 +117,12 @@ export function coincideProvinciaConCodigoPostal(cp: string, provincia: string):
 
 export type ZonaFiscal = 'peninsula_baleares' | 'navarra_pais_vasco' | 'canarias' | 'ceuta_melilla'
 
+/** Canarias, Ceuta y Melilla: sus datos fiscales se revisan a mano antes de poder cobrar (sql/102). */
+export function requiereRevisionManual(cp: string): boolean {
+  const zona = zonaFiscalDeCodigoPostal(cp)
+  return zona === 'canarias' || zona === 'ceuta_melilla'
+}
+
 /**
  * Zona fiscal que corresponde a un código postal. Importante: Canarias, Ceuta y
  * Melilla no aplican el IVA (IGIC / IPSI) y Navarra y País Vasco tienen Hacienda
