@@ -87,9 +87,13 @@ Guía: PDF del plan del 27/11 (`docs/RuleaFit_Plan_Mejoras_Pagos_Agrupados_27-11
 
 **Bloque A, sin banco**
 1. Huecos de cobro. **Hecho** (apartado 3, 27/11).
-2. Pruebas con el simulador en Preview. **Siguiente**: Bizum, bono o pago, bonos por sesión, devolución de bono sin
-   sesiones, estado de la devolución, cancelar reserva; y lo que quedaba sin probar: bloqueo, retención por
-   cancelaciones, anular bonos, autocancelación, zonas fiscales especiales y borrado de cuenta.
+2. Pruebas con el simulador. **Hecho** (27-28/11). Reglas de dinero en la base de pruebas, 23 de 23
+   (`sql/pruebas/prueba_reglas_de_pagos.sql`; termina siempre con error para no guardar nada). En pantalla (Preview):
+   Bizum y tarjeta, cancelar desde la ficha y Mis reservas, reclamación, «Devolver y cerrar», devolución en trámite y
+   confirmada, alta y cancelación de Pro, crear y comprar bono, elegir bono o pago, bono no admitido, aviso al
+   organizador y devolución. El aviso «Ninguna sesión próxima admite este bono» se muestra también
+   dentro de los 14 días (cambiado el 28/11, sin volver a ver en pantalla). Sin ver en pantalla: bloqueo, retención, anular bonos, autocancelación, zonas especiales y
+   borrado de cuenta (comprobados solo en la base).
 3. Liquidaciones: días 15 y último (siguiente hábil), mínimo 10 €, descifrado del IBAN, excluir lo retenido y decidir
    qué hacer con bonos aún devolubles y saldos negativos.
 4. Fichero SEPA (pain.001) o el formato que dé CaixaBank.

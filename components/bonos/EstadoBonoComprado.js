@@ -37,7 +37,7 @@ export default function EstadoBonoComprado({ id, estado, sinSesiones, onHecho, o
           {cobro === 'requiere_reembolso' ? 'devolución en marcha. Puede tardar unos días en verse en tu cuenta.' : texto}
         </p>
       )}
-      {porSinSesiones && (
+      {sinSesiones > 0 && cobro === 'pagado' && (
         <p className="mb-2 text-sm font-medium text-[#3D4A00]">
           Ninguna sesión próxima admite este bono. Puedes pedir gratis la devolución de lo no usado.
         </p>

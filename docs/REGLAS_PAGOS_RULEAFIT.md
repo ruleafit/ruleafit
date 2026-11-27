@@ -121,8 +121,9 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 - [x] Elegir tarjeta o Bizum al pagar una sesión suelta.
 - [x] El alumno con bono elige entre canjearlo o pagar; el organizador marca qué bonos admite cada sesión (`sql/113`).
 - [x] Estado de la devolución en Reclamaciones.
-- [ ] Probar los tres puntos anteriores en Preview (`sql/113` ya aplicado).
-- [ ] Probar en Preview: bloqueo, retención por cancelaciones, autocancelación, zonas especiales y borrado de cuenta.
+- [x] Probados los tres puntos anteriores en Preview (28/11/2026).
+- [ ] Probar en pantalla (comprobado en la base de pruebas el 27/11 con `sql/pruebas/prueba_reglas_de_pagos.sql`): bloqueo,
+      retención por cancelaciones, autocancelación, zonas especiales y borrado de cuenta.
 
 ### D. Despliegue (con los pagos apagados)
 - [ ] Copia de seguridad de la base de producción.

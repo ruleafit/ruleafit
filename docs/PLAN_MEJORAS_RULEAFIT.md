@@ -60,7 +60,7 @@ Prioridad original / complejidad entre paréntesis.
 |---|---|---|---|---|
 | 31 | Devoluciones por Redsys con conciliación (Imprescindible, 5/5) | 🧪 | Devolución por REST, estados, reintentos, devolución al cancelar o autocancelar (`sql/096`, `102`), parciales de bonos (`107`) | Prueba con Redsys, programar el cron (`103_…_cron.sql`); las respuestas dudosas se revisan a mano |
 | 32 | Liquidaciones, autofacturas y fiscalidad (Imprescindible, 5/5) | 🟡 | Datos fiscales validados e IBAN cifrado, comisión 10 %, bolsa, liberación a 48 h, `/mis-ingresos` | Liquidaciones (días 15 y último, mínimo 10 €), descifrar IBAN, fichero SEPA, autofacturas, facturas de Pro, IVA/IRPF, contracargos |
-| 33 | Pruebas de extremo a extremo y cierre de cuenta (Imprescindible, 4/5) | 🟡 | Simulador del TPV; pago, rechazo, aviso repetido, última plaza, devolución, bonos y reclamaciones probados en Preview; borrado de cuenta protegido | Redsys real. En Preview: bloqueo, retención por cancelaciones, anular bonos, autocancelación, zonas especiales, borrado de cuenta y `sql/113` |
+| 33 | Pruebas de extremo a extremo y cierre de cuenta (Imprescindible, 4/5) | 🟡 | Simulador del TPV; pago, rechazo, aviso repetido, última plaza, devolución, bonos y reclamaciones probados en Preview; borrado de cuenta protegido | Redsys real. En pantalla (ya comprobado en la base de pruebas): bloqueo, retención por cancelaciones, anular bonos, autocancelación, zonas especiales y borrado de cuenta |
 | 34 | Coherencia legal (Imprescindible, 3/5) | ⬜ | Borradores en `legal/borradores/`; el aviso legal cambia el texto de pago según el interruptor | La privacidad sigue diciendo 14 años y el registro exige 18; publicar términos y condiciones; revisión jurídica |
 | 35 | Incidencias y reclamaciones económicas (Imprescindible, 3/5) | 🧪 | Número RF-AAAA-NNNNNN, estados, `/admin/incidencias`, retención del dinero y «Devolver y cerrar» (`sql/098`, `105`, `108`); el alumno ve el estado de su devolución | Probarlo en Preview; privacidad y plazo de conservación |
 | 36 | Alertas operativas (Imprescindible, 3/5) | 🧪 | Alertas, correo al administrador, frenos de cobros y devoluciones, `/admin/alertas` (`sql/099`) | Programar el cron en pruebas y producción; vigilancia externa |
@@ -118,7 +118,7 @@ Prioridad original / complejidad entre paréntesis.
 
 1. En producción está `sql/095`, pero no su parte de web: el aviso al borrar la cuenta y el bloqueo que impide
    guardar datos fiscales con los pagos apagados (la pantalla está oculta; la ruta sí responde). Está en Preview.
-2. Probar en Preview Bizum, la elección entre bono y pago, los bonos por sesión, la devolución de un bono sin sesiones y el estado de la devolución.
+2. Bizum, la elección entre bono y pago, los bonos por sesión y el estado de la devolución, probados en Preview el 28/11.
 3. Crons de pagos sin programar (alertas, devoluciones, renovación Pro).
 4. Publicación: en producción faltan `096`–`109` y `113`, en orden y con los pagos apagados (apartado 8 de las reglas).
    `main` tiene un commit de fusión que no está en la rama; la mezcla de prueba no da conflictos.
