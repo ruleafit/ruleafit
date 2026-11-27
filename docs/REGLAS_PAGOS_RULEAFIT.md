@@ -76,11 +76,17 @@ Mi cuenta → Datos fiscales y cobros. Se validan NIF/NIE/CIF, IBAN español, di
 salvo Canarias, Ceuta y Melilla (revisión manual). Solo con estado `activo` se puede publicar de pago y cobrar. El
 IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 
+## 6 bis. Sesiones gratuitas (precio 0 €)
+- **Publicar** una sesión o una serie gratuita no exige NIF, domicilio fiscal ni IBAN: basta con tener cuenta. Dejar el
+  precio vacío equivale a 0 €. Los datos fiscales solo se piden para sesiones de pago, bonos y Pro.
+- **Reservar** una sesión gratuita **nunca gasta un uso de bono** y no pasa por el TPV (`sql/109`). Si una sesión pasa a
+  ser gratuita, sus reservas activas recuperan el uso. `109` devuelve además los usos ya gastados en sesiones gratuitas.
+
 ## 7. Entornos
 | | Producción (`main`) | Preview (`feat/pagos-mejoras`) |
 |---|---|---|
 | Base de datos | proyecto «ruleafit» | proyecto de pruebas aparte |
-| SQL | hasta 095 y 097 | base y 095-108 |
+| SQL | hasta 095 y 097 | base y 095-108; 109 cuando se aplique |
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
@@ -107,14 +113,15 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 - [ ] Liquidaciones: días 15 y último, mínimo 10 €, descifrado del IBAN, fichero SEPA, excluir lo retenido y decidir qué hacer
       con bonos aún devolubles (14 días) y saldos negativos.
 - [ ] Autofacturas y facturas de Pro.
-- [ ] Una sesión gratuita consume un uso del bono (`reservar_clase`): decidir y corregir.
-- [ ] Solo la web impide pagar una sesión teniendo bono; el servidor no.
-- [ ] Mostrar al alumno el estado de la devolución tras «Devolver y cerrar» sobre una sesión.
+- [ ] Impedir en el servidor pagar una sesión suelta si el alumno ya tiene un bono válido y activo para ese organizador
+      (hoy solo lo impide la web).
+- [ ] Mostrar claramente al alumno el estado de su devolución en la pantalla de Reclamaciones tras resolverse con
+      «Devolver y cerrar».
 - [ ] Probar en Preview: bloqueo, retención por cancelaciones, autocancelación, zonas especiales y borrado de cuenta.
 
 ### D. Despliegue (con los pagos apagados)
 - [ ] Copia de seguridad de la base de producción.
-- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, en orden, cada uno con su
+- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, `109`, en orden, cada uno con su
       verificación. Nada de `sql/pruebas`.
 - [ ] Publicar la web justo después.
 - [ ] Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL` (y `REDSYS_REST_URL`),

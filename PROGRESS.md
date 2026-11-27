@@ -983,3 +983,8 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - Suscripción Pro (40 €/mes, cobro recurrente solo simulado), compra online de bonos (0 %, disponibles a 48 h), desistimiento 14 días / 25 %, devoluciones parciales, retención por cancelaciones reiteradas y borrado de cuenta protegido. Sustituye el bloqueo de sql/106.
 - Pantallas: `/pro`, perfil del organizador, Mis sesiones → Bonos, Mis reservas → Bonos, `/admin/alertas`. Reglas: `docs/REGLAS_PAGOS_RULEAFIT.md` apartado 12.
 - Producción, antes de activar pagos: 107, `107_pro_y_bonos_preactivacion.sql`; cron `107_pro_y_bonos_cron.sql` solo con Redsys recurrente probado.
+
+## SQL 108 y 109 · EN RAMA (27 nov 2026)
+- 108: la reclamación sobre una sesión reservada con bono retiene el bono.
+- 109: una sesión gratuita no gasta bono (y devuelve los usos ya gastados así). Publicar con el precio vacío ya no falla.
+- Producción: aplicar con el resto, antes de activar pagos.

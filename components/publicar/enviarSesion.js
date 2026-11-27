@@ -99,7 +99,7 @@ export async function publicarSesion(c, setMensaje) {
     hora,
     duracion: duracion === '' ? null : Number(duracion),
     nivel,
-    precio: precio === '' ? null : Number(precio),
+    precio: precio === '' ? 0 : Number(precio), // vacío = gratuita (la columna no admite nulos)
     plazas_max: plazasMax === '' ? null : plazasMaxNum,
     plazas_min: plazasMinNum,
     material,

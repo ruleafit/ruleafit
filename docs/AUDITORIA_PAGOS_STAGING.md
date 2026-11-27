@@ -77,8 +77,12 @@ Formulario fiscal por el asistente (no introduce NIF ni IBAN), zonas especiales,
 de cuenta, cambio de ubicación al reprogramar, compra de bonos (no existe), push, correos y Redsys real.
 
 ## 5. Abierto
-Ver el checklist del apartado 8 de `docs/REGLAS_PAGOS_RULEAFIT.md`. Lo más importante: una sesión gratuita consume un
-uso del bono, las liquidaciones no existen y falta todo lo de Redsys real, fiscal y legal.
+Ver el checklist del apartado 8 de `docs/REGLAS_PAGOS_RULEAFIT.md`. Lo más importante: las liquidaciones no existen y falta
+todo lo de Redsys real, fiscal y legal.
+
+Sesiones gratuitas (27/11/2026): en la base de pruebas, una cuenta sin datos fiscales publica sesión y serie a 0 € y la
+de pago se rechaza (probado sin guardar nada). Corregido: publicar con el precio vacío fallaba. `sql/109` (el bono no se
+gasta en sesiones gratuitas) probado en local y pendiente de aplicar en pruebas.
 
 ---
 

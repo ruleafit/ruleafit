@@ -148,7 +148,7 @@ export default function PerfilFiscal({ usuario }) {
       <h3 className="mb-2 text-base font-bold text-[#1F2400]">Datos fiscales y cobros</h3>
       <p className="mb-4 text-sm text-[#6B7355]">
         Si organizas sesiones de pago necesitamos estos datos para emitir las autofacturas en tu nombre y transferirte
-        tus ingresos.
+        tus ingresos. Para publicar sesiones gratuitas no necesitas rellenar nada de esto.
       </p>
 
       {cargado && guardado && (
