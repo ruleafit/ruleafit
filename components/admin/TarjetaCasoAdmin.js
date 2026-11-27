@@ -2,20 +2,31 @@
 
 import { useState } from 'react'
 import { formatearEuros } from '../../lib/pagos/dinero.ts'
-import { ESTADOS_INCIDENCIA, TIPOS_INCIDENCIA } from '../../lib/pagos/incidencias.ts'
+import { ESTADOS_INCIDENCIA, TIPOS_INCIDENCIA, estaCerrada, puedeDevolver } from '../../lib/pagos/incidencias.ts'
 
 export default function TarjetaCasoAdmin({ caso, onCambiar }) {
   const [respuesta, setRespuesta] = useState('')
   const [trabajando, setTrabajando] = useState(false)
   const [error, setError] = useState('')
 
-  async function cambiar(estado) {
+  async function enviar(datos) {
     setTrabajando(true)
     setError('')
-    const fallo = await onCambiar({ id: caso.id, estado, respuesta: respuesta.trim() || null })
+    const fallo = await onCambiar({ id: caso.id, respuesta: respuesta.trim() || null, ...datos })
     setTrabajando(false)
     if (fallo) setError(fallo)
     else setRespuesta('')
+  }
+
+  const cambiar = (estado) => enviar({ estado })
+
+  function devolver() {
+    if (!respuesta.trim()) {
+      setError('Para cerrar un caso hay que escribir una respuesta.')
+      return
+    }
+    const pregunta = `¿Devolver ${formatearEuros(caso.cobros.importe_centimos)} y cerrar el caso ${caso.numero}? Si la sesión no ha empezado, se cancela también la reserva. No se puede deshacer.`
+    if (window.confirm(pregunta)) enviar({ accion: 'devolver' })
   }
 
   return (
@@ -57,6 +68,16 @@ export default function TarjetaCasoAdmin({ caso, onCambiar }) {
             {estado === caso.estado ? `Responder (${texto})` : `Pasar a: ${texto}`}
           </button>
         ))}
+        {!estaCerrada(caso.estado) && puedeDevolver(caso.cobros?.estado) && (
+          <button
+            type="button"
+            disabled={trabajando}
+            onClick={devolver}
+            className="corte-tag border border-red-300 px-3 py-1 text-xs font-bold text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            Devolver y cerrar
+          </button>
+        )}
       </div>
       {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
     </li>

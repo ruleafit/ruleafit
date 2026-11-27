@@ -35,6 +35,7 @@ export async function GET(request) {
 }
 
 // Cambia el estado y responde: { id, estado, respuesta? }. No mueve dinero.
+// Con { id, accion: 'devolver', respuesta } marca el pago para devolución y cierra el caso (sql/105).
 export async function PATCH(request) {
   if (!(await verificarAdmin(request))) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
@@ -47,21 +48,21 @@ export async function PATCH(request) {
     return NextResponse.json({ error: 'Cuerpo no válido' }, { status: 400 })
   }
 
-  const { id, estado, respuesta } = cuerpo || {}
+  const { id, estado, respuesta, accion } = cuerpo || {}
+  const devolver = accion === 'devolver'
   if (
     typeof id !== 'string' ||
     !UUID.test(id) ||
-    !esEstadoIncidencia(estado) ||
+    (accion != null && !devolver) ||
+    (!devolver && !esEstadoIncidencia(estado)) ||
     (respuesta != null && (typeof respuesta !== 'string' || respuesta.length > 1000))
   ) {
     return NextResponse.json({ error: 'Datos no válidos' }, { status: 400 })
   }
 
-  const { error } = await supabaseAdmin.rpc('actualizar_incidencia', {
-    p_id: id,
-    p_estado: estado,
-    p_respuesta: respuesta ?? null,
-  })
+  const { error } = devolver
+    ? await supabaseAdmin.rpc('devolver_y_cerrar_incidencia', { p_id: id, p_respuesta: respuesta ?? null })
+    : await supabaseAdmin.rpc('actualizar_incidencia', { p_id: id, p_estado: estado, p_respuesta: respuesta ?? null })
   if (error) {
     const legible = ['P0001', 'P0002', '23505'].includes(error.code)
     const texto =

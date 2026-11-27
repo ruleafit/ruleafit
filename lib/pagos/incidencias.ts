@@ -39,6 +39,11 @@ export function errorDeIncidencia(reservaId: string, tipo: string, descripcion: 
   return null
 }
 
+/** ¿Tiene sentido «Devolver y cerrar»? Solo si el pago está cobrado y aún no devuelto. */
+export function puedeDevolver(estadoCobro: string | null | undefined): boolean {
+  return estadoCobro === 'pagado' || estadoCobro === 'requiere_reembolso'
+}
+
 export function estaCerrada(estado: string): boolean {
   return estado === 'resuelta' || estado === 'rechazada'
 }

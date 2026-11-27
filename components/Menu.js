@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Home, Menu as IconoMenu, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 import CampanaNotificaciones from './CampanaNotificaciones'
 import AvisoActivarNotificaciones from './AvisoActivarNotificaciones'
 
@@ -110,6 +111,12 @@ export default function Menu() {
   // Usuarios, Mi cuenta) queden con la misma altura que las de dos líneas
   // (Explora y reserva, Mis reservas, Mis sesiones publicadas) y el menú no
   // se vea asimétrico. Pedido por el usuario el 11 sept 2026.
+  // Con «Mis ingresos» (pagos visibles) hay un enlace más: la barra de escritorio necesita más ancho y se pliega en el
+  // menú por debajo de 1024 px. Sin pagos todo queda como estaba. (Clases escritas enteras para Tailwind.)
+  const ancho = PAGOS_VISIBLES
+    ? { barra: 'max-w-6xl', enlaces: 'hidden items-center gap-2 lg:flex', soloMovil: 'lg:hidden' }
+    : { barra: 'max-w-5xl', enlaces: 'hidden items-center gap-5 md:flex', soloMovil: 'md:hidden' }
+
   const pildoraBaseClass =
     'inline-flex min-h-[52px] items-center justify-center corte-btn px-4 py-2 text-center text-sm font-bold leading-tight ' +
     'transition-colors motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out motion-safe:hover:scale-[1.03] ' +
@@ -128,6 +135,9 @@ export default function Menu() {
     enlaces.push({ key: 'mis-reservas', href: '/mis-reservas', label: 'Mis reservas', variante: 'participante' })
     enlaces.push({ key: 'mis-clases', href: '/mis-clases', label: 'Mis sesiones publicadas', variante: 'organizador' })
     enlaces.push({ key: 'publicar', href: '/publicar', label: 'Publicar sesión', variante: 'organizador' })
+    if (PAGOS_VISIBLES) {
+      enlaces.push({ key: 'ingresos', href: '/mis-ingresos', label: 'Mis ingresos', variante: 'organizador' })
+    }
     enlaces.push({ key: 'usuarios', href: '/entrenadores', label: 'Ruleros', variante: 'ambos' })
     enlaces.push({ key: 'cuenta', href: '/cuenta', label: 'Mi cuenta', variante: 'ambos' })
   } else {
@@ -238,7 +248,7 @@ export default function Menu() {
         conSombra ? 'shadow-sm' : ''
       }`}
     >
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
+      <div className={`mx-auto flex ${ancho.barra} items-center justify-between gap-4 px-6 py-4`}>
         <Link
           href="/"
           className={`rounded-sm text-lg font-bold text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 ${subrayadoClass(
@@ -248,7 +258,7 @@ export default function Menu() {
           Rulea<span style={{ color: '#B5E600' }}>fit</span>
         </Link>
 
-        <div className="hidden items-center gap-5 md:flex">
+        <div className={ancho.enlaces}>
           {enlaces.map(renderEnlaceEscritorio)}
 
           {usuario && (
@@ -265,7 +275,7 @@ export default function Menu() {
             onClick={() => setMenuAbierto((abierto) => !abierto)}
             aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
             aria-expanded={menuAbierto}
-            className="inline-flex items-center gap-2 corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#16231B] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 md:hidden"
+            className={`inline-flex items-center gap-2 corte-btn bg-[#B5E600] px-4 py-2 text-sm font-bold text-[#16231B] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B5E600] focus-visible:ring-offset-2 ${ancho.soloMovil}`}
           >
             {menuAbierto ? (
               <>
@@ -283,7 +293,7 @@ export default function Menu() {
       </div>
 
       {menuAbierto && (
-        <div className="border-t border-zinc-200 bg-white px-6 py-4 md:hidden">
+        <div className={`border-t border-zinc-200 bg-white px-6 py-4 ${ancho.soloMovil}`}>
           <div className="flex flex-col gap-1">
             {enlaces.map(renderEnlaceMovil)}
 

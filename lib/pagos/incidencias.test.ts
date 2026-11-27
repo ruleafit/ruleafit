@@ -10,6 +10,7 @@ import {
   esEstadoIncidencia,
   esTipoIncidencia,
   estaCerrada,
+  puedeDevolver,
 } from './incidencias.ts'
 
 const sql = readFileSync(new URL('../../sql/098_incidencias_pago.sql', import.meta.url), 'utf8')
@@ -34,4 +35,10 @@ test('no se aceptan claves heredadas de Object', () => {
   assert.equal(esEstadoIncidencia('constructor'), false)
   assert.equal(estaCerrada('resuelta'), true)
   assert.equal(estaCerrada('en_revision'), false)
+})
+
+test('«Devolver y cerrar» solo con un pago cobrado y no devuelto', () => {
+  assert.equal(puedeDevolver('pagado'), true)
+  assert.equal(puedeDevolver('requiere_reembolso'), true)
+  for (const no of ['reembolsado', 'fallido', 'creado', 'caducado', undefined, null]) assert.equal(puedeDevolver(no), false, String(no))
 })

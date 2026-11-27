@@ -19,7 +19,8 @@ export default function IncidenciasAdminPage() {
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
       <h1 className="text-2xl font-extrabold text-[#1F2400]">Reclamaciones de pagos</h1>
       <p className="mt-1 text-sm text-[#6B7355]">
-        Cambiar el estado de un caso no mueve dinero: las devoluciones se tramitan por su propio proceso.
+        Mientras un caso está abierto o en revisión, el importe queda retenido al organizador. Si le das la razón al
+        alumno usa <strong>Devolver y cerrar</strong>; cambiar solo el estado a cerrado libera el dinero al organizador.
       </p>
       <label className="mt-4 mb-6 flex items-center gap-2 text-sm text-[#1F2400]">
         <input type="checkbox" checked={soloAbiertas} onChange={(e) => setSoloAbiertas(e.target.checked)} />

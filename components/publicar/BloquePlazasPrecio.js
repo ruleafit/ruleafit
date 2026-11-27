@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Tag } from 'lucide-react'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import TituloBloque from './TituloBloque'
@@ -21,7 +22,8 @@ export default function BloquePlazasPrecio({ c }) {
                 <p className="mt-1 text-sm font-semibold text-[#3D4A00]">Tus alumnos pagan online en Ruleafit al reservar.</p>
                 <p className="text-xs text-[#6B7355]">
                   De cada pago se descuenta la comisión de Ruleafit ({COMISION_BPS_PREVISTA / 100} %). Tu parte se
-                  libera en tu saldo después de celebrarse la sesión. Si se cancela, se devuelve al alumno.
+                  libera en tu saldo después de celebrarse la sesión. Si se cancela, se devuelve al alumno.{' '}
+                  <Link href="/mis-ingresos" className="font-semibold underline">Ver mis ingresos</Link>
                 </p>
               </>
             ) : (
