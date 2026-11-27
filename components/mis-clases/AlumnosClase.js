@@ -1,6 +1,7 @@
 'use client'
 
 import { Users } from 'lucide-react'
+import { formatearMomentoParaMostrar } from '../../lib/formatoFecha'
 
 export default function AlumnosClase({ clase, haPasado }) {
   if (clase.alumnos.length === 0) {
@@ -27,7 +28,7 @@ export default function AlumnosClase({ clase, haPasado }) {
           <div className="text-sm">
             <p className="font-semibold text-[#1F2400]">{alumno.cliente_username}</p>
             <p className="text-xs text-[#6B7355]">
-              Reservó el {new Date(alumno.reservado_en).toLocaleString('es-ES')}
+              Reservó el {formatearMomentoParaMostrar(alumno.reservado_en)}
             </p>
           </div>
         </div>

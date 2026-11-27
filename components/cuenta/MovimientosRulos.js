@@ -1,5 +1,7 @@
 'use client'
 
+import { formatearMomentoParaMostrar } from '../../lib/formatoFecha'
+
 export default function MovimientosRulos({ movimientos, motivos }) {
   return (
     <div className="mb-8">
@@ -13,7 +15,7 @@ export default function MovimientosRulos({ movimientos, motivos }) {
             <div key={mov.id} className="flex items-center justify-between gap-3 px-4 py-3">
               <div>
                 <p className="text-sm text-[#1F2400]">{mov.nota || motivos[mov.motivo] || mov.motivo}</p>
-                <p className="text-xs text-[#6B7355]">{new Date(mov.created_at).toLocaleString('es-ES')}</p>
+                <p className="text-xs text-[#6B7355]">{formatearMomentoParaMostrar(mov.created_at)}</p>
               </div>
               <span
                 className={`shrink-0 text-sm font-bold ${mov.cantidad > 0 ? 'text-[#3D4A00]' : 'text-red-700'}`}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
-import { formatearFechaParaMostrar, formatearHoraParaMostrar } from '../../lib/formatoFecha'
+import { formatearFechaParaMostrar, formatearHoraParaMostrar, formatearMomentoParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import BotonReclamar from './BotonReclamar'
 import { textoDevolucion } from '../../lib/pagos/textoDevolucion.ts'
@@ -53,7 +53,7 @@ export default function TarjetaReservaCancelada({ reserva, indice, onReclamar, e
             ) : (
               'Cancelada por el entrenador / organizador.'
             )}
-            {reserva.cancelled_at && <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>}
+            {reserva.cancelled_at && <> El {formatearMomentoParaMostrar(reserva.cancelled_at)}.</>}
           </p>
 
           {devolucion && (
