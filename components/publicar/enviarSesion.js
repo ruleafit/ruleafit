@@ -112,7 +112,7 @@ export async function publicarSesion(c, setMensaje) {
 
   if (error) {
     setMensaje(
-      error.message?.includes('demasiados envíos')
+      error.message?.includes('demasiados envíos') || error.message?.includes('datos fiscales')
         ? error.message
         : 'No se ha podido publicar la sesión. Revisa los datos e inténtalo de nuevo.'
     )

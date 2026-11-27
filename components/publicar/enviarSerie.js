@@ -103,7 +103,7 @@ export async function publicarSerie(c, previa, setMensaje) {
   })
 
   if (error) {
-    const claro = /máximo|demasiadas|se acaba de publicar|solapan|repetidas|pasada/i.test(error.message || '')
+    const claro = /máximo|demasiadas|se acaba de publicar|solapan|repetidas|pasada|datos fiscales/i.test(error.message || '')
     setMensaje(claro ? error.message : 'No se ha podido publicar la serie. No se ha creado ninguna sesión. Revisa los datos e inténtalo de nuevo.')
     return
   }

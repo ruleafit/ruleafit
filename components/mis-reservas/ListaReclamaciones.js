@@ -63,9 +63,11 @@ export default function ListaReclamaciones({ reservaInicial = '' }) {
               <select value={reservaId} onChange={(e) => setReservaId(e.target.value)} className={`${campo} mt-1`}>
                 <option value="">Elige una reserva</option>
                 {r.reservas.map((x) => (
-                  <option key={x.reserva_id} value={x.reserva_id}>
-                    {x.titulo} · {formatearFechaParaMostrar(x.fecha)} {String(x.hora).slice(0, 5)}
+                  <option key={x.reserva_id || x.cobro_id} value={x.reserva_id || x.cobro_id}>
+                    {x.titulo}
+                    {x.fecha ? ` · ${formatearFechaParaMostrar(x.fecha)} ${String(x.hora).slice(0, 5)}` : ''}
                     {x.estado_reserva === 'cancelada' ? ' (cancelada)' : ''}
+                    {x.estado_reserva === 'sin_plaza' ? ' (pago sin plaza)' : ''}
                   </option>
                 ))}
               </select>

@@ -9,10 +9,11 @@ import TarjetaReservaCancelada from './TarjetaReservaCancelada'
 import TarjetaReservaPasada from './TarjetaReservaPasada'
 import TarjetaReservaCanceladaAjena from './TarjetaReservaCanceladaAjena'
 import { claveFechaHora } from './datos'
+import TarjetaPagoSinPlaza from './TarjetaPagoSinPlaza'
 
 // m = useMisReservas.
 export default function ListaMisReservas({ m, onReclamar }) {
-  const { reservas, canceladasAjenas = [], error, mensaje } = m
+  const { reservas, canceladasAjenas = [], pagosSinPlaza = [], error, mensaje } = m
 
   const reservasActivas = reservas.filter((r) => r.estado === 'activa' && r.clases)
   const reservasCanceladasPorEntrenador = reservas.filter(
@@ -23,7 +24,10 @@ export default function ListaMisReservas({ m, onReclamar }) {
       horasHastaClase(r.clases) > -1
   )
   const sinReservas =
-    reservasActivas.length === 0 && reservasCanceladasPorEntrenador.length === 0 && canceladasAjenas.length === 0
+    reservasActivas.length === 0 &&
+    reservasCanceladasPorEntrenador.length === 0 &&
+    canceladasAjenas.length === 0 &&
+    pagosSinPlaza.length === 0
 
   const reservasProximas = reservasActivas
     .filter((r) => !claseYaPaso(r.clases))
@@ -61,6 +65,14 @@ export default function ListaMisReservas({ m, onReclamar }) {
             Ver sesiones
           </Link>
         </RevelarAlLlegar>
+      )}
+
+      {pagosSinPlaza.length > 0 && (
+        <div className="mb-6 flex flex-col gap-4">
+          {pagosSinPlaza.map((pago) => (
+            <TarjetaPagoSinPlaza key={pago.cobro_id} pago={pago} onReclamar={onReclamar} />
+          ))}
+        </div>
       )}
 
       <div className="flex flex-col gap-4">

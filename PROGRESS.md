@@ -950,4 +950,10 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - Sesión `cancelada` por cualquier vía → sus cobros `pagado` pasan a `requiere_reembolso` (trigger; corrige los anteriores).
 - No se borra la cuenta con reclamación de pago abierta (con devolución pendiente ya no se podía).
 - Canarias, Ceuta y Melilla: revisión manual (`pendiente_revision`); Navarra y País Vasco se aprueban solos. Solo `activo` permite publicar y cobrar sesiones de pago.
-- Sigue pendiente: programar el cron de `/api/payments/devolver`; reclamar un cobro sin reserva.
+- Sigue pendiente en este punto: ver SQL 103.
+
+## SQL 103 · Cron de devoluciones y blindaje de cobros · EN RAMA (27 nov 2026), sin aplicar en producción
+- C3: `103_blindaje_cobros_cron.sql` (+ baja) llama a `/api/payments/devolver` cada 10 min. Solo producción y tras probar con Redsys.
+- M1: con pagos activos no se crea ni se pone precio a una sesión sin perfil fiscal `activo`. M2: un cobro en curso por alumno y sesión (se reutiliza el pedido). M3: `creado` caduca a los 30 min (`caducado`, cron cada 5 min); si el banco confirma tarde se da plaza o se marca devolución.
+- A2: los pagos sin plaza se ven en Mis reservas y se reclaman (`abrir_incidencia_cobro`).
+- `BotonReservar` desbloquea el botón al volver del TPV.

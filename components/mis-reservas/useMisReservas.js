@@ -14,6 +14,7 @@ export default function useMisReservas() {
   const [cargandoSesion, setCargandoSesion] = useState(true)
   const [reservas, setReservas] = useState([])
   const [canceladasAjenas, setCanceladasAjenas] = useState([])
+  const [pagosSinPlaza, setPagosSinPlaza] = useState([])
   const [cargandoReservas, setCargandoReservas] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -74,6 +75,9 @@ export default function useMisReservas() {
       // función aún no existe o falla, simplemente no se muestran.
       const { data: ajenas } = await supabase.rpc('mis_reservas_canceladas_por_bloqueo')
       setCanceladasAjenas(Array.isArray(ajenas) ? ajenas : [])
+      // Pagos que no llegaron a dar plaza (sql/103). Si la función es la antigua o falla, no se muestra nada.
+      const { data: reclamables } = await supabase.rpc('mis_reservas_reclamables')
+      setPagosSinPlaza(Array.isArray(reclamables) ? reclamables.filter((x) => x.estado_reserva === 'sin_plaza') : [])
       setCargandoReservas(false)
     }
     cargarReservas()
@@ -130,6 +134,7 @@ export default function useMisReservas() {
     cargando: cargandoSesion || cargandoReservas,
     reservas,
     canceladasAjenas,
+    pagosSinPlaza,
     error,
     mensaje,
     cancelandoId,

@@ -32,9 +32,11 @@ export default function useReclamaciones() {
     cargar()
   }, [cargar])
 
+  // reservaId = id de la opción elegida: una reserva o, si es un pago sin plaza, su cobro (sql/103).
   async function abrir({ reservaId, tipo, descripcion }) {
-    const { data, error: errorRpc } = await supabase.rpc('abrir_incidencia', {
-      p_reserva_id: reservaId,
+    const sinPlaza = reservas.some((x) => x.cobro_id === reservaId)
+    const { data, error: errorRpc } = await supabase.rpc(sinPlaza ? 'abrir_incidencia_cobro' : 'abrir_incidencia', {
+      [sinPlaza ? 'p_cobro_id' : 'p_reserva_id']: reservaId,
       p_tipo: tipo,
       p_descripcion: descripcion,
     })

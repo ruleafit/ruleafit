@@ -102,6 +102,20 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     }
   }, [])
 
+  // Al volver desde el TPV con «atrás», el navegador puede restaurar la página tal como estaba («Abriendo el
+  // pago…»): se desbloquea el botón. Pulsarlo de nuevo no duplica el cobro (el servidor reutiliza el pedido).
+  useEffect(() => {
+    const desbloquear = () => {
+      if (document.visibilityState === 'visible') setPagando(false)
+    }
+    window.addEventListener('pageshow', desbloquear)
+    document.addEventListener('visibilitychange', desbloquear)
+    return () => {
+      window.removeEventListener('pageshow', desbloquear)
+      document.removeEventListener('visibilitychange', desbloquear)
+    }
+  }, [])
+
   // C03: si el usuario acaba de identificarse para reservar ESTA sesión, se avisa (una vez) y se limpia el recuerdo.
   // No se reserva nada: la confirmación sigue siendo suya.
   useEffect(() => {
