@@ -971,4 +971,9 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 
 ## Correcciones tras la auditoría en Preview (27 nov 2026)
 - A3: textos de pago según `NEXT_PUBLIC_PAGOS_ACTIVOS` (ficha y publicar). B1: sesión cancelada con 0 plazas ocupadas (trigger en `sql/104`). Horas en HH:MM. Mensajes de devolución según el estado real del cobro (`lib/pagos/textoDevolucion.ts`). Enlaces a `/pagos/ok` y `/pagos/ko` en el TPV simulado.
-- Pendiente antes de producción: el aviso legal (`app/aviso-legal/page.js`) dice que no hay cobros en la plataforma; «tramitado automáticamente» exige tener programado `103_blindaje_cobros_cron.sql`.
+- El aviso legal ya muestra el pago online cuando los pagos son visibles (pendiente de revisión jurídica). Antes de producción: «tramitado automáticamente» exige tener programado `103_blindaje_cobros_cron.sql`.
+
+## SQL 106 · Bonos bloqueados con pagos activos · EN RAMA (27 nov 2026), sin aplicar
+- Fallo: `adquirir_bono` no cobra; con pagos activos daba un bono gratis para reservar sesiones de pago sin pagar.
+- `sql/106`: trigger en `bonos_clientes` que impide altas mientras `pagos_activos`. La web oculta «Adquirir» y lo explica. Los bonos ya adquiridos siguen sirviendo. Cobro de bonos: pendiente.
+- **Aplicar antes de activar pagos en producción.**

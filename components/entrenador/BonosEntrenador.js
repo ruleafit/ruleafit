@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Gift } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
+import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 
 function formatearFechaLimite(plazoDias) {
   const fecha = new Date()
@@ -60,6 +61,11 @@ export default function BonosEntrenador({ perfil, bonos, usuarioActual }) {
         </p>
       )}
       {errorBono && <p className="mb-3 text-sm text-red-600">{errorBono}</p>}
+      {PAGOS_VISIBLES && (
+        <p className="mb-3 text-sm text-[#6B7355]">
+          La compra de bonos todavía no está disponible con el pago online. Puedes reservar y pagar sesión a sesión.
+        </p>
+      )}
 
       <div className="flex flex-col gap-3">
         {bonos.map((bono) => (
@@ -80,7 +86,7 @@ export default function BonosEntrenador({ perfil, bonos, usuarioActual }) {
               {bono.descripcion && <p className="mt-1 text-sm text-[#1F2400]">{bono.descripcion}</p>}
             </div>
 
-            {usuarioActual && usuarioActual.id !== perfil.id && (
+            {!PAGOS_VISIBLES && usuarioActual && usuarioActual.id !== perfil.id && (
               <button
                 type="button"
                 onClick={() => handleAdquirirBono(bono)}

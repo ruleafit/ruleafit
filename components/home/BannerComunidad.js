@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import { botonPrimarioClass } from './constantes'
+import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 
 // Franja de comunidad: quien ya tiene sesiones propias ve una llamada a
 // publicar otra, en vez de a buscar sesiones.
@@ -38,7 +39,9 @@ export default function BannerComunidad({ tieneClasesPublicadas }) {
       <div className="absolute inset-0 -z-10 bg-black/60" />
       <div className="flex flex-col items-center gap-6">
         <p className="max-w-xl text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          Solo, en pareja o en grupo. Tú eliges: pagas sesión a sesión o compras un bono con tu entrenador.
+          {PAGOS_VISIBLES
+            ? 'Solo, en pareja o en grupo. Reservas y pagas online, sesión a sesión.'
+            : 'Solo, en pareja o en grupo. Tú eliges: pagas sesión a sesión o compras un bono con tu entrenador.'}
         </p>
         <Link href="/clases" className={botonPrimarioClass}>
           Ver sesiones

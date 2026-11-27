@@ -20,7 +20,7 @@ psql -f "$env:TEMP\esquema.sql" "<conexión de PRUEBAS>"
    El aviso «schema public already exists» es normal. Cualquier otro error hay que revisarlo.
 4. En el SQL Editor **del proyecto de pruebas**, en este orden: `sql/096_devoluciones.sql`,
    `sql/098_incidencias_pago.sql`, `sql/099_alertas_operativas.sql`, `sql/100_reprogramaciones.sql`,
-   `sql/101_aprobacion_fiscal_automatica.sql`, `sql/102_devoluciones_por_cancelacion.sql`, `sql/103_blindaje_cobros.sql`, `sql/104_permisos_explicitos.sql`, `sql/105_ingresos_retencion.sql`,
+   `sql/101_aprobacion_fiscal_automatica.sql`, `sql/102_devoluciones_por_cancelacion.sql`, `sql/103_blindaje_cobros.sql`, `sql/104_permisos_explicitos.sql`, `sql/105_ingresos_retencion.sql`, `sql/106_bonos_con_pagos.sql`,
    `sql/pruebas/permisos_base_de_pruebas.sql` y, al final,
    `sql/pruebas/preparar_base_de_pruebas.sql`. (095 y 097 ya vienen en el volcado.) No ejecutes ningún `_cron.sql`.
 5. **Authentication**: pon como *Site URL* la dirección del Preview y añade `https://*.vercel.app/**` a las

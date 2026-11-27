@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { CircleAlert, Gift, Plus, Users } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 
 const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
@@ -146,7 +147,9 @@ export default function GestionBonos({ usuario }) {
 
       <div className="mb-6 flex items-center justify-between">
         <p className="text-sm text-[#6B7355]">
-          Crea bonos para que tus clientes los compren y los gasten en tus sesiones.
+          {PAGOS_VISIBLES
+            ? 'La compra de bonos no está disponible mientras el pago online esté activo. Los ya adquiridos se siguen usando.'
+            : 'Crea bonos para que tus clientes los compren y los gasten en tus sesiones.'}
         </p>
         <button
           type="button"
