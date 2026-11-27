@@ -29,6 +29,7 @@ export default function VerificacionesAdminPage() {
   const secciones = [
     { tipo: 'identidad', titulo: 'Identidad', filas: cola.identidades },
     { tipo: 'titulacion', titulo: 'Titulaciones', filas: cola.titulaciones },
+    { tipo: 'centro', titulo: 'Centros', filas: cola.centros || [] },
   ]
 
   return (

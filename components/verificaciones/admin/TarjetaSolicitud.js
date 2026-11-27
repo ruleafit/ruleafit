@@ -4,8 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { campoClass, etiquetaClass, botonClass, COLOR_ESTADO } from '../estilos'
 import { ESTADOS } from '../../../lib/verificaciones/reglas'
-import VisorDocumento from '../VisorDocumento'
-import { peticionAdmin } from './useColaVerificaciones'
+import VerDocumento from './VerDocumento'
 
 const secundarioClass =
   'corte-tag border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] hover:border-[#B5E600] disabled:opacity-60'
@@ -16,18 +15,8 @@ export default function TarjetaSolicitud({ tipo, solicitud, onResolver }) {
   const [nombreRevisado, setNombreRevisado] = useState(false)
   const [trabajando, setTrabajando] = useState(false)
   const [error, setError] = useState('')
-  const [imagenes, setImagenes] = useState({})
-  const [viendo, setViendo] = useState(false)
   const esIdentidad = tipo === 'identidad'
   const pendiente = solicitud.estado === 'pendiente'
-
-  async function verCara(cara) {
-    setError('')
-    const respuesta = await peticionAdmin(`/api/admin/verificaciones/identidad?id=${solicitud.id}&cara=${cara}`)
-    const json = await respuesta?.json().catch(() => null)
-    if (!respuesta?.ok) return setError(json?.error || 'No se pudo abrir el documento.')
-    setImagenes((prev) => ({ ...prev, [cara]: json.url }))
-  }
 
   async function decidir(decision, confirmarDiscrepancia = false) {
     setError('')
@@ -66,8 +55,14 @@ export default function TarjetaSolicitud({ tipo, solicitud, onResolver }) {
           'cuenta sin perfil'
         )}
         {' · '}
-        {esIdentidad ? solicitud.tipo_documento : `${solicitud.nombre} — ${solicitud.entidad} (${solicitud.anio})`}
+        {esIdentidad
+          ? solicitud.tipo_documento
+          : tipo === 'centro'
+            ? `${solicitud.razon_social} — ${solicitud.cif}`
+            : `${solicitud.nombre} — ${solicitud.entidad} (${solicitud.anio})`}
       </p>
+      {solicitud.metodo === 'automatico' && <p className="text-xs text-[#6B7355]">Aprobada automáticamente.</p>}
+      {tipo === 'centro' && solicitud.fiscal && <p className="mt-1 text-sm text-[#6B7355]">Perfil fiscal: {solicitud.fiscal}</p>}
 
       {solicitud.denuncias > 0 && (
         <p className="mt-1">
@@ -83,40 +78,30 @@ export default function TarjetaSolicitud({ tipo, solicitud, onResolver }) {
         </p>
       )}
 
-      {esIdentidad && pendiente && (
-        <>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" onClick={() => verCara('anverso')} className={secundarioClass}>Ver anverso</button>
-            {solicitud.tiene_reverso && (
-              <button type="button" onClick={() => verCara('reverso')} className={secundarioClass}>Ver reverso</button>
-            )}
-          </div>
-          {Object.entries(imagenes).map(([cara, url]) => (
-            <p key={cara} className="mt-2">
-              <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#3D4A00] underline">
-                Abrir {cara} (el enlace caduca en 60 segundos)
-              </a>
-            </p>
-          ))}
-          {solicitud.tiene_fiscal && (
-            <div className="mt-3 flex flex-col gap-3">
-              <label>
-                <span className={etiquetaClass}>Número del documento (se compara con el NIF y no se guarda)</span>
-                <input value={numero} onChange={(e) => setNumero(e.target.value)} autoComplete="off" className={campoClass} />
-              </label>
-              <label className="flex items-start gap-2 text-sm text-[#1F2400]">
-                <input type="checkbox" checked={nombreRevisado} onChange={(e) => setNombreRevisado(e.target.checked)} className="mt-1 accent-[#B5E600]" />
-                El nombre del documento coincide con el nombre fiscal.
-              </label>
-            </div>
-          )}
-        </>
+      {pendiente && tipo === 'identidad' && (
+        <div className="mt-3 flex flex-wrap gap-3">
+          <VerDocumento tipo={tipo} id={solicitud.id} cara="anverso" texto="Ver anverso" />
+          {solicitud.tiene_reverso && <VerDocumento tipo={tipo} id={solicitud.id} cara="reverso" texto="Ver reverso" />}
+        </div>
+      )}
+      {((pendiente && tipo === 'centro') || tipo === 'titulacion') && (
+        <div className="mt-3">
+          <VerDocumento tipo={tipo} id={solicitud.id} />
+        </div>
       )}
 
-      {!esIdentidad && (
-        <button type="button" onClick={() => setViendo(true)} className={`mt-3 ${secundarioClass}`}>Ver documento</button>
+      {esIdentidad && pendiente && solicitud.tiene_fiscal && (
+        <div className="mt-3 flex flex-col gap-3">
+          <label>
+            <span className={etiquetaClass}>Número del documento (se compara con el NIF y no se guarda)</span>
+            <input value={numero} onChange={(e) => setNumero(e.target.value)} autoComplete="off" className={campoClass} />
+          </label>
+          <label className="flex items-start gap-2 text-sm text-[#1F2400]">
+            <input type="checkbox" checked={nombreRevisado} onChange={(e) => setNombreRevisado(e.target.checked)} className="mt-1 accent-[#B5E600]" />
+            El nombre del documento coincide con el nombre fiscal.
+          </label>
+        </div>
       )}
-      {viendo && <VisorDocumento titulacion={solicitud} onCerrar={() => setViendo(false)} />}
 
       <label className="mt-3 block">
         <span className={etiquetaClass}>{pendiente ? 'Motivo (obligatorio para rechazar)' : 'Motivo para retirar'}</span>

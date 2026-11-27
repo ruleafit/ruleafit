@@ -2,6 +2,7 @@
 
 import useMisVerificaciones from './useMisVerificaciones'
 import VerificacionIdentidad from './VerificacionIdentidad'
+import VerificacionCentro from './VerificacionCentro'
 import MisTitulaciones from './MisTitulaciones'
 
 // Contenido del desplegable «Verificación del perfil» de Mi cuenta.
@@ -15,8 +16,9 @@ export default function BloqueVerificacion({ usuario }) {
 
   return (
     <div>
-      <VerificacionIdentidad identidad={datos.identidad} onEnviar={datos.enviarIdentidad} onRetirar={datos.retirarIdentidad} />
+      <VerificacionIdentidad identidad={datos.identidad} fiscal={datos.fiscal} onEnviar={datos.enviarIdentidad} onRetirar={datos.retirarIdentidad} />
       <MisTitulaciones titulaciones={datos.titulaciones} onEnviar={datos.enviarTitulacion} onRetirar={datos.retirarTitulacion} />
+      <VerificacionCentro centro={datos.centro} fiscal={datos.fiscal} onEnviar={datos.enviarCentro} onRetirar={datos.retirarCentro} />
     </div>
   )
 }

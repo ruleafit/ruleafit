@@ -5,7 +5,6 @@ import Link from 'next/link'
 import {
   ESTADOS,
   ACEPTA_ARCHIVOS,
-  AVISO_TAPAR_DNI,
   MAX_TITULACIONES,
   ANIO_MINIMO,
   validarArchivo,
@@ -60,9 +59,8 @@ export default function MisTitulaciones({ titulaciones, onEnviar, onRetirar }) {
     <div className="mt-8 border-t border-[#E2E6CF] pt-6">
       <h3 className="text-base font-bold text-[#1F2400]">Titulaciones deportivas</h3>
       <p className="mt-1 text-sm text-[#6B7355]">
-        Al subirlas aparecen en tu perfil y en tus sesiones como «Titulación declarada», sin el documento. Cuando las
-        revisemos pasan a «Titulación acreditada» y los usuarios con sesión iniciada podrán ver el documento con una marca
-        de agua.
+        Al subirlas aparecen en tu perfil y en tus sesiones como «Titulación declarada». Cuando las revisemos pasan a
+        «Titulación acreditada». El documento solo lo ve el equipo de RuleaFit.
       </p>
 
       {titulaciones.length > 0 && (
@@ -99,16 +97,15 @@ export default function MisTitulaciones({ titulaciones, onEnviar, onRetirar }) {
             <span className={etiquetaClass}>Año</span>
             <input type="number" inputMode="numeric" min={ANIO_MINIMO} max={new Date().getFullYear()} value={campos.anio} onChange={cambiar('anio')} className={campoClass} />
           </label>
-          <p role="note" className="corte-tag border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">{AVISO_TAPAR_DNI}</p>
           <label>
-            <span className={etiquetaClass}>Documento (PDF o imagen, máximo 8 MB y 10 páginas)</span>
+            <span className={etiquetaClass}>Documento (PDF o imagen, máximo 8 MB)</span>
             <input key={reinicio} type="file" accept={ACEPTA_ARCHIVOS} onChange={(e) => setArchivo(e.target.files?.[0] || null)} className={campoClass} />
           </label>
           <label className="flex items-start gap-2 text-sm text-[#1F2400]">
             <input type="checkbox" checked={acepta} onChange={(e) => setAcepta(e.target.checked)} className="mt-1 accent-[#B5E600]" />
             <span>
-              Declaro que el documento es auténtico y mío y que he tapado mi número de DNI. Consiento que los datos del título
-              se muestren desde ahora como declarados y el documento a otros usuarios tras la revisión, según la <Link href="/privacidad" className="font-semibold underline">política de privacidad</Link>.
+              Declaro que el documento es auténtico y mío. Consiento que RuleaFit lo revise y que los datos del título (no el
+              documento) se muestren públicamente, según la <Link href="/privacidad" className="font-semibold underline">política de privacidad</Link>.
             </span>
           </label>
           <button type="submit" disabled={enviando} className={botonClass}>
