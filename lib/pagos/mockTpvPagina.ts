@@ -43,12 +43,17 @@ export function pagina(datos: {
 .franja{background:#fde68a;border:2px solid #b45309;padding:.75rem;font-weight:700;text-align:center}
 button{width:100%;padding:.8rem;margin:.3rem 0;font-weight:700;border:2px solid #1F2400;background:#fff;cursor:pointer}
 button.si{background:#B5E600}button.no{background:#fee2e2}section{border:1px solid #ccc;padding:0 1rem;margin:1rem 0}
+.enlace{display:block;text-align:center;padding:.8rem;margin:.3rem 0;font-weight:700;border:2px solid #1F2400;color:#1F2400;text-decoration:none}
+.enlace.si{background:#B5E600}.enlace.no{background:#fee2e2}
 .aviso{background:#fff7ed;border:1px solid #fb923c;padding:.75rem}li{margin:.4rem 0}</style></head><body>
 <p class="franja">TPV SIMULADO · PRUEBAS · no se cobra dinero</p>
 ${resumen}
 ${aviso ? `<p class="aviso" role="status">${escapar(aviso)}</p>` : ''}
 ${filas ? `<h2>Respuesta del webhook</h2><ul>${filas}</ul>` : ''}
 ${pagos}
+<h2>Pantallas finales de la web</h2>
+<p><a class="enlace si" href="/pagos/ok">Ver «Pago recibido» (/pagos/ok)</a>
+<a class="enlace no" href="/pagos/ko">Ver «El pago no se ha completado» (/pagos/ko)</a></p>
 <h2>Devoluciones</h2>
 <p>Primero cancela una reserva pagada (2 h antes o más) en Mis reservas. Después:</p>
 ${boton('devolver', 'Procesar las devoluciones pendientes (banco simulado: 0900)')}

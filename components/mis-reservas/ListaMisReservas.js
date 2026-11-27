@@ -101,7 +101,13 @@ export default function ListaMisReservas({ m, onReclamar }) {
 
           <div className="flex flex-col gap-4">
             {reservasCanceladasPorEntrenador.map((reserva, indice) => (
-              <TarjetaReservaCancelada key={reserva.id} reserva={reserva} indice={indice} onReclamar={onReclamar} />
+              <TarjetaReservaCancelada
+                key={reserva.id}
+                reserva={reserva}
+                indice={indice}
+                onReclamar={onReclamar}
+                estadoCobro={m.cobrosPorReserva?.[reserva.id]}
+              />
             ))}
           </div>
         </div>

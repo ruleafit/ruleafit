@@ -6,7 +6,7 @@ import { centimosDePrecio, precioValido } from './precio'
 
 // Solo informativo: la comisión real la calcula la base de datos
 // (config_pagos.comision_bps, 1000 = 10 %) al crear el cobro.
-const COMISION_BPS_PREVISTA = 1000
+export const COMISION_BPS_PREVISTA = 1000
 
 export default function PrevisionIngreso({ precio }) {
   if (!precioValido(precio)) {

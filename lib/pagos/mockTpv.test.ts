@@ -185,3 +185,8 @@ test('la referencia de producción del código es la que se protege', () => {
   // Las dos entradas de la ruta comprueban el permiso antes de hacer nada.
   assert.equal(ruta.match(/noExiste\(\)/g)!.length, 3)
 })
+
+test('el TPV simulado enlaza a las pantallas finales', () => {
+  const p = pagina({})
+  assert.ok(p.includes('href="/pagos/ok"') && p.includes('href="/pagos/ko"'))
+})

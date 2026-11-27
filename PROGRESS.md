@@ -963,3 +963,7 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - `sql/104`: concede a `service_role` las tablas de 095-100. Aplicar en producción junto al resto.
 - Toda tabla nueva necesita sus `grant` explícitos.
 - `/api/payments/perfil-fiscal` indica el paso y el error (el detalle, solo fuera de producción).
+
+## Correcciones tras la auditoría en Preview (27 nov 2026)
+- A3: textos de pago según `NEXT_PUBLIC_PAGOS_ACTIVOS` (ficha y publicar). B1: sesión cancelada con 0 plazas ocupadas (trigger en `sql/104`). Horas en HH:MM. Mensajes de devolución según el estado real del cobro (`lib/pagos/textoDevolucion.ts`). Enlaces a `/pagos/ok` y `/pagos/ko` en el TPV simulado.
+- Pendiente antes de producción: el aviso legal (`app/aviso-legal/page.js`) dice que no hay cobros en la plataforma; «tramitado automáticamente» exige tener programado `103_blindaje_cobros_cron.sql`.

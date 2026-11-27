@@ -16,7 +16,7 @@ export default function BloqueNoEditable({ clase }) {
         </div>
         <div>
           <label className={labelClass}>Hora</label>
-          <p className={soloLecturaClass}>{clase.hora}</p>
+          <p className={soloLecturaClass}>{String(clase.hora || '').slice(0, 5)}</p>
         </div>
         <div>
           <label className={labelClass}>Duración</label>

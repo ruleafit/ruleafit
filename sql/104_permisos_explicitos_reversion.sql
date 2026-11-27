@@ -9,3 +9,5 @@ revoke select, insert, update, delete on
   public.reprogramaciones,
   public.reprogramacion_respuestas
 from service_role;
+drop trigger if exists trg_vaciar_plazas_sesion_cancelada on public.clases;
+drop function if exists public.vaciar_plazas_sesion_cancelada();

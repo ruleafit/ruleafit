@@ -2,12 +2,14 @@
 
 import Link from 'next/link'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
-import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
+import { formatearFechaParaMostrar, formatearHoraParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import BotonReclamar from './BotonReclamar'
+import { textoDevolucion } from '../../lib/pagos/textoDevolucion.ts'
 
-export default function TarjetaReservaCancelada({ reserva, indice, onReclamar }) {
+export default function TarjetaReservaCancelada({ reserva, indice, onReclamar, estadoCobro }) {
   const clase = reserva.clases
+  const devolucion = textoDevolucion(estadoCobro, !!reserva.bono_cliente_id)
   const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
 
   return (
@@ -35,7 +37,7 @@ export default function TarjetaReservaCancelada({ reserva, indice, onReclamar })
             </p>
             <p>
               Fecha: <span className="text-red-500">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
-              <span className="text-red-500">{clase.hora}</span>
+              <span className="text-red-500">{formatearHoraParaMostrar(clase.hora)}</span>
             </p>
           </div>
 
@@ -53,6 +55,12 @@ export default function TarjetaReservaCancelada({ reserva, indice, onReclamar })
             )}
             {reserva.cancelled_at && <> El {new Date(reserva.cancelled_at).toLocaleString('es-ES')}.</>}
           </p>
+
+          {devolucion && (
+            <p role="status" className="mt-2 corte-tag border border-[#B5E600] bg-[#EDF5C9] px-3 py-2 text-sm font-medium text-[#1F2400]">
+              {devolucion}
+            </p>
+          )}
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <Link

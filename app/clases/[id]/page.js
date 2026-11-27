@@ -9,7 +9,8 @@ import { supabase } from '../../../lib/supabaseClient'
 import { textoPlazas } from '../../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../../lib/confirmacionClase'
 import { claseYaPaso } from '../../../lib/ventanaEdicionClase'
-import { formatearFechaParaMostrar } from '../../../lib/formatoFecha'
+import { formatearFechaParaMostrar, formatearHoraParaMostrar } from '../../../lib/formatoFecha'
+import { PAGOS_VISIBLES } from '../../../lib/pagosVisibles'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../../lib/imagenesCategoria'
 import BotonReservar from '../../../components/BotonReservar'
 import BotonCopiarCoordenadas from '../../../components/BotonCopiarCoordenadas'
@@ -190,7 +191,7 @@ function DetalleClaseContenido() {
 
             <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
               <p className="text-lg font-bold text-[#1F2400] sm:text-xl">{formatearFechaParaMostrar(clase.fecha)}</p>
-              <p className="text-lg font-bold text-[#1F2400] sm:text-xl">{clase.hora}</p>
+              <p className="text-lg font-bold text-[#1F2400] sm:text-xl">{formatearHoraParaMostrar(clase.hora)}</p>
               {clase.duracion != null && (
                 <p className="text-sm text-[#6B7355]">{clase.duracion} min de duración</p>
               )}
@@ -201,7 +202,13 @@ function DetalleClaseContenido() {
                 {clase.precio != null ? clase.precio : 'A consultar'}
               </span>
               {clase.precio != null && <span className="text-lg font-semibold text-[#6B7355]">€</span>}
-              <span className="ml-2 text-xs text-[#6B7355]">Se paga directamente al entrenador</span>
+              {!PAGOS_VISIBLES ? (
+                <span className="ml-2 text-xs text-[#6B7355]">Se paga directamente al entrenador</span>
+              ) : (
+                Number(clase.precio) > 0 && (
+                  <span className="ml-2 text-xs text-[#6B7355]">Pago online seguro en Ruleafit, con tarjeta o Bizum</span>
+                )
+              )}
             </div>
 
             <div className="mt-5">

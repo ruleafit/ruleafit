@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
-import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
+import { formatearFechaParaMostrar, formatearHoraParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import BotonReclamar from './BotonReclamar'
 
@@ -43,7 +43,7 @@ export default function TarjetaReservaPasada({ reserva, indice, onReclamar }) {
             </p>
             <p>
               Fecha: <span className="text-zinc-500">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
-              <span className="text-zinc-500">{clase.hora}</span>
+              <span className="text-zinc-500">{formatearHoraParaMostrar(clase.hora)}</span>
             </p>
             {clase.duracion != null && (
               <p>

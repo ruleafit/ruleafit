@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { plazoCancelacion } from '../../lib/plazoCancelacion'
 import { tipoReserva } from './datos'
 import useReprogramaciones from './useReprogramaciones'
+import { DEVOLUCION_EN_MARCHA, mensajeCancelacion } from '../../lib/pagos/textoDevolucion.ts'
 
 // Sesión, carga de reservas propias y cancelación de una reserva.
 export default function useMisReservas() {
@@ -15,6 +16,7 @@ export default function useMisReservas() {
   const [reservas, setReservas] = useState([])
   const [canceladasAjenas, setCanceladasAjenas] = useState([])
   const [pagosSinPlaza, setPagosSinPlaza] = useState([])
+  const [cobrosPorReserva, setCobrosPorReserva] = useState({}) // reserva_id -> estado de su cobro
   const [cargandoReservas, setCargandoReservas] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -27,7 +29,7 @@ export default function useMisReservas() {
       data?.usaba_bono
         ? 'Reserva cancelada sin coste. La sesión de tu bono vuelve a estar disponible.'
         : data?.reembolso === 'pendiente'
-          ? 'Reserva cancelada sin coste. La devolución de tu pago queda pendiente de tramitar.'
+          ? `Reserva cancelada sin coste. ${DEVOLUCION_EN_MARCHA}`
           : 'Reserva cancelada sin coste.'
     )
     setTimeout(() => setMensaje(''), 8000)
@@ -78,6 +80,13 @@ export default function useMisReservas() {
       // Pagos que no llegaron a dar plaza (sql/103). Si la función es la antigua o falla, no se muestra nada.
       const { data: reclamables } = await supabase.rpc('mis_reservas_reclamables')
       setPagosSinPlaza(Array.isArray(reclamables) ? reclamables.filter((x) => x.estado_reserva === 'sin_plaza') : [])
+      // Estado de los cobros propios (RLS), para explicar la devolución en las reservas canceladas.
+      const { data: cobros } = await supabase
+        .from('cobros')
+        .select('reserva_id, estado')
+        .eq('cliente_id', usuario.id)
+        .in('estado', ['requiere_reembolso', 'reembolsado'])
+      setCobrosPorReserva(Object.fromEntries((cobros || []).filter((x) => x.reserva_id).map((x) => [x.reserva_id, x.estado])))
       setCargandoReservas(false)
     }
     cargarReservas()
@@ -117,17 +126,9 @@ export default function useMisReservas() {
     }
 
     setReservas((prev) => prev.filter((r) => r.id !== reserva.id))
-    setMensaje(
-      !data?.cancelacion_tardia
-        ? 'Reserva cancelada correctamente.'
-        : data?.usaba_bono
-          ? 'Reserva cancelada. Faltaban menos de 2 horas, así que la sesión de tu bono se considera consumida.'
-          : data?.reembolso === 'sin_derecho'
-            ? 'Reserva cancelada. Faltaban menos de 2 horas, así que no tienes derecho a devolución.'
-            : 'Reserva cancelada correctamente. Tu plaza ha quedado libre para otra persona.'
-    )
+    setMensaje(mensajeCancelacion(data))
     setCancelandoId(null)
-    setTimeout(() => setMensaje(''), 6000)
+    setTimeout(() => setMensaje(''), 10000)
   }
 
   return {
@@ -135,6 +136,7 @@ export default function useMisReservas() {
     reservas,
     canceladasAjenas,
     pagosSinPlaza,
+    cobrosPorReserva,
     error,
     mensaje,
     cancelandoId,

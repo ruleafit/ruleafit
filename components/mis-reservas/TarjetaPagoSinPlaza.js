@@ -3,6 +3,7 @@
 import { formatearEuros } from '../../lib/pagos/dinero.ts'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import BotonReclamar from './BotonReclamar'
+import { textoDevolucion } from '../../lib/pagos/textoDevolucion.ts'
 
 // Un pago que no llegó a dar plaza (sesión completa o cancelada al confirmarse): su devolución y cómo reclamar.
 export default function TarjetaPagoSinPlaza({ pago, onReclamar }) {
@@ -17,7 +18,7 @@ export default function TarjetaPagoSinPlaza({ pago, onReclamar }) {
       )}
       <p className="mt-2 text-sm text-amber-900">
         No se te ha podido dar la plaza. Importe: <strong>{formatearEuros(pago.importe_centimos)}</strong>.{' '}
-        {pago.estado_cobro === 'reembolsado' ? 'Devolución completada.' : 'Devolución pendiente de tramitar.'}
+        {textoDevolucion(pago.estado_cobro)}
       </p>
       <BotonReclamar reservaId={pago.cobro_id} onReclamar={onReclamar} className="mt-3" />
     </div>

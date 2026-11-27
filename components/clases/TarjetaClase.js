@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { textoPlazas } from '../../lib/formatoPlazas'
 import { estadoConfirmacionClase } from '../../lib/confirmacionClase'
-import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
+import { formatearFechaParaMostrar, formatearHoraParaMostrar } from '../../lib/formatoFecha'
 import BotonReservar from '../BotonReservar'
 import BotonCopiarCoordenadas from '../BotonCopiarCoordenadas'
 import BotonCompartir from '../BotonCompartir'
@@ -65,7 +65,7 @@ export default function TarjetaClase({ clase, indice, usuario, onReservado, onEr
         <div className="flex flex-col gap-1 text-sm text-[#6B7355]">
           <p>
             Fecha: <span className="text-[#1F2400]">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
-            <span className="text-[#1F2400]">{clase.hora}</span>
+            <span className="text-[#1F2400]">{formatearHoraParaMostrar(clase.hora)}</span>
           </p>
           {clase.duracion != null && (
             <p>

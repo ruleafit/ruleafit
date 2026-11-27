@@ -3,7 +3,8 @@
 import { Tag } from 'lucide-react'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import TituloBloque from './TituloBloque'
-import PrevisionIngreso from './PrevisionIngreso'
+import PrevisionIngreso, { COMISION_BPS_PREVISTA } from './PrevisionIngreso'
+import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 import { inputClass, labelClass, ayudaClass, tarjetaClass } from './constantes'
 
 export default function BloquePlazasPrecio({ c }) {
@@ -15,8 +16,20 @@ export default function BloquePlazasPrecio({ c }) {
           <div>
             <label className={labelClass}>Precio (€)</label>
             <input type="number" value={c.precio} onChange={(e) => c.setPrecio(e.target.value)} className={inputClass} min="0" step="0.01" />
-            <p className="mt-1 text-sm font-semibold text-[#3D4A00]">Acuerda el precio con tus alumnos.</p>
-            <p className="text-xs text-[#6B7355]">A día de hoy, el 100% es para ti.</p>
+            {PAGOS_VISIBLES ? (
+              <>
+                <p className="mt-1 text-sm font-semibold text-[#3D4A00]">Tus alumnos pagan online en Ruleafit al reservar.</p>
+                <p className="text-xs text-[#6B7355]">
+                  De cada pago se descuenta la comisión de Ruleafit ({COMISION_BPS_PREVISTA / 100} %). Tu parte se
+                  libera en tu saldo después de celebrarse la sesión. Si se cancela, se devuelve al alumno.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="mt-1 text-sm font-semibold text-[#3D4A00]">Acuerda el precio con tus alumnos.</p>
+                <p className="text-xs text-[#6B7355]">A día de hoy, el 100% es para ti.</p>
+              </>
+            )}
             <PrevisionIngreso precio={c.precio} />
           </div>
           <div>

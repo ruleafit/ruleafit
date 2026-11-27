@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { CircleCheck } from 'lucide-react'
 import { IMAGEN_POR_CATEGORIA, IMAGEN_POR_DEFECTO } from '../../lib/imagenesCategoria'
 import { estadoConfirmacionClase, textoFaltanParaConfirmar } from '../../lib/confirmacionClase'
-import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
+import { formatearFechaParaMostrar, formatearHoraParaMostrar } from '../../lib/formatoFecha'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import AvisoPlazoCancelacion from '../AvisoPlazoCancelacion'
 import BotonCalendario from '../BotonCalendario'
@@ -72,7 +72,7 @@ export default function TarjetaReservaProxima({ reserva, indice, cancelando, err
             </p>
             <p>
               Fecha: <span className="text-[#1F2400]">{formatearFechaParaMostrar(clase.fecha)}</span> · Hora:{' '}
-              <span className="text-[#1F2400]">{clase.hora}</span>
+              <span className="text-[#1F2400]">{formatearHoraParaMostrar(clase.hora)}</span>
             </p>
             {clase.duracion != null && (
               <p>
