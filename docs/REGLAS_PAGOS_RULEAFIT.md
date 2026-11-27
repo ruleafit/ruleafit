@@ -80,7 +80,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 | | Producción (`main`) | Preview (`feat/pagos-mejoras`) |
 |---|---|---|
 | Base de datos | proyecto «ruleafit» | proyecto de pruebas aparte |
-| SQL | hasta 095 y 097 | base y 095-106; 107 cuando se aplique |
+| SQL | hasta 095 y 097 | base y 095-108 |
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
@@ -88,7 +88,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 1. Revisión jurídica y fiscal: términos, condiciones de organizadores, aviso legal, privacidad.
 2. Contratar el TPV en CaixaBank y probar cobro y devolución en el entorno de pruebas de Redsys
    (`docs/prueba-devoluciones.md`). Confirmar que admite devoluciones por REST.
-3. Con los pagos apagados: SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, cada uno con su
+3. Con los pagos apagados: SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, cada uno con su
    verificación. Nada de `sql/pruebas`.
 4. Publicar la web.
 5. Variables en Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL`
@@ -151,7 +151,7 @@ Implementado en `sql/107`. Cobros reales apagados; el cobro mensual solo se ha p
 | Caducidad | Lo no usado queda para el organizador |
 | Organizador anula, bloquea, se da de baja o incumple | Se devuelve la parte no usada |
 | Cancelaciones reiteradas | 3 sesiones con alumnos de bono canceladas en 30 días: se retiene su saldo de bonos y se avisa; se decide en `/admin/alertas` |
-| Reclamación | Retiene ese cobro. «Devolver y cerrar» devuelve la parte no usada |
+| Reclamación | Sobre el bono o sobre una sesión reservada con él: retiene su cobro (`sql/108`). En la del bono, «Devolver y cerrar» devuelve la parte no usada |
 | Borrar la cuenta | Imposible con usos pendientes vendidos. Antes: «Cancelar mis bonos y devolver lo no usado» y esperar las devoluciones |
 
 **Por qué el 25 %:** el 15 % pedido al principio no dejaba usar ni una sesión en un bono de 4 o de 5. El 25 % es la
