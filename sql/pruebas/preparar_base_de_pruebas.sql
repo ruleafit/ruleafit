@@ -22,7 +22,7 @@ begin
 
   drop trigger if exists on_auth_user_created_otorgar_bienvenida on auth.users;
   create trigger on_auth_user_created_otorgar_bienvenida
-    after insert on auth.users for each row execute function public.otorgar_open_bienvenida();
+    after insert on auth.users for each row execute function public.otorgar_rulos_bienvenida();
 
   drop trigger if exists on_auth_user_invitacion on auth.users;
   create trigger on_auth_user_invitacion

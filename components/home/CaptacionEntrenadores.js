@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import RevelarAlLlegar from '../RevelarAlLlegar'
+import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 import { PUNTOS_CAPTACION_ENTRENADOR, botonPrimarioClass, botonSecundarioClass } from './constantes'
 
 export default function CaptacionEntrenadores() {
@@ -20,7 +21,9 @@ export default function CaptacionEntrenadores() {
         </h2>
         <p className="max-w-xl text-base text-white/85 sm:text-lg">
           Decides qué días trabajas, a qué hora, cuánta gente entra y cuánto cobras. Sin horario fijo, sin jefe.
-          Publicas tu sesión en dos minutos y cobras directamente a tus alumnos.
+          {PAGOS_VISIBLES
+            ? 'Publicas tu sesión en dos minutos y cobras online a través de Ruleafit.'
+            : 'Publicas tu sesión en dos minutos y cobras directamente a tus alumnos.'}
         </p>
 
         <div className="mt-4 grid w-full grid-cols-1 gap-8 sm:grid-cols-3">

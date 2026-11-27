@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 
 export const metadata = {
   title: 'Aviso legal · Ruleafit',
@@ -41,9 +42,15 @@ export default function AvisoLegalPage() {
       <p className={pClass}>
         Ruleafit <strong>actúa exclusivamente como intermediario tecnológico</strong>. No presta el servicio deportivo, no emplea a los entrenadores ni mantiene con ellos relación laboral alguna. La sesión de entrenamiento se acuerda y se ejecuta entre el Usuario y el entrenador correspondiente, siendo este último el único responsable de su contenido, desarrollo, idoneidad, titulación y aseguramiento.
       </p>
-      <p className={pClass}>
-        En la presente versión del Sitio Web <strong>no se realiza ningún cobro ni pago a través de la plataforma</strong>. El precio de la sesión, si lo hubiera, se abona directamente al entrenador fuera de la aplicación, según lo que ambas partes acuerden. Ruleafit no interviene en dicha transacción, no percibe comisión alguna y no gestiona reembolsos.
-      </p>
+      {PAGOS_VISIBLES ? (
+        <p className={pClass}>
+          El precio de las sesiones de pago <strong>se abona a través de la plataforma</strong>, con tarjeta o Bizum, en la pasarela de pago de la entidad bancaria; Ruleafit no almacena los datos de la tarjeta. Ruleafit actúa como intermediaria en el cobro y descuenta del importe una comisión que asume el organizador. Las devoluciones se tramitan según las condiciones de cancelación que se muestran antes de pagar.
+        </p>
+      ) : (
+        <p className={pClass}>
+          En la presente versión del Sitio Web <strong>no se realiza ningún cobro ni pago a través de la plataforma</strong>. El precio de la sesión, si lo hubiera, se abona directamente al entrenador fuera de la aplicación, según lo que ambas partes acuerden. Ruleafit no interviene en dicha transacción, no percibe comisión alguna y no gestiona reembolsos.
+        </p>
+      )}
       <p className={pClass}>
         El Sitio Web ofrece asimismo un sistema de puntos de fidelización denominado &quot;Rulos&quot;, de carácter meramente promocional. Los Rulos no constituyen dinero electrónico ni medio de pago, no pueden comprarse, recargarse, transferirse ni canjearse por dinero, y no otorgan derecho a contraprestación económica alguna.
       </p>

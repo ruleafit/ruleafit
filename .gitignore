@@ -42,3 +42,12 @@ next-env.d.ts
 
 # notas locales, no forman parte del proyecto
 legal/instruccion.txt
+
+# temporales, registros y salidas de herramientas
+.playwright-mcp/
+*.log
+*.tmp
+*.bak
+*.orig
+*.swp
+/sql/pruebas/todo_para_sql_editor.sql
