@@ -10,9 +10,10 @@ import AvisoPlazoCancelacion from '../AvisoPlazoCancelacion'
 import BotonCalendario from '../BotonCalendario'
 import BotonReclamar from './BotonReclamar'
 import AvisoReprogramacion from './AvisoReprogramacion'
+import CancelarReserva from '../reserva/CancelarReserva'
 import { etiquetaCuentaAtras, tipoReserva } from './datos'
 
-export default function TarjetaReservaProxima({ reserva, indice, cancelando, errorCancelacion, onCancelar, onReclamar, cambio, respondiendo, errorCambio, onResponder }) {
+export default function TarjetaReservaProxima({ reserva, indice, onCancelada, onReclamar, cambio, respondiendo, errorCambio, onResponder }) {
   const clase = reserva.clases
   const cuentaAtras = etiquetaCuentaAtras(clase.fecha)
   const imagenClase = IMAGEN_POR_CATEGORIA[clase.categoria] || IMAGEN_POR_DEFECTO
@@ -117,20 +118,9 @@ export default function TarjetaReservaProxima({ reserva, indice, cancelando, err
               Ver detalle
             </Link>
 
-            {!cambio && (
-              <button
-                type="button"
-                onClick={() => onCancelar(reserva, clase)}
-                disabled={cancelando}
-                className="corte-tag border border-red-200 px-2.5 py-1 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {cancelando ? 'Cancelando...' : 'Cancelar reserva'}
-              </button>
-            )}
+            {!cambio && <CancelarReserva reserva={reserva} clase={clase} onCancelada={onCancelada} />}
             <BotonReclamar reservaId={reserva.id} onReclamar={onReclamar} />
           </div>
-
-          {errorCancelacion && <p className="mt-2 text-xs text-red-600">{errorCancelacion}</p>}
         </div>
       </div>
     </RevelarAlLlegar>

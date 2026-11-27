@@ -322,7 +322,7 @@ function DetalleClaseContenido() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-2xl px-4 pb-44 sm:px-6 sm:pb-10">
+      <div className="mx-auto w-full max-w-2xl px-4 pb-72 sm:px-6 sm:pb-10">
         <BotonDenunciar
           tipo="sesion"
           objetivoId={clase.id}

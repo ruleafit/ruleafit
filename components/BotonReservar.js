@@ -6,6 +6,9 @@ import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
 import { vibrar } from '../lib/nativo'
 import { plazoCancelacion } from '../lib/plazoCancelacion'
 import AvisoPlazoCancelacion from './AvisoPlazoCancelacion'
+import CancelarReserva from './reserva/CancelarReserva'
+import { tipoReserva } from './mis-reservas/datos'
+import { mensajeCancelacion } from '../lib/pagos/textoDevolucion.ts'
 import BotonCalendario from './BotonCalendario'
 import { Bell } from 'lucide-react'
 import BotonAvisoPlaza from './reserva/BotonAvisoPlaza'
@@ -62,6 +65,9 @@ function claseYaPaso(clase) {
 export default function BotonReservar({ clase, onReservado, tamaño = 'normal', mostrarPlazo = false, mostrarCalendario = false }) {
   const [usuario, setUsuario] = useState(null)
   const [yaReservada, setYaReservada] = useState(false)
+  const [reserva, setReserva] = useState(null) // { id, bono_cliente_id } de la reserva activa, para poder cancelarla
+  const [mensajeCancelada, setMensajeCancelada] = useState('')
+  const [version, setVersion] = useState(0) // sube tras cancelar: se vuelve a mirar el bono
   const [comprobandoReserva, setComprobandoReserva] = useState(true)
   const [reservando, setReservando] = useState(false)
   const [errorReserva, setErrorReserva] = useState('')
@@ -152,7 +158,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
 
       const { data } = await supabase
         .from('reservas')
-        .select('id')
+        .select('id, bono_cliente_id')
         .eq('clase_id', clase.id)
         .eq('cliente_id', usuario.id)
         .eq('estado', 'activa')
@@ -160,6 +166,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
 
       if (!cancelado) {
         setYaReservada(!!data)
+        setReserva(data || null)
         setComprobandoReserva(false)
       }
     }
@@ -200,7 +207,30 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     return () => {
       cancelado = true
     }
-  }, [usuario, esMiPropiaSesion, precioClase, clase.trainer_id, clase.bonos_admitidos])
+  }, [usuario, esMiPropiaSesion, precioClase, clase.trainer_id, clase.bonos_admitidos, version])
+
+  // La ficha tiene dos botones (móvil y escritorio): al cancelar en uno se actualizan los dos.
+  useEffect(() => {
+    const alCancelar = (e) => {
+      if (e.detail.claseId !== clase.id) return
+      setYaReservada(false)
+      setReserva(null)
+      setAcabaDeReservar(false)
+      setUsadoBono(false)
+      setDesgloseAbierto(false)
+      setPrefierePagar(false)
+      setUltimaHoraAceptada(false)
+      setMensajeCancelada(e.detail.mensaje)
+      setVersion((v) => v + 1)
+    }
+    window.addEventListener('reserva-cancelada', alCancelar)
+    return () => window.removeEventListener('reserva-cancelada', alCancelar)
+  }, [clase.id])
+
+  function alCancelarAqui(data) {
+    window.dispatchEvent(new CustomEvent('reserva-cancelada', { detail: { claseId: clase.id, mensaje: mensajeCancelacion(data) } }))
+    onReservado?.(Math.max((clase.plazas_ocupadas ?? 1) - 1, 0))
+  }
 
   // Pide al servidor el formulario firmado y lleva al alumno a la página de
   // pago del banco. La plaza se concede cuando el banco confirma el pago.
@@ -309,6 +339,8 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     }
 
     setYaReservada(true)
+    setReserva(data?.reserva_id ? { id: data.reserva_id, bono_cliente_id: data.usado_bono ? true : null } : null)
+    setMensajeCancelada('')
     setAcabaDeReservar(true)
     setUsadoBono(!!data?.usado_bono)
     setReservando(false)
@@ -415,12 +447,26 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
           <p className="mt-1 text-xs text-[#6B7355]">Se ha descontado 1 sesión de tu bono con este rulero.</p>
         )}
         {mostrarCalendario && <BotonCalendario clase={clase} pregunta={acabaDeReservar} className="mt-2" />}
+        {mostrarPlazo && reserva && (
+          <>
+            <AvisoPlazoCancelacion clase={clase} variante="reserva" tipo={tipoReserva(reserva, clase)} className="mt-2" />
+            <div className="mt-2">
+              <CancelarReserva reserva={reserva} clase={clase} onCancelada={alCancelarAqui} />
+            </div>
+          </>
+        )}
       </div>
     )
   }
 
   const ventanaUltimaHora = avisoUltimaHora && (
     <AvisoUltimaHora clase={clase} onVolver={volverDeAvisoUltimaHora} onContinuar={continuarTrasAvisoUltimaHora} />
+  )
+
+  const avisoCancelada = mensajeCancelada && (
+    <p role="status" className="mb-2 corte-tag border border-[#B5E600]/60 bg-[#EDF5C9] px-3 py-1.5 text-sm font-medium text-[#3D4A00]">
+      {mensajeCancelada}
+    </p>
   )
 
   const avisoListo = avisoRetorno && (
@@ -440,6 +486,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     }
     return (
       <div>
+        {avisoCancelada}
         {avisoListo}
         {ventanaUltimaHora}
         {desgloseAbierto ? (
@@ -473,6 +520,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
 
   return (
     <div>
+      {avisoCancelada}
       {avisoListo}
       {ventanaUltimaHora}
       <button type="button" onClick={handleReservar} disabled={reservando} className={botonReservarClass(tamaño)}>

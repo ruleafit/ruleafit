@@ -27,7 +27,7 @@ Reglas de pagos: [REGLAS_PAGOS_RULEAFIT.md](REGLAS_PAGOS_RULEAFIT.md).
 - Código leído y buscado en las dos ramas. `npm run test:pagos` 81/81, `test:verificaciones` 14/14, resto 131/131 y
   `npm run build` correcto.
 - Base de **producción** (solo lista de tablas y columnas): están `sql/095` y `110`–`112`; no hay tablas de `096`–`109`.
-- Base de **pruebas** (solo lectura): tablas de `096`–`107`, `110`–`112` y `109` aplicados, igual que `108`; **`113` sin aplicar**.
+- Base de **pruebas** (solo lectura): tablas de `096`–`107`, `110`–`112` y `109` aplicados, igual que `108` y `113`.
 - No se ha probado nada con cuentas reales, con el banco ni en pantalla en esta revisión.
 
 ## 2. Mejoras realizadas del plan (✅ publicadas)
@@ -118,7 +118,7 @@ Prioridad original / complejidad entre paréntesis.
 
 1. En producción está `sql/095`, pero no su parte de web: el aviso al borrar la cuenta y el bloqueo que impide
    guardar datos fiscales con los pagos apagados (la pantalla está oculta; la ruta sí responde). Está en Preview.
-2. Aplicar `sql/113` en la base de pruebas y probar en Preview Bizum, la elección entre bono y pago, los bonos por sesión, la devolución de un bono sin sesiones y el estado de la devolución.
+2. Probar en Preview Bizum, la elección entre bono y pago, los bonos por sesión, la devolución de un bono sin sesiones y el estado de la devolución.
 3. Crons de pagos sin programar (alertas, devoluciones, renovación Pro).
 4. Publicación: en producción faltan `096`–`109` y `113`, en orden y con los pagos apagados (apartado 8 de las reglas).
    `main` tiene un commit de fusión que no está en la rama; la mezcla de prueba no da conflictos.

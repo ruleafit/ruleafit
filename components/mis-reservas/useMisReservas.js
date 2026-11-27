@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabaseClient'
-import { plazoCancelacion } from '../../lib/plazoCancelacion'
-import { tipoReserva } from './datos'
 import useReprogramaciones from './useReprogramaciones'
 import { DEVOLUCION_EN_MARCHA, mensajeCancelacion } from '../../lib/pagos/textoDevolucion.ts'
 
@@ -20,8 +18,6 @@ export default function useMisReservas() {
   const [cargandoReservas, setCargandoReservas] = useState(true)
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
-  const [cancelandoId, setCancelandoId] = useState(null)
-  const [erroresCancelacion, setErroresCancelacion] = useState({})
   // Cambios de fecha, hora o lugar pendientes de respuesta (sql/100).
   const reprogramaciones = useReprogramaciones(usuario, (reservaId, data) => {
     setReservas((prev) => prev.filter((r) => r.id !== reservaId))
@@ -92,42 +88,10 @@ export default function useMisReservas() {
     cargarReservas()
   }, [usuario])
 
-  async function handleCancelar(reserva, clase) {
-    // Con menos de 2 h se puede cancelar igualmente, pero sin devolución (o con la sesión del bono
-    // consumida): se avisa antes de confirmar.
-    const tipo = tipoReserva(reserva, clase)
-    const tardia = plazoCancelacion(clase).estado === 'cerrado'
-    let pregunta = `¿Seguro que quieres cancelar tu reserva de ${clase.titulo}? Esta acción no se puede deshacer.`
-    if (tardia) {
-      const consecuencia =
-        tipo === 'bono'
-          ? ', pero la sesión de tu bono se considerará consumida'
-          : tipo === 'pago'
-            ? ', pero no recibirás la devolución del importe pagado'
-            : ''
-      pregunta = `¿Seguro que quieres cancelar? Tu plaza quedará libre para otra persona${consecuencia}.`
-    }
-    const confirmado = window.confirm(pregunta)
-    if (!confirmado) return
-
-    setCancelandoId(reserva.id)
-    setErroresCancelacion((prev) => {
-      const siguiente = { ...prev }
-      delete siguiente[reserva.id]
-      return siguiente
-    })
-
-    const { data, error } = await supabase.rpc('cancelar_reserva', { p_reserva_id: reserva.id })
-
-    if (error) {
-      setErroresCancelacion((prev) => ({ ...prev, [reserva.id]: error.message }))
-      setCancelandoId(null)
-      return
-    }
-
-    setReservas((prev) => prev.filter((r) => r.id !== reserva.id))
+  // La cancelación la hace components/reserva/CancelarReserva; aquí solo se actualiza la lista.
+  function alCancelar(reservaId, data) {
+    setReservas((prev) => prev.filter((r) => r.id !== reservaId))
     setMensaje(mensajeCancelacion(data))
-    setCancelandoId(null)
     setTimeout(() => setMensaje(''), 10000)
   }
 
@@ -139,9 +103,7 @@ export default function useMisReservas() {
     cobrosPorReserva,
     error,
     mensaje,
-    cancelandoId,
-    erroresCancelacion,
-    handleCancelar,
+    alCancelar,
     reprogramaciones,
   }
 }

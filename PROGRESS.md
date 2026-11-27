@@ -1,1025 +1,155 @@
-# Ruleafit — Progreso del proyecto
+# Ruleafit — Estado actual
 
 Última actualización: 27 noviembre 2026
 
-## Estado actual (27 noviembre 2026)
-Estado punto por punto del plan de mejoras: `docs/PLAN_MEJORAS_RULEAFIT.md`. Reglas de pagos: `docs/REGLAS_PAGOS_RULEAFIT.md`. Las secciones de abajo son historial: lo que digan de «sin aplicar» o «pendiente» puede estar superado por este bloque.
+Este archivo es solo el estado actual: qué está hecho, qué falta, ramas y SQL. El historial completo (decisiones,
+pruebas e incidencias, fase a fase) está íntegro en `docs/historial/PROGRESS_HISTORIAL.md`: **no hace falta leerlo**
+salvo para investigar por qué se hizo algo; en ese caso, buscar con Grep el tema y leer solo ese tramo. Al terminar un
+trabajo se actualiza este archivo (corto) y, si hay detalle que conservar, se añade al final del historial.
 
+| Para saber | Mirar |
+|---|---|
+| Reglas y decisiones de producto, mapa de carpetas | `CLAUDE.md` |
+| Estado punto por punto del plan de mejoras | `docs/PLAN_MEJORAS_RULEAFIT.md` |
+| Reglas de pagos, bolsas y bonos, y checklist antes de cobrar | `docs/REGLAS_PAGOS_RULEAFIT.md` |
+| Probar en Preview con la base de pruebas | `docs/pruebas-preview.md` |
+
+## 1. Ramas y entornos
 | | `main` (producción) | `feat/pagos-mejoras` (Preview) |
 |---|---|---|
-| Código | Hasta verificaciones de perfil y `/admin` | Además: pagos, Plan Pro y bonos |
-| SQL comprobado | `095` y `110`–`112` aplicados; sin tablas de `096`–`109` (`097` aplicado según las reglas, no comprobado) | `096`–`112`; **falta `113`** |
-| Pagos | Apagados | Activos con TPV simulado |
-
-- Plan del 25/11: 15 publicadas, 5 hechas en Preview (31, 35–38), 4 parciales (12, 30, 32, 33), 35 pendientes.
-- `feat/verificaciones-perfil` y `prueba-avisos-zona` están integradas en `feat/pagos-mejoras`. `feat/redsys-devoluciones` (`520937e`) y `fix/eliminar-cuenta-pagos` (`8326321`) se borraron el 27/11: su contenido ya estaba en la rama de pagos.
-- Comprobado el 27/11: `test:pagos` 81/81, `test:verificaciones` 14/14, resto 131/131 y build correcto.
-
-### Pendiente técnico
-- Liquidaciones (SEPA), autofacturas, facturas de Pro y contracargos.
-- Hecho en local, sin commit (27/11): elegir tarjeta o Bizum en sesiones sueltas, elección del alumno entre canjear su bono o pagar, bonos admitidos por sesión con protección del comprador (`sql/113`) y estado de la devolución en Reclamaciones.
-- Aplicar `113` en pruebas; programar los crons de pagos; probar en Preview los casos sin cubrir.
-- Producción: la parte web de `095` solo está en la rama (con pagos apagados la ruta de datos fiscales responde).
-- Antes de activar pagos: `096`–`109` y `113` en orden y publicar la web (apartado 8 de las reglas).
-
-### Pendiente externo
-- Banco: TPV contratado, devoluciones REST, cobro recurrente, claves y pruebas, fichero de transferencias.
-- Asesor: cobro por cuenta de terceros, IVA, IRPF, autofacturas, modelo 238, zonas especiales.
-- Jurista: términos y condiciones, privacidad (incluidas verificaciones), edad 14/18, desistimiento.
-
-## Verificaciones de perfil (27 noviembre 2026) — publicado en `main`
-Hecho:
-- Insignias «Identidad verificada», «Centro verificado» y «Titulación declarada/acreditada» (sql/110-112), independientes de los pagos. Identidad y centro se comprueban automáticamente (lectura local, casos dudosos a mano); los documentos solo los ve el administrador. Cola en /admin/verificaciones y denuncias de titulaciones en /admin/denuncias.
-- RuleaFit usa exclusivamente Redsys: retiradas las menciones antiguas a otras pasarelas.
-
-Pendiente:
-- Probar la lectura automática con documentos reales en Preview.
-- sql/110, 111 y 112 aplicados en pruebas y en producción (comprobado el 27/11 por tablas, columnas y funciones; no consta ejecutado el script de verificación en producción).
-- Revisión jurídica del apartado de verificación de la política de privacidad.
-
-## Fase 0 · Entorno base — completada
-- Node, VS Code y Git instalados.
-- Proyecto Next.js creado y subido a GitHub.
-
-## Fase 1 · Cuentas y sesión — completada
-- Registro real con Supabase (app/registro).
-- Login (app/login).
-- Página /cuenta: ver usuario/rol y cerrar sesión.
-- Roles cliente/entrenador guardados en user_metadata.rol.
-- Confirmación de email desactivada (solo desarrollo).
-- Conector lib/supabaseClient.js, claves en .env.local.
-- Home personalizada con botones a login/registro.
-
-## Fase 2 · Clases — completada
-Hecho:
-- Tabla clases en Supabase con RLS.
-- /publicar: formulario con mapa real (Leaflet) para lat/lng.
-- /clases: listado en tarjetas (dirección, punto de encuentro, coordenadas).
-- Restricción "solo entrenadores publican" (interfaz + política RLS).
-- Menú de navegación (roles, indicador animado bajo enlace activo, botones de acción).
-- Detalles estéticos: formulario de /publicar centrado por secciones, tarjetas de /clases con indicador de plazas libres.
-- Filtros en /clases: por ciudad y categoría, aplicados al instante, con mensaje de estado vacío.
-- Ficha de detalle de cada clase (/clases/[id]) con mapa de solo lectura, gestión de clase no encontrada y enlace "Ver detalle" en las tarjetas.
-- Mapa en /clases con marcador por clase y popup resumen, filtros de ciudad/categoría/cuándo (hoy, mañana, próximos 7 y 30 días)/franja horaria, exclusión permanente de clases canceladas o con fecha pasada.
-
-Falta:
-- Ninguno.
-
-## Fase 3 · Reservas — completada
-Hecho:
-- Tabla reservas con RLS, índice único para evitar reservas duplicadas, y función RPC reservar_clase() con bloqueo de fila para evitar sobreventa (sql/001_reservas.sql, ejecutado en Supabase).
-- Botón Reservar (components/BotonReservar.js) en tarjetas y ficha de detalle, con estados según sesión, rol, aforo, clase pasada/inactiva y reserva ya existente. Llama a la función RPC reservar_clase() y actualiza el contador de plazas al momento.
-- Página /mis-reservas: lista de reservas activas del cliente ordenadas por fecha, restringida por rol, con enlace en el menú visible solo para clientes.
-- Panel del entrenador (/mis-clases): función RPC segura reservas_de_mis_clases() y página que agrupa las reservas por clase, con email y fecha de reserva de cada cliente.
-- Cancelación de reservas (/mis-reservas): función RPC segura cancelar_reserva(), botón con confirmación, mensaje informativo según si quedaban 2h o más (sin cargo real todavía, pendiente de la cartera en Fase 4).
-
-Falta:
-- Ninguno.
-
-## Nombres de usuario (previo a Fase 4)
-Hecho:
-- Tabla perfiles con generación automática al registrarse (trigger), backfill de cuentas existentes, comprobación de disponibilidad antes de registrarse o cambiar de nombre (username_disponible), campo de nombre de usuario en /registro, edición desde /cuenta, y panel del entrenador (Mis clases) mostrando nombre de usuario en vez de email por privacidad.
-
-## Fase 4 · Open (puntos de fidelización) — completada
-Hecho:
-- Sistema de Open completo: tablas open_saldos/open_movimientos/open_motivos con RLS, bienvenida automática (20 Open) al registrarse, asistencia confirmada (5 Open) marcada por el entrenador vía marcar_asistencia() con corrección mediante movimiento compensatorio, saldo e historial visibles en /cuenta, botones de asistencia en /mis-clases.
-
-Falta:
-- Ninguno.
-
-## Mínimo de plazas y cancelación de clase (post Fase 4)
-Hecho:
-- Campo plazas_min en /publicar y aviso visual de "pendiente de confirmación" en tarjetas/ficha.
-- Botón "Cancelar esta clase" para el entrenador en /mis-clases (función cancelar_clase, cancela la clase y todas sus reservas activas).
-- Aviso claro en /mis-reservas cuando una reserva fue cancelada por el entrenador (cancelada_por_entrenador), en sección separada.
-- Corregido un bucle de recursión en las políticas RLS de clases/reservas surgido al implementar esto (sql/010_arreglo_recursion_rls.sql).
-
-## Pantalla de inicio tras login/registro (post Fase 4)
-Hecho:
-- Home (/) muestra botones grandes con iconos según rol (entrenador: Clases/Mis clases/Publicar/Mi cuenta; cliente: Clases/Mis reservas/Mi cuenta) cuando hay sesión iniciada.
-- Login y registro redirigen automáticamente a esta pantalla.
-- Enlace "Inicio" añadido al menú de navegación.
-
-## Fase 5 · Pulido y lanzamiento — en curso
-Hecho:
-- Despliegue en Vercel: producción en https://openfit-five.vercel.app.
-- Variables NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY configuradas en Vercel (valores no documentados aquí).
-- En Supabase se añadieron el Site URL y las Redirect URLs de producción, manteniendo también las de localhost.
-- Corregido el título de la pestaña del navegador ("Create Next App" → "Openfit").
-- Rediseño visual completo, responsive desde el principio:
-  - Base visual compartida: paleta de marca en app/globals.css, tipografía de titulares, y animaciones (aparición al hacer scroll vía IntersectionObserver en components/RevelarAlLlegar.js, hover de tarjetas que se elevan, zoom lento de imágenes), todo respetando prefers-reduced-motion.
-  - Portada (/) rehecha: hero a pantalla casi completa con parallax suave, franja de categorías, franja de comunidad y sección de tres puntos con iconos.
-  - /clases rediseñada: cabecera con imagen de fondo, filtros en píldora con acento lima, tarjetas con imagen según categoría, estado vacío con icono y botón para limpiar filtros.
-  - /mis-reservas rediseñada: cabecera propia, imagen por categoría en cada tarjeta, franja de color en el borde izquierdo según estado (próxima en lima, ya pasada en gris, cancelada por el entrenador en rojo suave) y etiqueta de cuenta atrás ("faltan N días" / "es mañana" / "es hoy").
-  - /cuenta rediseñada: cabecera con imagen desenfocada, saldo de Open destacado en tarjeta propia justo debajo de la cabecera, historial de movimientos con el nuevo estilo.
-- Categorías de clase reducidas de seis a cuatro (Fuerza / funcional, Cardio, Yoga / Pilates / movilidad, Otros); los datos de las clases existentes se migraron manualmente en Supabase con UPDATE. El mapa de imagen por categoría vive en lib/imagenesCategoria.js, compartido entre /clases y /mis-reservas.
-- Imágenes del proyecto en public/imagenes (portada, fuerza, running, yoga, combate, comunidad), descargadas de Pexels con licencia gratuita de uso comercial.
-- Giro estratégico de mensajes: los textos ya no prometen exclusivamente entrenamiento al aire libre ni en grupo, de cara a abrirse en el futuro a gimnasios y a entrenamientos individuales o en pareja.
-- Captación de entrenadores en la portada sin sesión: hero único sin dividir en dos columnas (se descartó por obligar a elegir bando sin contexto y restar impacto); sección propia añadida debajo de la franja de categorías, visualmente diferenciada con fondo verde muy oscuro, línea introductoria "¿Eres entrenador?" en lima, titular "Tú pones las reglas.", cuerpo, tres puntos de apoyo con iconos y botón a /registro, visible solo sin sesión iniciada. Enlace discreto "¿Eres entrenador?" añadido al menú de navegación (solo sin sesión), con scroll suave hasta esa sección (`scroll-behavior: smooth` en app/globals.css, respetando prefers-reduced-motion).
-- Portada diferenciada con sesión iniciada: hero más corto (45vh en vez de 85vh) con saludo "Hola, [usuario]" y "¿Qué entrenas hoy?" en vez del mensaje de venta, manteniendo la rejilla de accesos con el mismo protagonismo; sin sesión el hero queda exactamente igual que antes.
-- Rediseño de /publicar con la misma base visual del resto de la app: cabecera con imagen y degradado, campos agrupados en tarjetas con título (componente TituloBloque: icono + barra lima + texto en verde oscuro), textos de ayuda bajo los campos que lo necesitaban, y mensajes de éxito/error con icono.
-- /mis-alumnos renombrada a /mis-clases (ruta, enlaces del menú y de la portada, y todos los textos visibles), y rediseñada con la misma base visual: cabecera propia, cada clase en su tarjeta con imagen según categoría, lista de alumnos con el estado de asistencia diferenciado visualmente, botón "Cancelar esta clase" separado del resto de acciones y en rojo discreto, y estado vacío con icono y botón a /publicar cuando el entrenador no tiene ninguna clase.
-- Nueva función mis_clases() (sql/011_panel_entrenador_y_contador.sql): el entrenador ve todas sus clases en /mis-clases aunque todavía no tengan ninguna reserva (antes, al depender solo de reservas_de_mis_clases(), una clase recién publicada y sin apuntados no aparecía); reservas_de_mis_clases() se mantiene intacta y sigue siendo la única fuente de la lista de alumnos por clase.
-- Corregido cancelar_clase() (mismo archivo): al cancelar una clase entera, ahora deja plazas_ocupadas a 0 en el mismo UPDATE que marca la clase como cancelada, evitando que el contador quedara desincronizado (antes se cancelaban las reservas pero el contador se quedaba congelado con el valor previo).
-- Las plazas se muestran según quién mira, no según la página: ocupadas ("3/10 plazas ocupadas") para el entrenador, libres ("Quedan 7 plazas") para el cliente o sin sesión, mediante lib/formatoPlazas.js, aplicado en /clases, /clases/[id] y /mis-clases.
-- Aviso de "pendiente de confirmación" (según plazas_min) añadido también en /mis-reservas (antes solo estaba en /clases y /clases/[id]) y en /mis-clases (con confirmación en verde "Mínimo alcanzado" cuando ya se llega al mínimo); la condición se extrajo a lib/confirmacionClase.js para no duplicarla en las cuatro páginas.
-- Edición de clases publicadas: función RPC editar_clase() (sql/012_editar_clase.sql, corregida en sql/013_arreglo_suelo_plazas_min.sql para que el suelo de 1 en plazas_min no bloquee la edición de clases que se publicaron sin mínimo), página app/mis-clases/[id]/editar/page.js (carga la clase vía mis_clases(), mensaje claro si no se puede editar —no existe/no es tuya, está cancelada, ya ha pasado o falta menos de 2h—, formulario con los campos libremente editables y plazas_min/plazas_max con su restricción de dirección aplicada también en el cliente, resto de campos de solo lectura) y botón "Editar" en las tarjetas de /mis-clases, visible solo cuando la clase es editable.
-- Portada adaptada al entrenador con sesión iniciada: debajo del hero, bloque con sus cifras (clases activas, reservas acumuladas y próxima clase) obtenidas de mis_clases(); si no tiene ninguna clase publicada, un estado vacío con llamada a publicar la primera en su lugar; los tres puntos con iconos pasan a sus mensajes ("Tu horario, tus normas", "Tú fijas el precio y las plazas", "Cobras directo, sin intermediarios"); la franja de categorías y la franja de comunidad (ambas dirigidas al cliente) se ocultan para el entrenador, sustituyendo la segunda por una llamada a publicar una clase nueva.
-- Rediseño de la ficha de detalle de clase (/clases/[id]): cabecera con imagen según categoría y título destacado, información agrupada en bloques con jerarquía clara (fecha/hora/duración primero, precio destacado, plazas con aviso de confirmación, detalles, ubicación), botón de reservar fijo en la parte inferior de la pantalla en móvil, botón "Cómo llegar" que abre Google Maps con las coordenadas de la clase, y el botón de copiar coordenadas extraído a components/BotonCopiarCoordenadas.js, compartido con /clases para no duplicar el comportamiento.
-- Rediseño de /login y /registro con la base visual del resto de la app y una cabecera de marca compartida entre ambas (logo Openfit y frase breve, sin imagen pesada), con enlace claro entre las dos páginas. Sin tocar el flujo de creación de cuenta, la asignación de rol ni el trigger de perfiles/username.
-- Casilla obligatoria de mayoría de edad en /registro, justo antes de "Crear cuenta", con el texto "Declaro ser mayor de 18 años y acepto el aviso legal." ("aviso legal" enlazado a /aviso-legal, se abre en pestaña nueva sin perder lo escrito). El registro se bloquea si no está marcada; el dato no se guarda en Supabase, solo se impide el registro.
-- Errores de Supabase traducidos al español en /login y /registro en lugar del texto crudo en inglés ("Invalid login credentials" -> "El correo o la contraseña no son correctos.", email ya registrado -> "Ya existe una cuenta con este correo.", resto -> mensaje genérico en español). Estado de carga ("Creando cuenta...") diferenciado visualmente del de error.
-- Aviso legal actualizado (legal/aviso-legal.md y app/aviso-legal/page.js): ya no describe el servicio solo como "sesiones de entrenamiento al aire libre", coherente con la apertura futura a gimnasios y a entrenamientos individuales o en pareja.
-- Etiqueta de asistencia en la lista de alumnos de /mis-clases: ahora solo aparece en clases ya pasadas y dice "Sin marcar" (antes se mostraba también en clases futuras y se confundía con el aviso de "pendiente de confirmación" de la clase).
-- Clase de prueba "x" eliminada de la base de datos: primero un SQL de solo lectura para comprobar si tenía reservas (sql/014_comprobar_clase_x.sql), y después un borrado acotado por IDs exactos de la clase y su reserva, en una transacción (sql/015_borrar_clase_x.sql). Ambos versionados en el repo.
-- Tabla public.clases versionada por fin en sql/016_tabla_clases.sql: definición reproducible (create table if not exists) con las 22 columnas y sus tipos/defaults reales, la PK, el CHECK de plazas_min, la FK a auth.users con on delete cascade, el enable row level security y las tres políticas RLS (crear solo entrenadores, editar las propias, ver activas o reservadas), reflejando el estado real en Supabase a 27 julio 2026. La función usuario_tiene_reserva_en_clase que usa la política ya estaba versionada en sql/010.
-- Versión de Node fijada con "engines": "24.x" en package.json, alineada con la versión que usa Vercel.
-- PWA: la web ya se puede añadir a la pantalla de inicio del móvil. Manifest generado por código en app/manifest.js (nombre, descripción, start_url, display standalone, colores de marca: fondo crema #FBFAF3 y theme lima #B5E600, iconos 192 y 512). export const viewport con themeColor lima en app/layout.js. Iconos openfit-icon-192.png y openfit-icon-512.png en public/ (pin de ubicación sobre una mancuerna, fondo lima).
-- Botón de instalación de la PWA "Ten Openfit a mano" (components/BotonInstalarApp.js), insertado en la portada tras el hero y visible para todos los visitantes en móvil: en Android/Chrome lanza el diálogo nativo de instalación (evento beforeinstallprompt), en iPhone/Safari abre un panel con instrucciones para añadir a pantalla de inicio, y se oculta en ordenador o si la app ya está instalada. El margen vertical vive en el propio componente para no dejar hueco cuando no se muestra.
-- Registro preparado para la confirmación de email (app/registro/page.js): signUp ahora captura data y, si no hay sesión (confirmación activada), muestra un mensaje de éxito pidiendo revisar la bandeja de entrada y la carpeta de spam en lugar de redirigir. Con la confirmación desactivada el comportamiento no cambia (sigue entrando directo). El código queda listo para cuando se active.
-- Campo "modalidad" renombrado a "tipo_actividad" y cambiado de significado: antes era "presencial/online", ahora es texto libre para el tipo de actividad (zumba, boxeo, running...). Tocó código (publicar, editar, ficha de detalle y tarjetas usan tipo_actividad con la etiqueta "Tipo de actividad") y base de datos: sql/017 renombró la columna, sql/018 recreó editar_clase con el parámetro p_tipo_actividad (hizo falta DROP FUNCTION + CREATE porque Postgres no permite renombrar un parámetro con CREATE OR REPLACE, restaurando después el grant execute a authenticated), y sql/016 actualizado para reflejar la columna renombrada. CLAUDE.md también actualizado.
-- Flujo completo probado de punta a punta en producción (registro como entrenador y como cliente, publicar clase, buscar y filtrar, reservar, cancelar) antes de repartir la beta.
-- Retirada la frase "al aire libre" del subtítulo de /clases (coherente con el giro de mensajes hacia gimnasios e individual/pareja).
-- Portada de entrenador: el tercer punto "Cobras directo, sin intermediarios" cambiado a "Cobros y reservas automáticos" (el anterior dejaría de ser cierto al introducir comisión en los pagos).
-- /clases: las clases cuya fecha+hora de inicio ya pasó dejan de mostrarse en el listado y el mapa. Antes el filtro comparaba solo la fecha (no la hora) y no usaba zona horaria de Madrid; ahora usa claseYaPaso() de lib/. Las clases no se borran, solo se ocultan.
-- /mis-reservas rediseñada: reservas próximas arriba (en color), historial de pasadas abajo (en gris atenuado) bajo el título "Historial", y bloque de canceladas por el entrenador movido justo debajo de las próximas y recoloreado en rojo suave. Las canceladas se ocultan pasada 1h de su hora de inicio (horasHastaClase). Eliminadas copias locales duplicadas de claseYaPaso.
-- /mis-clases (entrenador): mismo tratamiento de historial (próximas arriba, pasadas abajo atenuadas bajo "Historial"). La tarjeta se extrajo a renderTarjeta(clase, indice, atenuada); la gestión de asistencia sigue funcionando en las clases pasadas del historial.
-- Se muestra el username del entrenador de cada clase en /clases, en la ficha de detalle /clases/[id] y en /mis-reservas (incluido el bloque de canceladas, que ahora dice "Cancelada por el entrenador @username"). En negrita y verde de marca sobre fondo claro, adaptado al tono del contexto en historial y canceladas. Requirió sql/019: una FK clases.trainer_id -> perfiles.id para habilitar el embed perfiles(username) de Supabase, y ampliar la política RLS de perfiles a lectura pública (to public) porque /clases es pública y el username no es dato sensible. sql/019 ya ejecutado en Supabase.
-- Botón de instalar la PWA: las instrucciones para iPhone del panel de iOS ahora cubren tanto el flujo antiguo (botón Compartir directo) como el nuevo de iOS reciente (tres puntos, Compartir, Ver más, Añadir). Verificado en un iPhone reciente: se leen bien y la lista <ol> no duplica el número de cada paso.
-- Etiqueta visual "Dirección" cambiada a "Zona" en toda la interfaz de clases (formulario de /publicar, con placeholder de ejemplo "Ej: Nervión, o C/ Larios"; ficha de detalle con prefijo "Zona:"; listado /clases; /mis-reservas; edición de clase). Solo cambió el texto visible: la columna de la base de datos y el nombre del campo/estado en el código siguen llamándose "direccion".
-- Mejoras en el mapa de clases (components/MapaClases.js):
-  - Botón "Ver detalles" dentro del popup de cada clase, enlazando a la ficha /clases/[id], para no tener que buscar la clase en el listado tras localizarla en el mapa.
-  - Marcadores diferenciados por categoría con forma + color en vez del pin azul único: círculo amarillo #F2C037 (Fuerza / funcional), triángulo rojo #E5533D (Cardio), cuadrado azul #3D8BFF (Yoga / Pilates / movilidad), rombo morado #9B5DE5 (Otros), círculo gris #9AA0A6 por defecto. Cada marcador es un L.divIcon con SVG y un pico inferior que señala la ubicación exacta (icono anclado en la punta). Se usan formas además de colores para no depender solo del color (accesible para daltonismo).
-  - Leyenda discreta debajo del mapa con cada forma+color junto a su categoría.
-
-Nota (decisión de producto): un usuario tiene un único rol (cliente o entrenador), guardado en user_metadata.rol al registrarse. Si un entrenador quiere reservar clases, hoy tiene que crearse otra cuenta como cliente; no se implementa doble rol por ahora. Se preguntará en la beta si merece la pena permitirlo.
-
-Nota (decisión de producto, 4 agosto 2026) — SUPERADA el 30 octubre 2026: manda la asistencia automática (sql/057, commit 6a39dc4 del 29 agosto); la web ya no tiene marcado manual. Texto original: se mantiene el marcado manual de asistencia (asistio/no_asistio) por el entrenador tal como está, a propósito; descartado implementar el marcado automático a las 24h que figuraba antes en pendientes. El marcado manual crea un incentivo cruzado sano: el entrenador marca "asistio" para que el cliente pueda valorarlo, y el cliente le presiona para que lo haga.
-
-Nota (hallazgo técnico, resuelto el 2 agosto 2026): se creía que la tabla public.clases y sus políticas RLS no estaban versionadas en sql/, pero sí lo estaban: sql/016_tabla_clases.sql (tabla, RLS y las tres políticas), sql/019 (FK adicional a perfiles) y sql/010 (función usuario_tiene_reserva_en_clase, usada por la política de SELECT). Verificado el 2 agosto 2026 contra la definición real en Supabase, sin diferencias.
-
-Nota (decisión de marca pendiente, 7 agosto 2026): el nombre "Openfit" hay que cambiarlo sí o sí, ya que es una marca ya registrada por otra empresa del sector fitness (fitness/apps), con riesgo legal si el proyecto crece; openfit.com y openfit.es están cogidos. Candidato actual guardado: "Ruleafit", comprobado libre de dominio (.com) y sin marca previa aparente, pendiente de confirmar como decisión firme. En pruebas de dictado por voz sin contexto, el final "-fit" se falla a veces (se oye como -fic/-cit/-pick), aunque con contexto de app de deporte se acierta mejor; si se confirma el nombre, conviene comprar también ruleafic.com como red de seguridad. Cuando el nombre esté decidido al 100%, cambiar "Openfit" por el nuevo en: cabecera (menú superior), pie de página, página de inicio y el nombre del acceso directo/PWA en móvil (manifest), además de revisar textos legales, correo y metadata donde aparezca. De momento se mantiene "Openfit" en toda la app; no se cambia nada todavía.
-
-Nota (checklist de rename, 12 agosto 2026): Rename Openfit -> [nombre final]: revisar en TRES grupos:
-- Código: búsqueda global de "openfit"/"Openfit"/"OpenFit" en todo el proyecto (interfaz, layout, manifest PWA, textos legales, remitente y asunto del correo de feedback en app/api/avisar-feedback/route.js).
-- Plantillas de correo de Supabase (Authentication -> Emails): "Confirm signup" y "Reset password" llevan "Openfit" en asunto y cuerpo; revisar también cualquier otra plantilla que se active.
-- Configuración en paneles: nombre visible del remitente en el Custom SMTP de Supabase (ahora "Openfit").
-
-Beta lanzada (en curso):
-- Beta repartida a ~30 personas del círculo cercano (~6 entrenadores, resto clientes), sin confirmación de email, con mensajes de WhatsApp distintos por rol. La app corre en producción (Vercel + Supabase); la gente la está usando durante una semana como si fuera real.
-- Recogiendo errores y sugerencias (estéticas y de funcionalidad) para ir corrigiendo. IMPORTANTE: al haber gente usando la app en vivo, extremar el cuidado con lo que se sube a main.
-
-## Perfil público de entrenador (durante la beta)
-Hecho:
-- Base de datos: columnas descripcion (text, máx. 300 caracteres vía CHECK) y foto_url (text) añadidas a public.perfiles (sql/020_perfiles_descripcion_foto.sql, ya ejecutado en Supabase).
-- Storage: bucket público "avatares" creado en Supabase Storage, con políticas RLS (lectura pública; subir/actualizar/borrar solo el propio archivo, en la ruta {user_id}/avatar.jpg) (sql/021_storage_avatares_politicas.sql, ya ejecutado).
-- /cuenta: los entrenadores (rol === 'entrenador') pueden editar su descripción (textarea con contador X/300) y subir su foto de perfil, guardando ambas con un único botón "Guardar perfil". La foto se comprime en el propio navegador antes de subir (canvas, máx. 800px en el lado mayor, JPEG calidad 0.8, sin librerías externas), se sube a avatares/{user.id}/avatar.jpg con upsert, y se guarda la URL pública con un parámetro de versión para evitar problemas de caché del navegador.
-- /cuenta reorganizada: para entrenadores, un único bloque "Perfil del entrenador" arriba del todo fusiona foto + descripción + correo + nombre de usuario + cambiar nombre de usuario (este último mantiene su propio botón y su lógica intactos); para clientes se mantiene el bloque de correo + username como estaba. El contenido de correo/username se extrajo a un fragmento JSX reutilizable para no duplicarlo entre ambos casos.
-- El avatar circular de la cabecera de /cuenta muestra ahora la foto de perfil si existe, con la inicial como reserva si no la hay.
-- Página pública nueva app/entrenador/[username]/page.js, accesible sin sesión iniciada: busca el perfil por username (insensible a mayúsculas) y muestra foto (o inicial), @username, descripción y número de clases activas (trainer_id + estado 'activa', descartando las ya pasadas con claseYaPaso()). Si el perfil no tiene ni foto ni descripción, muestra "Este entrenador aún no ha completado su perfil."; si el username no existe, pantalla de "Entrenador no encontrado" con enlace de vuelta a /clases. Incluye un hueco {/* TODO: valoraciones */} preparado para el futuro.
-- El @username del entrenador es ahora un enlace a su perfil público en /clases, en la ficha /clases/[id] y en las tres tarjetas de /mis-reservas (próximas, canceladas e historial).
-
-Falta:
-- Ninguno.
-
-Otros pendientes menores (sin prioridad asignada):
-- Pulido fino según el feedback de la beta.
-- Doble rol cliente + entrenador (ver nota en Fase 5): aplazado hasta que el modelo de negocio esté más consolidado.
-- Notificaciones push web: bloque completo (motor, eventos directos, recordatorios programados, preferencias y centro de notificaciones), ver "Notificaciones push (Bloque B + C + sub-bloque 7: completo)".
-
-## Mapa de clases: clustering y ubicación del cliente (durante la beta)
-Hecho:
-- Clustering de marcadores (components/MapaClases.js): instalada la librería react-leaflet-cluster (v4.1.3, compatible con React 19 y react-leaflet 5; instalación limpia, sin --force ni --legacy-peer-deps), con sus dos CSS importados manualmente (MarkerCluster.css y MarkerCluster.Default.css). Los marcadores de clases cercanas se agrupan en una burbuja al alejar el zoom y se separan al acercar; burbuja verde oscuro #3D4A00 con el número en blanco, mediante icono personalizado vía iconCreateFunction.
-- Ubicación del cliente en el mapa (components/MapaClases.js): botón "Ver mi ubicación" (control flotante sobre el mapa) que usa la Geolocation API del navegador (getCurrentPosition, una sola lectura) para centrar el mapa en la posición del cliente (zoom 14). Marcador de punto azul estilo Google Maps (#1A73E8) con halo translúcido y borde blanco, colocado fuera del grupo de clustering (no se agrupa con las clases) y con zIndexOffset alto para quedar siempre por encima de los marcadores de clase. Si el permiso se deniega, falla la geolocalización o el navegador no la soporta, se muestra un aviso discreto y el mapa sigue funcionando sin el marcador de usuario.
-
-## Correcciones varias (1 agosto 2026)
-Hecho:
-- Fix del zoom automático de Safari en iPhone al enfocar campos de formulario: regla en app/globals.css que fija font-size 16px en input/select/textarea solo en móvil (@media max-width: 640px), sin tocar el tamaño en escritorio.
-- Descripción del entrenador ampliada de 300 caracteres a 300 palabras: contador de palabras y validación al guardar en /cuenta (no deja guardar si se superan las 300 palabras), y CHECK de la base de datos ampliado de 300 a 3000 caracteres como red de seguridad, no como límite real (sql/022_ampliar_limite_descripcion.sql, ya ejecutado en Supabase).
-
-## Contador de clases realizadas (2 agosto 2026)
-Hecho:
-- /mis-clases: en clases ya pasadas sin ninguna reserva, ya no aparece el mensaje "Todavía no se ha apuntado nadie. En cuanto alguien reserve, lo verás aquí." (pensado para clases futuras); ahora muestra "Esta clase no tuvo reservas.", solo cuando claseYaPaso() confirma que la clase ya pasó. En clases futuras sin reservas el mensaje original se mantiene igual.
-- Contador de "clases realizadas" para ambos roles, sin RPCs ni consultas nuevas donde ya había datos cargados:
-  - /mis-reservas (cliente): texto discreto junto al título "Historial" con el número de reservas cuya asistencia = 'asistio', derivado de los datos ya cargados (se amplió el select de reservas para incluir la columna asistencia).
-  - /mis-clases (entrenador): mismo texto discreto junto a "Historial", contando las clases ya pasadas (claseYaPaso()) que no están canceladas, derivado de clasesConAlumnos ya cargado.
-  - /cuenta: tarjeta destacada "Clases realizadas" junto a "Open acumulados", mismo estilo (icono en círculo, número grande, etiqueta). Aquí sí hizo falta una consulta nueva por rol, ya que /cuenta no cargaba ni clases ni reservas: para clientes, cuenta de reservas con asistencia = 'asistio'; para entrenadores, clases propias no canceladas filtradas por claseYaPaso(). En los tres sitios se usa el valor real guardado en base de datos, 'asistio' sin tilde (columna reservas.asistencia, ver sql/006_open_fidelizacion.sql).
-
-## Feedback de usuarios y valoraciones de entrenadores (2 agosto 2026)
-Hecho:
-- Feedback de usuarios ("Ayuda"): nueva tabla public.feedback en Supabase (id, user_id, mensaje, created_at; CHECK de mensaje entre 1 y 5000 caracteres y no vacío; RLS con política de INSERT solo del propio usuario autenticado, auth.uid() = user_id, y sin política de SELECT para usuarios normales, ya que el feedback se revisa desde el panel de Supabase con la service role, que se salta RLS). Nueva página /ayuda con formulario (solo para usuarios con sesión iniciada; sin sesión, mensaje pidiendo iniciar sesión) que guarda el mensaje con un insert; textarea con contador y límite de 5000 caracteres (coherente con el CHECK de la base de datos, ampliado desde 1000 iniciales). Enlace "Ayuda" añadido al footer (components/PieDePagina.js). SQL versionado en sql/023_tabla_feedback.sql y sql/024_ampliar_limite_feedback.sql, ambos ya ejecutados en Supabase. Hecho (11 agosto 2026, Bloque D): aviso por correo al admin al recibir feedback, vía trigger pg_net + ruta /api/avisar-feedback con Resend. Ver sección Después de la beta.
-- Valoraciones de entrenadores: nueva tabla public.valoraciones (cliente_id y entrenador_id referencian perfiles.id; estrellas de 1 a 5; opinion opcional, hasta 750 caracteres en base de datos como red de seguridad y 100 palabras como límite real controlado en frontend; UNIQUE(cliente_id, entrenador_id) para una única valoración por par, editable). RLS: SELECT público (nota media y opiniones visibles sin sesión); INSERT/UPDATE solo del propio cliente y solo si ha asistido a alguna clase del entrenador valorado (EXISTS sobre reservas + clases con asistencia = 'asistio'); sin política de DELETE. SQL en sql/025_tabla_valoraciones.sql, ya ejecutado en Supabase.
-  - Perfil público del entrenador (app/entrenador/[username]/page.js): nota media + número de valoraciones + botón "Ver opiniones", visibles para cualquiera (visitantes sin sesión, clientes y el propio entrenador viendo su perfil). Formulario para valorar (1 a 5 estrellas clicables + opinión opcional con contador de palabras) solo para clientes que han asistido a una clase del entrenador; si el cliente ya tiene una valoración, el formulario carga sus valores y funciona en modo edición (upsert con onConflict cliente_id+entrenador_id); mensaje discreto para clientes que aún no cumplen el requisito de asistencia. Título de la sección de descripción cambiado de "Sobre mí" a "Sobre @username", para que tenga sentido visto desde fuera.
-  - Página nueva app/entrenador/[username]/opiniones/page.js: lista pública de las opiniones escritas del entrenador (se excluyen las valoraciones sin texto), ordenadas de más reciente a más antigua, mostrando solo estrellas + texto + fecha, sin ningún dato del cliente autor (anónimas por diseño de la consulta, sin ningún embed a perfiles del cliente).
-  - /cuenta: el entrenador ve también su nota media + número de valoraciones + botón "Ver opiniones", en una tarjeta junto a las de Open acumulados/Clases realizadas, para consultar su feedback sin tener que buscar su propio perfil público. No se muestra nada de esto a los clientes.
-- Longitud mínima de contraseña subida de 6 a 8 caracteres en la configuración de Supabase (Authentication -> Email). Cambio de configuración, no de código; afecta solo a registros y cambios de contraseña nuevos, no a las contraseñas ya existentes.
-
-Falta:
-- Ninguno.
-
-## Fix de contador y confirmación al cerrar sesión (4 agosto 2026)
-Hecho:
-- Fix del contador "Clases activas" en la portada del entrenador (app/page.js): antes contaba también clases ya pasadas (solo filtraba por estado = 'activa'), así que en la práctica se acercaba al total de clases publicadas. Ahora se calcula con una variable nueva, clasesActivasAhora, que filtra por estado activo Y no pasada (claseYaPaso), sin afectar al contador "Reservas acumuladas" (sigue usando la variable original).
-- Confirmación al cerrar sesión: al pulsar "Cerrar sesión" aparece un window.confirm ("¿Estás seguro de que quieres cerrar sesión?"), mismo patrón ya usado para cancelar clase/reserva. Aplicado en el menú de navegación (components/Menu.js) y en /cuenta. Además se quitó el botón "Cerrar sesión" redundante de la portada (app/page.js), ya que el del menú aparece en todas las páginas con sesión iniciada.
-
-Falta:
-- Ninguno.
-
-## Terminología "clase/clases" a "sesión/sesiones" en la interfaz (4 agosto 2026)
-Hecho:
-- Texto visible de toda la interfaz (menús, portada, /clases, /clases/[id], /mis-clases, /mis-clases/[id]/editar, /mis-reservas, /publicar, /login, perfil público del entrenador y sus opiniones, metadata del manifest PWA y aviso de privacidad) cambiado de "clase/clases" a "sesión/sesiones", sin tocar la tabla clases, las funciones RPC, las rutas, los nombres de archivo/carpeta ni las variables (16 archivos de frontend). aviso-legal quedó sin tocar por ya usar "sesión/sesiones".
-- Descripción del motivo de Open asistencia_confirmada actualizada a la misma terminología (sql/027_texto_motivo_asistencia_sesion.sql, ya ejecutado en Supabase); el historial de Open de asistencias ya concedidas muestra ahora el texto nuevo, ya que se lee la descripción actual del motivo.
-
-Falta:
-- Ninguno.
-
-## Seguir entrenadores y buscador de entrenadores (5 agosto 2026)
-Hecho:
-- Tabla public.seguimientos (sql/028_seguimientos.sql, ya ejecutado en Supabase): registra qué cliente sigue a qué entrenador (seguidor_id, entrenador_id, ambos referencian auth.users(id)), con UNIQUE(seguidor_id, entrenador_id) para evitar duplicados y CHECK(seguidor_id <> entrenador_id) para impedir el autoseguimiento. RLS: lectura pública; INSERT y DELETE solo sobre las propias filas (auth.uid() = seguidor_id); sin política de UPDATE (un seguimiento se crea o se borra, no se edita). Igual que en valoraciones, el rol (quién puede seguir y a quién se puede seguir) no se valida en la base de datos sino en el frontend, ya que perfiles no guarda el rol.
-- Botón Seguir/Siguiendo (components/BotonSeguir.js) en el perfil público del entrenador (app/entrenador/[username]/page.js), con los mismos estados que el resto de la app: sin sesión, enlace a /login; el propio entrenador viendo su perfil, oculto; cliente, botón funcional que alterna entre "Seguir" (lima) y "Siguiendo" (borde), insertando/borrando filas en seguimientos.
-- Contador PRIVADO de seguidores en /cuenta, visible solo para el entrenador: función RPC contar_mis_seguidores() (sql/029_contar_seguidores.sql, security definer, cuenta solo los propios vía auth.uid()), mostrado en una tarjeta junto a las de Open acumulados/Clases realizadas/Valoraciones. Decisión de producto: el número de seguidores NO se muestra en el perfil público, a propósito, para no penalizar a los entrenadores nuevos con un efecto "los que ya tienen tirón crecen más" desde el principio.
-- Buscador de entrenadores para clientes (app/entrenadores/page.js), accesible solo con sesión de cliente iniciada (sin sesión invita a iniciar sesión; con sesión de entrenador, mensaje "Esta sección es para clientes."): función RPC listar_entrenadores() (sql/030_listar_entrenadores.sql, security definer, filtra por el rol real en auth.users.raw_user_meta_data, no por tener clases publicadas) devuelve id/username/descripcion/foto_url de cada entrenador; búsqueda por username en el propio cliente, sin volver a llamar a Supabase al escribir; tarjetas con foto o inicial, enlazando al perfil público (/entrenador/[username]). Enlace "Entrenadores" añadido al menú de navegación, visible solo para clientes logueados.
-
-Falta:
-- Ninguno.
-
-## Navegación móvil responsive y acceso a Entrenadores desde el inicio (5 agosto 2026)
-Hecho:
-- Menú de navegación (components/Menu.js) convertido en responsive: en móvil, botón tipo pastilla lima con icono + texto ("Menú"/"Cerrar" según esté cerrado o abierto) que despliega un panel a pantalla completa con todos los enlaces en columna y buen tamaño de toque; en escritorio (md y superior) el menú queda exactamente igual que antes, sin ningún cambio visual. La lista de enlaces se calcula una única vez a partir de usuario/rol y se reutiliza en ambas versiones, para no duplicar la lógica de roles; el resaltado de página activa (subrayado animado) en escritorio no se tocó.
-- Tarjeta de acceso "Entrenadores" añadida a la portada (app/page.js) para el cliente con sesión iniciada, junto a las de Sesiones/Mis reservas/Mi cuenta, enlazando a /entrenadores.
-
-Falta:
-- Ninguno.
-
-## Buscador de direcciones en los mapas y ajustes de navegación (6 agosto 2026)
-Hecho:
-- Buscador de direcciones con autocompletado en los mapas de /publicar y /clases: geocodificación con Nominatim de OpenStreetMap (lib/geocodificar.js), sin coste y sin API key, limitada a España (countrycodes=es); salvaguardas para no abusar del servicio público: mínimo de 4 caracteres antes de llamar, debounce de 400ms, y caché en memoria por texto de búsqueda. Componente reutilizable components/BuscadorDireccion.js: desplegable de hasta 5 sugerencias, marco lima permanente, placeholder corto "Buscar calle o lugar" (pensado para que no se corte en pantallas de móvil). Nota técnica: no requiere nada en Supabase, la geocodificación la resuelve el propio navegador contra la API pública de Nominatim. Nota de escalado: la instancia pública de Nominatim es suficiente para la beta y bastante más volumen; si algún día el uso creciera mucho, se migraría a una instancia self-hosted o a un proveedor de pago (Mapbox, Google), cambio acotado a lib/geocodificar.js.
-- En /publicar (components/MapaSelector.js): al buscar una calle aparece un marcador CORAL de referencia (icono propio, lib/iconoBusqueda.js) con letrero "Esta es la ubicación que buscaste" al pincharlo; el pin AZUL de la sesión (el que de verdad se guarda) sigue fijándose solo al pinchar el punto exacto en el mapa. Decisión de producto: separar a propósito "la calle que busqué" (mera referencia visual) del "punto exacto de la sesión" (lo que se guarda en clases.lat/lng), para no dar por hecho que el centro aproximado de una calle es el punto de encuentro real.
-- En /clases (components/MapaClases.js): el buscador solo centra el mapa (no filtra ni toca la lista de sesiones ni la consulta a Supabase), con el mismo marcador coral de referencia; el buscador y el botón "Ver mi ubicación" se sacaron de encima del mapa (antes superpuestos con position:absolute, tapaban a veces el letrero de una sesión) a una barra en flujo normal encima del recuadro del mapa, igual que en /publicar; esto permitió quitar el autoPan forzado que se había añadido como parche (el letrero de una sesión ya no aparece y desaparece).
-- Textos de navegación adaptados al rol: el acceso a /clases (menú de escritorio, menú hamburguesa de móvil y tarjeta de acceso de la portada) muestra "Descubre sesiones" sin sesión iniciada, "Busca tu sesión" para clientes y "Sesiones publicadas" para entrenadores, en vez del genérico "Sesiones" de antes.
-- Corregido el z-index del mapa en móvil: al hacer scroll, el mapa (o sus controles/overlays) podían pintarse por encima de la barra de navegación superior, tapándola. Arreglado con isolate (aísla el contexto de apilamiento de cada mapa) en components/MapaClases.js y components/MapaSelector.js, y subiendo el z-index del <nav> sticky (components/Menu.js) de z-50 a z-[2000] como refuerzo.
-
-Falta:
-- Ninguno.
-
-## Botón de limpiar en el buscador de direcciones (7 agosto 2026)
-Hecho:
-- Botón "X" en components/BuscadorDireccion.js para vaciar el texto de golpe (antes había que borrar letra a letra), visible solo cuando hay texto escrito; también se activa el mismo efecto de limpieza si el usuario borra el texto a mano hasta dejarlo vacío. Nueva prop onLimpiar, usada en los dos mapas (components/MapaSelector.js en /publicar y components/MapaClases.js en /clases) para apagar a la vez el marcador coral de referencia. En /publicar esto además libera el punto donde estaba el coral, permitiendo fijar ahí mismo el pin azul de la sesión.
-
-Falta:
-- Ninguno.
-
-## Actualización de Next a 16.3.0 (7 agosto 2026)
-Hecho:
-- Subida de Next de 16.2.10 a 16.3.0 (salto de versión menor, no breaking), que cierra las 3 vulnerabilidades "high" que reportaba npm audit en next/postcss/sharp (arrastraban desde antes, no las trajo react-leaflet-cluster); npm audit queda en 0 vulnerabilidades. Probado en local tras la subida (build y funcionamiento igual que antes).
-
-Falta:
-- Ninguno.
-
-## Autocancelación de sesiones sin mínimo (8 agosto 2026)
-Hecho:
-- Las sesiones con plazas_min > 0 que no alcanzan el mínimo se cancelan solas, automáticamente, cuando faltan ~1h50 para su inicio (comprobación cada 5 minutos vía cron, así que el margen real es esa ventana de 5 min alrededor de las 1h50).
-- Nueva columna clases.motivo_cancelacion ('entrenador' | 'minimo') para distinguir quién canceló la clase. SQL 031, ya ejecutado en Supabase.
-- Barrera real de 2h en cancelar_reserva(): el cliente ya no puede cancelar su reserva si faltan menos de 2h para el inicio (antes el límite de 2h solo calculaba el flag informativo reembolso_aplicable, sin impedir cancelar). SQL 032, ya ejecutado en Supabase.
-- Función autocancelar_clases_sin_minimo() que hace la cancelación en bloque (clase + sus reservas activas), marcando motivo_cancelacion = 'minimo' y sin marcar cancelada_por_entrenador (esta cancelación no la decide el entrenador). SQL 033, ya ejecutado en Supabase.
-- Cron de pg_cron 'autocancelar-clases', cada 5 minutos, que ejecuta la función anterior. SQL 034, ya ejecutado en Supabase, con la extensión pg_cron activada.
-- Probado: validado a mano (canceladas 2 sesiones de prueba) y con el cron real en producción (canceló una sesión de prueba sola a los 5 minutos, sin intervención manual).
-
-## Notificaciones push (Bloque B + C + sub-bloque 7: completo) (9 agosto 2026)
-Hecho:
-- Motor de notificaciones push completo y probado en producción, incluida una prueba real en iPhone.
-- Piezas: claves VAPID generadas (pública en NEXT_PUBLIC_VAPID_PUBLIC_KEY, privada en VAPID_PRIVATE_KEY), service worker (public/sw.js, registrado desde components/RegistrarServiceWorker.js montado en app/layout.js), toggle de suscripción en /cuenta (components/NotificacionesToggle.js), tabla public.push_subscriptions (sql/035, RLS: cada usuario solo ve/crea/borra las suyas) y tabla public.notificaciones_cola (sql/036, cola sin políticas RLS: solo la escriben funciones SECURITY DEFINER y el backend con service role). Backend de envío: lib/enviarPush.js (usa la librería web-push) y cliente admin lib/supabaseAdmin.js (service role key, solo servidor), expuestos a través de la API app/api/procesar-notificaciones/route.js (POST protegido con el secreto CRON_SECRET vía cabecera Authorization).
-- Eventos directos ya enganchados a la cola: publicar una sesión nueva avisa a los seguidores del entrenador (trigger notificar_publicacion_clase(), sql/037); cancelar una clase (manual del entrenador o automática por no alcanzar el mínimo) avisa a cada cliente con reserva activa, y la autocancelación por mínimo avisa además al propio entrenador (sql/038); una reserva que agota las plazas de una sesión avisa al entrenador (sql/039).
-- Despliegue: variables NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, SUPABASE_SERVICE_ROLE_KEY y CRON_SECRET configuradas en Vercel; extensión pg_net instalada en Supabase; cron de producción (pg_cron + pg_net) que llama cada minuto a /api/procesar-notificaciones (sql/040, documentado en el repo con el secreto en placeholder, valor real solo en Supabase/Vercel).
-- Bloque C (recordatorios programados), completo y en producción: tabla recordatorios_enviados con unique(clase_id, usuario_id, tipo) para deduplicar (sql/041); función procesar_recordatorios() que escanea sesiones activas y encola recordatorios en 6 bandas (cliente 24h/7h/2h + entrenador 24h/7h/2h), dedupe vía on conflict, y la banda de 2h solo aplica si ya se alcanzó plazas_min (sql/042); cron pg_cron 'procesar-recordatorios' cada 5 minutos (sql/043, jobid 3). Validado en producción: llegó el recordatorio de 24h a cliente y entrenador, y el dedupe quedó confirmado (count 1 tras varios escaneos del cron sobre la misma sesión).
-- Sub-bloque 7 (preferencias + centro de notificaciones), completo y en producción: dos tablas nuevas con RLS —notificaciones_historial (registro de TODAS las notificaciones generadas, con flag leido) y preferencias_notificaciones (opt-out por categoría)— (sql/044); función helper generar_notificacion() que escribe SIEMPRE en el historial y encola push solo si la preferencia de la categoría del tipo está activa (las categorías críticas —cancelaciones— siempre se envían), con mapeo tipo→categoría granular (cada recordatorio con su propia categoría) (sql/045 v1, sql/050 v2 granular). Las 5 funciones que generaban notificaciones se reconvirtieron para pasar por generar_notificacion(): publicación (sql/037→046), cancelación manual y por mínimo (sql/038→047), plazas agotadas (sql/039→048) y recordatorios (sql/042→049); ya no quedan inserts directos a notificaciones_cola en código de negocio. UI en /cuenta: panel de preferencias por categoría (components/PreferenciasNotificaciones.js, opt-out, toggles individuales que se atenúan si el push general está desactivado, cancelaciones siempre activas y no desactivables, color lima de marca #B5E600) y panel de historial fijo con las 10 últimas notificaciones (components/HistorialNotificaciones.js). Campana de notificaciones en components/Menu.js (components/CampanaNotificaciones.js), independiente del menú y siempre visible a la izquierda del botón "Menú" en escritorio y móvil: punto rojo si hay no leídas, lista de las 10 últimas, marca como leídas al abrir, refresco cada 60s. Commit f145b97.
-
-Falta: nada crítico. Opcional a futuro: purga de historial antiguo (notificaciones_historial crecerá sin límite) y verificar en una autocancelación real (no solo de prueba) que los avisos de autocancelación por mínimo (cliente y entrenador) llegan correctamente en producción.
-
-## Aviso de activar notificaciones tras la primera acción (9 agosto 2026)
-Hecho:
-- Banner discreto (components/AvisoActivarNotificaciones.js) que invita a activar las push tras la primera acción del usuario, no al registrarse: cliente al seguir a un entrenador o reservar una sesión; entrenador al publicar una sesión. No exige que sea la primera acción absoluta del usuario; cualquiera de esas tres acciones lo dispara.
-- Arquitectura: la lógica de suscripción push se extrajo de NotificacionesToggle a un hook compartido lib/usePush.js (mismo comportamiento, ahora reutilizable; activar() devuelve true/false). Las acciones emiten un evento global window 'primera-accion' (una línea en BotonSeguir, BotonReservar y app/publicar); el banner, montado en Menu.js y siempre presente con sesión iniciada, lo escucha vía un disparador incremental. El efecto solo reacciona al cambio del disparador (useRef guarda el último procesado), nunca al iniciar sesión ni al cambiar otras dependencias.
-- Frecuencia (opt-out amable, guardada en localStorage clave aviso_notif_v1): se ofrece 1 vez; si el usuario cierra con "ahora no" espera 7 días; a la 2ª negativa no vuelve a insistir. No se muestra si las push ya están activadas, si el permiso del navegador está en denied, o si no hay soporte.
-- Caso iPhone: si detecta iOS sin la PWA instalada, en vez de pedir permiso invita a instalar la app reutilizando BotonInstalarApp.
-- Commit a76679f.
-
-Falta:
-- Ninguno.
-
-## Validación de fecha pasada al publicar (9 agosto 2026)
-Hecho:
-- Impedir crear una sesión con fecha+hora ya pasada. Dos capas: (1) validación en el navegador en app/publicar/page.js reutilizando claseYaPaso de lib/ventanaEdicionClase (aviso inmediato al entrenador, no publica); (2) red de seguridad en base de datos con trigger BEFORE INSERT en clases (funcion validar_clase_no_pasada, sql/051) que rechaza fecha+hora anterior a ahora en hora Europe/Madrid.
-- Basta con que sea futura, sin margen minimo.
-Falta:
-- Ninguno.
-
-## Login con Google (OAuth) (10 agosto 2026)
-Hecho:
-- Boton "Continuar con Google" en /login y /registro (signInWithOAuth, provider google, redirectTo a /auth/callback).
-- Ruta /auth/callback (app/auth/callback/page.js): cliente, procesa la sesion; si el usuario ya tiene rol en user_metadata va a /, si no va a /completar-perfil.
-- Pantalla /completar-perfil (app/completar-perfil/page.js): usuario nuevo de Google elige rol (Cliente/Entrenador con doble confirmacion y aviso destacado de que no se puede cambiar) y username (validado con RPC username_disponible). Al confirmar guarda rol+username en user_metadata (updateUser) Y actualiza el username en la tabla perfiles.
-- Detalle clave: el trigger crear_perfil_para_usuario_nuevo crea la fila de perfiles en el momento del login de Google con un username derivado del email (Google no manda username); por eso completar-perfil DEBE actualizar perfiles ademas de user_metadata, ya que la app lee el username de perfiles.
-- El registro normal (email/password) se mantiene intacto; Google es un carril aparte. Se añadio tambien el aviso coral destacado de "el rol no se puede cambiar" al registro normal, por coherencia.
-- Config (Fase 0): proveedor Google activado en Supabase Auth con Client ID/Secret de Google Cloud; Redirect URLs de localhost y produccion.
-- Commit 82fcee2.
-Falta:
-- Confirmar que la Redirect URL de produccion (https://www.ruleafit.com/auth/callback) esta en Supabase (la de localhost si esta, probado en local).
-
-## Después de la beta (decidido el 27 julio 2026)
-
-Hecho (8 agosto 2026):
-- Dominio ruleafit.com comprado (comvive) y vinculado a Vercel, con DNS configurado y SSL activo en los tres dominios.
-- Supabase Auth actualizado: Site URL y Redirect URLs apuntando a https://www.ruleafit.com (sin quitar vercel.app ni localhost).
-- metadataBase añadido en app/layout.js apuntando a https://www.ruleafit.com.
-
-Hecho (10 agosto 2026) · Bloque A · Infraestructura de correo (Resend):
-- Cuenta creada en Resend (organización openfit2026), plan gratuito (3.000 correos/mes, 100/día, 1 dominio).
-- Dominio ruleafit.com verificado en Resend. Registros DNS añadidos en comvive.es: DKIM (TXT resend._domainkey), SPF (TXT send), MX (send -> feedback-smtp.eu-west-1.amazonses.com, prioridad 10) y DMARC (TXT _dmarc, v=DMARC1; p=none;). Los registros previos de Vercel quedaron intactos. Región de envío: EU (Ireland).
-- SMTP propio configurado en Supabase (Authentication -> Emails -> Custom SMTP): host smtp.resend.com, puerto 465, usuario "resend", contraseña = API key de Resend. Remitente no-reply@ruleafit.com, nombre visible "Openfit" (provisional, hasta el rename final). Intervalo mínimo por usuario: 60 s.
-- Validado: correo de recuperación enviado desde Authentication -> Users llega correctamente desde no-reply@ruleafit.com con remitente Openfit.
-
-Hecho (10 agosto 2026) · Bloque B · Confirmación de registro:
-- Plantilla "Confirm signup" traducida al español en Supabase (asunto "Confirma tu cuenta en Openfit" y cuerpo con marca Openfit), respetando la variable {{ .ConfirmationURL }}.
-- Interruptor "Confirm email" activado en Supabase (Authentication -> Sign In / Providers -> Email). Comprobado antes que los 40 usuarios existentes ya tenían email_confirmed_at (no se bloquea a nadie); solo afecta a registros nuevos.
-- Aviso claro en /login cuando el email no está confirmado: nueva rama en traducirErrorLogin() de app/login/page.js que detecta error.code === 'email_not_confirmed' (con respaldo por texto) y muestra un mensaje pidiendo confirmar el correo y revisar spam. Commit c91b06f.
-- Validado en producción: registro con correo real -> correo en español -> no deja entrar sin confirmar (mensaje claro) -> tras confirmar, entra.
-
-Hecho (11 agosto 2026) · Bloque C · Recuperación de contraseña:
-- Flujo aislado del callback de Google (no se tocó app/auth/callback). Enlace "¿Olvidaste tu contraseña?" añadido en /login.
-- Página /recuperar: pide el email y llama a resetPasswordForEmail con redirectTo dinámico (window.location.origin + /nueva-contrasena). Mensaje neutro que no revela si el email existe.
-- Página /nueva-contrasena: detecta la sesión de tipo recovery con onAuthStateChange (evento PASSWORD_RECOVERY) + getSession() de respaldo para evitar la condición de carrera; estado verificando/valido/invalido. Valida mínimo 8 caracteres y coincidencia, llama a updateUser, hace signOut y redirige a /login?reset=ok. Caso de enlace inválido/caducado manejado con aviso claro y opción de pedir otro.
-- Mensaje de éxito en /login al recibir ?reset=ok (useSearchParams envuelto en Suspense).
-- Plantilla "Reset password" traducida al español en Supabase (asunto "Restablece tu contraseña en Openfit"), respetando la variable {{ .ConfirmationURL }}. Redirect URLs ya cubrían /nueva-contrasena vía comodín.
-- Validado end-to-end en local con correo real: pedir reset -> correo en español -> enlace -> nueva contraseña -> login con la nueva. Commit del código: ver rama main (feat recuperar).
-- Conocido (mejora post-beta): el enlace de recuperación es de un solo uso y caduca ~1h; si se abre dos veces (p.ej. primero en un dispositivo donde no aplica y luego en otro) el segundo intento sale como caducado. La página lo gestiona ofreciendo pedir otro enlace. Valorar OTP/PKCE post-beta si molesta a usuarios reales.
-
-Hecho (11 agosto 2026) · Bloque D · Aviso de feedback por correo:
-- Arquitectura: trigger AFTER INSERT en public.feedback que llama vía pg_net a la ruta /api/avisar-feedback (mismo patrón que el cron de notificaciones). SQL versionado en sql/052_trigger_aviso_feedback.sql (con placeholder <CRON_SECRET>, el valor real se sustituye a mano al ejecutar).
-- Ruta app/api/avisar-feedback/route.js: protegida con CRON_SECRET (Bearer), lee el feedback por id con supabaseAdmin, intenta obtener el email del usuario (getUserById, no bloqueante), y envía el correo con el SDK de Resend (librería resend instalada). Remitente Openfit <no-reply@ruleafit.com>, destinatario FEEDBACK_ADMIN_EMAIL.
-- Variables de entorno nuevas: RESEND_API_KEY y FEEDBACK_ADMIN_EMAIL (= openfit2026@gmail.com), añadidas en .env.local y en Vercel (Production and Preview).
-- app/ayuda/page.js NO se tocó: el insert de feedback dispara el trigger automáticamente.
-- Validado en producción: feedback de prueba en www.ruleafit.com/ayuda -> correo recibido en openfit2026@gmail.com (verificado también en el panel de Resend como Delivered).
-- CRON_SECRET rotado el 11 agosto 2026 en los 4 sitios (.env.local, Vercel, cron de notificaciones y trigger de feedback) tras haber quedado visible en una captura durante el montaje. Notificaciones y feedback verificados en 200 tras la rotación.
-
-Falta:
-- 2FA activado el 27 julio 2026 en las tres cuentas críticas del proyecto (Vercel, GitHub y Google), con app de autenticación y códigos de recuperación guardados.
-
-## Historial y detalle de sesiones (12 agosto 2026)
-Hecho:
-- /mis-reservas (cliente): historial limitado a los últimos 30 días (reservasPasadasRecientes con horasHastaClase > -30*24); el contador "sesiones realizadas" sigue contando el total. Badge de asistencia por reserva (Asististe / No asististe / Pendiente de confirmar por el entrenador) estilo semáforo. Quitado "Ver detalle" en el historial (pasadas); se mantiene en próximas y canceladas.
-- /mis-clases (entrenador): badges de estado en pasadas (Confirmada verde / No se alcanzó el mínimo gris / Sesión cancelada roja). Texto según motivo de cancelación (motivo_cancelacion='minimo' -> "Esta sesión no llegó al mínimo"; NULL -> "Sesión cancelada por el entrenador"). Ocultado "Esta sesión no tuvo reservas" en pasadas canceladas. Las sesiones futuras canceladas ya no aparecen en próximas (filtro estado!='cancelada'). "Ver detalles" añadido solo en próximas.
-- SQL: sql/053 (autocancelar_clases_sin_minimo ahora pone plazas_ocupadas=0) y sql/054 (RPC mis_clases devuelve motivo_cancelacion, con DROP+CREATE). Ejecutados en Supabase.
-- Detalle /clases/[id]: en sesiones pasadas muestra "{ocupadas}/{max} plazas ocupadas" en vez de "Quedan X plazas". Botón "volver" devuelve al origen según query param ?from= (whitelist: clases / mis-reservas / mis-clases), con Suspense.
-- Editar sesión: botón "Cancelar" que vuelve sin guardar, y "Guardar cambios" deshabilitado hasta que haya cambios reales (comparación JSON de valores iniciales).
-
-Falta:
-- Ninguno.
-
-## Fase 6 · Pagos online reales — futuro, fuera del MVP
-- Sustituir la cartera simulada por pagos reales. Posterior al lanzamiento.
-- Rediseño de Open ligado al precio: no regalar los 5 Open de asistencia en clases gratis o muy baratas; conceder Open solo por encima de un umbral de precio X, aún por decidir.
-- Al integrar el proveedor de pagos, quitar/ajustar el texto "se paga directamente al entrenador" que aparece junto al precio en el detalle de sesión (app/clases/[id]), igual que en su día se cambió "Cobras directo, sin intermediarios" -> "Cobros y reservas automáticos".
-
-Nota (investigación del modelo de cobros, 7 agosto 2026) — SUPERADA el 30 octubre 2026 por el modelo acordado de la sección "Pagos: modelo acordado y plan": un reparto directo del proveedor de pagos no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
-
-## Análisis de competencia (21 julio 2026)
-
-Competidor directo detectado: Trainity (trainityapp.com), lanzado en julio de 2026. Misma propuesta que Openfit: entrenamientos en grupo al aire libre en Sevilla, sin cuotas mensuales, precios desde 3 €.
-
-Sus ventajas sobre Openfit:
-- Pagos reales online (tarjeta, Apple Pay, Google Pay). Cobran al cliente, abonan al entrenador y se quedan una comisión de intermediación.
-- Documentación legal completa: aviso legal, condiciones de contratación, condiciones para entrenadores, privacidad, cookies, consentimiento informado de riesgo, titular identificado con NIF.
-- SEO trabajado, con páginas específicas por búsqueda (entrenador personal en Sevilla, entrenamiento al aire libre, funcional, en grupo, para perder peso).
-- Sistema de valoraciones y reseñas, limitado a quienes reservaron por la plataforma.
-- Reserva sin registro: solo nombre, email y teléfono.
-- Sección de perfiles de entrenador.
-
-Sus debilidades frente a Openfit:
-- No tienen panel de entrenador: el alta se hace por un formulario externo de Google, y el entrenador no puede publicar ni gestionar sus sesiones.
-- La cancelación es manual (formulario o email), no automática.
-- Sin cuentas de usuario, por lo que el cliente no tiene historial ni "mis reservas".
-- Solo operan en Sevilla.
-- Sin sistema de fidelización.
-- Cancelación más rígida: 24 h de antelación frente a las 2 h de Openfit.
-
-Conclusiones para la hoja de ruta:
-- La ventaja diferencial de Openfit es el panel del entrenador (publicar, ver alumnos, marcar asistencia, cancelar clase). Conviene reforzarla para captar entrenadores.
-- Subir la prioridad de los pagos reales (Fase 6): dejan de ser un extra posterior al lanzamiento para ser la diferencia entre producto y demostración.
-- Valorar añadir a la hoja de ruta perfiles públicos de entrenador y valoraciones tras la clase. No dependen de los pagos y son clave para la confianza en un marketplace.
-- Antes de cobrar dinero habrá que preparar la documentación legal correspondiente, con asesoramiento profesional.
-
-## Campana de notificaciones: solo no leídas (28 agosto 2026)
-Hecho:
-- La campana de notificaciones (components/CampanaNotificaciones.js) ahora carga solo las notificaciones no leídas de notificaciones_historial (antes cargaba las últimas 10 sin importar si estaban leídas). Al abrir la campana se marcan como leídas en base de datos y desaparece el punto rojo, pero la lista se mantiene visible mientras el desplegable está abierto; al cerrarse (clic fuera o volviendo a pulsar la campana) la lista se vacía, así que la próxima apertura solo trae notificaciones nuevas. El refresco automático cada 60s se pausa mientras está abierta para no vaciar la lista delante del usuario.
-- Estado vacío nuevo: cuando no hay notificaciones sin leer, se muestra "No tienes notificaciones nuevas ahora mismo" con un enlace "Ver historial de notificaciones" que lleva a /cuenta#notificaciones (el historial completo de HistorialNotificaciones.js no cambia: sigue mostrando siempre las últimas notificaciones, leídas o no).
-- app/cuenta/page.js: bloque "Notificaciones" con id="notificaciones" y scroll-mt-24; useEffect que, cuando cargando pasa a false y el hash de la URL es #notificaciones, hace scroll automático y suave hasta el bloque (con reintentos vía requestAnimationFrame por si el bloque tarda un frame en pintarse). La navegación desde la campana usa router.push con { scroll: false } para que el propio Next no interfiera con el scroll manual (su mecanismo interno de scroll-to-hash solo lo intenta una vez, muy pronto, y falla porque el bloque aún no existe mientras cargando es true).
-- Es un único componente compartido entre cliente y entrenador, así que el cambio aplica a ambos roles automáticamente.
-
-Falta:
-- Ninguno.
-
-## Rename Openfit → Ruleafit: bloque 1, documentos legales (28 agosto 2026)
-Hecho:
-- Sustituido "Openfit" → "Ruleafit" en los 4 documentos legales: legal/aviso-legal.md, app/aviso-legal/page.js, legal/politica-privacidad.md y app/privacidad/page.js (page.js y .md son contenido duplicado, uno como componente y otro como fuente).
-- De paso, corregida una URL desactualizada encontrada en el propio texto legal: las 8 apariciones de https://openfit-five.vercel.app (dominio antiguo de Vercel) se actualizaron a https://www.ruleafit.com (dominio real de producción).
-- Verificado que el titular/responsable del tratamiento en ambos documentos es siempre la persona física (Rubén Fernández Personat, con NIF), nunca "Openfit" como entidad — la sustitución de marca no afecta a ninguna razón social.
-- Sigue pendiente el resto de bloques del rename ampliado: interfaz visible + metadata/PWA + iconos; correo de feedback + dato ya insertado en Supabase (tabla open_motivos); plantillas de correo de Supabase + nombre SMTP; GitHub/Gmail (pendientes de decisión del usuario); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera en sql/*.sql).
-
-Falta:
-- Ninguno (de este bloque). Resto de bloques del rename, pendientes.
-
-## Rename Openfit → Ruleafit: bloque 2, interfaz visible + metadata/PWA + iconos (28 agosto 2026)
-Hecho:
-- Sustituido "Openfit" → "Ruleafit" en los textos visibles al usuario: app/registro/page.js (título y placeholder de nombre de usuario), app/completar-perfil/page.js (mismo placeholder), components/BotonInstalarApp.js ("Ten Ruleafit a mano"), components/AvisoActivarNotificaciones.js (texto del banner).
-- Metadata/PWA: app/layout.js (title), app/manifest.js (name y short_name de la app instalable).
-- public/sw.js: título de fallback de las notificaciones push y rutas de icon/badge.
-- Los dos iconos de la PWA renombrados con git mv (historial de archivo conservado): public/openfit-icon-192.png -> public/ruleafit-icon-192.png, public/openfit-icon-512.png -> public/ruleafit-icon-512.png; referencias actualizadas en manifest.js y sw.js.
-- Verificado: el short_name "Ruleafit" (8 caracteres) no tiene problema de longitud para Android/iOS; icon y badge de sw.js seguían apuntando al mismo archivo que antes (solo cambia el nombre, no el comportamiento).
-
-Falta:
-- Ninguno (de este bloque). Resto de bloques del rename ampliado, pendientes: correo de feedback + dato ya insertado en Supabase (open_motivos); plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
-
-## Rename Openfit → Ruleafit: bloque 3, correo de feedback y dato en Supabase (28 agosto 2026)
-Hecho:
-- app/api/avisar-feedback/route.js: remitente ("Ruleafit <no-reply@ruleafit.com>") y asunto ("Nuevo feedback de usuario en Ruleafit") actualizados. lib/enviarPush.js y FEEDBACK_ADMIN_EMAIL (.env.local) no se tocan a propósito: son la dirección de correo real (openfit2026@gmail.com), no texto de marca, pendiente de decidir si se cambia de cuenta más adelante.
-- sql/055_texto_motivo_bienvenida_ruleafit.sql creado: UPDATE sobre public.open_motivos (columna descripcion, codigo = 'bienvenida') para corregir el texto ya insertado por sql/006 ("Bienvenida al registrarse en Openfit" -> "...en Ruleafit"). Sigue el mismo patrón que sql/027. Pendiente de ejecutar a mano en Supabase; hasta entonces, el historial de Open sigue mostrando el texto antiguo.
-
-Falta:
-- Resto de bloques del rename ampliado, pendientes: plantillas de correo de Supabase + SMTP; GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
-
-Verificado (28 agosto 2026): tras el rename del sistema de puntos Open → Rulos (open_motivos → rulos_motivos), se comprobó directamente en Supabase que la fila con codigo = 'bienvenida' ya dice "Bienvenida al registrarse en Ruleafit". No hizo falta ejecutar ningún UPDATE adicional de sql/055.
-
-## Rename Openfit → Ruleafit: bloque 4, plantillas de correo de Supabase y SMTP (28 agosto 2026)
-Hecho:
-- En el panel de Supabase (Authentication → Emails), plantillas "Confirm signup" y "Reset Password" actualizadas: asunto y cuerpo cambiados de "Openfit" a "Ruleafit", sin tocar las variables ({{ .ConfirmationURL }}).
-- Nombre de remitente visible del Custom SMTP cambiado de "Openfit" a "Ruleafit" (el remitente no-reply@ruleafit.com no cambia).
-- Cambio hecho directamente en el panel de Supabase, no en el repo — no hay diff de código en este bloque.
-
-Falta:
-- Resto de bloques del rename ampliado, pendientes: GitHub/Gmail (pendientes de decisión); limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
-
-## Logo partido "Rulea"+"fit" (28 agosto 2026)
-Hecho:
-- Se detectó que el logo de marca estaba escrito en JSX como dos fragmentos de texto en colores distintos ("Open" + `<span>` lima "fit"), por lo que no aparecía como la cadena "Openfit" y se había colado en el rename de marca. Corregido en los 3 sitios donde aparece: components/Menu.js (cabecera), components/PieDePagina.js (copyright del footer) y components/CabeceraAuth.js (cabecera compartida de /login y /registro). Ahora dividen "Ruleafit" como "Rulea" (color oscuro heredado) + "fit" (lima #B5E600), manteniendo el mismo patrón visual de resaltar el sufijo "-fit".
-- Cambio puramente visual/textual: mismo estilo inline, misma estructura JSX, sin tocar lógica ni props.
-
-Falta:
-- El resto del rename de marca Openfit → Ruleafit sigue pausado y pendiente de retomar: GitHub/Gmail (pendientes de decisión) y limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
-
-## Rename de GitHub: repo y cuenta (28 agosto 2026)
-Hecho:
-- Repo de GitHub renombrado de "openfit" a "ruleafit" (misma cuenta, openfit2026, en ese momento); remoto local actualizado a https://github.com/openfit2026/ruleafit.git y verificado con push de prueba.
-- Cuenta de GitHub renombrada de "openfit2026" a "ruleafit"; remoto local actualizado de nuevo a https://github.com/ruleafit/ruleafit.git y verificado con este mismo commit.
-- Contacto VAPID de las notificaciones push (lib/enviarPush.js) cambiado de mailto:openfit2026@gmail.com a mailto:ruleafit@gmail.com.
-- FEEDBACK_ADMIN_EMAIL actualizado a ruleafit@gmail.com en Vercel (producción, hecho a mano por el usuario) y en .env.local (entorno local, sin commit por estar en .gitignore).
-
-Falta:
-- Resto de bloques del rename ampliado, sin cambios: limpieza interna (package.json, CLAUDE.md, comentarios de cabecera sql/*.sql).
-
-## Rename sistema de puntos Open → Rulos: documentación y legal (28 agosto 2026)
-Hecho:
-- Las 3 tablas de Supabase renombradas: open_saldos → rulos_saldos, open_movimientos → rulos_movimientos, open_motivos → rulos_motivos, con vistas de compatibilidad bajo el nombre antiguo mientras se termina el despliegue (pendientes de eliminar en unos días).
-- Las 3 funciones renombradas: otorgar_open() → otorgar_rulos(), otorgar_open_bienvenida() → otorgar_rulos_bienvenida(), otorgar_open_valoracion() → otorgar_rulos_valoracion().
-- CLAUDE.md actualizado: la sección "Moneda" ahora describe "Rulos" en vez de "Open", incluida la equivalencia futura de referencia (1€ = 10 Rulos). No se tocó la mención a "Openfit" (marca, bloque aparte) ni a OpenStreetMap.
-- Documentos legales (legal/aviso-legal.md y app/aviso-legal/page.js) actualizados: el nombre del sistema de puntos de fidelización pasa de "Open" a "Rulos". legal/politica-privacidad.md y app/privacidad/page.js no necesitaron cambio: mencionan el sistema de puntos de forma genérica, sin nombrarlo.
-
-Falta:
-- Eliminar las vistas de compatibilidad open_saldos/open_movimientos/open_motivos en Supabase una vez confirmado que nada las usa ya (manual, lo hace el usuario).
-
-## Desbloqueo de despliegues en Vercel por email de commit (29 agosto 2026)
-Hecho:
-- Vercel bloqueaba los despliegues de Producción porque el email global de Git en el ordenador local no coincidía con un email verificado en la cuenta de GitHub (`ruleafit`): estaba en `openfit2026@gmail.com`, en vez de `ruleafit@gmail.com`.
-- Corregido con `git config --global user.email "ruleafit@gmail.com"`.
-- Verificado con un commit vacío (`chore: trigger redeploy`, `0dad8ca`): desplegó en Vercel con estado "Ready" sin bloqueo, confirmando que los commits posteriores a `fbd1a07` (que ya llevaba el email correcto de forma puntual) también quedan resueltos por el cambio de configuración global, sin necesidad de repetir el truco en cada commit.
-- Corregido también el título de este documento ("Openfit" -> "Ruleafit", quedaba desde antes del rename de marca).
-
-Falta:
-- Resto de la limpieza interna del rename ampliado, sin cambios: revisar package.json (ya en "ruleafit", sin pendiente), CLAUDE.md y comentarios de cabecera de sql/*.sql.
-
-## Fix: registro de usuarios roto por rename incompleto Open → Rulos (7 septiembre 2026)
-Hecho:
-- Detectado el 30 de agosto de 2026: ningún usuario nuevo podía registrarse en la web, ni por email ni con Google — el alta por email daba "Algo ha ido mal" y el botón de Google devolvía directamente a /login sin crear sesión.
-- Causa real, confirmada en Supabase el 7 de septiembre de 2026: el rename Open → Rulos del 28 de agosto (ver más arriba, "Rename sistema de puntos Open → Rulos") renombró las funciones con `ALTER FUNCTION ... RENAME TO`, que cambia el nombre en el catálogo de Postgres pero no reescribe el cuerpo de la función. `otorgar_rulos()` (antes `otorgar_open()`) seguía escribiendo en `public.open_movimientos` / `public.open_saldos`, tablas que dejaron de existir el 30 de agosto al borrar las vistas de compatibilidad; y `otorgar_rulos_bienvenida()` (antes `otorgar_open_bienvenida()`) seguía llamando a `public.otorgar_open(...)`, nombre que ya no existía. Esa función se dispara con un trigger `AFTER INSERT` en `auth.users` (bienvenida automática de 20 Rulos); al fallar dentro del trigger, se abortaba toda la transacción de alta — por eso afectaba igual al registro por email que al de Google (los dos crean una fila nueva en `auth.users`).
-- Se encontraron dos funciones más con el mismo patrón roto por dentro, comprobado que sin ningún trigger activo hoy que las dispare (`otorgar_rulos_valoracion`, bono por valorar al entrenador; y `marcar_asistencia`, ya en desuso desde la Tarea A del 29 de agosto). No estaban rompiendo nada en producción, pero se corrigieron igual por higiene.
-- Corregidas las 4 funciones en Supabase (SQL Editor, a mano por bloqueos del clasificador de seguridad al escribir varias de golpe). Detalle exacto documentado en `sql/059_fix_funciones_open_a_rulos.sql`.
-- Verificado con búsqueda en `pg_proc` (0 funciones ya referencian los nombres viejos) y con un registro de prueba real completado con éxito tras el arreglo.
-
-Falta:
-- Ninguno de este bloque.
-
-## Invitación de ruleafit@gmail.com al equipo de Resend (7 septiembre 2026)
-Hecho:
-- Pendiente desde el 29 de agosto de 2026: no se conseguía añadir `ruleafit@gmail.com` como admin del equipo "ruleafit" en Resend (propiedad de `openfit2026@gmail.com`). Se abrió un ticket a soporte de Resend ese mismo día; el 1 de septiembre, soporte (Brian) respondió sugiriendo que el fallo era un lío de sesiones del navegador: se intentaba aceptar la invitación mientras el navegador tenía activa la sesión de Resend de la otra cuenta (`openfit2026@gmail.com`).
-- El 7 de septiembre se reintentó siguiendo esa pista: se canceló la invitación pendiente desde el panel de Resend (Settings → Team, como `openfit2026@gmail.com`) y se generó una invitación nueva a `ruleafit@gmail.com` con rol Admin.
-- Primer intento de aceptarla en ventana de incógnito fallando igual ("This invite is for another account", resuelto en la cuenta openfit2026@gmail.com pese a estar en incógnito, porque el botón "Log in with Google" recogió automáticamente la cuenta de Google vinculada al perfil de Chrome). Se generó una segunda invitación nueva (la primera queda inválida en cuanto se visita una vez con la cuenta equivocada) y esta vez se aceptó con el formulario de email/contraseña de Resend en vez de "Log in with Google", evitando el lío de cuentas.
-- Verificado por los dos lados: en Resend (Settings → Team) `ruleafit@gmail.com` figura como "Joined on Sep 07, 2026", rol Admin, ya no "Pending".
-
-Falta:
-- Ninguno de este bloque. El ticket de soporte con Resend se puede cerrar o dejar sin responder, ya no hace falta seguimiento.
-
-## Fix SEO: página /ayuda no se indexaba en Google por quedar oculta a usuarios sin sesión (7 septiembre 2026)
-Hecho:
-- Detectado a raíz de un aviso de Google Search Console ("Nuevos motivos que impiden que se indexen páginas", 6 de septiembre de 2026) con dos motivos. Comprobado uno por uno directamente en Search Console (Indexación de páginas), no solo leído el correo:
-  - "Rastreada: actualmente sin indexar" → la URL afectada era `https://www.ruleafit.com/favicon.ico?favicon...`. Comportamiento normal (Google rastrea el favicon para la miniatura de resultados, pero no lo indexa como página); no requería ninguna acción.
-  - "Duplicada: el usuario no ha indicado ninguna versión canónica" → la URL afectada era `https://www.ruleafit.com/ayuda`. Causa real encontrada en `app/ayuda/page.js`: la página ocultaba todo su contenido (título, descripción, formulario de feedback) detrás de una comprobación de sesión, y solo mostraba el texto genérico "No has iniciado sesión. Ve a iniciar sesión." a cualquier visitante no autenticado — incluidos los robots de Google, que rastrean sin iniciar sesión. Al ser un texto genérico que podía coincidir con el de otras páginas protegidas del sitio, Google no sabía distinguir esta página del resto y no la indexaba.
-- Corregido `app/ayuda/page.js`: el título, la descripción y el formulario de la página ahora se muestran siempre, a cualquier visitante; el inicio de sesión solo se exige en el momento de enviar el mensaje (antes bloqueaba el acceso a toda la página). Commit `a9f3639`.
-- Desplegado en Vercel (estado "Ready") y verificado en directo con el navegador que `https://www.ruleafit.com/ayuda` ya muestra el contenido real sin sesión iniciada.
-- Se le indicó al usuario cómo solicitar la reindexación manual de esa URL en Search Console (Inspeccionar URL → Solicitar indexación) para acelerar que Google la vuelva a rastrear.
-
-Falta:
-- Confirmar en unos días en Search Console que la URL ha pasado a "Indexada" tras la reindexación manual.
-
-## Unificación de roles cliente/entrenador (11 septiembre 2026)
-Hecho (según commits del 11/9 y sql/060; reconstruido a partir del historial de git):
-- Un mismo usuario ya puede reservar Y publicar sesiones. sql/060 quita las seis barreras de rol y añade la única regla nueva: un entrenador no puede reservar su propia sesión. user_metadata.rol deja de leerse en esas funciones y políticas.
-- Fases 2 a 7 en el frontend: registro y entrada, menú y portada, publicar / mis sesiones / mis reservas, botón de reservar, directorio de usuarios y perfil público, mi cuenta y preferencias de notificaciones. Esto sustituye a la nota anterior de "un único rol por cuenta".
-- "Usuarios" pasa a llamarse "Ruleros" (directorio y perfil público); "Busca tu sesión" pasa a "Explora y reserva".
-
-## Niveles de usuario (11-12 septiembre 2026)
-Hecho:
-- Sistema de niveles 0-100 basado en Rulos (lib/niveles.js), con rango con nombre e icono (píldora lima) junto al nivel.
-- sql/061 hace público el saldo de Rulos para mostrar el nivel de cualquier usuario en el directorio y en su perfil público.
-
-## Avisos al publicar y recordatorio al entrenador (12 septiembre 2026)
-Hecho:
-- Aviso antes de publicar y recordatorio al entrenador 10 minutos antes de su sesión (sql/062).
-- Icono de silbato (lucide-react actualizado para incluir Whistle) en "Publicar sesión"; icono de lista en "Mis sesiones publicadas".
-
-## Bonos (21 septiembre 2026)
-Hecho:
-- Sistema de bonos (sql/063): el entrenador crea bonos (número de sesiones o ilimitados, plazo, precio, descripción) y los clientes los adquieren y se consumen automáticamente al reservar. Corregida la política RLS (faltaba trainer_id al crear) y actualizados los textos de la portada.
-
-## Copiar sesión y pulido visual (21 septiembre 2026)
-Hecho:
-- Copiar sesión: precarga el formulario de /publicar y avisa si la fecha y hora están duplicadas. sql/064 (clase_para_copiar) corrige que saliera vacío al copiar una sesión cancelada por el entrenador.
-- Esquinas cortadas en lugar de píldoras y esquinas redondeadas en todo el sitio; avisos sin pestaña lateral.
-- Aceptación del aviso legal también en el registro con Google.
-
-## Filtro de ruleros seguidos y otros ajustes (23 septiembre - 12 octubre 2026)
-Hecho:
-- Filtro "Solo sesiones de ruleros a los que sigo" en Explora y reserva (botón con icono, marco lima) y opción "Mantener este filtro activado siempre que entre", guardada en la cuenta (sql/065, perfiles.filtro_clases_solo_seguidos).
-- "Historial de Rulos" pasa a "Mis últimos Rulos", limitado a los 5 más recientes.
-- Se permite valorar al entrenador si cancela la sesión con menos de 2 h de antelación (sql/066).
-- Fechas de las sesiones en formato DD/MM/YYYY.
-
-## Buscador por palabra y normas de trabajo (30 octubre 2026)
-Hecho:
-- Campo "Buscar actividad" en /clases (app/clases/page.js): filtra por título, tipo de actividad, categoría, observaciones y material, sin distinguir mayúsculas ni tildes, y todas las palabras escritas deben coincidir. Se combina con el resto de filtros y "Limpiar filtros" lo vacía. Probado en escritorio y a 390 px con sesiones simuladas; la prueba en móvil detectó que la lupa quedaba tapada por el campo (arreglado con z-10).
-- CLAUDE.md: se permite arrancar npm run dev, y nueva norma de probar cada cambio visible en el navegador y ejecutar npm run build antes de proponer un commit.
-- Remoto de Git cambiado a https://ruleafit@github.com/ruleafit/ruleafit.git (la credencial guardada era de otra cuenta y daba 403).
-- Entorno local: .env.local con la URL de Supabase corregida (sin /rest/v1/, que hacía fallar el login con "Algo ha ido mal") y valores nuevos de CRON_SECRET y claves VAPID solo para local.
-
-- Botón "Buscar" junto al campo de búsqueda de actividad en /clases: cierra el teclado en móvil y lleva la vista a los resultados (el filtrado sigue siendo en vivo). Probado a 390 px.
-- Filtro de ciudad en /clases: el desplegable pasa a ser un campo de búsqueda (sin tildes ni mayúsculas, coincidencia parcial) con sugerencias de las ciudades que tienen sesiones. Si en la ciudad escrita no hay ninguna sesión, se localiza esa ciudad (geocodificarCiudad en lib/geocodificar.js) y se muestran las 10 sesiones más cercanas con su distancia en km (lib/distancia.js) y el aviso "No hay sesiones en X. Te mostramos las más cercanas.". Esto resuelve en parte la idea de ordenar por distancia.
-- Ciudad de toda España al publicar (app/publicar/page.js): el desplegable fijo de Sevilla y Málaga pasa a un campo con autocompletado de poblaciones de España (components/BuscadorCiudad.js, buscarCiudades en lib/geocodificar.js; provincias y regiones descartadas). El mapa de ubicación se centra en la ciudad elegida (components/MapaSelector.js recibe el centro por prop). No se puede publicar sin elegir la ciudad de la lista. La base de datos no cambia: clases.ciudad ya era texto libre.
-- Cabeceras sin límite geográfico: "Sesiones sin cuota ni permanencia." en /clases, y quitado "en Sevilla y Málaga" de la portada, /entrenadores y la descripción del manifest de la PWA. Los textos legales con la dirección postal (Fuentes de Andalucía, Sevilla) no se tocan.
-- CLAUDE.md actualizado: la plataforma ya no se limita a Sevilla y Málaga y se documenta la regla de ciudades.
-- Búsqueda por provincia: clases.provincia (sql/067, ejecutado) se rellena al publicar con la provincia de la ciudad elegida en el autocompletado, y el filtro de ciudad de /clases busca en ciudad y provincia (buscar "Sevilla" encuentra también Dos Hermanas o Utrera). Si la ciudad no tiene sesiones que cumplan los filtros (no solo si no tiene ninguna), se ofrecen las más cercanas. Limitaciones: Zaragoza sale con provincia "Aragón" y Ceuta sin provincia (se encuentran por su nombre); "Copiar sesión" recalcula la provincia buscando la ciudad.
-- Probado con 10 sesiones reales publicadas en 10 ciudades (cuenta lealfj1, producción) y con datos simulados para la provincia.
-
-## Compartir sesión y mejoras de Copiar sesión (30 octubre 2026)
-Hecho:
-- Compartir sesión: botón en la ficha (/clases/[id]) y en cada tarjeta de /clases (components/BotonCompartir.js). Panel (en un portal a document.body, porque dentro de la cabecera lo tapaba el resto de la página) con: menú nativo del móvil (navigator.share: Instagram, WhatsApp, Mensajes...), copiar enlace, WhatsApp, Telegram, X, Facebook y correo.
-- Imagen para historia de Instagram (lib/imagenHistoria.js): PNG vertical de 1080x1920 dibujado en un canvas con la foto de la categoría, título, ciudad, zona, fecha, hora, precio y "Pulsa el enlace y reserva tu plaza / ruleafit.com". En el móvil se comparte como archivo; en el ordenador se descarga. Una imagen no se puede pulsar, así que al generarla se copia a la vez el enlace de la sesión y el panel indica el paso siguiente: subir la imagen y pegar el enlace con el sticker "Enlace" de Instagram.
-- Vista previa del enlace (app/clases/[id]/layout.js, generateMetadata en el servidor): título "Título · Ciudad", descripción con fecha, hora, tipo y precio, y la foto de la categoría (Open Graph y Twitter card). Con un id inexistente o una sesión no visible usa los datos generales.
-- Copiar sesión: la fecha ya no se copia igual, se propone el mismo día de la semana siguiente (o la primera semana futura si la sesión copiada es antigua) con una nota bajo el campo; el aviso de fecha y hora duplicadas muestra DD/MM/YYYY.
-- Commits 8c5833d y 7c78f97. Probado en el navegador: enlaces de las redes, imagen (títulos corto y largo), panel en móvil, copia del enlace y fecha propuesta. El menú nativo del móvil se probó simulado.
-- Botón Compartir también en Mis sesiones publicadas (app/mis-clases/page.js), junto a Ver detalles / Copiar sesión / Editar, solo en sesiones activas que no han pasado. Esa lista no trae ciudad, zona ni precio, así que BotonCompartir los lee de la base de datos al abrir el panel (commit 27ffaf5).
-- Imagen para historias: la etiqueta de categoría pisaba la primera línea del título (el título se dibuja por su línea base); se añadió el hueco necesario (commit 3187f3e).
-- Manifiesto de la PWA (app/manifest.js): añadidos id y scope "/" (commit 604d34d). Límite de plataforma: en iPhone un enlace nunca abre la web instalada en la pantalla de inicio (Safari y la app instalada no comparten sesión; solo lo permitiría una app nativa con enlaces universales); en Android con la web instalada debería abrirse en la app, salvo que el enlace se pulse dentro del navegador integrado de otra app (Instagram, WhatsApp). Sin probar en un móvil real.
-- Historia de Instagram con enlace: una historia con solo la imagen no se puede pulsar; el enlace pulsable es el sticker "Enlace" de Instagram, que solo se añade dentro de la app. En móvil, el panel de compartir muestra el bloque "Historia de Instagram con enlace" con tres pasos (guardar la imagen, abrir Instagram con el enlace ya copiado, elegir la imagen y pegar el enlace con el sticker) y un botón que copia el enlace y abre la cámara de historias (esquema instagram://story-camera, no documentada oficialmente; si Instagram no está instalado no ocurre nada). Desde una web no se puede crear una historia con el enlace ya puesto.
-- Imágenes para historia: dos opciones separadas en el panel. "Compartir imagen para historia" (solo si el navegador puede compartir archivos: menú nativo del móvil) y "Descargar imagen (PNG)" (siempre, descarga directa; en iPhone va a la app Archivos, y para Fotos hay que usar el menú de compartir y "Guardar imagen"). Las dos copian a la vez el enlace de la sesión y avisan de pegarlo con el sticker "Enlace".
-
-Pendientes:
-- Comprobar en producción la vista previa del enlace en WhatsApp/Facebook, el menú nativo y la imagen en un móvil real, y que el sticker "Enlace" de Instagram lleva a la ficha.
-- Probar en un móvil real el botón "Abrir Instagram con el enlace copiado" (iPhone y Android) y si el esquema instagram://story-camera abre la cámara de historias.
-- Opcional: enlaces cortos para las sesiones (ruleafit.com/s/abc123). Opcional a largo plazo: app nativa que envuelva la web (por ejemplo con Capacitor) para que los enlaces abran la app en iPhone.
-- Commit ffe0c7f. Probado en el navegador con sesiones simuladas (en producción /clases sigue vacía por no haber sesiones futuras) y sin publicar nada real.
-Pendientes:
-- Ordenar SIEMPRE las sesiones por distancia (idea del 30 octubre 2026; ya existe el caso de ciudad sin sesiones, ver arriba): hacerlo como opción voluntaria "Ordenar por: Fecha / Cercanía" que pida la ubicación solo si el usuario elige Cercanía, moviendo la lectura de ubicación de components/MapaClases.js a la página. Aplazado hasta que haya más sesiones publicadas a la vez.
-- Probar en producción publicar una sesión en otra ciudad (por ejemplo Granada) y verla en /clases, y copiar una sesión de una ciudad distinta de Sevilla o Málaga; borrar la sesión de prueba después.
-- Conseguir sesiones futuras reales: hoy la base de datos solo tiene sesiones pasadas y /clases sale vacía.
-- Comprobado el 30 octubre 2026 con una consulta de solo lectura en Supabase: sql/056 a sql/062 están aplicados (las cabeceras que dicen "NO EJECUTADO todavía" están desfasadas). Una fila salió en false (marcar_asistencia sin referencias a open_), casi seguro un falso positivo de la consulta: en ILIKE el guion bajo es comodín y "open_" coincide con "v_cantidad_open " dentro del cuerpo de la función. Sin importancia: la web no usa marcar_asistencia(). Decisión de producto: manda la asistencia automática.
-- Pendientes anteriores sin cambios: reindexación de /ayuda en Search Console, Redirect URL de producción de Google, limpieza de comentarios de cabecera de sql/*.sql del rename.
-
-## Pagos: modelo acordado y plan (30 octubre 2026)
-Estado: acordado con el gestor y el asesor en lo esencial; nada implementado. Los puntos marcados [confirmar] los revisarán el gestor o el asesor antes del lanzamiento.
-
-Modelo:
-- Ruleafit actúa como intermediaria (lo dicen los términos y condiciones, validado por el asesor). El alumno paga con tarjeta o Bizum en el TPV virtual CyberPack de CaixaBank (Redsys; concepto comercial "RULEAFIT"). Ruleafit no ve el número de tarjeta.
-- Comisión de Ruleafit: 10 % (variable RULEAFIT_COMMISSION_RATE=0.10). El resto va a la bolsa virtual del entrenador: "pendiente" hasta 48 h después de celebrarse la sesión (confirmado) y luego "disponible".
-- Liquidaciones los días 15 y último de cada mes (siguiente día hábil si es festivo o fin de semana), por remesa de transferencias. Mínimo de liquidación confirmado: 10 €, con el saldo arrastrado al periodo siguiente. El formato del fichero lo dará CaixaBank al contratar el CyberPack; se prepara el XML SEPA estándar (pain.001) con el formato intercambiable.
-- Reembolsos (propuestos): sesión cancelada por el entrenador o por no llegar al mínimo: reembolso total sin comisión; el alumno cancela con más de 2 h: reembolso; con menos de 2 h: sin reembolso. Un reembolso o contracargo posterior a la liquidación se descuenta de la siguiente.
-
-Facturación:
-- Ruleafit emite una autofactura al entrenador por cada liquidación, para dejar constancia del pago: emisor el entrenador con sus datos fiscales, receptor Ruleafit, concepto "Prestación de servicios de entrenamiento en plataforma Ruleafit", desglose de base imponible, IVA y retención de IRPF si aplica, con la mención de facturación por el destinatario. Los entrenadores aceptan esto en los términos (aceptación tácita de cada factura en 15 días, confirmado el plazo) [confirmar el texto].
-- Numeración: la lleva Ruleafit, una serie propia correlativa y sin saltos, con formato AF-AAAA-NNNNNN y reinicio cada año. Se asigna dentro de la misma transacción que genera la factura.
-- A los alumnos no se les emite factura salvo que la pidan (simplificada hasta 400 €; completa con sus datos si la piden o el importe lo exige) [confirmar].
-- Cada entrenador tiene sus propios modelos de factura; los desgloses se ajustarán a lo que indique el gestor.
-
-Impuestos (criterio de partida, a confirmar con el gestor):
-- IVA 21 % con carácter general (península y Baleares). Sin límite de ingresos para particulares: cada entrenador es responsable de su situación fiscal y de declarar sus ingresos, y lo acepta en los términos.
-- Retención de IRPF: personas físicas con actividad profesional, 15 % (7 % los tres primeros años si lo declara el entrenador); sociedades, sin retención. Ruleafit la ingresa (modelos 111 y 190).
-- Navarra y País Vasco: mismo IVA, pero las retenciones y declaraciones van a la Hacienda foral.
-- Canarias (IGIC), Ceuta y Melilla (IPSI): impuesto distinto del IVA, que depende de dónde se realiza la sesión y no del domicilio del entrenador. Casilla específica en el perfil fiscal y revisión manual; sin soporte automático en el lanzamiento hasta que el gestor dé las reglas. Se apoya en el campo provincia de las sesiones (sql/067).
-- Informe anual de operadores de plataformas (modelo 238, DAC7): probable obligación; por eso se recogen los datos necesarios desde el principio [confirmar].
-
-Datos a pedir a quien quiera publicar una sesión de pago: nombre y apellidos o razón social, NIF/NIE/CIF (con comprobación de letra o dígito de control), domicilio fiscal completo, correo, IBAN con titular (con comprobación de dígito de control; guardado cifrado), fecha de nacimiento y país de residencia fiscal si es persona física, tipo (persona física con actividad profesional, persona física con actividad empresarial, sociedad), casilla de zona fiscal especial. Casillas obligatorias: aceptación de términos y de la cláusula de autofacturación, declaración de que declarará sus ingresos y casilla de que se hace responsable de la exactitud de los datos facilitados (con fecha, versión del texto e IP). Las sesiones gratis no exigen datos fiscales.
-
-Tecnología: módulo en TypeScript (el resto del proyecto sigue en JavaScript), importes en céntimos enteros, reparto y cierre de periodo dentro de funciones SQL atómicas, webhook idempotente, firma de Redsys verificada contra el entorno de pruebas, PDF con pdfkit, interruptor general PAGOS_ACTIVOS apagado hasta el lanzamiento. Las librerías nuevas y todo lo relativo a pagos requieren confirmación explícita (ver CLAUDE.md).
-
-Orden de trabajo acordado:
-1. Documentos legales y cumplimiento común: términos y condiciones (hoy no hay), condiciones para entrenadores, política de cookies y almacenamiento, actualización de privacidad y aviso legal, y funciones que piden las tiendas (borrar la cuenta, denunciar y bloquear).
-2. Pagos, fase 1: perfil fiscal con sus casillas, tablas de cobros, bolsa y liquidaciones, firma y webhook de Redsys en entorno de pruebas, con el interruptor apagado.
-3. Aplicaciones: Android primero (versión de prueba, luego tienda) y después iPhone (notificaciones push nativas e inicio de sesión de Google nativo).
-4. Con el CyberPack contratado: credenciales, direcciones del webhook, formato del fichero del banco y pruebas con cobros reales de 1 € antes del lanzamiento.
-5. Lanzamiento al mercado con las apps ya disponibles en las tiendas.
-Los documentos legales los afino yo en borrador y los revisan el gestor y el asesor antes de lanzar (no soy asesor legal).
-
-## Borradores legales y seguridad antes del lanzamiento (30 octubre 2026)
-Hecho:
-- Borradores de documentos legales en legal/borradores/ (no publicados, sin enlazar en la web): términos y condiciones de contratación, condiciones para entrenadores (cobros, bolsa, liquidaciones, autofacturación, responsabilidad por los datos), política de cookies y almacenamiento, y lista de cambios para el aviso legal y la política de privacidad. Con huecos [CORCHETES] y puntos [REVISAR] para el gestor y el asesor. No son asesoramiento legal.
-- Dependencias actualizadas (30 octubre 2026): npm audit marcaba 5 vulnerabilidades (una crítica en Next 16.3.0, y sharp, nanoid, source-map-js y baseline-browser-mapping). Next pasa a 16.4.3 (versión corregida, fijada en package.json) y el resto se corrige con npm audit fix sin --force: ahora npm audit da 0 vulnerabilidades. Probado en local: build correcto, todas las rutas principales responden, las rutas /api sin secreto devuelven 401, las vistas previas de enlaces (generateMetadata) funcionan, y /clases, /publicar y /cuenta sin errores en consola. Aviso: los avisos de seguridad aparecen cada pocas semanas, conviene repetir npm audit antes del lanzamiento y de forma periódica.
-
-Plan de seguridad y estabilidad (planteado por el usuario; sin empezar):
-- Auditoría de seguridad antes de activar los cobros reales: revisión del código y de las políticas RLS de todas las tablas, gestión de secretos, cabeceras de seguridad (hoy next.config.mjs no define ninguna, ni hay middleware), límites de peticiones en las rutas /api, protección de las rutas de administración, dependencias, copias de seguridad y registro de actividad. Después, prueba de intrusión externa por un profesional. Una web "infranqueable" no existe: el objetivo es reducir el riesgo y poder detectar y recuperarse.
-- Las tarjetas no las guarda Ruleafit: se introducen en la página del TPV de CaixaBank (Redsys), así que el alcance de PCI DSS es mínimo. Sí se guardarán IBAN y NIF de entrenadores: cifrado, acceso restringido y plan de respuesta a brechas.
-- Cuentas críticas con doble factor (ya activado en GitHub, Vercel y Google); proteger la rama main (revisión obligatoria), permisos mínimos y alertas de acceso en Supabase y Vercel.
-- Alojamiento: valorar mover de Vercel a un servidor propio. Criterio de partida: un servidor propio no es más seguro por sí mismo (pasan a ser responsabilidad de Ruleafit el sistema, los parches, el cortafuegos, la protección contra ataques de denegación y las copias). Varios de los avisos de Next afectan precisamente a instalaciones propias. Recomendación: seguir en proveedores gestionados (Vercel y Supabase, plan de pago con copias y recuperación a un punto en el tiempo) y reforzarlos; reconsiderar el servidor propio solo con un motivo concreto y capacidad de operarlo.
-- Recuperación automática: punto de salud /api/health, vigilancia externa con avisos al móvil (UptimeRobot o similar), reintentos y página de error con reintento en las apps, y copias de seguridad con restauración probada. Con servidor propio: contenedores con reinicio automático, más de una instancia y balanceador. Un servidor no puede reiniciarse solo si cae la máquina o el centro de datos: hace falta redundancia.
-
-## Cumplimiento común para las tiendas: borrar cuenta, denunciar y bloquear (30 octubre 2026)
-Hecho (sql/068 ejecutado en Supabase el 30 octubre 2026):
-- sql/068_cumplimiento_tiendas.sql (ejecutado): tablas denuncias y bloqueos con RLS, y la función eliminar_mi_cuenta() (SECURITY DEFINER). La función rechaza el borrado si el usuario tiene sesiones próximas con reservas activas de otros, libera las plazas de sus reservas, pone a null las dos referencias sin ON DELETE CASCADE (rulos_movimientos.otorgado_por y reservas.asistencia_marcada_por) y borra el usuario de auth.users; el resto se borra en cascada (perfil, reservas, sesiones, valoraciones, seguimientos, Rulos, notificaciones, bonos).
-- Borrar cuenta (components/EliminarCuenta.js, en /cuenta): hay que escribir ELIMINAR; borra antes la foto de perfil del almacenamiento y llama a eliminar_mi_cuenta(); si hay sesiones próximas con reservas muestra el aviso y no borra.
-- Denunciar (components/BotonDenunciar.js): ficha de la sesión ("Denunciar esta sesión") y perfil del usuario ("Denunciar usuario"), con motivo y comentario; se guarda en denuncias y se revisa desde el panel de Supabase. No se denuncia a uno mismo.
-- Bloquear (components/BotonBloquear.js, lib/useBloqueados.js, components/UsuariosBloqueados.js): botón en el perfil, lista con desbloqueo en /cuenta, y las sesiones y el perfil del bloqueado dejan de verse en /clases y /entrenadores. Si las tablas no existen todavía, el botón de bloquear no se muestra y la web funciona igual.
-- Probado con la base de datos real (cuenta lealfj1): bloquear a un usuario y que desaparezca de /entrenadores (48 a 47), aparezca en la lista de Mi cuenta y vuelva al desbloquear; denunciar (se guarda; una segunda denuncia igual se detecta como duplicada y no da error); el panel de administración lista la denuncia y cambiarle el estado se guarda. El botón de eliminar solo se activa con la palabra exacta y el aviso de sesiones próximas se muestra (probado con respuesta simulada). No probado: el borrado real de una cuenta (hay que probarlo con una cuenta de prueba), ni el cierre de sesión posterior.
-- Limitaciones resueltas (30 octubre 2026):
-  - Bloquear impide reservar: sql/069_bloqueo_impide_reservar.sql (ejecutado y probado) añade un trigger BEFORE INSERT en reservas: si el organizador ha bloqueado al usuario, la reserva se rechaza con el mensaje genérico "Esta sesión no está disponible para ti." (no revela el bloqueo). No se toca reservar_clase. No cancela reservas ya existentes.
-  - Aviso por correo de cada denuncia: sql/070_trigger_aviso_denuncia.sql (ejecutado con el CRON_SECRET real, que no se versiona; como en sql/052) y ruta app/api/avisar-denuncia (probada: 401 sin secreto, 400 sin id, 404 si no existe; el envío real del correo no se ha probado). Ejecutar 070 después de desplegar esta ruta.
-  - Panel de revisión: /admin/denuncias (no enlazado en el menú, noindex), con la ruta app/api/admin/denuncias (GET lista, PATCH cambia estado). El servidor comprueba el token, que el correo esté confirmado y que sea de administración: ADMIN_EMAILS (opcional, separados por comas) o, si no existe, FEEDBACK_ADMIN_EMAIL (hoy ruleafit@gmail.com en Vercel). Probado: sin token, y con un usuario normal, 403 en GET y PATCH; con el correo de administración activado solo para la prueba, lista y actualiza.
-  - AGENTS.md: se añade agentRules: false en next.config.mjs para que next dev deje de generar AGENTS.md y de reescribir el bloque en CLAUDE.md (el bloque ya está en CLAUDE.md). Se borró el AGENTS.md generado.
-
-Pendiente:
-- Hecho y probado el 30 octubre 2026: sql/069 y sql/070 ejecutados; un usuario bloqueado no puede reservar (probado con un bloqueo temporal, y sin bloqueo la reserva se permite) y el correo de aviso llega al denunciar (confirmado por el administrador).
-- Probado por el usuario el 30 octubre 2026: crear una cuenta nueva con Google y borrarla desde Mi cuenta funciona.
-- Al activar los pagos, borrar cuenta debe rechazarse o conservar los datos fiscales y liquidaciones pendientes que la ley obligue a guardar.
-- Enlazar denuncias y bloqueos en los términos y condiciones (ya figuran en los borradores de legal/borradores/).
-- Mejoras futuras: acciones desde el panel (suspender un usuario, retirar una sesión) y límite de denuncias por usuario.
-
-## Selector de cuenta de Google al iniciar sesión (30 octubre 2026)
-- Fallo detectado en iPhone: al cerrar sesión y volver a entrar con Google, entraba directamente con la cuenta anterior sin preguntar. Corregido en app/login/page.js y app/registro/page.js añadiendo queryParams prompt=select_account a signInWithOAuth, para que Google pregunte siempre con qué cuenta entrar. Comprobado en local que la dirección que se abre en Google lleva prompt=select_account; la selección en sí se prueba en el iPhone una vez desplegado.
-
-## Pagos, fase 1: plan aprobado (30 octubre 2026)
-- Plan detallado en docs/plan-pagos-fase-1.md: tablas (sql/071), funciones (sql/072), módulo TypeScript en lib/pagos/, rutas de cobro y webhook de Redsys, pantalla de datos fiscales, y pruebas. Todo detrás de un interruptor apagado.
-- Aprobado por el usuario: tocar pagos, usar TypeScript en este módulo y añadir pdfkit (fase 2). Valores confirmados: comisión 10 %, mínimo de liquidación 10 €, 48 h hasta disponible, 15 días de aceptación tácita.
-- Decisiones por defecto: pagar primero y reservar después (si no queda plaza, se marca para reembolso); bonos en la fase 2; solo España, con Canarias, Ceuta y Melilla en revisión manual.
-- Pasos 1 a 3 hechos (30 octubre 2026), pendientes de revisión y de commit:
-  - TypeScript configurado (tsconfig.json con allowJs; typescript y los tipos como dependencias de desarrollo; el resto del proyecto sigue en JavaScript). npm audit: 0 vulnerabilidades. next build y tsc estricto sin errores.
-  - lib/pagos/dinero.ts (céntimos enteros, reparto con comisión en puntos básicos y redondeo de mitades hacia arriba, formato de euros), lib/pagos/validaciones.ts (DNI, NIE, CIF, IBAN español, código postal, correo, coincidencia provincia-código postal y zona fiscal) y lib/pagos/redsys.ts (parámetros del comercio, concepto RULEAFIT, firma HMAC-SHA256 con clave derivada por 3DES, verificación del aviso del banco en tiempo constante, pedido aleatorio de 12 caracteres).
-  - 24 pruebas con node:test (npm run test:pagos), todas correctas. La firma está contrastada con una implementación independiente (OpenSSL), NO con un ejemplo oficial de Redsys; la validación definitiva es contra su entorno de pruebas (paso 9).
-- Pendiente: pasos 4 a 9 del plan (sql/071, sql/072, rutas, pantallas, flujo de reserva con pago y prueba completa), con revisión previa al sql/071.
-
-## Pagos, fase 1: construido y aparcado hasta activarlo (31 octubre 2026)
-Todo está hecho y subido, pero APAGADO: los usuarios no ven ni pueden usar nada de pagos. Se retoma cuando se vaya a activar.
-- Base de datos (ejecutado por el usuario): sql/071_pagos_tablas.sql (config_pagos con pagos_activos=false, perfiles_fiscales, cobros, bolsas, movimientos_bolsa inmutable, liquidaciones y sus líneas; solo lectura para usuarios, IBAN cifrado ilegible desde el navegador), sql/072_pagos_funciones.sql (guardar_perfil_fiscal, crear_cobro, confirmar_cobro_pagado idempotente, liberar_pendientes con pg_cron cada 15 min; clave del IBAN en Vault como iban_clave) y sql/073_reservar_exige_pago.sql (reservar_clase rechaza sesiones de pago sin bono solo cuando pagos_activos=true). Comprobado: 4 funciones, clave del IBAN, tarea cron y pagos_activos=false.
-- Servidor: app/api/payments/crear (503 si PAGOS_ACTIVOS no es "true"), app/api/payments/redsys-webhook (verifica la firma y llama a confirmar_cobro_pagado), app/api/payments/perfil-fiscal (valida con lib/pagos/validaciones y guarda), páginas /pagos/ok y /pagos/ko.
-- Pantalla (solo con NEXT_PUBLIC_PAGOS_ACTIVOS="true", ver lib/pagosVisibles.js): bloque "Datos fiscales y cobros" en Mi cuenta (components/PerfilFiscal.js), bloqueo al publicar sesiones de pago sin datos fiscales y botón "Pagar X € y reservar" en components/BotonReservar.js (con bono vigente se reserva como siempre).
-- Probado: build, 24 pruebas de lib/pagos, webhook en local (firma buena con pedido desconocido responde 200, firma falsa y cuerpo vacío responden 400), crear con pagos apagados (503), validación de NIF en el formulario, botón de pagar con una sesión simulada (página temporal ya borrada) y que reservar_clase sigue funcionando tras sql/073.
-- NO probado: cobro completo con el banco, firma contra un ejemplo oficial de Redsys (hoy solo contrastada con OpenSSL), guardado real de datos fiscales, el bloqueo nuevo de sql/073 con pagos activos, ni reservar una sesión gratuita de otro usuario tras sql/073.
-- Para activarlo (pendiente):
-  1. Paso 9: claves del entorno de pruebas del TPV de CaixaBank como variables de entorno en Vercel o .env.local (REDSYS_MERCHANT_CODE, REDSYS_SECRET_KEY, REDSYS_URL; REDSYS_TERMINAL opcional, por defecto 1), sin pegarlas en el chat. Prueba con dos cuentas: pago correcto, rechazado, cancelado y sesión llena justo al pagar.
-  2. eliminar_mi_cuenta() debe comprobar bolsa, cobros y perfil fiscal (las tablas nuevas usan restrict o set null y bloquearían el borrado).
-  3. Reembolsos: cancelar_clase() y cancelar_reserva() aún no generan reembolsos; liberar_pendientes() ignora las sesiones canceladas.
-  4. Fase 2: autofacturas en PDF (pdfkit), liquidaciones los días 15 y último, SEPA XML, bonos con pago.
-  5. Revisión del asesor de los documentos legales y de la versión de aceptación (hoy "borrador-2026-10"), y auditoría de seguridad antes de cobrar dinero real.
-  6. Activar: config_pagos.pagos_activos=true, PAGOS_ACTIVOS="true" y NEXT_PUBLIC_PAGOS_ACTIVOS="true".
-
-## App de Android generada y probada, sin publicar (8 noviembre 2026)
-- Web preparada (manifiesto, /.well-known/assetlinks.json, /eliminar-cuenta) y app TWA generada con Bubblewrap (`com.ruleafit.app`, `.aab` y `.apk` firmados, fuera del repositorio). Probada en un móvil Android por el usuario; la huella de la clave está en Vercel y el enlace de verificación la sirve.
-- El usuario decide no publicar todavía. Todo lo necesario (ubicación de la clave, cómo recompilar en Windows, problemas encontrados y cómo se resolvieron, y lo pendiente para publicar) está en docs/app-android.md.
-- Pendiente para publicar: cuenta de Play Console (25 €), prueba cerrada de 12 testers y 14 días si es cuenta personal, capturas y gráficos de la ficha, formularios de Play y revisión legal.
-
-## App de iPhone probada en un iPhone real, aparcada (8 noviembre 2026)
-- Proyecto Capacitor en `app-ios/` (bundle `com.ruleafit.app`), que carga www.ruleafit.com en una app nativa. Adaptaciones de la web: login con Google por el navegador del sistema, ubicación nativa, vibración, y `.solo-web` para ocultar en la app lo que solo vale en navegador. Detalle en docs/app-ios.md y app-ios/README.md.
-- Compilada con Xcode en un Mac prestado e instalada en el iPhone del usuario; en una primera revisión todo se veía bien. Con Apple ID gratuito caduca a los 7 días y solo se instala por cable.
-- Incidencias: el aviso `dyld_shared_cache_extract_dylibs failed` al preparar el iPhone no impidió que la app se instalara y abriera.
-- El usuario aparca esta línea. Para retomarla: `git pull`, `npx cap sync ios` y ▶ en Xcode.
-- Pendiente con cuenta de Apple Developer (99 €/año): iniciar sesión con Apple (obligatorio por tener Google), notificaciones push nativas, TestFlight para testers y ficha del App Store (capturas, cuenta de demostración, etiquetas de privacidad).
-- Pendiente de comprobar: la URL `com.ruleafit.app://auth/callback` en Supabase → Redirect URLs y la lista de pruebas del README (Google, ubicación, compartir, reservar).
-
-## Auditoría de seguridad de la web (9 noviembre 2026)
-- Informe completo en docs/auditoria-seguridad.md. Hallazgo principal: `otorgar_rulos` y `generar_notificacion` (y 7 funciones internas más) eran ejecutables sin iniciar sesión con la clave pública de la web (en Supabase, `revoke ... from public` no quita los permisos de `anon`/`authenticated`). Confirmado en producción con una sonda inofensiva.
-- Arreglado en código: comprobación del secreto de las rutas internas (`lib/secretoCron.js`), enlaces de notificaciones solo de la propia web (`public/sw.js`), cabeceras de seguridad (`next.config.mjs`).
-- Cerrado (10 noviembre 2026): `sql/074` ejecutado y comprobado en producción (la sonda da "permission denied"); `sql/075_cerrar_update_directo_clases.sql` ejecutado (hallazgo 8: ya no hay UPDATE directo sobre `clases`, la web solo escribe por funciones; probado que la clave pública recibe 42501 y la lectura pública sigue funcionando); `sql/076_limites_de_envio.sql` ejecutado (límite por usuario: feedback 5/h y 20/día, denuncias 10/h y 30/día, sesiones publicadas 30/h y 100/día).
-- Ajustes del panel de Supabase revisados por el usuario (contraseña, OTP, Redirect URLs, rate limits, bucket avatares), salvo el límite de correo: el SMTP propio ya está configurado con Resend (agosto 2026), pero en el plan gratuito (100 correos al día, 3.000 al mes); ampliarlo antes de una campaña de lanzamiento.
-- Mejoras de la interfaz (10 noviembre 2026): publicar sin ciudad por defecto y mapas centrados en España (antes Sevilla); errores técnicos sustituidos por mensajes claros; promesa de "cobros automáticos" quitada de la portada; plurales; etiquetas enlazadas y `autoComplete` en login, registro, recuperar y nueva contraseña; `aria-label` descriptivos en los botones de cerrar. "Ruleros" es marca del usuario: no cambiar.
-- Pendiente: segunda auditoría centrada en pagos y `eliminar_mi_cuenta` antes de activar dinero real; política `script-src` de CSP; el autocompletado de ciudad depende del Nominatim público, que a veces tarda (valorar servicio propio si molesta).
-
-## Avisos de sesiones en mi zona: fases 1 a 4 (21-22 noviembre 2026)
-Estado: desarrollo y pruebas técnicas de las fases 1 a 4 terminados. **Todo apagado**: `inmediatos_activos = false`, `resumen_activo = false`, modo prueba activo (`solo_usuarios_prueba = true`) y `usuarios_prueba` vacía. Nadie recibe avisos de zona. Trabajo en la rama `prueba-avisos-zona` (main sin tocar; la web pública no cambia).
-- **Idea**: cada usuario elige una zona habitual, radio (1/5/10/20 km), categorías, franja horaria de inicio y modalidad (inmediata o resumen diario). Horizonte: la sesión debe empezar dentro de 168 horas reales desde su PUBLICACIÓN (sin avisos retroactivos). Inmediata: máximo 1 aviso por organizador y día y 5 al día por usuario (día de Europe/Madrid). Los favoritos con "publicaciones" activa siguen avisando por su vía y quedan excluidos del aviso de zona.
-- **Fase 1 · base de datos** (`sql/079_avisos_zona_*.sql`, aplicado): tablas `avisos_zona` (configuración privada, RLS por usuario), `config_avisos_zona` (interruptores globales, modo prueba, tope diario), `avisos_zona_procesadas`, `avisos_zona_inmediatos`, `avisos_zona_resumenes`; funciones auxiliares (distancia, 168 h, 20:30 de Madrid, ventana del resumen, franja); reversión y verificación (91 comprobaciones correctas). Funciones solo para service_role.
-- **Fase 2 · interfaz** (`components/cuenta/AvisosZona.js`, `useAvisosZona.js`, `lib/avisosZonaVisibles.js`; en la rama): bloque "Avisos de sesiones en mi zona" en Mi cuenta, visible también en la app de iPhone (fuera de `solo-web`). **Oculto salvo que `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES` sea "true"**: debe seguir sin definirse en Producción de Vercel (solo en Preview de la rama). Guardado real probado en el Preview con la cuenta de pruebas. También en la rama: `lib/enviarPush.js` configura web-push al enviar y no al importar (para compilar sin claves VAPID en Preview).
-- **Fase 3 · evaluación en seco** (`sql/080_avisos_zona_evaluacion*.sql`, aplicado): `avisos_zona_evaluar(sesión, ahora, detalle)`, solo lectura; motivos: sesion_no_activa, ya_empezada, completa, fuera_de_horizonte, sin_coordenadas, sesion_propia, bloqueado, publicada_antes_de_activar, categoria, franja, fuera_de_radio, ya_avisado_por_favoritos, ya_avisado_organizador_hoy, tope_diario. Probada en aislado (71 pruebas) y en producción con rollback.
-- **Fase 4 · avisos inmediatos** (`sql/081_avisos_zona_inmediatos*.sql`, aplicado; cron programado): motor `procesar_avisos_zona_inmediatos()` (cron `avisos-zona-inmediatos`, cada minuto, jobid 9) → `avisos_zona_evaluar` → `generar_aviso_zona` (campana siempre; push solo con suscripción; comprueba por sí misma interruptor y modo prueba) → cola y envío push ya existentes (no se modifica `generar_notificacion`, el trigger de favoritos, la cola ni la ruta). Cursor de sesiones (recupera tras paradas largas, sin ventana de tiempo), espera de 60 s, hasta 50 sesiones por ejecución, `avisos_zona_pendientes` (reintentos con espera creciente, hasta 8; lo agotado queda visible, no se descarta en silencio; `avisos_zona_estado_motor()` y `avisos_zona_reintentar_agotados()`), sin avisos retroactivos al encender. Apagado: el cron solo avanza el cursor (`{"estado":"apagado"}`). Pruebas: 115 en aislado (fallos parciales, agotamiento, reintentos, tope de 5, medianoche de Madrid, parada de 5 h, 120 sesiones con el mismo instante…) y prueba de producción con rollback correcta. Archivos de baja/reversión: `sql/081_avisos_zona_inmediatos_cron_baja.sql` y `..._reversion.sql`.
-- **Estado de producción comprobado el 22 nov**: 8 crons activos (los 7 originales intactos más el nuevo), 0 avisos de zona en campana y cola, funciones y triggers existentes con huella idéntica a antes de las fases.
-- **Pendiente (trasladado a la Fase 6, antes del lanzamiento público)**: prueba real de extremo a extremo de la recepción en campana y push. Plan aprobado y NO ejecutado: organiza `rubenpersonatEn`, recibe `rubenpersonatCl` (cambiar antes su modalidad a inmediata); añadir solo esas dos cuentas a `usuarios_prueba` y encender solo `inmediatos_activos` en una sola sentencia; publicar una sesión gratuita en Sevilla/Cardio que empiece entre 40 y 60 h después (visible 2-4 min: título "PRUEBA interna, no reservar"); comprobar 1 aviso en campana y 1 push; cancelar la sesión (sin reservas) y apagar de nuevo. Parada de emergencia: `update public.config_avisos_zona set inmediatos_activos = false;` o dar de baja el cron.
-- **Siguiente**: Fase 5 (resumen diario a las 20:30 de Madrid; ventana móvil de 20:30 a 20:30, cron con varias franjas por el horario de verano, un resumen por usuario y día en `avisos_zona_resumenes`, pantalla del resumen) y Fase 6 (prueba real, historial de 10 notificaciones por usuario que los avisos podrían desplazar, política de privacidad, purgas de tablas de control y cola, decidir cuándo mostrar el bloque en Producción).
-- **Pendiente de commit**: PROGRESS.md (actualizado, sin commit). Lo demás de las fases 1 a 4 ya está en la rama.
-
-## Avisos de sesiones en mi zona: Fase 5, resumen diario (22 noviembre 2026)
-Estado: **INSTALADA en Supabase el 22 nov 2026** (`sql/082` aplicado, verificación 34/34 correcta, cron `avisos-zona-resumen` jobid 10 programado; 9 crons activos, los 8 anteriores intactos). Todo apagado: `inmediatos_activos = false`, `resumen_activo = false`, modo prueba, lista vacía; 0 avisos de zona generados. Commit d969897 en `prueba-avisos-zona`, Preview correcto.
-- **Qué hace**: a partir de las 20:30 de Madrid, cada usuario en modalidad «diario» recibe UNA notificación (campana siempre, push solo con suscripción; tipo `resumen_zona`, mismas tablas historial/cola) con el nº de sesiones nuevas de su zona. Sin sesiones → no se avisa. Enlace `/sesiones-en-mi-zona?r=<id>`.
-- **SQL** (`sql/082_avisos_zona_resumen*.sql`): `avisos_zona_sesiones_resumen(usuario, día, ahora)` (solo lectura, mismas reglas que la evaluación de la Fase 3 aplicadas a la ventana 20:30→20:30; probado por paridad), `generar_resumen_zona` (un usuario, idempotente por unique usuario+día, comprueba interruptor/modo prueba por dentro), `procesar_avisos_zona_resumen` (lo que ejecuta el cron; bloqueo consultivo; fallos por usuario aislados y registrados en `avisos_zona_resumen_errores`), `avisos_zona_estado_resumen`, tablas `avisos_zona_resumen_motor` y `avisos_zona_resumen_errores`. Archivos aparte: `_cron` (`*/5 18-21 * * *` UTC; se niega con el interruptor encendido), `_cron_baja`, `_reversion`, `_verificacion`.
-- **Reglas**: ventana = sesiones PUBLICADAS entre las 20:30 de ayer y las 20:30 de hoy (23/25 h al cambiar el horario); 168 h reales desde la publicación; activas, sin empezar y con plazas en el momento del resumen; sin propias, bloqueos, publicadas antes de activar, ni organizadores en favoritos con «publicaciones» activa; sin duplicar sesiones ya avisadas como inmediatas ni incluidas en un resumen anterior; máximo 500 sesiones por resumen.
-- **Recuperación**: el proceso solo actúa entre las 20:30 y las 22:30 (Madrid); si el cron falla dentro de esa franja, la siguiente ejecución envía lo que falte sin repetir. Pasadas las 22:30 ese día ya no se envía (evita avisos tardíos) y la ventana del día siguiente no lo arrastra.
-- **App** (rama, sin commit): página `/sesiones-en-mi-zona` (`app/sesiones-en-mi-zona/page.js`, `components/sesiones-zona/`), reutiliza `TarjetaClase`; muestra las sesiones del resumen que siguen disponibles; sin `?r=` enseña el último resumen; añadida a `robots.js` como privada. `npm run build` correcto.
-- **Pruebas** (PGlite, 85 comprobaciones, 0 fallos): filtros, paridad con la Fase 3, interruptores/modo prueba, idempotencia, franja y recuperación, cambios de horario (28-mar y 31-oct 2027, 168 h reales atravesando el cambio), fallo de un usuario, tope 500, permisos/RLS, cron y reversión, funciones existentes sin cambios (huella).
-
-## Avisos de sesiones en mi zona: Fase 6, revisión final y preparación del lanzamiento (22 noviembre 2026)
-Estado de las seis fases:
-| Fase | Qué | Estado |
-|---|---|---|
-| 1 | Base de datos (`sql/079`) | Instalada |
-| 2 | Configuración en Mi cuenta (oculta tras `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES`) | En la rama; probada en Preview |
-| 3 | Evaluación en seco (`sql/080`) | Instalada |
-| 4 | Avisos inmediatos (`sql/081` + cron cada minuto) | Instalada; cron en marcha, interruptor apagado |
-| 5 | Resumen diario 20:30 (`sql/082` + cron cada 5 min, 18-21 UTC) y página `/sesiones-en-mi-zona` | Instalada; interruptor apagado |
-| 6 | Historial, limpieza, privacidad, prueba real | `sql/083` **instalado el 22 nov** (verificación 14/14; cron de limpieza sin programar); prueba real y lanzamiento pendientes |
-
-Hecho en la Fase 6 (rama `prueba-avisos-zona`, sin tocar Supabase de producción):
-- **Historial de la campana**: la purga diaria (10 últimas por usuario) habría expulsado reservas/cancelaciones con unos pocos avisos de zona (demostrado en pruebas). `sql/083_avisos_zona_mantenimiento.sql` reemplaza `purgar_notificaciones_historial()` (mismo nombre, firma y permisos; el cron actual no cambia) por una con cuota separada: 10 normales + 5 de zona por usuario; idéntica para quien no tiene avisos de zona. En la web, `lib/consultaNotificaciones.js` pide aparte 10 normales + 3 de zona (campana e historial). **083 aplicado en producción el 22 nov 2026**: verificación 14/14 correcta, huellas de reservas/favoritos/cancelaciones/recordatorios intactas, y prueba con rollback: de 12 normales + 8 de zona quedan 10 normales + 5 de zona, sin tocar filas de otros usuarios.
-- **Limpieza de control**: `avisos_zona_purgar_control()` (en `sql/083`) borra solo registros antiguos: procesadas >30 d, inmediatos >14 d, pendientes resueltos >30 d / agotados >90 d, errores de resumen >30 d, resúmenes >60 d, cola de avisos de zona enviada/error >14 d. No toca configuración, interruptores, estado de los motores, pendientes ni notificaciones que no sean de zona. Cron `avisos-zona-purga` (04:30 UTC) preparado en `sql/083_..._cron.sql`, **sin programar**. Incluye baja, reversión (restaura la purga de `sql/056` exacta) y verificación.
-- **Privacidad**: borrador en `legal/borradores/privacidad-avisos-zona.md` (categorías, fines, base legal, retención, destinatarios push). **No publicado**; la política vigente no se ha tocado. `eliminar_mi_cuenta()` borra en cascada la configuración y los resúmenes.
-- **Ocultación en Producción**: la sección de Mi cuenta y ahora también `/sesiones-en-mi-zona` dependen de `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES` (no definida en Producción). Texto de privacidad añadido en la sección de Mi cuenta.
-- **Seguridad de `/sesiones-en-mi-zona?r=<id>`**: sin sesión no consulta nada; RLS en producción solo deja leer los resúmenes propios (comprobado: política `auth.uid() = usuario_id`, sin acceso anon ni escritura); cambiar el id de la URL devuelve 0 filas.
-- **Prueba real controlada**: procedimiento de 4 pasos en `docs/prueba-real-avisos-zona.md` (En en modo inmediato y Cl en resumen diario se avisan entre sí; una sola activación; aislamiento a las 2 cuentas; parada de emergencia). **No ejecutada.**
-- **Pruebas aisladas (PGlite)**: 081 (115), 082 (85), 083 (23) correctas, 0 fallos; `npm run build` correcto.
-
-Pendiente para lanzar (cada paso con autorización): 1) (opcional) cron de limpieza de `sql/083`; 2) ejecutar la prueba real (campana + push, inmediata y resumen); 3) aprobar y publicar la política de privacidad; 4) `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES=true` en Producción y pasar la rama a `main`; 5) abrir los interruptores (`solo_usuarios_prueba=false`, `inmediatos_activos` y `resumen_activo` en true). No verificado: aspecto en móvil y escritorio de la pantalla del resumen y de la configuración con una sesión real (revisión solo por código y build).
-
-## Avisos de sesiones en mi zona: pruebas reales y preparación del lanzamiento (22 noviembre 2026)
-**Pruebas reales de las fases 4, 5 y 6 superadas** con las cuentas rubenpersonatEn (organizador) y rubenpersonatCl (receptor), en producción, con modo prueba limitado a esas dos cuentas:
-- **Resumen diario**: sesión A publicada por En; resumen lanzado una vez simulando las 20:35 de hoy (ventana real 20:30→20:30) → 1 notificación en la campana de Cl («1 sesión nueva en tu zona»), cola de push `enviada` a la primera, 0 errores. Efecto: queda registrado el resumen de Cl del 22-nov (id 2751d4c9-d6fc-4c20-acb3-44e29f146da5), conservado a propósito (no se duplica; su enlace sirve para la comprobación en Producción).
-- **Aviso inmediato**: Cl cambió a Inmediata; sesión B publicada por En → motor procesó la sesión en < 2 min, exactamente 1 aviso `sesion_zona` para Cl (enlace /clases/<id>), push `enviada` sin reintentos, 0 pendientes.
-- **Aislamiento**: 0 avisos de zona para cualquier otro usuario; después de la prueba, interruptores apagados, `solo_usuarios_prueba = true`, lista vacía, 0 usuarios habilitados, 9 crons activos.
-- **Hallazgos**: (1) En tiene a Cl en Favoritos, así que por la regla anti-duplicado En nunca recibe avisos de zona de Cl (comportamiento correcto; por eso el receptor fue Cl). (2) El enlace del resumen da 404 en Producción hasta fusionar la rama (aceptado en la prueba; obligatorio comprobarlo antes de abrir interruptores). (3) Un título con tabulador inicial aparecía tal cual en el aviso: corregido en `sql/084_avisos_zona_texto_espacios.sql` (con reversión; 6 pruebas aisladas correctas), **sin aplicar todavía** (requiere autorización).
-- Las sesiones A y B y las notificaciones de prueba se conservan por decisión del titular.
-
-Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en main: 7 commits / 37 archivos, fusión directa; pasos en orden; vigilancia; parada de emergencia; recomendación de programar el cron de limpieza el día del lanzamiento). Texto de privacidad pendiente de aprobación (`legal/borradores/privacidad-avisos-zona.md`), **no publicado**. Interruptores apagados y variable `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES` sin definir en Producción.
-
-### Actualización final antes del lanzamiento (22 noviembre 2026)
-- `sql/084_avisos_zona_texto_espacios.sql` **aplicado en producción**: título y ciudad del aviso con espacios normalizados (tabulador y saltos de línea iniciales corregidos); comprobado con el caso real, título normal idéntico, permisos solo service_role y huellas de generar_notificacion, favoritos, reservas, cancelaciones y recordatorios intactas. Interruptores siguen apagados.
-- **Política de privacidad aprobada y preparada, sin publicar**: el texto vive en `app/privacidad/page.js` condicionado a `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES` (sin la variable la política es la actual; comprobado con dos builds). Retención ajustada a la realidad: al desactivar los avisos solo se marca `activo=false` y la zona queda guardada inactiva hasta que se elimine la cuenta o se solicite su supresión. Tres puntos aún para revisión legal: datos de localización, transferencias internacionales y privacidad de iOS. `legal/politica-privacidad.md` pendiente de copiar al lanzar.
-- El cron de limpieza pasa a ser **necesario** en el lanzamiento (cumple el plazo de 90 días de la política). Rama lista para fusión directa con main; guía en `docs/lanzamiento-avisos-zona.md`.
-
-### Lanzamiento público de «Avisos de sesiones en mi zona»: COMPLETADO (22 noviembre 2026)
-- **Publicado**: rama fusionada en `main` y desplegada; `NEXT_PUBLIC_AVISOS_ZONA_VISIBLES=true` definida por el titular solo en Vercel Production; «Avisos de sesiones en mi zona» visible en Mi cuenta de www.ruleafit.com y `/sesiones-en-mi-zona` disponible. La **política de privacidad actualizada ya es pública** (última actualización 22-nov-2026) y `legal/politica-privacidad.md` está sincronizada con ese texto.
-- **Activado en producción**: `inmediatos_activos = true`, `resumen_activo = true`, `solo_usuarios_prueba = false`. Solo reciben avisos los usuarios que han guardado y activado su configuración (la función está desactivada por defecto; hoy solo hay 2 configuraciones activas, las cuentas de prueba). Sin configuración activa no se evalúa ni se avisa a nadie.
-- **Sin retroactivos**: el cursor del motor de inmediatos arrancó en el momento de la activación (0 sesiones procesadas, 0 avisos nuevos, 0 pendientes tras la primera ejecución); cada usuario solo recibe sesiones publicadas después de activar su configuración. El primer resumen diario se genera a las 20:30 de Madrid para los usuarios en modalidad «Resumen diario».
-- **Crons** (10 activos): los 7 originales, `avisos-zona-inmediatos` (cada minuto), `avisos-zona-resumen` (cada 5 min, 18-21 UTC) y `avisos-zona-purga` (04:30 UTC, programado el 22-nov; cumple los plazos publicados). Notificaciones habituales sin errores.
-- **Conservado**: sesiones A y B, resumen y avisos de prueba (por decisión del titular).
-- **Pendientes tras el lanzamiento**: (1) **revisión jurídica de 3 puntos** de la política (datos de localización de la zona habitual, transferencias internacionales de los servicios push, etiquetas de privacidad de iOS), recogidos en `legal/borradores/privacidad-avisos-zona.md`; (2) vigilar los primeros días (`avisos_zona_estado_motor()`, `avisos_zona_estado_resumen()`, `avisos_zona_pendientes`); (3) al desactivar los avisos la zona queda guardada inactiva (borrado solo al pedir supresión o eliminar la cuenta): valorar borrarla al desactivar; (4) push nativo del iPhone depende de la cuenta Apple Developer; (5) parada de emergencia: `update public.config_avisos_zona set inmediatos_activos = false, resumen_activo = false;`.
-
-## Participantes de una sesión con privacidad: PUBLICADO (22 noviembre 2026)
-- **Qué**: en el detalle de la sesión (`/clases/<id>`) aparece «Quién participa» con las reservas activas. **Opt-in**: el @ solo se muestra si el usuario activa voluntariamente Mi cuenta → Tu perfil → «Mostrar mi @ a otros participantes» (DESACTIVADA por defecto, también para usuarios existentes y nuevos); si no, aparece «Usuario anónimo» (sin enlace ni dato alguno). Al activarla se aplica a todas sus reservas, presentes y futuras. El organizador ve SIEMPRE todos los @ reales (con la marca «oculto para los demás»); cada usuario ve su propia reserva («(tú)») y, si está anónimo, un aviso con el enlace a Mi cuenta → Tu perfil. No aparece en tarjetas, mapa ni ventanas emergentes; solo lo ven usuarios con sesión.
-- **SQL aplicado en producción (`sql/085_participantes_sesion*.sql`)**: tabla `perfil_privacidad` (RLS propia, por defecto false, separada de `perfiles` porque es de lectura pública) y función `participantes_clase(uuid)` (SECURITY DEFINER, solo authenticated; la identidad de un anónimo nunca sale del servidor; anónimos al final en orden aleatorio; sin ids; oculta bloqueados). Solo lee reservas: reservas, pagos, plazas y notificaciones intactos (huellas verificadas). Verificación 15/15; prueba real con rollback: organizador ve 6/6 @, un ajeno 6 filas sin ningún @, un participante solo el suyo. 38 pruebas aisladas correctas.
-- **Política de privacidad** actualizada (`app/privacidad/page.js` y `legal/politica-privacidad.md`): @ visible solo si el usuario lo activa; el organizador siempre lo ve. Al ser opt-in, ya no hay exposición por defecto; sigue pendiente la revisión jurídica de los 3 puntos anteriores.
-
-## Bloqueos: «si A bloquea a B, para B A no existe» · PUBLICADO (22 noviembre 2026)
-- **Antes**: solo se impedía reservar (trigger `trg_impedir_reserva_si_bloqueado`) y la web ocultaba sesiones al bloqueador; B podía ver sesiones y perfil de A por API o enlace.
-- **`sql/086_bloqueos_invisibles*.sql`** (reversión incluida): RLS en `clases`, `perfiles`, `seguimientos`, `favoritos`, `valoraciones`, `bonos` y `rulos_saldos` mediante `me_ha_bloqueado()`; `listar_entrenadores()` sin A para B; `notificar_publicacion_clase()` (aviso de favoritos) no avisa con un bloqueo de por medio; trigger para que B no pueda adquirir bonos de A. Excepción: B conserva la visibilidad de las sesiones donde tiene una reserva ACTIVA (su historial) y del perfil de A solo mientras tenga una reserva activa futura anterior al bloqueo. Desbloquear lo devuelve todo al instante. 29 pruebas aisladas correctas.
-- **Límites**: un visitante sin sesión sigue viendo lo público; la vista previa al compartir el enlace (título de la sesión) es pública por diseño. Textos de bloquear/desbloquear actualizados. Build correcto.
-
-### Bloqueos: cancelación automática y «Ruleros bloqueados» · PUBLICADO (22 noviembre 2026; `sql/086` aplicado en producción)
-- **Al bloquear**, un trigger (misma transacción: o se hace todo o no se bloquea) cancela TODAS las reservas activas de B en sesiones FUTURAS activas de A, libera su plaza (la sesión sigue para los demás), a cualquier hora (excepción a la regla de 2 h), sin tocar reservas de sesiones ya celebradas. Notificación neutra a B por el sistema existente (tipo `sesion_cancelada`, no menciona el bloqueo): «Tu reserva para «X» ha sido cancelada. Recibirás el reembolso íntegro del importe pagado.» (solo si había pago; gratuita: sin frase de reembolso; bono: «la sesión de tu bono vuelve a estar disponible»).
-- **Dinero (RIESGO A DECIDIR)**: la plataforma NO tiene proceso de devolución (pagos desactivados, 0 cobros; `cancelar_reserva/cancelar_clase` tampoco reembolsan: «fase 2»). El trigger deja el cobro en `requiere_reembolso` (estado ya previsto; nunca «reembolsado» ni se simula nada; no se libera al organizador) y NO toca la bolsa. La devolución real por Redsys, el ajuste de bolsa y el paso a «reembolsado» están pendientes y deben existir ANTES de activar pagos. Hoy no hay dinero afectado.
-- **Mis reservas**: nueva sección «Reservas canceladas» (RPC `mis_reservas_canceladas_por_bloqueo`: título, fecha y estado del reembolso: pendiente/completado; sin organizador, sin enlaces). Registro interno en `reservas_canceladas_por_bloqueo` (sin acceso web).
-- **Mi cuenta**: nuevo desplegable «Ruleros bloqueados» (candado) tras «Tu perfil», con lista, «Desbloquear» y «No tienes ruleros bloqueados»; «Usuarios bloqueados» ya no está dentro de «Tu perfil». Desbloquear NO restaura reservas ni deshace reembolsos.
-- 51 pruebas aisladas correctas (cancelación, bonos, cobros, notificaciones, idempotencia, atomicidad ante fallo, visibilidad, reversión). Build correcto.
-
-> ## ⛔ NO ACTIVAR LOS PAGOS (`config_pagos.pagos_activos`) hasta implementar y comprobar las devoluciones reales por Redsys
-> Desde el 22-nov-2026, al bloquear a un usuario se cancelan sus reservas futuras con ese organizador (`sql/086`) y, si había un cobro pagado, este queda en `requiere_reembolso` y el usuario ve «Reembolso: pendiente de tramitar». **La plataforma NO devuelve dinero**: no existe la devolución por Redsys, ni el ajuste de la bolsa del organizador, ni el paso a `reembolsado` (la «fase 2» de pagos; tampoco reembolsan `cancelar_reserva` ni `cancelar_clase`). Con pagos activos habría usuarios con un reembolso prometido que nadie ejecuta. Antes de activar pagos hay que: (1) implementar la devolución por Redsys con idempotencia y gestión de errores del proveedor, (2) marcar `reembolsado` solo cuando el banco lo confirme, (3) ajustar la bolsa/movimientos del organizador, (4) probarlo con importes reales de prueba y (5) revisar los textos de reembolso. Hoy: `pagos_activos = false` y 0 cobros, sin dinero afectado.
-
-## Mapa: agrupación por organizador en el zoom máximo · PUBLICADO (22 noviembre 2026)
-- **Comportamiento**: con zoom normal el mapa sigue agrupando sesiones con círculos numéricos. Al pulsar un círculo cuyas sesiones comparten ubicación, el mapa AMPLÍA hasta el zoom máximo (18) y allí aparece **una foto por organizador** (no una por sesión). Un organizador con una sola sesión en el punto abre su ventana habitual («Ver detalles»); con varias, abre un panel con sus sesiones (más próximas primero, agrupadas por día, 20 por página, «Ir al perfil»). Si hay más de 24 organizadores en el punto se muestra «+N» con la lista de organizadores. Al alejar el zoom vuelve el círculo numérico.
-- **Código**: `components/MapaClases.js` (contenedor, `ObservadorZoomMaximo`, reencuadre solo cuando cambian las sesiones), `components/mapa/CapaMaximoZoom.js` (capa solo en zoom máximo; agrupa por proximidad en píxeles, umbral 46 px, reparte las fotos en anillos), `PanelSesionesMapa.js`, `iconosMapa.js`, `ContenidoPopupSesion.js`, `lib/agruparMapa.js` (23 pruebas lógicas). Sin cambios de SQL.
-- **Bug corregido (commit 8b36a8a)**: con la opción por defecto de la librería (`spiderfyOnMaxZoom`), un grupo de sesiones en el mismo punto se dispersaba al instante sin ampliar el zoom y la agrupación por organizador nunca llegaba a verse. Solución: `spiderfyOnMaxZoom={false}` en `MarkerClusterGroup` (con comentario explicativo en el código). Verificado en navegador real, en local y en producción.
-- **Prueba final en producción (www.ruleafit.com)**: dos sesiones de dos organizadores distintos (En y Cl) con coordenadas idénticas en Córdoba (37,8882; -4,7794): círculo «2» → al pulsarlo zoom máximo → dos fotos separadas, cada una pulsable y con su ventana habitual → al alejar vuelve el círculo «2». 6/6 comprobaciones correctas, sin cambios de código, 0 notificaciones y 0 reservas. Las dos sesiones de prueba («PRUEBA mapa 2 organizadores…») quedan publicadas por decisión del titular. También hay 15 sesiones de prueba de En en La Cartuja (Sevilla).
-- **Nota de pruebas**: en el panel del navegador de pruebas (visor escalado) los clics por coordenadas no se registraban sobre el mapa; se usaron clics por referencia y un clic de DOM sobre el círculo. Conviene que el titular pruebe una vez el clic real con ratón o dedo sobre el círculo.
-
-## C33 · Información clara sobre los plazos de cancelación · PUBLICADO (23 noviembre 2026)
-- **Regla real (sin cambios)**: `cancelar_reserva` (sql/032, comprobado en producción) permite cancelar si faltan **2 h o más** hasta el inicio en hora de Madrid (con exactamente 2 h todavía se puede; con menos, error P0003). Es la misma regla para sesiones gratuitas, de pago y con bono. No se ha tocado SQL, pagos, reservas ni notificaciones.
-- **Detalle de la sesión** (`/clases/[id]`, bajo «Reservar»; sin cambios en las tarjetas de Explorar ni en el mapa): reloj + «Puedes cancelar hasta el DD/MM a las HH:MM» y la norma de 2 horas. Con menos de 2 h, aviso ámbar «Esta sesión comienza en menos de 2 horas…» y el botón pasa a «Entiendo, reservar» (segundo clic de confirmación solo en ese caso; en el resto, el plazo ya se ve antes de pulsar, sin pasos extra). Barra fija móvil con relleno inferior ampliado para no tapar contenido.
-- **Mis reservas** (próximas): «Puedes cancelar hasta las HH:MM del DD/MM» o «El plazo de cancelación ha finalizado. Ya no puedes cancelar esta reserva»; los botones de cancelar siguen igual (decide el servidor).
-- **Pagos futuros**: en el bloque de pago se muestra el mismo plazo, sin la frase anterior «Cancelación gratuita hasta 2 h antes», y una línea neutra («la devolución se gestiona según las condiciones del pago»; sin prometer reembolso automático). **Revisar ese texto cuando se implementen las devoluciones reales** (ver aviso ⛔ de pagos).
-- **Código**: `lib/plazoCancelacion.js` (cálculo en hora de Madrid con segundos, 7 pruebas en `lib/plazoCancelacion.test.js`; `node --test lib/plazoCancelacion.test.js`), `components/AvisoPlazoCancelacion.js`, `components/BotonReservar.js` (prop `mostrarPlazo`), `TarjetaReservaProxima.js`. Si cambia la política de 2 h hay que cambiar `PLAZO_CANCELACION_HORAS` y la barrera SQL a la vez.
-- **Pruebas**: lógica (límites exactos, horario de verano, madrugada), build correcto y revisión visual móvil de todos los textos. No se probó el clic de reserva con una cuenta real (sin credenciales en local).
-
-## C33b · Nueva política: se puede cancelar hasta el comienzo, con o sin devolución · PUBLICADO (23 noviembre 2026; `sql/087` aplicado en producción)
-- **Regla nueva** (sustituye a la barrera de 2 h de `sql/032`): una reserva se puede cancelar en cualquier momento ANTES de que empiece la sesión. **2 h o más** (exactamente 2 h cuenta como a tiempo) = cancelación a tiempo, con derecho a devolución; **menos de 2 h** = cancelación tardía: se cancela igual y se libera la plaza al instante, pero sin derecho a devolución, y la sesión de un bono queda consumida. Una sesión ya empezada no se puede cancelar. La reserva cancelada nunca cuenta como asistencia ni da Rulos (esos procesos solo miran reservas activas).
-- **SQL aplicado (`sql/087_cancelacion_tardia.sql`, reversión incluida; en producción se aplicó la misma lógica sin comentarios)**: columna `reservas.cancelacion_tardia` (false por defecto); `cancelar_reserva` sin barrera: marca la tardía, libera la plaza y, si hay cobro `pagado` sin liberar, lo pasa a **`requiere_reembolso`** si es a tiempo (mismo estado que la cancelación por bloqueo) o lo deja **`pagado`** si es tardía (sin derecho a devolución; nunca `reembolsado`). `mis_bonos_comprados`, `compradores_de_mis_bonos` y el cupo de bono de `reservar_clase` cuentan como usada la reserva activa O cancelada con `cancelacion_tardia`. Devuelve además `cancelacion_tardia`, `usaba_bono` y `reembolso` ('pendiente' | 'sin_derecho' | null).
-- **Intactas** (hash idéntico antes/después): `cancelar_clase`, `cancelar_reservas_por_bloqueo`, `autocancelar_clases_sin_minimo`, `completar_asistencia_clases_pasadas`, `liberar_pendientes`, `generar_notificacion`. Esas cancelaciones NO son tardías: el bono vuelve y el cobro sigue su regla (bloqueo → `requiere_reembolso`).
-- **Pruebas**: 36 pruebas aisladas (límite exacto de 2 h y 2 h − 1 µs, gratuita, de pago, bono, bono agotado, plazas, doble cancelación, ajena, sin sesión, sesión empezada, reversión y reaplicación) y una prueba en producción con rollback (gratuita 3 h / 1 h 30, pago 3 h / 1 h con cobro, bono con 3 reservas; 0 notificaciones, 0 cobros reembolsados, pagos desactivados; nada quedó guardado).
-- **Web**: detalle de sesión («Puedes cancelar gratis hasta el DD/MM a las HH:MM»; con menos de 2 h: «Puedes cancelar tu reserva hasta que comience la sesión, pero si faltan menos de 2 horas no tendrás derecho a devolución»; el botón sigue pidiendo un segundo clic «Entiendo, reservar»); Mis reservas con aviso adaptado a gratuita/de pago/bono y confirmación al cancelar («Tu plaza quedará libre para otra persona, pero no recibirás la devolución del importe pagado» / «…la sesión de tu bono se considerará consumida»); portada «Cancela gratis hasta 2 h antes»; borrador de términos actualizado. Revisado en móvil y escritorio.
-- **Sigue vigente el aviso ⛔**: los pagos (`config_pagos.pagos_activos`) deben seguir DESACTIVADOS hasta implementar la devolución real por Redsys. Los cobros a tiempo quedan en `requiere_reembolso` pendientes de esa devolución; los tardíos se quedan `pagado` (se liberan al organizador).
-
-## C07 · Sesiones recurrentes (series) · PUBLICADO (23 noviembre 2026; `sql/088` aplicado en producción)
-- **Qué es**: una serie es solo una etiqueta que agrupa sesiones NORMALES de `clases` (`clases.serie_id` + tabla `series_sesiones`). Cada sesión conserva sus reservas, plazas, participantes, cancelaciones, bonos, cobros, asistencia y valoraciones; Explora, mapa, calendario, perfil público y Mis reservas las tratan como sesiones normales (no se tocó el mapa ni la agrupación por organizador). No hay reserva de serie completa para clientes (mejora futura).
-- **Publicar** (`/publicar`): «¿Quieres repetir esta actividad?» (por defecto «No, publicar una sola sesión»). Con «Sí, repetir semanalmente»: fecha de inicio, días L-M-X-J-V-S-D, horas como etiquetas editables (las mismas todos los días o «Personalizar horas por día»), fecha final libre (inclusive) y resumen + lista de fechas y horas reales con errores/avisos antes de publicar; botón «Publicar X sesiones». Validaciones: ≥1 día, ≥1 hora por día, sin horas repetidas, fin ≥ inicio, nada en el pasado (las horas de hoy ya pasadas se omiten y se avisa), sin solapes por duración, aviso de duplicados con sesiones ya publicadas, hora inexistente en el cambio a horario de verano. Máximo 250 sesiones por publicación (el formulario pide acortar o dividir). Todo en hora de Madrid (fecha y hora «de reloj», sin desplazamientos por el cambio de horario).
-- **SQL aplicado (`sql/088_series_sesiones.sql`, reversión incluida; las sesiones no se borran al revertir)**: `publicar_serie` (atómica: todas o ninguna; límites 250 sesiones/serie, 10 series/hora, 30/día; anti doble envío; sin duplicados ni solapes), `cancelar_serie` + `previsualizar_cancelacion_serie` (alcance `solo_esta` | `esta_y_siguientes` | `toda_futura`; cada sesión se cancela con la función EXISTENTE `cancelar_clase`: reservas canceladas por el organizador, notificaciones, bonos y cobros como siempre; no son cancelaciones tardías de C33), `editar_serie` (usa `editar_clase` con sus reglas; precio y duración SOLO en sesiones sin reservas; lo que no se puede se devuelve como «omitida» con el motivo), `actualizar_patron_serie` (añade sesiones nuevas y cancela las que sobran solo si no tienen reservas; las reservadas se conservan y se informa; nunca toca pasadas). Funciones internas `serie_sesiones_objetivo`, `notificar_serie_publicada`, `proteger_serie_id` (el cliente no puede asignar/cambiar `serie_id`). RLS: cada organizador solo ve sus series. Solo `authenticated` ejecuta las funciones públicas.
-- **Funciones existentes modificadas** (solo cuando la inserción viene de una serie, marcada con la variable de transacción `ruleafit.serie_rpc`): `limitar_envios` (la serie no cuenta contra las 30 sesiones/hora; las sesiones de serie tampoco cuentan en ese límite de sesiones sueltas) y `notificar_publicacion_clase` (no notifica sesión a sesión). Sin la marca, comportamiento idéntico al anterior (comprobado). Resto de funciones intactas por huella (cancelar_clase, editar_clase, cancelar_reserva, reservar_clase, bloqueos, asistencia, liberar_pendientes, generar_notificacion…).
-- **Notificaciones**: UNA agrupada por favoritero («@organizador ha publicado N nuevas sesiones de X», enlace a la primera sesión; «ha añadido N…» al ampliar el patrón), con las mismas preferencias y bloqueos de siempre. Avisos de zona sin cambios: el motor ya limita a un aviso por usuario, organizador y día.
-- **Mis sesiones publicadas** (`/mis-clases`): una tarjeta por serie (título, días, horarios semanales, sesiones programadas, próxima fecha) con «Ver sesiones» (listado cronológico desplegable: plazas, Participantes, Ver, Editar, Cancelar… con alcance) y «Gestionar serie» (bloques desplegables: editar, cambiar días y horas, cancelar). Las sesiones sueltas se muestran como siempre. **Editar** (`/mis-clases/<id>/editar`): en sesiones de serie, selector «Solo esta / Esta y las siguientes / Toda la serie futura» y bloque de precio y duración; si alguna sesión no admite el cambio se lista con el motivo. La ubicación NO se edita en bloque (decisión aceptada).
-- **Código**: `lib/seriesSesiones.js` (+ 12 pruebas), `components/series/EditorPatron.js`, `components/publicar/{BloqueCuando,VistaPreviaSerie,useVistaPreviaSerie,enviarSerie}.js`, `components/mis-clases/{SerieMisClases,FilaSesionSerie,DialogoCancelarSerie,CambiarPatronSerie}.js`, `components/editar-clase/BloqueSerieEditar.js`.
-- **Pruebas**: 55 pruebas aisladas del SQL (publicar con horas por día, fecha final inclusive, atómica, doble envío, límites, notificación agrupada, cancelación con/sin reservas, bonos y cobros sin «reembolsado», editar con omitidas, cambio de patrón conservando reservadas, permisos y RLS, reversión) + 12 de lógica de fechas (cambio de horario de marzo/octubre) + prueba en producción con rollback (26 sesiones L/X/V con horas distintas, fin inclusive, 1 notificación agrupada, gestión y cancelación, 60 sesiones sin consumir el límite individual, sesión individual igual que antes). Build correcto; revisión visual móvil y escritorio con datos de ejemplo. Pagos desactivados (`pagos_activos = false`), sin tocar código financiero.
-- **Pendiente conocido**: antes de activar pagos, las devoluciones reales por Redsys (ver aviso ⛔): cancelar una serie usa `cancelar_clase`, que cancela y avisa pero no tramita devoluciones.
-
-## C02 · Añadir las sesiones reservadas al calendario personal · PUBLICADO (23 noviembre 2026)
-- **Qué hace**: botón «Añadir al calendario» con dos opciones: **Google Calendar** (enlace con el evento ya preparado; el usuario lo confirma en Google, sin pedir permisos de cuenta) y **Apple Calendar y otros (.ics)** (descarga un archivo iCalendar para importar). No afirma que se haya guardado: la importación la confirma el usuario. Sin sincronización: si la sesión cambia o se cancela, la descripción del evento remite a su ficha en RuleaFit.
-- **Dónde aparece**: (1) en el detalle de la sesión (`/clases/[id]`), justo bajo «Ya tienes esta sesión reservada», con «¿Quieres añadir esta sesión a tu calendario?» solo cuando el servidor acaba de confirmar la reserva desde esa pantalla (si se entra con la reserva ya hecha, solo el botón); (2) en cada reserva futura activa de `/mis-reservas`. No en reservas canceladas, sesiones ya empezadas, tarjetas de Explorar ni mapa. Sesiones de series (C07): solo la fecha reservada (UID por sesión).
-- **Evento**: título «RuleaFit · [actividad]»; inicio real; fin = inicio + duración real (60 min si no hay duración); ubicación «dirección, ciudad · Punto de encuentro: …»; descripción con «Sesión reservada en RuleaFit.», organizador, enlace a la ficha (`https://www.ruleafit.com/clases/<id>`) y aviso de consultar cambios/cancelaciones. Sin datos de participantes. Zona Europe/Madrid: el .ics lleva su VTIMEZONE (verano: último domingo de marzo; invierno: último de octubre) y Google recibe `ctz=Europe/Madrid`.
-- **Seguridad**: Google se construye con `URLSearchParams` (ningún dato de la sesión puede añadir parámetros ni cambiar la dirección); el .ics escapa texto (\\ ; , saltos), pliega líneas a 75 octetos UTF-8 sin partir tildes y usa CRLF. Sin dependencias nuevas, sin SQL, sin tocar reservas, pagos, bonos, cancelaciones, notificaciones ni C33.
-- **Código**: `lib/calendario.js` (+ 10 pruebas en `lib/calendario.test.js`: fin y medianoche, Google con datos hostiles, .ics válido, marzo/octubre, escapado y plegado, nombre de archivo), `components/BotonCalendario.js` (reutilizado en ambos sitios), integrado en `BotonReservar.js` (prop `mostrarCalendario`, solo detalle) y `TarjetaReservaProxima.js`.
-- **Comprobado**: lógica y archivo .ics generado en navegador (descarga con nombre seguro, tipo `text/calendar`, datos y líneas plegadas correctas), enlace de Google con todos los parámetros, sesión pasada sin botón, diseño móvil y escritorio. **No comprobado**: importación real en iPhone, Android o Outlook ni la confirmación dentro de Google Calendar (sin esos dispositivos/cuenta en el entorno de pruebas) ni la reserva con una cuenta real en pantalla.
-
-## C16 · Solicitud automática de valoraciones y C18 · Avisos del organizador a participantes · PUBLICADO (23 noviembre 2026; `sql/089` y su cron aplicados en producción)
-- **Infraestructura reutilizada**: `generar_notificacion()` (campana + cola de push + preferencias), pg_cron, `valoraciones` (una por usuario y organizador, con su RLS y formulario del perfil) y la asistencia automática existente. Única función existente modificada: `generar_notificacion` (+2 categorías desactivables: `solicitud_valoracion` y `avisos_organizador`; hash del resto de funciones —recordatorios, avisos de zona, favoritos, asistencia, cancelaciones— idéntico antes y después). Sin segundo sistema de notificaciones ni de valoraciones; sin correos.
-- **C16**: «asistencia confirmada» = movimiento de Rulos `asistencia_confirmada` de la reserva (cron de asistencia cada 15 min desde que la sesión empieza); la RLS deja valorar desde el inicio de la sesión, así que pedirlo **1 h después de terminar** (inicio + duración + 60 min; 60 min de duración si no consta) nunca llega antes de poder valorar. `solicitar_valoraciones()` (cron `solicitar-valoraciones`, cada 10 min) avisa UNA vez por usuario y sesión (`solicitudes_valoracion`, UNIQUE sesión+usuario) a quien tiene reserva activa en sesión activa, asistencia confirmada, no ha valorado a ese organizador, sin bloqueos y sin otra solicitud al mismo organizador en 7 días; ventana 48 h; sin retroactivos (`solicitudes_valoracion_config.activo_desde` = instalación, 23-nov-2026 11:21 UTC); interruptor `activo`. Aviso: «¿Qué tal tu entrenamiento?» / «Ya has completado tu sesión con @org. ¡Cuéntanos qué te ha parecido!» → `/entrenador/<usuario>?valorar=1`: el perfil baja al bloque de valoración existente (si ya valoró, muestra «Ya has valorado… aquí puedes actualizar tu valoración»; el UNIQUE impide duplicar). Campana con estrella y etiqueta «Valorar experiencia».
-- **C18**: botón «Enviar aviso a participantes» en cada sesión futura activa de Mis sesiones publicadas (sesiones sueltas y sesiones de series C07; cada sesión es independiente). Panel con sesión, fecha/hora, participantes con reserva activa, texto con contador /300, vista previa, confirmación con el nº de destinatarios (recalculado en el servidor) e historial «Avisos enviados» («Has enviado N de 3…»). Servidor (`enviar_aviso_participantes`): solo el organizador, solo antes de empezar y con sesión activa, máx. 3 avisos (UNIQUE sesión+orden y orden ≤ 3 como garantía dura + bloqueo de fila contra envíos simultáneos), máx. 300 caracteres, destinatarios = reservas ACTIVAS sin bloqueos, transacción única (todo o nada) y doble clic con el mismo texto en 60 s = el mismo aviso sin consumir otro. `reintentar_aviso` reenvía solo a los pendientes sin consumir aviso ni duplicar. Avisos inmutables (RLS sin acceso + trigger) y texto plano (la web lo muestra escapado). Notificación «Aviso de @organizador» + ««sesión» · DD/MM HH:MM — mensaje» → `/clases/<id>?aviso=<id>`, donde el destinatario ve el aviso completo (`AvisosRecibidos`). Es solo informativo: cambios y cancelaciones siguen por las herramientas de siempre (C07/C33 intactas).
-- **Preferencias** (Mi cuenta → Notificaciones, «Como participante»): «Solicitud de valoración tras la sesión» y «Avisos del organizador de mis sesiones», con la aclaración «solo desactiva la notificación push; el aviso seguirá en la campana». El historial de la campana se guarda siempre.
-- **Pruebas**: 45 pruebas aisladas del SQL (asistencia confirmada/no, ya valorado, reserva y sesión canceladas, bloqueos, no retroactivo, hora de aviso, ejecución repetida sin duplicados, interruptor, límites de C18, recuperación parcial, inmutabilidad, permisos, reversión) + prueba en producción con rollback (C16: recibe quien tiene asistencia confirmada, texto y enlace correctos, sin repetición, no a quien ya valoró; C18: no propietario rechazado, 301 caracteres rechazados, envío a 2 reservas activas, doble clic sin duplicar, 4.º rechazado, historial, participante lo ve, tablas no legibles, reintento sin duplicar; preferencia desactivada = campana sí, push no). Cron activo; motor de avisos de zona sigue `ok`. Interfaz revisada en móvil y escritorio con datos de ejemplo.
-- **No comprobado**: push reales (sin dispositivo con permiso en el entorno de pruebas; la cola y su proceso de envío son los de siempre) y el flujo completo con cuentas iniciadas en pantalla.
-- Pagos desactivados; sin tocar reservas, bonos ni asistencia.
-
-## N09 · Ubicaciones habituales, detección de ciudad desde el mapa y campos opcionales · PUBLICADO (23 noviembre 2026; `sql/090` aplicado en producción)
-- **Separación mantenida**: ubicación del mapa = dirección física (coordenadas, ciudad/municipio, provincia); **Zona** = sala o espacio concreto (opcional, `clases.direccion`); **Punto de encuentro** = indicaciones adicionales (opcional). Elegir una ubicación habitual NO rellena ni sobrescribe Zona ni Punto de encuentro (comprobado) y no hay botón para copiar la dirección a Zona.
-- **Ubicaciones habituales** (solo desde /publicar, sin entradas nuevas en el menú ni en Mi cuenta): selector «Mis ubicaciones habituales» (solo si hay alguna guardada) que recupera coordenadas, ciudad y provincia y centra el mapa; «Guardar esta ubicación» (opcional; pide solo un nombre privado; guarda también la dirección postal si el servicio la da); «Gestionar ubicaciones» (cambiar nombre, «Editar en el mapa», eliminar). Mensajes de éxito en verde lima, errores en rojo. Sin ubicaciones guardadas, la publicación funciona como siempre. Sirve igual para sesiones sueltas y series C07 (mismo formulario; sin tocar la lógica de series).
-- **SQL aplicado (`sql/090_ubicaciones_habituales.sql`, reversión incluida)**: tabla `ubicaciones_habituales` (usuario, nombre, ciudad, provincia, dirección, lat, lng) SIN relación con `clases`: cada sesión guarda su propia copia de la ubicación, así que renombrar, mover o borrar una ubicación nunca cambia sesiones ni series publicadas. RLS: cada organizador solo ve, crea, modifica y borra las suyas (`usuario_id = auth.uid()`; el dueño no se puede cambiar); sin acceso anónimo; nombre único por usuario (sin distinguir mayúsculas), varias ubicaciones en la misma dirección con nombres distintos permitidas, máx. 50.
-- **Detección de ciudad** (`lib/geocodificarInversa.js`): al marcar un punto se consulta Nominatim (reverse, zoom 10) y se devuelve el MUNICIPIO (municipality/city/town/village; barrios, distritos y pedanías se resuelven a su municipio; sin municipio → no se inventa nada) y la provincia (province → county → comunidad). Mantiene las coordenadas exactas, se puede corregir a mano, un fallo solo muestra un aviso (no bloquea) y no pisa nunca una ciudad escrita o elegida por la persona (`ciudadOrigen`) ni una respuesta lenta o antigua (secuencia + cancelación). Si primero se escribe la ciudad, todo funciona como antes. También rellena la provincia de una ubicación guardada que no la tenga.
-- **Política de Nominatim** (`lib/nominatim.js`): TODAS las consultas (buscar ciudad, buscar calle, inversa) pasan por una cola del navegador con ≥ 1,1 s entre peticiones reales (máx. 1 por segundo), las canceladas se descartan sin gastar turno, identificación por el Referer de la web (`referrerPolicy` fijado) y caché por texto/coordenadas. Se hace en el navegador porque cada persona consulta desde su propia IP (lo que Nominatim mide); pasar por un servidor propio concentraría todo el tráfico en una IP y empeoraría el límite. Nota: el autocompletado al escribir ya existía antes y la política de Nominatim lo desaconseja; la cola y el debounce lo mantienen dentro del 1 req/s por navegador. Si el uso crece, el siguiente paso sería un proveedor propio/de pago.
-- **Campos opcionales**: «(Opcional)» en Tipo de actividad, Zona, Punto de encuentro, Material necesario y Observaciones, en /publicar y en la edición de sesiones. Comprobado en servidor: solo `tipo_actividad` es NOT NULL en `clases` pero acepta texto vacío (el formulario siempre lo envía; ya había 5 sesiones sin él); sin cambios de base de datos.
-- **Pruebas**: 19 pruebas aisladas del SQL; 7 de geocodificación inversa y 5 de la cola (espaciado, orden, cancelación, fallos); prueba en producción con rollback (permisos y RLS, guardar, duplicado rechazado, misma dirección con otro nombre, editar, otro usuario sin ver/modificar/borrar/crear, eliminar sin cambiar la sesión previa, serie C07 de 10 sesiones con ubicación y campos opcionales vacíos); interfaz revisada en móvil con servicios simulados. **No comprobado**: Nominatim real en vivo y el flujo con una sesión iniciada en pantalla.
-
-## N10 · Filtros de precio, duración y plazas libres en Explora y reserva · PUBLICADO (23 noviembre 2026; sin SQL)
-- **Qué se añadió** (dentro del mismo panel «Filtros», junto a Ruleros, Buscar, Ciudad, Categoría, Cuándo y Franja horaria; sin «Más filtros» ni otra sección): **Precio** (una barra con DOS tiradores, 0–50 € en saltos de 1 €, intervalo en verde lima, mínimo nunca por encima del máximo, uso con dedo, ratón y teclado: flechas ±1, Re Pág/Av Pág ±5, Inicio/Fin; «Quitar filtro de precio»), **Duración** (Cualquier duración por defecto; hasta 30; 31–60; 61–90; más de 90 min) y **Disponibilidad** (casilla «Solo sesiones con plazas libres», desactivada por defecto).
-- **Reglas**: por defecto NO hay restricción de precio aunque la barra muestre 0–50 € (salen también las de más de 50 €); al mover un tirador se aplica el rango elegido con límites incluidos (un 0–50 explícito sí excluye las de más de 50 €); las gratuitas valen 0 €. Duración: tramo sobre la duración real; las sesiones sin duración solo aparecen con «Cualquier duración». Plazas libres = no completa (canceladas, inactivas y pasadas ya las descartaban los filtros de siempre).
-- **Implementación**: se amplió el filtrado existente (`components/clases/filtros.js` con `coincideConPrecio`, `coincideConDuracion`, `tienePlazasLibres`; `useClasesListado.js` aplica los tres junto a los demás). Tarjetas y mapa usan la misma lista `clasesFiltradas`, así que siempre coinciden (agrupación de marcadores y fotos de organizadores intacta); los valores viven en el hook, no se pierden al cerrar el panel o cambiar otros filtros; «Limpiar filtros» restablece también precio, duración y plazas libres; el mensaje de sin resultados no cambia. Componente nuevo `SelectorRangoPrecio.js` (sin dependencias externas). Sin SQL ni cambios en reservas, pagos, bonos, cancelaciones, notificaciones ni series.
-- **Pruebas**: 7 pruebas de lógica (precio mínimo/máximo, gratuitas, rango explícito 0–50 vs sin filtro con precios > 50 €, límites exactos de cada tramo de duración, sin duración, completas/libres); en navegador con las sesiones reales: tirador máximo y mínimo (el mínimo no supera al máximo), 5–25 € y 0–15 €, gratuitas 0–0 €, duraciones, plazas libres, combinación, número de tarjetas = sesiones en el mapa en todos los casos, y limpieza total; teclado y diseño móvil (tiradores de 28 px en zona táctil de 44 px, sin desbordes). **No comprobado**: arrastre táctil real en un teléfono (probado con eventos de puntero) y sesiones reales de más de 5 € (los datos actuales llegan a 5 €; cubierto por las pruebas de lógica).
-
-## N15 · Alta guiada de gimnasios y centros deportivos · PUBLICADO (23 noviembre 2026; `sql/091` aplicado en producción)
-- Portada (sin sesión): bloque «¿Tienes un gimnasio o centro deportivo?» dentro de la sección del entrenador → `/centros`. Página pública `/centros` (4 ventajas reales: recurrentes, plazas, avisos, visibilidad; sin pagos online ni cuentas multi-monitor) con formulario de contacto (`components/centros/FormularioCentros.js`). «Crear cuenta y empezar» → `/registro?tipo=organizador` (solo guarda `user_metadata.interes='organizador'` y un flag en localStorage; sin rol nuevo).
-- Almacenamiento: tabla privada `solicitudes_centros` (RLS sin políticas, sin privilegios para anon/authenticated) y función `registrar_solicitud_centro` (solo service_role). Estados internos: nuevo (inicial), contactado, demo_pendiente, registrado, activo; se cambian A MANO desde Supabase y nunca pasan solos a registrado/activo (`usuario_id` manual). Límites: 3/día por correo, 20/hora y 100/día globales; doble envío (mismo correo+centro en 24 h) devuelve la misma solicitud. No se guardan IPs.
-- Endpoint `app/api/centros/solicitud` + `lib/centros/procesarSolicitud.js` (validación servidor, origen, campo trampa, tiempo mínimo 2,5 s). Guarda primero y luego avisa por Resend al correo `CENTROS_ADMIN_EMAIL` o, si no existe, `FEEDBACK_ADMIN_EMAIL`; si el correo falla la solicitud queda guardada (`aviso_enviado_at` null, `aviso_intentos`) y un reintento solo repite el aviso.
-- Guía de 3 pasos para organizadores en la portada (`components/home/GuiaOrganizador.js`): perfil (foto + descripción), ubicación habitual (N09), primera sesión. Para quien registró interés o tiene 1–2 sesiones; cerrable; se oculta al completar.
-- Privacidad actualizada (23-nov-2026): finalidad, base legal (consentimiento), Resend como destinatario y criterio de conservación.
-- **Conservación (criterio inicial, NO plazo legal, sujeto a revisión jurídica):** máx. 12 meses desde el último contacto para solicitudes que no acaben en relación comercial. **Revisión periódica manual** (mensual/trimestral): `select id, centro, estado, updated_at from solicitudes_centros where estado in ('nuevo','contactado','demo_pendiente') and updated_at < now() - interval '12 months';` y borrar esas filas (o antes si la persona lo pide). Registrado/activo se rigen por la política de esa relación. Sin campañas comerciales con estos datos sin consentimiento.
-- **Pendiente jurídico:** revisión de la base legal y de la transferencia internacional (Resend, EE. UU.), junto a los 3 puntos ya abiertos de la política.
-
-## N11 · Agrupación de sesiones por organizador y día en Explora · PUBLICADO (24 noviembre 2026; sin SQL)
-- Listado de /clases: una tarjeta principal por organizador (`trainer_id`) y fecha, con botón «Ver X sesiones más de este día» / «Ocultar sesiones» que despliega las demás (compactas: hora, título, precio, plazas, Ver detalle y reservar). Es solo presentación: `components/clases/agruparSesiones.js` agrupa la lista YA filtrada (`clasesFiltradas`), `GrupoSesiones.js` pinta el grupo y `ListaClases.js` lo cablea. Sin selector de vista ni SQL.
-- Orden: fecha y hora; las tarjetas principales por la hora de su primera sesión que cumple los filtros; dentro del desplegable por hora. En modo «más cercanas» se respeta el orden por distancia entre grupos.
-- El desplegable se cierra solo si cambian las sesiones del grupo (firma de ids). Renderizado progresivo: 10 en 10 con «Mostrar más».
-- El MAPA no se ha tocado y sigue recibiendo todas las sesiones filtradas. No hay contador de sesiones en el listado.
-- La carga de sesiones ahora pagina de 1000 en 1000 con orden estable (fecha, hora, id): antes un límite oculto de PostgREST (1000 filas) podía dejar fuera sesiones.
-- Pruebas: `node --test components/clases/*.test.js` (agruparSesiones.test.js).
-
-## C03 · Reserva exprés para visitantes sin sesión · PUBLICADO (24 noviembre 2026; sin SQL)
-- Un visitante que pulsa «Reservar» (ficha, tarjetas de Explora, desplegables de N11) ve el panel «¡Estás a un paso de reservar!» (`components/reserva/PanelIdentificacion.js`, portal en body: panel inferior en móvil, centrado en escritorio; cierra con X, Escape o fuera) con nombre, fecha, hora y precio, y dos botones: «Soy nuevo» → `/registro?volver=/clases/<id>` y «Ya tengo cuenta» → `/login?volver=/clases/<id>`. Reutiliza los formularios existentes (Google y correo, mayoría de edad, aviso legal, username, validaciones): no hay segundo sistema de auth ni cambios de roles (los roles ya no existen: cualquiera reserva salvo su propia sesión).
-- Retorno: `lib/retorno.js` guarda SOLO la ruta `/clases/<uuid>` (lista blanca estricta) y el título en localStorage (caduca a 6 h; sin credenciales ni tokens). `login`, `registro`, `/auth/callback` (Google y confirmación de correo, vía `emailRedirectTo` solo cuando hay sesión pendiente) y `ManejadorApp` (app iOS) vuelven a esa ruta o a la portada. Valores externos o con formato distinto en `?volver=` se ignoran. Recuperar contraseña funciona porque el recuerdo vive en el almacén, no en la URL.
-- Al volver, `BotonReservar` (solo en la ficha) muestra «¡Ya puedes reservar! Tu sesión sigue seleccionada» una vez y borra el recuerdo; NO reserva: la confirmación sigue siendo del usuario, con las condiciones C33 y el flujo de pago/bono de siempre. Sin bloqueo de plaza durante el registro; si se completa, avisa; cancelada/comenzada/no encontrada ya tenían mensaje.
-- **Preparado para C25**: el registro de retorno reserva un campo `invitacion` que HOY se descarta (`guardarRetorno` solo guarda ruta/título/ts); C25 deberá definir su validación en servidor. Sin tablas ni Rulos.
-- Pruebas: `node --test lib/retorno.test.js` (7). Navegador real SIN cuenta: panel móvil/escritorio, cierre, enlaces, aviso en login/registro, `?volver` externo ignorado. NO probado con cuenta real: login/registro/Google/confirmación de correo y el aviso final (cubierto solo por pruebas unitarias).
-
-## C15 · «Avísame si queda una plaza» + doble confirmación de última hora · PUBLICADO (24 noviembre 2026; `sql/092` aplicado en producción)
-- **Botón** «Avísame si queda una plaza» (campana) en sesiones completas y sin empezar (ficha, tarjetas de Explora, desplegables N11; `components/reserva/BotonAvisoPlaza.js`, integrado en `BotonReservar`). «¡Aviso activado!» + «Dejar de recibir avisos». Visitantes: panel de C03 con intención `avisar` (`lib/retorno.js` guarda `intencion` reservar/avisar; al volver hay que pulsar para activar: nunca se activa solo). Si alguien se adelanta al reservar se explica y se ofrece el aviso. «Mi cuenta → Avisos de plazas» (`components/cuenta/AvisosPlazas.js`) y preferencia «Avisos de plazas» (`avisos_plazas`, solo apaga el push).
-- **SQL 092**: tablas privadas `alertas_plaza` (usuario+sesión único, RLS: cada uno ve las suyas, escribe solo por RPC), `episodios_plaza`, `avisos_plaza_enviados` (sin acceso de cliente); RPC `activar_aviso_plaza`, `desactivar_aviso_plaza`, `mis_avisos_plaza`; internas `detectar_plaza_liberada`, `procesar_episodio_plaza`, `procesar_episodios_plaza_pendientes`, `limpiar_avisos_plaza`, `empujar_cola_notificaciones`, `sesion_ya_empezo`; trigger `trg_desactivar_aviso_al_reservar` (reservar desactiva TU alerta). `generar_notificacion` solo añade el tipo `plaza_libre` → categoría `avisos_plazas` (verificado por md5: idéntica salvo esa rama).
-- **Detección**: constraint trigger DIFERIDO `trg_detectar_plaza_liberada` en `clases` (plazas_ocupadas/plazas_max/estado): ve el estado FINAL de la transacción; transición real completa→disponible con sesión activa y sin empezar. Cubre cancelar_reserva (C33 incluida, también <2 h), bloqueos, eliminar cuenta y cambios de capacidad sin tocar esas funciones; cancelar la sesión entera NO avisa. El episodio se crea en la misma transacción que el cambio.
-- **Aviso a TODOS a la vez**: en el mismo commit se crea campana + cola push de todos los interesados elegibles (sin turnos ni prioridad; se excluye organizador, quien ya reservó y bloqueos). Un aviso por episodio y usuario (`avisos_plaza_enviados`); 9/10→8/10 no repite; completa→libera otra vez = episodio nuevo. Revalidación antes de enviar. Recuperación: cron `avisos-plaza-recuperar` (30 s). Push inmediato: `empujar_cola_notificaciones()` reutiliza la orden del cron existente.
-- **Blindaje**: los triggers capturan cualquier error: un fallo de C15 NUNCA impide reservar ni cancelar (si no se llegara a registrar el episodio por un fallo interno, ese aviso se perdería: es el coste de no romper reservas).
-- **Medidas anti-spam (pueden omitir avisos de episodios legítimos)**: no se repite ronda en <60 s para la misma sesión; máx. 6 rondas por sesión y hora; máx. 30 alertas activas por usuario. Si dentro de esos límites se llena y libera otra plaza, ese episodio se marca `omitido`.
-- **Cola push** (`app/api/procesar-notificaciones/route.js`): reclamo atómico por notificación (CAS sobre `intentos`) para que ejecuciones solapadas no dupliquen pushes; lote 100. Cron `procesar-notificaciones` pasa a cada 10 s (baja: `sql/092_avisos_plaza_cron_baja.sql`); nuevos crons `avisos-plaza-recuperar` (30 s) y `avisos-plaza-limpieza` (hora, minuto 17).
-- **Doble confirmación de última hora** (publicada junto a C15): `lib/ultimaHora.js` + `components/reserva/AvisoUltimaHora.js` en `BotonReservar`: con <30 min (exactamente 30 no) y sesión sin empezar, ventana «¡Tu clase empieza muy pronto!» (Volver / Sí, continuar); «Sí, continuar» NO reserva: deja el paso habitual «Entiendo, reservar». Mismo cálculo de hora de Madrid que C33 (`msHastaInicio` en `lib/plazoCancelacion.js`, solo lectura). El servidor sigue validando todo en `reservar_clase`.
-- Reversión: `sql/092_avisos_plaza_reversion.sql` (restaura `generar_notificacion` idéntica a la original) y `sql/092_avisos_plaza_cron_baja.sql` (vuelve a `* * * * *`). Verificación: `sql/092_avisos_plaza_verificacion.sql`.
-- Pruebas: 63 SQL en base local aislada (incl. blindaje, permisos, 1000 interesados, reversión), 54 de lógica JS (`node --test lib/ultimaHora.test.js lib/retorno.test.js components/clases/*.test.js lib/centros/*.test.js`), prueba de integración en PRODUCCIÓN con rollback (cancelación real → 3 campanas/2 push/1 episodio, sin repetir, reservar desactiva la alerta, RLS y permisos). Pendiente de comprobar con cuentas reales: activación desde la web con sesión iniciada y entrega push real.
-
-## C25 · Invita a tus amigos y comparte tu perfil · PUBLICADO (25 noviembre 2026; `sql/093` aplicado en producción)
-- **Invitaciones**: «Mi cuenta → Compartir y crecer → Invita a tus amigos» (`components/cuenta/CompartirYCrecer.js`): enlace personal `/invita/<código>` (código permanente de 8 caracteres, sin datos personales), «Copiar enlace», menú nativo de compartir y WhatsApp. Página `/invita/<código>` (`app/invita/[codigo]/page.js`) con vista previa «Te invitan a RuleaFit» (noindex). Sin historial, contador ni ranking de invitados.
-- **Rulos**: el invitado conserva sus 20 de bienvenida (sin cambios) y recibe 20 EXTRA (`invitacion_recibida`) = 40; el invitador recibe 20 (`invitacion_enviada`). Mismo libro (`otorgar_rulos`), sin saldo paralelo; aviso en la campana (sin push ni correo). Los 20 los fija el servidor.
-- **Atribución ligada a la creación de la cuenta**: al abrir `/invita/<código>` el servidor emite un BILLETE de un solo uso (`abrir_invitacion`, tabla `invitaciones_abiertas`) que guarda cuándo se abrió. Solo recibe recompensa una cuenta creada DESPUÉS de abrir el enlace; una cuenta anterior no puede reclamar (billete rechazado). Un billete = una cuenta; caduca a los 30 días. Correo: el billete viaja en los metadatos del alta y el trigger `on_auth_user_invitacion` (auth.users) lo aplica al quedar la cuenta CONFIRMADA (nunca antes). Google: `reclamar_invitacion(billete)` desde `/auth/callback`.
-- **Seguridad**: `codigos_invitacion`, `invitaciones_abiertas` e `invitaciones` privadas (RLS sin políticas, sin privilegios de cliente); solo `abrir_invitacion` (anon), `mi_codigo_invitacion` y `reclamar_invitacion` (authenticated) son ejecutables; `aplicar_invitacion`, el trigger y `recuperar_invitaciones` son internas. Una sola atribución por invitado (PK), concesión atómica e idempotente (bloqueo por cuenta). El trigger está BLINDADO: nunca rompe un alta ni una confirmación.
-- **Recuperación**: si falla temporalmente la concesión, el billete sigue «abierto» y `recuperar_invitaciones()` la reintenta de forma idempotente. **Cron `invitaciones-recuperar` ACTIVO desde el 25-nov-2026 (cada 5 min, `sql/093_invitaciones_cron.sql`; jobid 15).** Monitorización: `select status, return_message, start_time from cron.job_run_details where jobid = (select jobid from cron.job where jobname = 'invitaciones-recuperar') order by start_time desc limit 20;`; los fallos por cuenta quedan como WARNING `recuperar_invitaciones: fallo con la cuenta …` en los logs de Postgres de Supabase y se reintentan. Baja solo de este cron: `sql/093_invitaciones_cron_baja.sql`.
-- **Compartir perfil**: se reutiliza la ruta pública existente `/entrenador/<usuario>` (ya legible sin sesión) con vista previa Open Graph generada en servidor (`app/entrenador/[username]/layout.js`: usuario, descripción pública corta y foto, o la imagen por defecto; nada privado), botón «Compartir perfil» y «Mi cuenta → Comparte tu perfil». El enlace de perfil NO concede Rulos ni usa el código de invitación. A los visitantes no se les muestra el nivel (el saldo de Rulos solo lo leen usuarios con sesión).
-- **Seguir / Favorito sin sesión**: abren el panel de C03 con intención `seguir` / `favorito` (`PanelIdentificacion` con `perfil`); `lib/retorno.js` admite la ruta `/entrenador/<usuario>` (lista blanca ampliada). Tras identificarse se vuelve al perfil y se recuerda la acción; nada se activa solo. La invitación (`lib/invitacion.js`, clave aparte) y el retorno conviven sin pisarse.
-- Pruebas: 48 SQL en base local aislada (billetes, cuentas anteriores, correo/Google, reintentos, fallo parcial, recuperación, blindaje, permisos, reversión), 85 de JavaScript (`node --test lib/*.test.js components/clases/*.test.js`) y comprobaciones en producción dentro de transacciones que se deshacen (concesión 40/20, reintentos, cuenta existente rechazada, trigger de alta y confirmación, permisos, RLS). Navegador real sin cuenta: perfil público como visitante, panel seguir/favorito y retorno, Open Graph, `/invita` y registro (con la llamada de alta y el RPC interceptados). Sin probar con cuentas reales: registro real con correo/Google, confirmación y recepción de la campana; compartir nativo en móvil.
-- Reversión: `sql/093_invitaciones_reversion.sql` (no retira Rulos ya concedidos) y `sql/093_invitaciones_cron_baja.sql`.
-
-## Ubicación única al publicar (pin = ubicación definitiva; municipio y provincia automáticos) · PUBLICADO (25 noviembre 2026; sin SQL)
-- **Causa del fallo anterior**: `MapaSelector` guardaba el resultado del buscador solo en un estado interno (marcador provisional con popup) y no llamaba a `onCambiarUbicacion`; hacía falta tocar el mapa para fijar lat/lng.
-- **Ahora**: elegir un resultado del buscador (o una ubicación habitual, o cargar una sesión copiada) fija YA la ubicación; tocar el mapa la ajusta. Hay UN solo marcador y UNA ubicación activa. Mensaje bajo el mapa: «Hemos marcado la ubicación de tu búsqueda. Si quieres ajustarla, toca otro punto del mapa» / «Ubicación ajustada en el mapa».
-- **Sin buscador de ciudad** en publicar (se quita `BuscadorCiudad` del formulario; el buscador de ciudades de Explora no se toca). Del pin salen las coordenadas, el municipio y la provincia (`DatosUbicacion`: «Ubicación seleccionada / Municipio / Provincia», datos automáticos). Los campos del modelo (`clases.ciudad`, `provincia`, `lat`, `lng`, `direccion` = Zona, `punto_encuentro`) no cambian.
-- **Lógica central**: `lib/ubicacionSesion.js` (autómata sin React, con pruebas) usa la geocodificación inversa existente (`lib/geocodificarInversa.js`: Nominatim con cola de 1,1 s, caché y cancelación; sin proveedor nuevo). Al mover el pin se borran municipio y provincia anteriores; cada resolución lleva secuencia y coordenadas y se DESCARTA si el punto cambió (respuesta antigua nunca pisa a la nueva); fallo del servicio = se conservan las coordenadas, «Reintentar» o corrección manual (excepcional). `prepararUbicacionParaPublicar` (publicar sesión y series C07) lee la ubicación del gestor al publicar y espera la resolución en curso; sin municipio no se publica (se explica cómo).
-- N09: elegir una ubicación habitual la fija sin consultar al servicio (si le falta la provincia se completa sin tocar el municipio); ajustar el pin crea una ubicación distinta para esa sesión sin tocar la guardada. C07: todas las sesiones de la serie reciben las mismas coordenadas, municipio y provincia. `BuscadorDireccion` ya no lanza una segunda búsqueda al poner en el campo el resultado elegido.
-- Vista pública: la ficha de la sesión muestra «Municipio, Provincia» (datos guardados al publicar; sin geocodificar al abrir la ficha). La pantalla de edición muestra «Municipio» con provincia (solo lectura).
-- **Edición de sesiones: NO se ha cambiado.** La ubicación de una sesión ya publicada sigue siendo «Esto no se puede cambiar» (`editar_clase` / `editar_serie` no admiten coordenadas, municipio ni provincia). Permitir mover una sesión ya publicada requiere SQL y una decisión de producto sobre las reservas existentes: pendiente.
-- Pruebas: `node --test lib/ubicacionSesion.test.js components/publicar/ubicacionPublicar.test.js` (23) y el resto (108 en total). Navegador real con Nominatim simulado (formulario aislado, sin sesión): buscar → elegir resultado → pin y coordenadas al instante, mensaje, un solo marcador, municipio/provincia, toque en el mapa, fallo del servicio y corrección manual, una sola búsqueda tras elegir. Sin comprobar con cuenta real: publicar de extremo a extremo y Nominatim real.
-
-## Ubicación editable en sesiones ya publicadas (protegiendo reservas) · PUBLICADO (25 noviembre 2026; `sql/094` aplicado en producción)
-- **Edición**: nuevo bloque «Dónde» en `/mis-clases/[id]/editar` (`BloqueUbicacionEditar`) con el mismo buscador, mapa y lógica de ubicación única que al publicar (`lib/ubicacionSesion.js`: el pin fija lat, lng, municipio y provincia; respuestas antiguas descartadas). La zona (`clases.direccion`) se edita junto a la ubicación y se conserva si no se toca (aviso si cambias de lugar y mantienes una zona).
-- **SQL 094**: `editar_serie(uuid, text, jsonb)` (misma firma; sin la clave `ubicacion` se comporta exactamente como antes) acepta `ubicacion { lat, lng, ciudad, provincia, direccion }` y `confirmar_parcial`; `previsualizar_ubicacion_serie(uuid, text)` (solo lectura) informa de cuántas sesiones del alcance tienen reservas. `editar_clase` no cambia. Una sesión suelta con cambio de ubicación pasa por `editar_serie` con alcance `solo_esta`.
-- **Protección de reservas (en el servidor, dentro de la operación)**: se bloquean (FOR UPDATE, en orden de id) las filas de TODAS las sesiones afectadas antes de contar reservas; `reservar_clase` y `confirmar_cobro_pagado` bloquean antes esa misma fila, así que ninguna reserva puede colarse entre la comprobación y el guardado. Sesión suelta con reservas: rechazo con «Esta sesión ya tiene reservas. No puedes cambiar su ubicación para evitar confusiones entre los participantes.» y NO se modifica nada. Serie: las sesiones con reservas se excluyen y conservan sus datos; si hay exclusión se exige confirmación expresa (`confirmar_parcial`); si todas las del alcance tienen reservas, rechazo. Respeta alcance, titularidad y las reglas de `editar_clase` (2 h, empezadas, canceladas).
-- **Edición parcial desde una sesión con reservas**: el bloqueo visual depende del ALCANCE elegido (se reconsulta al cambiarlo): con «solo esta» y reservas se bloquea (con pista para ampliar el alcance); con «Esta y las siguientes» o «Toda la serie futura» se pueden cambiar las sesiones sin reservas aunque la de origen tenga reservas (esa conserva la suya).
-- **Coherencia**: lat, lng, municipio, provincia y zona se guardan en la MISMA sentencia (nunca coordenadas nuevas con datos del punto anterior); sin municipio o fuera de España se rechaza.
-- Reversión: `sql/094_ubicacion_editable_reversion.sql` (restaura `editar_serie` idéntica a la anterior —verificado por md5— y elimina la previsualización; no toca sesiones).
-- Pruebas: 45 de SQL en base local aislada (regresión, individual con/sin reservas, series en los 3 alcances, edición parcial desde sesión con reservas, validaciones, 2 h, reserva entre previsualización y guardado, bloqueo de filas, permisos, reversión) y prueba REAL en producción dentro de una transacción deshecha (individual, reservas, serie parcial con confirmación, sin ubicación, otro usuario). 109 de JavaScript. Navegador con respuestas simuladas (formulario aislado). Sin probar con cuenta real: edición de extremo a extremo y concurrencia real entre dos transacciones.
-
-## Imagen de «Quedadas deportivas» (25 noviembre 2026; sin SQL)
-- Nueva imagen predeterminada de la categoría (vóley playa + fútbol sala): `public/imagenes/quedadas-deportivas.jpg` (1536×1024), definida en `lib/imagenesCategoria.js` (tarjetas, listado, detalle, Mis sesiones/reservas, vista previa al compartir) y en la tarjeta de categoría de la portada (`components/home/constantes.js`). `comunidad.jpg` se conserva para sus otros usos (banner, Ruleros, Mis reservas) y como imagen por defecto de categorías desconocidas. Las demás categorías no cambian.
-
-## Devoluciones reales por Redsys · PREPARADO EN RAMA `devoluciones-redsys` (26 nov 2026), NO publicado ni aplicado
-- `lib/pagos/redsys.ts`: devolución tipo 3 por REST (solo 0900 con firma válida confirma; fallo de red = dudosa, nunca reembolsado). Pruebas en `redsys.test.ts`.
-- `sql/096_devoluciones.sql` (+ reversión y verificación), SIN ejecutar: tabla `devoluciones` (1 por cobro), `reclamar_devolucion()`, `completar_devolucion()` (cobro → `reembolsado` y ajuste de bolsa solo con confirmación del banco).
-- `app/api/payments/devolver` (cron, `CRON_SECRET`). Guía de prueba: `docs/prueba-devoluciones.md`.
-- Pendiente: probar en el TPV de pruebas con credenciales, programar el cron y revisar textos. El aviso ⛔ sigue vigente hasta entonces.
-
-## Pendiente 37 · Desglose del precio antes de pagar · EN RAMA `feat/pagos-mejoras`, NO publicado (sin SQL)
-- `calcularDesglose()` / `totalCoincide()` en `lib/pagos/dinero.ts`: la misma función en navegador y servidor. Total = precio publicado (impuestos incluidos); recargo al alumno 0,00 €; la comisión sale de la parte del organizador. No se calculan impuestos aparte.
-- `components/reserva/DesglosePago.js`: precio, gestión, impuestos, total y política de cancelación; solo desde ahí se va al banco.
-- `/api/payments/crear` exige `totalCentimos` y responde 409 si no coincide con el precio actual o con el importe de `crear_cobro()`.
-- Solo visible con `NEXT_PUBLIC_PAGOS_ACTIVOS="true"` (hoy no).
-
-## Pendiente 35 · Centro de reclamaciones económicas · EN RAMA `feat/pagos-mejoras`, NO publicado ni aplicado
-- `sql/098_incidencias_pago.sql` (+ reversión y verificación): `incidencias_pago` (número RF-AAAA-NNNNNN; motivo cobro/cancelación/reembolso; estado recibida/en revisión/resuelta/no procede), historial, `abrir_incidencia()` (solo reservas propias; un caso abierto por reserva y motivo; máx. 5 al día y 10 abiertos), `actualizar_incidencia()` (solo servicio; cerrar exige respuesta). No mueve dinero. Al borrar la cuenta se elimina el texto y el vínculo con la persona.
-- Separado del feedback general. Alumno: pestaña «Reclamaciones» y botón en cada reserva de Mis reservas (solo con pagos visibles). Administración: `/admin/incidencias` (`ADMIN_EMAILS`).
-- Pendiente: mencionar en la política de privacidad y fijar plazo de conservación (revisión jurídica).
-
-## Pendiente 36 · Alertas operativas y parada segura · EN RAMA `feat/pagos-mejoras`, NO publicado ni aplicado
-- `sql/099_alertas_operativas.sql` (+ reversión, verificación, cron y baja): `alertas_operativas` (una abierta por causa), `revisar_salud_pagos()` (cola de notificaciones, crons y llamadas HTTP, devoluciones, liberación de saldos y cuadre de bolsas, cobros sin respuesta del banco, reclamaciones sin revisar).
-- Parada segura: `config_pagos.parada_cobros` (trigger en `cobros`) y `parada_devoluciones` (lo lee `/api/payments/devolver`; si no puede leerlo, no devuelve). NO se usa `pagos_activos` como freno (apagarlo dejaría reservar sin pagar). Las confirmaciones del banco nunca se paran. Se activan solos y se quitan solo a mano; si la causa sigue, la revisión vuelve a frenar.
-- Web: webhook, devoluciones y cola registran alertas (`lib/pagos/alertas.ts`); `/api/alertas` (cron cada 5 min, `CRON_SECRET`) envía un correo por Resend a `ALERTAS_ADMIN_EMAIL` o `FEEDBACK_ADMIN_EMAIL`; panel `/admin/alertas`.
-- Límites: las liquidaciones (SEPA) no existen, se vigila su paso previo; si pg_cron o la web caen del todo no sale correo (haría falta un monitor externo).
-
-## Pendiente 38 · Reprogramaciones con aceptación o salida sin coste · EN RAMA `feat/pagos-mejoras`, NO publicado ni aplicado
-- `sql/100_reprogramaciones.sql` (+ reversión y verificación): `reprogramar_sesion()` (una sesión; fecha, hora o ubicación; con reservas, 24 h de antelación sobre el horario anterior y el nuevo; sin reservas, 2 h; máx. 3), `responder_reprogramacion()` (aceptar o cancelar sin coste: vuelve el bono y un cobro pagado pasa a `requiere_reembolso`), `mis_reprogramaciones_pendientes()`. No responder no es aceptar: se puede salir hasta que empiece.
-- `cancelar_reserva()`: igual que sql/087 salvo que con un cambio sin responder la cancelación nunca es tardía. Un pago iniciado antes del cambio y confirmado después también queda pendiente.
-- `editar_serie` (sql/094) no cambia. Web: `/mis-clases/[id]/reprogramar` y aviso en Mis reservas (`lib/reprogramacion.js`). Esta función SÍ es visible con pagos desactivados: aplicar el SQL ANTES de publicar la web.
-- Pruebas de 35, 36 y 38: SQL en base local aislada (PGlite) y `node --test`. Sin probar en producción ni con cuentas reales.
-
-## Pendiente 33 · Simulador del TPV de Redsys · EN RAMA `feat/pagos-mejoras`, NO publicado
-- `/api/payments/mock-tpv`: 404 salvo local (`next dev`) o Vercel Preview, con `MOCK_TPV_ACTIVO=true`, `REDSYS_URL=/api/payments/mock-tpv` y `MOCK_TPV_SUPABASE_REF` igual a una base que NO sea la de producción (`lib/pagos/mockTpv.ts`).
-- Firma con `redsys.ts` y entrega el aviso al manejador real de `/api/payments/redsys-webhook` (no existe una ruta «notificacion»). Escenarios: autorizado, rechazado, aviso repetido, última plaza a la vez y devolución hasta `completada` con banco simulado.
-- La lógica de devoluciones pasa a `lib/pagos/procesarDevoluciones.ts` (la usan la ruta real y el simulador).
-- Guía: `docs/pruebas-preview.md`; base de pruebas: `sql/pruebas/preparar_base_de_pruebas.sql`.
-- Pruebas: `npm run test:pagos` y prueba local de principio a fin (web compilada + Supabase simulado sobre PGlite). Sin probar en Vercel.
-- Pendiente: los Preview de Vercel de las ramas de pagos fallaban al compilar (probable: faltan variables de Supabase en Preview).
-
-## Aprobación automática de datos fiscales y bancarios · EN RAMA `feat/pagos-mejoras` (27 nov 2026), SQL 101 sin aplicar en producción
-- Al guardar, el servidor evalúa (`lib/pagos/evaluarPerfilFiscal.ts`): NIF/NIE/CIF con control y sin duplicar en otra cuenta, IBAN español (24 caracteres, módulo 97-10), nombre y apellidos (persona física) o razón social, titular de la cuenta, dirección, código postal 01-52 y provincia, correo, mayoría de edad y casillas.
-- Cumple: estado `activo` al instante (`sql/101`). No cumple: respuesta `rechazado` con motivos y NO se guarda nada (un perfil ya aprobado sigue como estaba). `bloqueado` sigue siendo manual.
-- No comprueba que el NIF o el IBAN sean de la persona: valorar una verificación antes del primer pago.
-
-## SQL 102 · Devoluciones al cancelar sesiones, borrado de cuenta y zonas especiales · EN RAMA (27 nov 2026), sin aplicar en producción
-- Sesión `cancelada` por cualquier vía → sus cobros `pagado` pasan a `requiere_reembolso` (trigger; corrige los anteriores).
-- No se borra la cuenta con reclamación de pago abierta (con devolución pendiente ya no se podía).
-- Canarias, Ceuta y Melilla: revisión manual (`pendiente_revision`); Navarra y País Vasco se aprueban solos. Solo `activo` permite publicar y cobrar sesiones de pago.
-- Sigue pendiente en este punto: ver SQL 103.
-
-## SQL 103 · Cron de devoluciones y blindaje de cobros · EN RAMA (27 nov 2026), sin aplicar en producción
-- C3: `103_blindaje_cobros_cron.sql` (+ baja) llama a `/api/payments/devolver` cada 10 min. Solo producción y tras probar con Redsys.
-- M1: con pagos activos no se crea ni se pone precio a una sesión sin perfil fiscal `activo`. M2: un cobro en curso por alumno y sesión (se reutiliza el pedido). M3: `creado` caduca a los 30 min (`caducado`, cron cada 5 min); si el banco confirma tarde se da plaza o se marca devolución.
-- A2: los pagos sin plaza se ven en Mis reservas y se reclaman (`abrir_incidencia_cobro`).
-- `BotonReservar` desbloquea el botón al volver del TPV.
-
-## SQL 104 · Permisos explícitos y error real al guardar datos fiscales · EN RAMA (27 nov 2026)
-- Causa del fallo en Preview: el proyecto Supabase de pruebas (nuevo) no concede permisos por defecto sobre las tablas (`permission denied for table ...`, también en clases, reservas, etc.). Arreglo en pruebas: `sql/pruebas/permisos_base_de_pruebas.sql`.
-- `sql/104`: concede a `service_role` las tablas de 095-100. Aplicar en producción junto al resto.
-- Toda tabla nueva necesita sus `grant` explícitos.
-- `/api/payments/perfil-fiscal` indica el paso y el error (el detalle, solo fuera de producción).
-
-## SQL 105 · «Mis ingresos» y retención por reclamación · EN RAMA (27 nov 2026), sin aplicar
-- `/mis-ingresos` (menú, solo con pagos visibles): pendiente, disponible, liquidado, retenido/en devolución, historial por cobro y transferencias. Datos de `mis_ingresos()` (solo lo propio, sin datos del alumno).
-- Un cobro con reclamación abierta o en revisión no se libera. Para dar la razón al alumno: botón «Devolver y cerrar» en `/admin/incidencias` (`devolver_y_cerrar_incidencia`: marca la devolución, cancela la reserva si la sesión no ha empezado y cierra el caso).
-- Fuera: liquidaciones al IBAN y autofacturas (pendiente del gestor). Un importe ya liberado y reclamado se muestra retenido: las liquidaciones deberán excluirlo.
-
-## Correcciones tras la auditoría en Preview (27 nov 2026)
-- A3: textos de pago según `NEXT_PUBLIC_PAGOS_ACTIVOS` (ficha y publicar). B1: sesión cancelada con 0 plazas ocupadas (trigger en `sql/104`). Horas en HH:MM. Mensajes de devolución según el estado real del cobro (`lib/pagos/textoDevolucion.ts`). Enlaces a `/pagos/ok` y `/pagos/ko` en el TPV simulado.
-- El aviso legal ya muestra el pago online cuando los pagos son visibles (pendiente de revisión jurídica). Antes de producción: «tramitado automáticamente» exige tener programado `103_blindaje_cobros_cron.sql`.
-
-## SQL 106 · Bonos bloqueados con pagos activos · EN RAMA (27 nov 2026), sin aplicar
-- Fallo: `adquirir_bono` no cobra; con pagos activos daba un bono gratis para reservar sesiones de pago sin pagar.
-- `sql/106`: trigger en `bonos_clientes` que impide altas mientras `pagos_activos`. La web oculta «Adquirir» y lo explica. Los bonos ya adquiridos siguen sirviendo. Cobro de bonos: pendiente.
-- **Aplicar antes de activar pagos en producción.**
-- Nueva regla del titular (27/11/2026): los bonos se venderán online (`docs/REGLAS_PAGOS_RULEAFIT.md`, apartado 12). Pendiente de sus respuestas; el bloqueo es temporal.
-
-## SQL 107 · Plan Pro y bonos online · EN RAMA (27 nov 2026), sin aplicar
-- Suscripción Pro (40 €/mes, cobro recurrente solo simulado), compra online de bonos (0 %, disponibles a 48 h), desistimiento 14 días / 25 %, devoluciones parciales, retención por cancelaciones reiteradas y borrado de cuenta protegido. Sustituye el bloqueo de sql/106.
-- Pantallas: `/pro`, perfil del organizador, Mis sesiones → Bonos, Mis reservas → Bonos, `/admin/alertas`. Reglas: `docs/REGLAS_PAGOS_RULEAFIT.md` apartado 12.
-- Producción, antes de activar pagos: 107, `107_pro_y_bonos_preactivacion.sql`; cron `107_pro_y_bonos_cron.sql` solo con Redsys recurrente probado.
-
-## SQL 108 y 109 · EN RAMA (27 nov 2026)
-- 108: la reclamación sobre una sesión reservada con bono retiene el bono.
-- 109: una sesión gratuita no gasta bono (y devuelve los usos ya gastados así). Publicar con el precio vacío ya no falla.
-- Producción: aplicar con el resto, antes de activar pagos.
+| Web | https://www.ruleafit.com (deploy al hacer push a `main`) | Preview de Vercel de la rama |
+| Base de datos | Supabase «ruleafit» (Irlanda) | Proyecto de pruebas aparte (`ixeuanoikjftpdgezfyz`) |
+| Código | Hasta verificaciones de perfil y `/admin` | Además: pagos, Plan Pro, bonos y todo lo del apartado 3 |
+| Pagos | **Apagados**. No se ha movido dinero | Activos con TPV simulado (`mock-tpv`) |
+
+- `feat/verificaciones-perfil` y `prueba-avisos-zona` están integradas en `main` y en `feat/pagos-mejoras`.
+- `feat/redsys-devoluciones` (`520937e`) y `fix/eliminar-cuenta-pagos` (`8326321`) se borraron el 27/11: su contenido
+  está en `feat/pagos-mejoras`.
+- `main` tiene un commit de fusión que no está en la rama; la mezcla de prueba no daba conflictos (27/11).
+- Último SQL del repositorio: **113**. El titular pega los SQL a mano en el SQL Editor.
+- Reglas firmes: no activar cobros reales; solo Redsys (CaixaBank); commit y push solo cuando se pidan.
+
+## 2. SQL por entorno
+| SQL | Contenido | Producción | Pruebas |
+|---|---|---|---|
+| hasta `094` | Web publicada (sesiones, avisos, bloqueos, series, centros, invitaciones, ubicaciones) | Aplicado | Aplicado |
+| `095`, `097` | Borrado de cuenta con pagos; permisos | Aplicado (`097` según las reglas, no comprobado) | Aplicado |
+| `096` | Devoluciones por Redsys | Falta | Aplicado |
+| `098`, `099` | Reclamaciones; alertas y frenos | Falta | Aplicado |
+| `100` | Reprogramaciones | Falta | Aplicado |
+| `101`, `102` | Aprobación fiscal; devolución al cancelar sesiones | Falta | Aplicado |
+| `103`, `104` | Blindaje de cobros; permisos explícitos | Falta | Aplicado |
+| `105` | Mis ingresos y retención | Falta | Aplicado |
+| `106`–`108` | Bonos online, Plan Pro, reclamación retiene bono | Falta | Aplicado |
+| `109` | Sesión gratuita no gasta bono | Falta | Aplicado |
+| `110`–`112` | Verificaciones de perfil y centros | Aplicado (sin constancia del script de verificación) | Aplicado |
+| `113` | Bonos admitidos por sesión y protección del comprador | Falta | Aplicado y verificado (27/11) |
+
+Antes de reejecutar un SQL antiguo, mirar su cabecera y `CLAUDE.md`: varios envuelven o sustituyen funciones de otros
+(no reejecutar `096`/`103`/`105` después de `107`; `110` después de `112`; `088`/`109` sin volver a ejecutar `113`).
+
+**Crons.** Pruebas: caducidad de cobros y liberación de saldos; **sin** alertas, devoluciones ni renovación Pro.
+Producción: los de la web publicada (notificaciones, recordatorios, autocancelación, avisos de zona y su purga,
+valoraciones, avisos de plaza, invitaciones) y ninguno de pagos. Sin programar: `099_alertas_operativas_cron.sql`,
+`103_blindaje_cobros_cron.sql` y `107_pro_y_bonos_cron.sql` (los dos últimos, solo tras probar con Redsys).
+
+## 3. Hecho
+
+### Publicado en producción
+- Base: cuentas (correo y Google, confirmación y recuperación), perfiles públicos, publicar y editar sesiones, reservar y
+  cancelar (hasta el comienzo; devolución solo con 2 h o más), mínimo de plazas y autocancelación, asistencia automática,
+  Rulos, valoraciones, seguir y favoritos, feedback, denuncias, bloqueos (invisibles y con cancelación de reservas),
+  borrar cuenta, notificaciones push y campana, PWA, auditoría de seguridad `074`–`076`.
+- Explora y mapa: buscador, ciudad y provincia, filtros de precio/duración/plazas, agrupación por organizador, foto en el
+  zoom máximo, avisos de sesiones en mi zona (inmediatos y resumen 20:30), «Quién participa» opt-in.
+- Mejoras del plan: series recurrentes, añadir al calendario, solicitud de valoración, avisos del organizador,
+  ubicaciones habituales, ubicación única al publicar y editable sin mover reservas, alta de centros (`/centros`),
+  reserva exprés, aviso de plaza libre y doble confirmación de última hora, invitaciones y perfiles compartibles.
+- Verificaciones de perfil (identidad, centro, titulación) y panel `/admin`.
+
+### Solo en `feat/pagos-mejoras` (Preview), sin publicar
+- Cobro de sesiones y bonos por Redsys (probado solo con simulador), webhook, comisión 10 % y bolsa del organizador.
+- Datos fiscales con aprobación automática (revisión manual en Canarias, Ceuta y Melilla); sesiones gratis sin datos
+  fiscales.
+- Devoluciones con estados y reintentos, devolución al cancelar o autocancelar, parciales de bonos.
+- Desglose antes de pagar, reclamaciones económicas, alertas y frenos, reprogramaciones, «Mis ingresos» y retención.
+- Un cobro en curso por alumno y sesión, con caducidad. Plan Pro y bonos online.
+- 27/11 (`0910cc3`): elegir tarjeta o Bizum en sesiones; el alumno con bono elige canjearlo o pagar; el organizador
+  marca qué bonos admite cada sesión; bono sin sesiones donde usarlo = aviso y devolución de lo no usado; estado de la
+  devolución en Reclamaciones.
+- 27/11: «Cancelar reserva» confirma dentro de la página (la ventana del navegador no aparecía) y está también en la
+  ficha de la sesión.
+
+## 4. Pendiente
+
+### Ruta de pagos acordada (uno a uno, preguntando antes de pasar al siguiente)
+Guía: PDF del plan del 27/11 (`docs/RuleaFit_Plan_Mejoras_Pagos_Agrupados_27-11-2026.pdf`, local, no se sube).
+
+**Bloque A, sin banco**
+1. Huecos de cobro. **Hecho** (apartado 3, 27/11).
+2. Pruebas con el simulador en Preview. **Siguiente**: Bizum, bono o pago, bonos por sesión, devolución de bono sin
+   sesiones, estado de la devolución, cancelar reserva; y lo que quedaba sin probar: bloqueo, retención por
+   cancelaciones, anular bonos, autocancelación, zonas fiscales especiales y borrado de cuenta.
+3. Liquidaciones: días 15 y último (siguiente hábil), mínimo 10 €, descifrado del IBAN, excluir lo retenido y decidir
+   qué hacer con bonos aún devolubles y saldos negativos.
+4. Fichero SEPA (pain.001) o el formato que dé CaixaBank.
+5. Autofacturas en borrador (`AF-AAAA-NNNNNN`, aceptación tácita a 15 días) y facturas de Pro.
+6. Textos legales.
+7. Alertas y contracargos (programar crons; vigilancia externa).
+
+Lo que dependa del asesor (IVA, IRPF, formato de facturas) se deja configurable y marcado.
+
+**Bloque B, espera al banco**: TPV contratado con tarjeta y Bizum, devoluciones REST totales y parciales, tarjeta
+guardada y cobro recurrente, claves de pruebas y producción, prueba en su entorno, confirmar parámetros de
+`lib/pagos/redsys.ts` y formato del fichero de transferencias.
+
+### Antes de activar pagos en producción
+Orden completo en el apartado 8 de `docs/REGLAS_PAGOS_RULEAFIT.md`: asesor → banco → desarrollo → copia de seguridad,
+SQL `096`, `098`–`109` y `113` con los pagos apagados, publicar la web, variables (sin `MOCK_TPV_ACTIVO`) y crons →
+`107_pro_y_bonos_preactivacion.sql`, activar, un cobro real pequeño y su devolución.
+
+- La parte web de `095` solo está en la rama: en producción la ruta de datos fiscales responde aunque la pantalla esté
+  oculta.
+- En producción había (27/11) 3 bonos y 1 adquirido por un usuario real: no tocarlos sin permiso.
+- No borrar la cuenta de nadie ni tocar datos de producción sin autorización expresa.
+
+### Asesor y jurista
+- Si Ruleafit puede cobrar y guardar dinero de organizadores (servicios de pago).
+- IVA de la comisión y de Pro, cuándo tributa un bono, autofacturas, IRPF, modelo 238 (DAC7), Canarias, Ceuta y Melilla.
+- Desistimiento (sesiones con fecha, bonos y Pro) y la protección del comprador de un bono sin sesiones.
+- Términos, condiciones de organizadores, cookies y aviso legal (borradores en `legal/borradores/`, sin publicar).
+- Privacidad: contradicción de edad 14/18 publicada; localización de la zona habitual, transferencias internacionales y
+  etiquetas de iOS; verificaciones de perfil; reclamaciones y plazos de conservación; centros (12 meses) y Resend.
+- Verificar o no la titularidad de NIF e IBAN antes del primer pago; retener pagos a un organizador sospechoso (no hay
+  botón); saldos negativos de quien deja la plataforma.
+
+### Producto y técnica fuera de pagos
+- Plan de mejoras: 35 sin hacer y 4 parciales (12, 30, 32, 33). Priorizadas: 02, 19, 25, 01, 07, 10, 12, 20 y 23.
+- Verificaciones: probar la lectura automática y el visor con documentos reales en Preview.
+- Plan Resend: gratuito, 100 correos al día; ampliarlo antes de una campaña.
+- Seguridad: política `script-src` de CSP; vigilancia externa (`/api/health`) y copias de seguridad con restauración
+  probada. Informes en `docs/auditoria-seguridad*.md`.
+- Nominatim público lento a veces (valorar servicio propio).
+- Revisión pendiente de los archivos sin uso (`BuscadorCiudad.js`, `IconoSilbato.js`, SVG de `public/`): no borrarlos sin
+  permiso.
+- Otros botones siguen confirmando con `window.confirm` (cancelar sesión, devolver bono, respuesta a un cambio…): si
+  alguno «no hace nada» en algún navegador, pasarlo a confirmación en la página.
+
+### Apps móviles (aparcadas)
+- Android: generada y probada, sin publicar (`docs/app-android.md`). Falta cuenta de Play, prueba cerrada, ficha y
+  revisión legal.
+- iPhone: probada en un dispositivo, aparcada (`docs/app-ios.md`, `app-ios/README.md`). Falta cuenta de Apple Developer,
+  inicio de sesión con Apple, push nativas, TestFlight y ficha.
+
+### Apuntes antiguos sin confirmación posterior (comprobar antes de darlos por pendientes)
+- Probar en móviles reales la vista previa del enlace y el botón de Instagram.
+- Reindexación de `/ayuda` en Search Console y Redirect URL de producción de Google.
+- Purga del historial antiguo de notificaciones.
+- Limpieza de comentarios de cabecera antiguos en `sql/` (cambio de nombre).
+
+## 5. Pruebas
+- `npm run test:pagos` (obligatorio antes de un commit que toque pagos; 84 correctas el 27/11).
+- `npm run test:verificaciones` (14 correctas el 27/11). Resto: `node --test` sobre `lib/*.test.js` y
+  `components/**/*.test.js`.
+- `npm run build` antes de proponer un commit con cambios de código.
+- SQL: se prueba en local con PGlite desde archivos temporales; en pruebas, `sql/pruebas/` (nada de ahí en producción).

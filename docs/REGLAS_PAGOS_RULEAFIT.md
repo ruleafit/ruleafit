@@ -3,7 +3,7 @@
 Estado a 27 de noviembre de 2026, rama `feat/pagos-mejoras`. **En producción los pagos están apagados y no se ha
 movido dinero.** Si este documento y el código no coinciden, manda el código (`sql/` y `lib/pagos/`) y hay que
 corregir el documento. Sustituye como referencia a `docs/plan-pagos-fase-1.md` (plan original) y a la sección de
-pagos de `PROGRESS.md` (historial).
+pagos del historial (`docs/historial/PROGRESS_HISTORIAL.md`).
 
 ## 1. Palabras que se usan
 | Palabra | Qué es |
@@ -91,7 +91,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 | | Producción (`main`) | Preview (`feat/pagos-mejoras`) |
 |---|---|---|
 | Base de datos | proyecto «ruleafit» | proyecto de pruebas aparte |
-| SQL | hasta 095 y 097, y 110-112 | base y 095-112 (108 y 109 comprobados el 27/11/2026); **113 sin aplicar** |
+| SQL | hasta 095 y 097, y 110-112 | base y 095-113 (comprobado el 27/11/2026) |
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
@@ -121,7 +121,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 - [x] Elegir tarjeta o Bizum al pagar una sesión suelta.
 - [x] El alumno con bono elige entre canjearlo o pagar; el organizador marca qué bonos admite cada sesión (`sql/113`).
 - [x] Estado de la devolución en Reclamaciones.
-- [ ] Probar los tres puntos anteriores en Preview (con `sql/113` aplicado).
+- [ ] Probar los tres puntos anteriores en Preview (`sql/113` ya aplicado).
 - [ ] Probar en Preview: bloqueo, retención por cancelaciones, autocancelación, zonas especiales y borrado de cuenta.
 
 ### D. Despliegue (con los pagos apagados)

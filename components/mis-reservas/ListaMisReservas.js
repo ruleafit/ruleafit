@@ -81,9 +81,7 @@ export default function ListaMisReservas({ m, onReclamar }) {
             key={reserva.id}
             reserva={reserva}
             indice={indice}
-            cancelando={m.cancelandoId === reserva.id}
-            errorCancelacion={m.erroresCancelacion[reserva.id]}
-            onCancelar={m.handleCancelar}
+            onCancelada={(data) => m.alCancelar(reserva.id, data)}
             onReclamar={onReclamar}
             cambio={m.reprogramaciones?.pendientes[reserva.id]}
             respondiendo={m.reprogramaciones?.respondiendoId === reserva.id}

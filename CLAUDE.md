@@ -24,12 +24,12 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - `sql/079`–`sql/086` — avisos de sesiones en mi zona, privacidad de participantes, bloqueos (cada uno con variantes de verificación/reversión).
 - `sql/096`–`sql/109` — devoluciones, reclamaciones, alertas, reprogramaciones, fiscal, cobros, ingresos, Pro y bonos. Pantallas: `components/pro`, `components/bonos`, `components/ingresos`.
 - `sql/110`–`sql/112`, `lib/verificaciones/`, `components/verificaciones/`, `components/admin/` — verificaciones de perfil y administración.
-- `docs/PLAN_MEJORAS_RULEAFIT.md` — plan de mejoras con el estado de cada punto (actualizarlo al terminar una mejora). Estado general: `PROGRESS.md` (bloque «Estado actual»).
+- `docs/PLAN_MEJORAS_RULEAFIT.md` — plan de mejoras con el estado de cada punto (actualizarlo al terminar una mejora). Estado general: `PROGRESS.md` (solo estado actual; mantenerlo corto).
 - `docs/plan-pagos-fase-1.md` (plan original, superado), `docs/auditoria-seguridad.md`, `docs/auditoria-seguridad-2.md`, `docs/AUDITORIA_PAGOS_STAGING.md`, `docs/pruebas-preview.md`, `docs/lanzamiento-avisos-zona.md`.
 
 ## Ramas y entornos (27/11/2026)
 - `main` = producción: pagos apagados; SQL de pagos solo hasta `095`/`097`; verificaciones `110`–`112` aplicadas. No tiene el código de `096`–`109` ni la parte web de `095`.
-- `feat/pagos-mejoras` = Preview con base de pruebas aparte («RuleaFit-Pruebas»): `096`–`107` y `109` aplicados, `108` pendiente.
+- `feat/pagos-mejoras` = Preview con base de pruebas aparte («RuleaFit-Pruebas»): `096`–`113` aplicados.
 
 ## Reglas estrictas
 - Prohibido duplicar lógica financiera (comisión, reparto, importes) fuera de `lib/pagos/dinero.ts` y `sql/072_pagos_funciones.sql`. Si cambia una, verificar que la otra coincide.
@@ -82,7 +82,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - Verificaciones de perfil (sql/110-112, independientes de los pagos; no son obligatorias para publicar y el perfil fiscal NO las concede): «Identidad verificada», «Centro verificado» y «Titulación declarada/acreditada». Las insignias de `perfiles` las calcula solo la BD. El usuario sube a buckets privados y no puede leerlos; escribe solo por RPC; resuelve solo el servidor. LOS DOCUMENTOS NO SE ENSEÑAN A NINGÚN USUARIO: solo el administrador, con URL firmada de 60 s (`/api/admin/verificaciones/archivo`). Identidad y centro se comprueban solos en `/api/verificaciones/analizar` (lectura local con tesseract.js, sin servicios externos; reglas en `lib/verificaciones/decidir.js`: aprobar, rechazar o manual; ante la duda, manual); sus archivos se borran al resolverse. Las titulaciones se revisan a mano: pendiente = «declarada» en gris, aprobada = «acreditada». Las denuncias de titulaciones no bloquean ni retiran nada y el denunciado no las ve. Ningún archivo se borra a mano: se encola en `archivos_verificacion_por_borrar` (`lib/verificaciones/purga.js`). No reejecutar sql/110 después de 112.
 - Administración: `/admin` (acceso desde el menú solo si `/api/admin/resumen` responde `admin: true`; la lista de correos nunca sale del servidor). Una página nueva de admin se añade en `lib/admin/secciones.js` con su recuento de pendientes.
 - Pendientes legales: revisión jurídica de 3 puntos de la política de privacidad (datos de localización, transferencias internacionales, etiquetas de privacidad de iOS).
-- Detalle histórico de decisiones y fases: PROGRESS.md.
+- Historial de decisiones y fases: `docs/historial/PROGRESS_HISTORIAL.md` (~200 KB). **No leerlo salvo que haga falta** para investigar por qué se hizo algo; entonces, buscar con Grep y leer solo ese tramo. `PROGRESS.md` solo guarda el estado actual (hecho, pendiente, ramas y SQL): el detalle nuevo va al final del historial.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
