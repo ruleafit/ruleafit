@@ -5,11 +5,13 @@ export const DEVOLUCION_EN_MARCHA =
   'La devolución íntegra de lo pagado se ha tramitado automáticamente. Puede tardar unos días en verse en tu cuenta.'
 export const DEVOLUCION_COMPLETADA = 'Devolución íntegra completada. Puede tardar unos días en verse en tu cuenta.'
 export const BONO_DEVUELTO = 'La sesión de tu bono vuelve a estar disponible.'
+export const DEVOLUCION_PARCIAL = 'Devuelta la parte no usada. Puede tardar unos días en verse en tu cuenta.'
 
 /** Para una reserva cancelada sin culpa del alumno. `estadoCobro` = estado del cobro de esa reserva, si lo hubo. */
 export function textoDevolucion(estadoCobro: string | null | undefined, usaBono = false): string | null {
   if (estadoCobro === 'requiere_reembolso') return DEVOLUCION_EN_MARCHA
   if (estadoCobro === 'reembolsado') return DEVOLUCION_COMPLETADA
+  if (estadoCobro === 'reembolsado_parcial') return DEVOLUCION_PARCIAL
   return usaBono ? BONO_DEVUELTO : null
 }
 

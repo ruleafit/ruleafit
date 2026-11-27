@@ -55,6 +55,14 @@ export const ALERTAS = {
     detalle: `El banco ha rechazado una devolución (cobro ${cobroId}, código ${codigo || 'sin código'}).`,
     parar: 'devoluciones', umbral: 3,
   }),
+  renovacionError: (codigo: string | undefined): Alerta => ({
+    tipo: 'webhook', clave: 'pro:renovacion_error', gravedad: 'critica',
+    detalle: `El cobro mensual de Pro no ha podido reclamar trabajo (error ${codigo || 'desconocido'}).`,
+  }),
+  renovacionDudosa: (pedido: string): Alerta => ({
+    tipo: 'webhook', clave: `pro:dudosa:${pedido}`, gravedad: 'critica',
+    detalle: `No se sabe si se cobró una renovación Pro (pedido ${pedido}). Revisar a mano: no se reintenta sola.`,
+  }),
   colaSinEnvio: (): Alerta => ({
     tipo: 'cola', clave: 'cola:sin_envio', gravedad: 'critica',
     detalle: 'El envío de notificaciones push está fallando (revisar las claves VAPID).',

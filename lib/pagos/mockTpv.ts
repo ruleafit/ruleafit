@@ -60,7 +60,7 @@ const leerParametros = (base64: string): Record<string, string> | null => {
 export function leerPeticionDeCobro(
   cfg: ConfigRedsys,
   entrada: { Ds_MerchantParameters?: string; Ds_Signature?: string }
-): { pedido: string; importeCentimos: number } | null {
+): CobroSimulado | null {
   const { Ds_MerchantParameters: parametros, Ds_Signature: firma } = entrada
   if (!parametros || !firma) return null
   const p = leerParametros(parametros)
@@ -68,13 +68,17 @@ export function leerPeticionDeCobro(
   const importe = String(p?.DS_MERCHANT_AMOUNT ?? '')
   if (!p || p.DS_MERCHANT_TRANSACTIONTYPE !== '0' || !esPedidoValido(pedido) || !/^\d+$/.test(importe)) return null
   if (!iguales(firmarParametros(cfg.claveSecreta, pedido, parametros), firma)) return null
-  return { pedido, importeCentimos: Number(importe) }
+  return {
+    pedido,
+    importeCentimos: Number(importe),
+    ...(p.DS_MERCHANT_IDENTIFIER === 'REQUIRED' ? { guardarTarjeta: true } : {}),
+  }
 }
 
 /** Aviso firmado como lo enviaría el banco (firma en base64 apta para URL). */
 export function crearAvisoDelBanco(
   cfg: ConfigRedsys,
-  datos: { pedido: string; importeCentimos: number; codigo: string }
+  datos: { pedido: string; importeCentimos: number; codigo: string; guardarTarjeta?: boolean }
 ): CamposFirmados {
   const parametros = {
     Ds_Order: datos.pedido,
@@ -84,6 +88,10 @@ export function crearAvisoDelBanco(
     Ds_MerchantCode: cfg.codigoComercio,
     Ds_Terminal: cfg.terminal,
     Ds_Currency: '978',
+    // Como el banco al guardar la tarjeta de una suscripción (referencias inventadas).
+    ...(datos.guardarTarjeta && Number(datos.codigo) <= 99
+      ? { Ds_Merchant_Identifier: `SIM-${datos.pedido}`, Ds_Merchant_Cof_Txnid: `TXN-${datos.pedido}` }
+      : {}),
   }
   const base64 = Buffer.from(JSON.stringify(parametros), 'utf8').toString('base64')
   return {
@@ -111,6 +119,25 @@ export function bancoSimuladoDevolucion(cfg: ConfigRedsys): typeof fetch {
   }) as typeof fetch
 }
 
+/** Banco simulado para el cobro mensual: comprueba la petición firmada y la aprueba o la deniega. */
+export function bancoSimuladoRecurrente(cfg: ConfigRedsys, aprobar: boolean): typeof fetch {
+  return (async (_url: unknown, opciones?: { body?: unknown }) => {
+    const campos = JSON.parse(String(opciones?.body ?? '{}'))
+    const p = leerParametros(String(campos.Ds_MerchantParameters ?? ''))
+    const pedido = String(p?.DS_MERCHANT_ORDER ?? '')
+    const valida =
+      !!p &&
+      p.DS_MERCHANT_COF_INI === 'N' &&
+      !!p.DS_MERCHANT_IDENTIFIER &&
+      esPedidoValido(pedido) &&
+      iguales(firmarParametros(cfg.claveSecreta, pedido, campos.Ds_MerchantParameters), String(campos.Ds_Signature ?? ''))
+    const cuerpo = valida
+      ? crearAvisoDelBanco(cfg, { pedido, importeCentimos: Number(p.DS_MERCHANT_AMOUNT), codigo: aprobar ? '0000' : '0190' })
+      : { errorCode: 'SIS0042' }
+    return new Response(JSON.stringify(cuerpo), { status: 200, headers: { 'content-type': 'application/json' } })
+  }) as typeof fetch
+}
+
 export const ESCENARIOS = {
   autorizar: 'Pago autorizado (0000)',
   rechazar: 'Pago rechazado (0190)',
@@ -121,7 +148,7 @@ export type Escenario = keyof typeof ESCENARIOS
 
 export const esEscenario = (v: unknown): v is Escenario => typeof v === 'string' && Object.hasOwn(ESCENARIOS, v)
 
-export type CobroSimulado = { pedido: string; importeCentimos: number }
+export type CobroSimulado = { pedido: string; importeCentimos: number; guardarTarjeta?: boolean }
 export type RespuestaWebhook = { status: number; resultado: string }
 export type Envio = RespuestaWebhook & { pedido: string; codigo: string }
 

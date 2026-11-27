@@ -5,8 +5,8 @@ import { calcularDesglose, totalCoincide } from '../../../../lib/pagos/dinero.ts
 
 const PRECIO_CAMBIADO = 'El precio no coincide con el que se te ha mostrado. Recarga la página y revisa el desglose antes de pagar.'
 
-// Inicia el pago de una sesión. El alumno envía su token de sesión de Supabase
-// (Authorization: Bearer ...) y el id de la sesión. El importe NUNCA viene del
+// Inicia el pago de una sesión (claseId) o de un bono (bonoId, sql/107). El alumno envía su token de sesión de Supabase
+// (Authorization: Bearer ...). El importe NUNCA viene del
 // navegador: lo calcula la base de datos desde el precio de la sesión. El navegador
 // envía además el total que ha ENSEÑADO (totalCentimos), solo para comprobarlo: si no
 // coincide con el del servidor no se redirige al banco.
@@ -23,14 +23,16 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Debes iniciar sesión para pagar.' }, { status: 401 })
   }
 
-  let claseId, metodo, totalCentimos
+  let claseId, bonoId, metodo, totalCentimos
   try {
-    ;({ claseId, metodo, totalCentimos } = await request.json())
+    ;({ claseId, bonoId, metodo, totalCentimos } = await request.json())
   } catch {
     return NextResponse.json({ error: 'Cuerpo no válido' }, { status: 400 })
   }
-  if (typeof claseId !== 'string' || !/^[0-9a-f-]{36}$/i.test(claseId)) {
-    return NextResponse.json({ error: 'Sesión no válida' }, { status: 400 })
+  const esBono = bonoId !== undefined
+  const id = esBono ? bonoId : claseId
+  if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id) || (esBono && claseId !== undefined)) {
+    return NextResponse.json({ error: esBono ? 'Bono no válido' : 'Sesión no válida' }, { status: 400 })
   }
   const metodoPago = metodo === 'bizum' ? 'bizum' : 'tarjeta'
 
@@ -54,9 +56,9 @@ export async function POST(request) {
 
   // Antes de crear el cobro: el total visto debe ser el que sale del precio actual (misma función que el navegador).
   const { data: sesionActual, error: errorSesion } = await supabaseUsuario
-    .from('clases')
+    .from(esBono ? 'bonos' : 'clases')
     .select('precio')
-    .eq('id', claseId)
+    .eq('id', id)
     .maybeSingle()
   if (errorSesion) {
     return NextResponse.json({ error: 'No se ha podido iniciar el pago.' }, { status: 500 })
@@ -71,8 +73,8 @@ export async function POST(request) {
   let errorCobro = null
   for (let intento = 0; intento < 3 && !cobro; intento++) {
     const pedido = nuevoPedido()
-    const { data, error } = await supabaseUsuario.rpc('crear_cobro', {
-      p_clase_id: claseId,
+    const { data, error } = await supabaseUsuario.rpc(esBono ? 'crear_cobro_bono' : 'crear_cobro', {
+      ...(esBono ? { p_bono_id: id } : { p_clase_id: id }),
       p_pedido: pedido,
       p_metodo: metodoPago,
     })
@@ -105,7 +107,7 @@ export async function POST(request) {
     pedido: cobro.pedido,
     importeCentimos: cobro.importe_centimos,
     urlNotificacion: `${sitio}/api/payments/redsys-webhook`,
-    urlOk: `${sitio}/pagos/ok`,
+    urlOk: esBono ? `${sitio}/mis-reservas?pestana=bonos&pago=ok` : `${sitio}/pagos/ok`,
     urlKo: `${sitio}/pagos/ko`,
     metodo: metodoPago,
   })

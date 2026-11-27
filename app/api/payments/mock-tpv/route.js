@@ -3,6 +3,7 @@ import { configRedsysDesdeEntorno } from '../../../../lib/pagos/redsys.ts'
 import {
   RUTA_MOCK,
   bancoSimuladoDevolucion,
+  bancoSimuladoRecurrente,
   ejecutarEscenario,
   esEscenario,
   leerPeticionDeCobro,
@@ -10,6 +11,7 @@ import {
 } from '../../../../lib/pagos/mockTpv.ts'
 import { pagina } from '../../../../lib/pagos/mockTpvPagina.ts'
 import { procesarDevoluciones } from '../../../../lib/pagos/procesarDevoluciones.ts'
+import { procesarRenovaciones } from '../../../../lib/pagos/procesarRenovaciones.ts'
 import { POST as webhookRedsys } from '../redsys-webhook/route'
 
 // SIMULADOR DEL TPV (Pendiente 33). Responde 404 salvo en local o Vercel Preview, con activación expresa y contra
@@ -51,12 +53,19 @@ async function leerCobro(pedido) {
     .select('pedido_redsys, importe_centimos, estado, clase_id, cliente_id')
     .eq('pedido_redsys', pedido)
     .maybeSingle()
-  if (!cobro) return null
-  const { data: clase } = await supabaseAdmin
-    .from('clases')
-    .select('plazas_ocupadas, plazas_max')
-    .eq('id', cobro.clase_id)
-    .maybeSingle()
+  if (!cobro) {
+    const { data: pro } = await supabaseAdmin
+      .from('pagos_pro')
+      .select('pedido_redsys, importe_centimos, estado')
+      .eq('pedido_redsys', pedido)
+      .maybeSingle()
+    return pro
+      ? { fila: pro, resumen: { pedido: pro.pedido_redsys, importeCentimos: pro.importe_centimos, estado: pro.estado } }
+      : null
+  }
+  const { data: clase } = cobro.clase_id
+    ? await supabaseAdmin.from('clases').select('plazas_ocupadas, plazas_max').eq('id', cobro.clase_id).maybeSingle()
+    : { data: null }
   return {
     fila: cobro,
     resumen: { pedido: cobro.pedido_redsys, importeCentimos: cobro.importe_centimos, estado: cobro.estado },
@@ -97,6 +106,38 @@ export async function POST(request) {
     return html(pagina({ aviso }), status)
   }
 
+  // Atajos de prueba. Solo se llega aquí contra una base de datos de pruebas (permisoMockTpv).
+  if (accion === 'renovar' || accion === 'renovar_denegada') {
+    const { cuerpo, status } = await procesarRenovaciones(supabaseAdmin, cfg, bancoSimuladoRecurrente(cfg, accion === 'renovar'))
+    const aviso = cuerpo.parado
+      ? 'Los cobros están en pausa o apagados.'
+      : cuerpo.error ||
+        `Renovaciones cobradas: ${cuerpo.cobradas} · denegadas: ${cuerpo.denegadas} · dudosas: ${cuerpo.dudosas}`
+    return html(pagina({ aviso }), status)
+  }
+  if (accion === 'adelantar') {
+    const ahora = new Date().toISOString()
+    const { data, error } = await supabaseAdmin
+      .from('suscripciones_pro')
+      .update({ periodo_fin: ahora, ultimo_intento_en: null })
+      .neq('estado', 'caducada')
+      .select('usuario_id')
+    return html(pagina({ aviso: error ? 'No se ha podido adelantar.' : `Suscripciones adelantadas: ${data.length}` }), error ? 500 : 200)
+  }
+  if (accion === 'liberar') {
+    const hace49h = new Date(Date.now() - 49 * 3600 * 1000).toISOString()
+    const { error } = await supabaseAdmin
+      .from('cobros')
+      .update({ pagado_en: hace49h })
+      .eq('tipo', 'bono')
+      .in('estado', ['pagado', 'reembolsado_parcial'])
+      .is('liberado_en', null)
+      .gt('pagado_en', hace49h)
+    const { data: liberados, error: errorLiberar } = await supabaseAdmin.rpc('liberar_pendientes')
+    const fallo = error || errorLiberar
+    return html(pagina({ aviso: fallo ? 'No se ha podido liberar.' : `Cobros liberados: ${liberados}` }), fallo ? 500 : 200)
+  }
+
   const campos = {
     Ds_SignatureVersion: texto('Ds_SignatureVersion') || 'HMAC_SHA256_V1',
     Ds_MerchantParameters: texto('Ds_MerchantParameters'),
@@ -112,14 +153,16 @@ export async function POST(request) {
   if (!accion) return html(pagina({ campos, cobro: cobro.resumen, plazas: cobro.plazas }))
   if (!esEscenario(accion)) return html(pagina({ campos, cobro: cobro.resumen, aviso: 'Acción no válida.' }), 400)
 
-  const { data: otros } = await supabaseAdmin
-    .from('cobros')
-    .select('pedido_redsys, importe_centimos')
-    .eq('clase_id', cobro.fila.clase_id)
-    .eq('estado', 'creado')
-    .neq('cliente_id', cobro.fila.cliente_id)
-    .order('created_at', { ascending: false })
-    .limit(1)
+  const { data: otros } = cobro.fila.clase_id
+    ? await supabaseAdmin
+        .from('cobros')
+        .select('pedido_redsys, importe_centimos')
+        .eq('clase_id', cobro.fila.clase_id)
+        .eq('estado', 'creado')
+        .neq('cliente_id', cobro.fila.cliente_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+    : { data: [] }
 
   const origen = new URL(RUTA_MOCK, request.url)
   const { envios, aviso } = await ejecutarEscenario(accion, {

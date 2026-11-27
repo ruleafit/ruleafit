@@ -12,7 +12,7 @@ export const SITUACIONES = {
 export type Situacion = keyof typeof SITUACIONES
 
 export const SALDOS = [
-  { clave: 'pendiente_centimos', titulo: 'Pendiente', ayuda: 'Sesiones pagadas que aún no han cumplido el plazo.' },
+  { clave: 'pendiente_centimos', titulo: 'Pendiente', ayuda: 'Sesiones y bonos pagados que aún no han cumplido el plazo.' },
   { clave: 'disponible_centimos', titulo: 'Disponible', ayuda: 'Ya es tuyo y entrará en la próxima liquidación.' },
   { clave: 'liquidado_centimos', titulo: 'Liquidado', ayuda: 'Transferido a tu cuenta.' },
 ] as const

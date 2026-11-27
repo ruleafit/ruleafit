@@ -26,6 +26,8 @@ export type PeticionPago = {
   urlKo: string
   /** "tarjeta" (por defecto) o "bizum". */
   metodo?: 'tarjeta' | 'bizum'
+  /** Primer pago de una suscripción: pide al banco guardar la tarjeta para cobros periódicos (solo tarjeta). */
+  guardarTarjeta?: boolean
 }
 
 export type FormularioRedsys = {
@@ -120,6 +122,13 @@ export function crearPeticionPago(cfg: ConfigRedsys, peticion: PeticionPago): Fo
   // Bizum: "z"; tarjeta: "C". Si el banco lo tiene activado, evita que el
   // alumno elija otro método en la página de pago.
   parametros.DS_MERCHANT_PAYMETHODS = peticion.metodo === 'bizum' ? 'z' : 'C'
+  if (peticion.guardarTarjeta) {
+    if (peticion.metodo === 'bizum') throw new Error('La suscripción solo se puede pagar con tarjeta')
+    // Credencial almacenada (COF): el titular la autoriza ahora y los cobros siguientes son recurrentes.
+    parametros.DS_MERCHANT_IDENTIFIER = 'REQUIRED'
+    parametros.DS_MERCHANT_COF_INI = 'S'
+    parametros.DS_MERCHANT_COF_TYPE = 'R'
+  }
 
   const parametrosBase64 = Buffer.from(JSON.stringify(parametros), 'utf8').toString('base64')
   return {
@@ -143,6 +152,9 @@ export type NotificacionRedsys = {
   autorizado: boolean
   codigoRespuesta: string | null
   codigoAutorizacion: string | null
+  /** Referencia de la tarjeta guardada y operación original (solo si se pidió guardarTarjeta). */
+  identificadorTarjeta: string | null
+  cofTxnid: string | null
 }
 
 function aBase64Estandar(valor: string): string {
@@ -170,6 +182,8 @@ export function verificarNotificacion(
     autorizado: false,
     codigoRespuesta: null,
     codigoAutorizacion: null,
+    identificadorTarjeta: null,
+    cofTxnid: null,
   }
 
   const parametrosBase64 = entrada.Ds_MerchantParameters
@@ -217,6 +231,8 @@ export function verificarNotificacion(
     autorizado: numeroRespuesta !== null && numeroRespuesta >= 0 && numeroRespuesta <= 99,
     codigoRespuesta: respuesta,
     codigoAutorizacion: buscar('Ds_AuthorisationCode'),
+    identificadorTarjeta: buscar('Ds_Merchant_Identifier'),
+    cofTxnid: buscar('Ds_Merchant_Cof_Txnid'),
   }
 }
 
@@ -314,4 +330,88 @@ export async function solicitarDevolucion(
     return { resultado: 'desconocido', codigoRespuesta: null, detalle: 'respuesta no válida' }
   }
   return interpretarRespuestaDevolucion(cfg.claveSecreta, datos.pedido, cuerpo)
+}
+
+// ---------------------------------------------------------------------------
+// Cobro recurrente con tarjeta guardada (suscripción), iniciado por el comercio (MIT), por REST.
+// Parámetros según la documentación de Redsys de credenciales almacenadas: A CONFIRMAR con CaixaBank al
+// contratar el TPV; hasta entonces solo se ha probado contra el simulador.
+// ---------------------------------------------------------------------------
+
+export type DatosCobroRecurrente = {
+  pedido: string
+  importeCentimos: number
+  identificadorTarjeta: string
+  cofTxnid: string | null
+}
+
+export function crearPeticionCobroRecurrente(cfg: ConfigRedsys, datos: DatosCobroRecurrente): FormularioRedsys['campos'] {
+  if (!esPedidoValido(datos.pedido)) throw new Error('Número de pedido no válido para Redsys')
+  if (!Number.isInteger(datos.importeCentimos) || datos.importeCentimos <= 0) {
+    throw new Error('El importe debe ser un número entero de céntimos mayor que cero')
+  }
+  if (!datos.identificadorTarjeta) throw new Error('No hay tarjeta guardada')
+  const parametros: Record<string, string> = {
+    DS_MERCHANT_AMOUNT: String(datos.importeCentimos),
+    DS_MERCHANT_ORDER: datos.pedido,
+    DS_MERCHANT_MERCHANTCODE: cfg.codigoComercio,
+    DS_MERCHANT_CURRENCY: MONEDA_EURO,
+    DS_MERCHANT_TRANSACTIONTYPE: TRANSACCION_AUTORIZACION,
+    DS_MERCHANT_TERMINAL: cfg.terminal,
+    DS_MERCHANT_IDENTIFIER: datos.identificadorTarjeta,
+    DS_MERCHANT_COF_INI: 'N',
+    DS_MERCHANT_COF_TYPE: 'R',
+    DS_MERCHANT_DIRECTPAYMENT: 'true',
+    DS_MERCHANT_EXCEP_SCA: 'MIT',
+  }
+  if (datos.cofTxnid) parametros.DS_MERCHANT_COF_TXNID = datos.cofTxnid
+  const parametrosBase64 = Buffer.from(JSON.stringify(parametros), 'utf8').toString('base64')
+  return {
+    Ds_SignatureVersion: 'HMAC_SHA256_V1',
+    Ds_MerchantParameters: parametrosBase64,
+    Ds_Signature: firmarParametros(cfg.claveSecreta, datos.pedido, parametrosBase64),
+  }
+}
+
+export type ResultadoCobroRecurrente = {
+  /** 'cobrado': autorizado (0000-0099). 'denegado': el banco dijo que no. 'desconocido': sin respuesta fiable. */
+  resultado: 'cobrado' | 'denegado' | 'desconocido'
+  codigoRespuesta: string | null
+  detalle?: string
+}
+
+/** Pide el cobro periódico. Nunca lanza por fallos de red: devuelve 'desconocido' (no reintentar a ciegas). */
+export async function solicitarCobroRecurrente(
+  cfg: ConfigRedsys,
+  datos: DatosCobroRecurrente,
+  llamar: typeof fetch = fetch
+): Promise<ResultadoCobroRecurrente> {
+  const dudoso = (detalle: string): ResultadoCobroRecurrente => ({ resultado: 'desconocido', codigoRespuesta: null, detalle })
+  const campos = crearPeticionCobroRecurrente(cfg, datos)
+  let cuerpo: Record<string, unknown>
+  try {
+    const respuesta = await llamar(urlRestRedsys(cfg), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(campos),
+      signal: AbortSignal.timeout(20_000),
+    })
+    if (!respuesta.ok) return dudoso(`HTTP ${respuesta.status}`)
+    cuerpo = ((await respuesta.json()) ?? {}) as Record<string, unknown>
+  } catch {
+    return dudoso('sin respuesta del banco')
+  }
+  if (typeof cuerpo.errorCode === 'string') {
+    return { resultado: 'denegado', codigoRespuesta: cuerpo.errorCode, detalle: 'error del banco' }
+  }
+  const n = verificarNotificacion(cfg.claveSecreta, {
+    Ds_MerchantParameters: typeof cuerpo.Ds_MerchantParameters === 'string' ? cuerpo.Ds_MerchantParameters : undefined,
+    Ds_Signature: typeof cuerpo.Ds_Signature === 'string' ? cuerpo.Ds_Signature : undefined,
+  })
+  if (!n.valida || n.pedido !== datos.pedido) return dudoso('respuesta sin firma válida')
+  if (n.autorizado && n.importeCentimos === datos.importeCentimos) {
+    return { resultado: 'cobrado', codigoRespuesta: n.codigoRespuesta }
+  }
+  if (n.autorizado) return dudoso('importe distinto')
+  return { resultado: 'denegado', codigoRespuesta: n.codigoRespuesta }
 }

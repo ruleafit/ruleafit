@@ -44,13 +44,26 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Firma no válida' }, { status: 400 })
   }
 
-  const { data, error } = await supabaseAdmin.rpc('confirmar_cobro_pagado', {
+  let { data, error } = await supabaseAdmin.rpc('confirmar_cobro_pagado', {
     p_pedido: n.pedido,
     p_importe_centimos: n.importeCentimos,
     p_autorizado: n.autorizado,
     p_codigo_respuesta: n.codigoRespuesta,
     p_codigo_autorizacion: n.codigoAutorizacion,
   })
+  // Si no es el cobro de un alumno, puede ser el de la suscripción Pro (sql/107).
+  if (!error && data?.resultado === 'desconocido') {
+    const pro = await supabaseAdmin.rpc('confirmar_pago_pro', {
+      p_pedido: n.pedido,
+      p_importe_centimos: n.importeCentimos,
+      p_autorizado: n.autorizado,
+      p_codigo_respuesta: n.codigoRespuesta,
+      p_identificador: n.identificadorTarjeta,
+      p_cof_txnid: n.cofTxnid,
+    })
+    // Sin sql/107 la función no existe: el pedido sigue siendo desconocido.
+    if (pro.error?.code !== 'PGRST202') ({ data, error } = pro)
+  }
   if (error) {
     console.error('confirmar_cobro_pagado falló:', error.code)
     await registrarAlerta(supabaseAdmin, ALERTAS.webhookErrorConfirmando(error.code))

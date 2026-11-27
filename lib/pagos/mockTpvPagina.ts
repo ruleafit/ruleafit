@@ -55,8 +55,14 @@ ${pagos}
 <p><a class="enlace si" href="/pagos/ok">Ver «Pago recibido» (/pagos/ok)</a>
 <a class="enlace no" href="/pagos/ko">Ver «El pago no se ha completado» (/pagos/ko)</a></p>
 <h2>Devoluciones</h2>
-<p>Primero cancela una reserva pagada (2 h antes o más) en Mis reservas. Después:</p>
+<p>Primero pide una devolución (cancelar una reserva, un bono o Pro). Después:</p>
 ${boton('devolver', 'Procesar las devoluciones pendientes (banco simulado: 0900)')}
-<p><a href="${RUTA_MOCK}">Panel del simulador</a> · <a href="/mis-reservas">Mis reservas</a> · <a href="/clases">Sesiones</a></p>
+<h2>Suscripción Pro</h2>
+${boton('adelantar', 'Adelantar: dar por terminado el mes de las suscripciones')}
+${boton('renovar', 'Cobrar las renovaciones pendientes (aprobadas)', undefined, 'si')}
+${boton('renovar_denegada', 'Cobrar las renovaciones pendientes (denegadas)', undefined, 'no')}
+<h2>Saldo</h2>
+${boton('liberar', 'Adelantar 48 h los bonos comprados y liberar el saldo')}
+<p><a href="${RUTA_MOCK}">Panel del simulador</a> · <a href="/mis-reservas">Mis reservas</a> · <a href="/clases">Sesiones</a> · <a href="/pro">Pro</a></p>
 </body></html>`
 }

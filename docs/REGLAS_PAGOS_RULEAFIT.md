@@ -123,26 +123,40 @@ Bizum activado, devoluciones por REST y formato del fichero de transferencias. L
 | Borradores legales | `legal/borradores/` |
 | Pruebas en Preview · informe | `docs/pruebas-preview.md` · `docs/AUDITORIA_PAGOS_STAGING.md` |
 
-## 12. Bonos con pago online (regla de negocio del titular, 27/11/2026)
-Con los pagos online activos los bonos **no se desactivan ni se pagan por fuera**:
-1. **Publicar:** solo organizadores con **suscripción activa** y perfil fiscal aprobado.
-2. **Comprar:** cualquier alumno, tenga o no suscripción, paga el bono online como una sesión suelta: TPV Redsys,
-   comisión y entrada en la bolsa del organizador.
-3. **Reservar:** con un bono vigente se canjean usos sin volver a pasar por el TPV.
+## 12. Suscripción Pro y bonos (reglas del titular, 27/11/2026)
+**Estado: acordado, en desarrollo.** Hasta que se publique, el bloqueo de `sql/106` sigue activo.
 
-| Parte | Estado hoy |
-|---|---|
-| Suscripción del organizador | **No existe**: ni nombre, ni precio, ni tabla, ni alta |
-| Restricción al publicar bonos | **Falta**: cualquier usuario puede crear un bono |
-| Compra del bono por el TPV, comisión y bolsa | **Falta**: `cobros` solo admite sesiones; hace falta un SQL nuevo |
-| Canje al reservar | Hecho (`reservar_clase`) |
-| Bloqueo temporal (`sql/106` y botón oculto) | Activo. Se propone retirarlo en la misma entrega que la compra online: quitarlo antes regala bonos |
+### Plan Pro
+- **40 €/mes** (IVA incluido o según la configuración fiscal), cobro mensual, **sin prueba gratuita**.
+- Lo contrata el organizador: cobro recurrente por Redsys con tarjeta guardada (COF). Sin contrato con el banco, solo
+  con el simulador.
+- Botón claro para **cancelar la renovación** en cualquier momento, sin trabas. Devolución cuando corresponda por
+  cancelación antes de consumir el mes o por desistimiento legal.
+- Incluye **crear y vender bonos**. Si caduca o se cancela, no se crean ni se venden bonos nuevos; **los ya vendidos
+  siguen funcionando** hasta agotarse o caducar.
 
-Preguntas enviadas al titular, **sin respuesta todavía** (no dar nada por decidido):
-- Suscripción: nombre, precio, periodo, prueba gratis, cómo se activa, qué incluye y qué pasa al caducar.
-- Cuándo pasa el dinero del bono a la bolsa del organizador.
-- Bonos de sesiones ilimitadas.
-- Usos sin gastar: caducidad, cancelación, bloqueo, baja y desistimiento.
-- Comisión de los bonos.
-- Bonos ya creados o adquiridos antes de activar los pagos.
-- Qué hacer con el bloqueo temporal hasta entonces.
+### Bonos
+- Publicar: Pro activo **y** perfil fiscal aprobado. Comprar: cualquier alumno, por el TPV.
+- Solo **número cerrado de sesiones** (mensuales o sin caducidad). Los ilimitados no se venden.
+- Comisión **0 %**, configurable en la base de datos.
+- El importe pasa a `disponible` **48 h después de la compra**.
+- Protección: con usos pendientes vendidos el organizador **no puede borrar su cuenta**; si cancela sesiones de forma
+  reiterada, bloquea al alumno, incumple el servicio o recibe una reclamación, se retiene el saldo o se compensa la
+  parte no disfrutada.
+- Si el bono caduca con usos sin gastar, el importe es del organizador.
+- Si el organizador cancela el bono, bloquea al alumno, deja de dar servicio o se da de baja: se devuelve la parte
+  proporcional no usada.
+- Desistimiento del alumno, en 14 días naturales desde la compra: sin usar ninguna sesión, devolución del 100 %;
+  usado hasta el 15 % de las sesiones, parte proporcional no consumida. Después, o por encima del 15 %, no hay
+  devolución voluntaria.
+- No queda ningún bono anterior activo. Limpiar la base de pruebas y documentar la de producción antes de activar pagos.
+
+### Dudas abiertas (preguntadas, sin respuesta)
+1. Baja del organizador frente a la prohibición de borrar la cuenta.
+2. Cuántas cancelaciones son «reiteradas».
+3. Qué cuenta como sesión usada.
+4. Duraciones permitidas.
+5. Devolución de la suscripción.
+6. Fallo del cobro mensual.
+7. Exigir datos fiscales para contratar Pro.
+8. Qué hacer con los bonos que ya existen en producción (3, y 1 adquirido).
