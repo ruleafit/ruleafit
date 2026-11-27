@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Gift } from 'lucide-react'
+import CompraBono from './CompraBono'
 import { supabase } from '../../lib/supabaseClient'
 import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 
@@ -15,6 +17,13 @@ export default function BonosEntrenador({ perfil, bonos, usuarioActual }) {
   const [adquiriendoId, setAdquiriendoId] = useState(null)
   const [mensajeBono, setMensajeBono] = useState('')
   const [errorBono, setErrorBono] = useState('')
+  const [aLaVenta, setALaVenta] = useState([]) // con pagos online: ids que se pueden comprar (sql/107)
+
+  useEffect(() => {
+    if (!PAGOS_VISIBLES || !perfil?.id) return
+    supabase.rpc('bonos_a_la_venta', { p_trainer: perfil.id }).then(({ data }) => setALaVenta(data || []))
+  }, [perfil?.id])
+  const visibles = PAGOS_VISIBLES ? bonos.filter((b) => aLaVenta.includes(b.id)) : bonos
 
   async function handleAdquirirBono(bono) {
     if (!usuarioActual) {
@@ -46,7 +55,7 @@ export default function BonosEntrenador({ perfil, bonos, usuarioActual }) {
     setTimeout(() => setMensajeBono(''), 8000)
   }
 
-  if (bonos.length === 0) return null
+  if (visibles.length === 0) return null
 
   return (
     <div className="mt-8 corte-card border border-[#E2E6CF] bg-white p-6">
@@ -61,17 +70,12 @@ export default function BonosEntrenador({ perfil, bonos, usuarioActual }) {
         </p>
       )}
       {errorBono && <p className="mb-3 text-sm text-red-600">{errorBono}</p>}
-      {PAGOS_VISIBLES && (
-        <p className="mb-3 text-sm text-[#6B7355]">
-          La compra de bonos todavía no está disponible con el pago online. Puedes reservar y pagar sesión a sesión.
-        </p>
-      )}
 
       <div className="flex flex-col gap-3">
-        {bonos.map((bono) => (
+        {visibles.map((bono) => (
           <div
             key={bono.id}
-            className="flex flex-col gap-2 rounded-lg border border-[#E2E6CF] p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 rounded-lg border border-[#E2E6CF] p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
           >
             <div>
               <p className="text-sm font-bold text-[#1F2400]">
@@ -81,11 +85,17 @@ export default function BonosEntrenador({ perfil, bonos, usuarioActual }) {
                 · {bono.precio} €
               </p>
               <p className="text-xs text-[#6B7355]">
-                Plazo de {bono.plazo_dias} días para consumirlas desde la compra.
+                {bono.plazo_dias > 0 ? `Plazo de ${bono.plazo_dias} días para consumirlas desde la compra.` : 'Sin caducidad.'}
               </p>
               {bono.descripcion && <p className="mt-1 text-sm text-[#1F2400]">{bono.descripcion}</p>}
             </div>
 
+            {PAGOS_VISIBLES && !usuarioActual && (
+              <Link href="/login" className="shrink-0 text-sm font-semibold text-[#3D4A00] underline">
+                Inicia sesión para comprar
+              </Link>
+            )}
+            {PAGOS_VISIBLES && usuarioActual && usuarioActual.id !== perfil.id && <CompraBono bono={bono} />}
             {!PAGOS_VISIBLES && usuarioActual && usuarioActual.id !== perfil.id && (
               <button
                 type="button"

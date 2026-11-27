@@ -15,8 +15,9 @@ export default function MisReservasPage() {
   const [reservaReclamada, setReservaReclamada] = useState('')
 
   useEffect(() => {
-    if (PAGOS_VISIBLES && new URLSearchParams(window.location.search).get('pestana') === 'reclamaciones') {
-      setPestana('reclamaciones')
+    const pedida = new URLSearchParams(window.location.search).get('pestana')
+    if (pedida === 'bonos' || (PAGOS_VISIBLES && pedida === 'reclamaciones')) {
+      setPestana(pedida)
     }
   }, [])
 
@@ -41,7 +42,7 @@ export default function MisReservasPage() {
       <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
         <PestanasMisReservas pestana={pestana} onCambiar={setPestana} conReclamaciones={PAGOS_VISIBLES} />
 
-        {pestana === 'bonos' && <BonosComprados />}
+        {pestana === 'bonos' && <BonosComprados onReclamar={PAGOS_VISIBLES ? reclamar : undefined} />}
 
         {pestana === 'reservas' && <ListaMisReservas m={m} onReclamar={PAGOS_VISIBLES ? reclamar : undefined} />}
 

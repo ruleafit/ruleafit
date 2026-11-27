@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { CircleAlert, Gift, Plus, Users } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
+import { AccionComprador, AnularBonos, AvisoPro } from './bonos/GestionVentaBonos'
 
 const inputClass =
   'block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] placeholder:text-[#6B7355] transition-colors focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]'
@@ -57,6 +58,15 @@ export default function GestionBonos({ usuario }) {
   const [descripcion, setDescripcion] = useState('')
   const [creando, setCreando] = useState(false)
   const [errorCrear, setErrorCrear] = useState('')
+  const [pro, setPro] = useState(null) // solo con pagos online (sql/107)
+  const [vendidos, setVendidos] = useState({})
+
+  async function cargarVenta() {
+    if (!PAGOS_VISIBLES) return
+    const [rp, rv] = await Promise.all([supabase.rpc('mi_pro'), supabase.rpc('mis_bonos_vendidos_estado')])
+    setPro(rp.data || null)
+    setVendidos(rv.data || {})
+  }
 
   async function cargarBonos() {
     setCargando(true)
@@ -68,6 +78,7 @@ export default function GestionBonos({ usuario }) {
     }
     setBonos(agruparPorBono(data || []))
     setError('')
+    await cargarVenta()
     setCargando(false)
   }
 
@@ -87,8 +98,8 @@ export default function GestionBonos({ usuario }) {
       setErrorCrear('Pon un precio válido.')
       return
     }
-    if (!Number.isInteger(plazoNumero) || plazoNumero <= 0) {
-      setErrorCrear('Pon un plazo en días válido (por ejemplo 30, o 180 para medio año).')
+    if (PAGOS_VISIBLES ? !['30', '0'].includes(plazoDias) : !Number.isInteger(plazoNumero) || plazoNumero <= 0) {
+      setErrorCrear(PAGOS_VISIBLES ? 'Elige la duración.' : 'Pon un plazo en días válido (por ejemplo 30, o 180 para medio año).')
       return
     }
     if (modo === 'limitado' && (!Number.isInteger(sesionesNumero) || sesionesNumero <= 0)) {
@@ -130,6 +141,7 @@ export default function GestionBonos({ usuario }) {
   async function handleToggleActivo(bono) {
     const { error } = await supabase.from('bonos').update({ activo: !bono.activo }).eq('id', bono.bono_id)
     if (!error) await cargarBonos()
+    else setError(error.message)
   }
 
   if (cargando) {
@@ -145,12 +157,15 @@ export default function GestionBonos({ usuario }) {
         </div>
       )}
 
-      <div className="mb-6 flex items-center justify-between">
+      {PAGOS_VISIBLES && <AvisoPro pro={pro} />}
+
+      <div className="mb-6 flex items-center justify-between gap-3">
         <p className="text-sm text-[#6B7355]">
           {PAGOS_VISIBLES
-            ? 'La compra de bonos no está disponible mientras el pago online esté activo. Los ya adquiridos se siguen usando.'
+            ? 'Tus alumnos compran el bono online y reservan con él sin volver a pagar. Sin comisión; pasa a disponible 48 horas después de la compra.'
             : 'Crea bonos para que tus clientes los compren y los gasten en tus sesiones.'}
         </p>
+        {(!PAGOS_VISIBLES || pro?.activa) && (
         <button
           type="button"
           onClick={() => setMostrarFormulario((v) => !v)}
@@ -159,6 +174,7 @@ export default function GestionBonos({ usuario }) {
           <Plus className="h-4 w-4" strokeWidth={2.5} />
           Crear bono
         </button>
+        )}
       </div>
 
       {mostrarFormulario && (
@@ -180,6 +196,7 @@ export default function GestionBonos({ usuario }) {
               >
                 Número fijo
               </button>
+              {!PAGOS_VISIBLES && (
               <button
                 type="button"
                 onClick={() => setModo('ilimitado')}
@@ -191,6 +208,7 @@ export default function GestionBonos({ usuario }) {
               >
                 Ilimitadas
               </button>
+              )}
             </div>
           </div>
 
@@ -209,6 +227,26 @@ export default function GestionBonos({ usuario }) {
             </div>
           )}
 
+          {PAGOS_VISIBLES ? (
+            <div>
+              <span className={labelClass}>Duración</span>
+              <div className="flex gap-2">
+                {[['30', '30 días'], ['0', 'Sin caducidad']].map(([valor, texto]) => (
+                  <button
+                    key={valor}
+                    type="button"
+                    onClick={() => setPlazoDias(valor)}
+                    aria-pressed={plazoDias === valor}
+                    className={`flex-1 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
+                      plazoDias === valor ? 'border-[#B5E600] bg-[#EDF5C9] text-[#1F2400]' : 'border-[#E2E6CF] text-[#6B7355]'
+                    }`}
+                  >
+                    {texto}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
           <div>
             <label className={labelClass}>Plazo para consumirlas (días)</label>
             <input
@@ -224,6 +262,7 @@ export default function GestionBonos({ usuario }) {
               Al terminar el plazo, las sesiones no consumidas se pierden. No hay opción de "sin caducidad".
             </p>
           </div>
+          )}
 
           <div>
             <label className={labelClass}>Precio (€)</label>
@@ -274,6 +313,12 @@ export default function GestionBonos({ usuario }) {
         </form>
       )}
 
+      {PAGOS_VISIBLES && (
+        <div className="mb-6">
+          <AnularBonos hayVendidos={Object.values(vendidos).some((v) => v.anulable)} onHecho={cargarBonos} />
+        </div>
+      )}
+
       {bonos.length === 0 ? (
         <div className="flex flex-col items-center gap-3 corte-card border border-dashed border-[#E2E6CF] px-6 py-10 text-center">
           <Gift className="h-8 w-8 text-[#B5E600]" strokeWidth={1.75} />
@@ -318,6 +363,7 @@ export default function GestionBonos({ usuario }) {
                   <div className="flex flex-col divide-y divide-[#E2E6CF] overflow-hidden rounded-lg border border-[#E2E6CF]">
                     {bono.compradores.map((c) => {
                       const caducado = new Date(c.fecha_fin) < new Date()
+                      const venta = vendidos[c.bono_cliente_id]
                       return (
                         <div
                           key={c.bono_cliente_id}
@@ -329,8 +375,11 @@ export default function GestionBonos({ usuario }) {
                               ? `${c.sesiones_usadas} sesiones usadas`
                               : `${c.sesiones_usadas} de ${bono.numero_sesiones} sesiones usadas`}
                             {' · '}
-                            {caducado ? 'caducado el' : 'caduca el'} {formatearFecha(c.fecha_fin)}
+                            {venta?.sin_caducidad ? 'sin caducidad' : `${caducado ? 'caducado el' : 'caduca el'} ${formatearFecha(c.fecha_fin)}`}
                           </p>
+                          {venta && (
+                            <AccionComprador estado={{ ...venta, id: c.bono_cliente_id }} comprador={c.cliente_username} onHecho={cargarBonos} />
+                          )}
                         </div>
                       )
                     })}

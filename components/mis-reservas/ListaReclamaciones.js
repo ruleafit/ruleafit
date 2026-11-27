@@ -59,9 +59,9 @@ export default function ListaReclamaciones({ reservaInicial = '' }) {
         ) : (
           <>
             <label className="text-sm font-semibold text-[#1F2400]">
-              Reserva
+              Reserva o bono
               <select value={reservaId} onChange={(e) => setReservaId(e.target.value)} className={`${campo} mt-1`}>
-                <option value="">Elige una reserva</option>
+                <option value="">Elige una reserva o un bono</option>
                 {r.reservas.map((x) => (
                   <option key={x.reserva_id || x.cobro_id} value={x.reserva_id || x.cobro_id}>
                     {x.titulo}

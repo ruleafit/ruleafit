@@ -23,7 +23,16 @@ export default function useReclamaciones() {
     } else {
       setError('')
       setCasos(rc.data || [])
-      setReservas(rr.data || [])
+      // Además de reservas y pagos sin plaza, los bonos pagados online (sql/107).
+      const [rb, re] = await Promise.all([supabase.rpc('mis_bonos_comprados'), supabase.rpc('mis_bonos_estado')])
+      const yaEstan = new Set((rr.data || []).map((x) => x.cobro_id))
+      const bonos = (rb.data || [])
+        .map((b) => ({
+          cobro_id: re.data?.[b.bono_cliente_id]?.cobro_id,
+          titulo: `Bono de ${b.numero_sesiones} sesiones · @${b.trainer_username}`,
+        }))
+        .filter((x) => x.cobro_id && !yaEstan.has(x.cobro_id))
+      setReservas([...(rr.data || []), ...bonos])
     }
     setCargando(false)
   }, [])

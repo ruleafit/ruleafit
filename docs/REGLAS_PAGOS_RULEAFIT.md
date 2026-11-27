@@ -12,7 +12,7 @@ pagos de `PROGRESS.md` (historial).
 | **Bolsa** | Registro de lo que Ruleafit debe a cada organizador (`bolsas`): `pendiente` y `disponible`. No es una cuenta bancaria |
 | **Movimiento** | Anotación de cada cambio de la bolsa (`movimientos_bolsa`), solo se añade |
 | **Liquidación** | Transferencia del saldo disponible al IBAN del organizador. **Sin implementar** |
-| **Bono** | Paquete de sesiones de un organizador. No es la bolsa. Su cobro online está **acordado y sin implementar** (apartado 12) |
+| **Bono** | Paquete de sesiones de un organizador. No es la bolsa. Con pagos activos se compra online (apartado 12) |
 | **Rulos** | Puntos de fidelización. No son dinero |
 
 ## 2. Reglas y estado de cada una
@@ -30,7 +30,7 @@ pagos de `PROGRESS.md` (historial).
 | Autofacturas | Una por liquidación, serie `AF-AAAA-NNNNNN`, aceptación tácita a los 15 días | **Falta** (pendiente del gestor) |
 | IVA e IRPF | IVA 21 % general; IRPF 15 % (7 % reducido) a personas físicas; foral y zonas especiales aparte | **Falta**, a confirmar |
 | Contracargos | Se descuentan de la bolsa | **Falta** el proceso |
-| Bonos con pago online | Apartado 12 | **Falta**; mientras tanto adquirirlos está bloqueado con pagos activos (`sql/106`) |
+| Bonos con pago online y Plan Pro | Apartado 12 | Hecho en la rama (`sql/107`); solo probado con simulador |
 
 Los valores 10 %, 48 h, 10 € y 15 días están en `config_pagos`. La web repite el 10 % en
 `COMISION_BPS_PREVISTA` (`components/publicar/PrevisionIngreso.js`) solo como estimación: si cambia, cambiar ambos.
@@ -80,7 +80,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 | | Producción (`main`) | Preview (`feat/pagos-mejoras`) |
 |---|---|---|
 | Base de datos | proyecto «ruleafit» | proyecto de pruebas aparte |
-| SQL | hasta 095 y 097 | base y 095-106 |
+| SQL | hasta 095 y 097 | base y 095-106; 107 cuando se aplique |
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
@@ -88,13 +88,14 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 1. Revisión jurídica y fiscal: términos, condiciones de organizadores, aviso legal, privacidad.
 2. Contratar el TPV en CaixaBank y probar cobro y devolución en el entorno de pruebas de Redsys
    (`docs/prueba-devoluciones.md`). Confirmar que admite devoluciones por REST.
-3. Con los pagos apagados: SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, cada uno con su
+3. Con los pagos apagados: SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, cada uno con su
    verificación. Nada de `sql/pruebas`.
 4. Publicar la web.
 5. Variables en Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL`
    (y `REDSYS_REST_URL` si procede), `CRON_SECRET`, `ADMIN_EMAILS`, `ALERTAS_ADMIN_EMAIL`, `NEXT_PUBLIC_SITE_URL`.
    Sin `MOCK_TPV_ACTIVO`.
-6. `099_alertas_operativas_cron.sql`; `103_blindaje_cobros_cron.sql` solo tras la prueba con Redsys.
+6. `099_alertas_operativas_cron.sql`; `103_blindaje_cobros_cron.sql` solo tras la prueba con Redsys; `107_pro_y_bonos_cron.sql` solo
+   con el cobro recurrente contratado y probado. Justo antes de activar: `107_pro_y_bonos_preactivacion.sql`.
 7. Tener resuelto cómo se paga a los organizadores antes del primer día 15.
 8. Solo entonces: `PAGOS_ACTIVOS`, `NEXT_PUBLIC_PAGOS_ACTIVOS` y `config_pagos.pagos_activos`.
 
@@ -123,40 +124,50 @@ Bizum activado, devoluciones por REST y formato del fichero de transferencias. L
 | Borradores legales | `legal/borradores/` |
 | Pruebas en Preview · informe | `docs/pruebas-preview.md` · `docs/AUDITORIA_PAGOS_STAGING.md` |
 
-## 12. Suscripción Pro y bonos (reglas del titular, 27/11/2026)
-**Estado: acordado, en desarrollo.** Hasta que se publique, el bloqueo de `sql/106` sigue activo.
+## 12. Plan Pro y bonos (reglas del titular, 27/11/2026)
+Implementado en `sql/107`. Cobros reales apagados; el cobro mensual solo se ha probado con el simulador.
 
 ### Plan Pro
-- **40 €/mes** (IVA incluido o según la configuración fiscal), cobro mensual, **sin prueba gratuita**.
-- Lo contrata el organizador: cobro recurrente por Redsys con tarjeta guardada (COF). Sin contrato con el banco, solo
-  con el simulador.
-- Botón claro para **cancelar la renovación** en cualquier momento, sin trabas. Devolución cuando corresponda por
-  cancelación antes de consumir el mes o por desistimiento legal.
-- Incluye **crear y vender bonos**. Si caduca o se cancela, no se crean ni se venden bonos nuevos; **los ya vendidos
-  siguen funcionando** hasta agotarse o caducar.
+| Regla | Valor |
+|---|---|
+| Precio | **40 €/mes** (IVA según configuración fiscal), sin prueba gratuita |
+| Alta | La hace el organizador con tarjeta (Redsys, tarjeta guardada en el banco). Exige datos fiscales aprobados |
+| Incluye | Crear y vender bonos |
+| Cancelar | Botón en `/pro`: detiene la renovación; Pro sigue hasta fin del mes pagado. Se puede reactivar |
+| Devolución | En los 14 días del **primer** alta: íntegra si no ha vendido bonos; proporcional a los días si ha vendido. Pro termina al pedirla |
+| Cobro fallido | 3 días de margen con un reintento diario; después caduca. Respuesta dudosa del banco: no se reintenta, se revisa |
+| Al caducar | No se crean ni venden bonos; los vendidos siguen funcionando |
 
 ### Bonos
-- Publicar: Pro activo **y** perfil fiscal aprobado. Comprar: cualquier alumno, por el TPV.
-- Solo **número cerrado de sesiones** (mensuales o sin caducidad). Los ilimitados no se venden.
-- Comisión **0 %**, configurable en la base de datos.
-- El importe pasa a `disponible` **48 h después de la compra**.
-- Protección: con usos pendientes vendidos el organizador **no puede borrar su cuenta**; si cancela sesiones de forma
-  reiterada, bloquea al alumno, incumple el servicio o recibe una reclamación, se retiene el saldo o se compensa la
-  parte no disfrutada.
-- Si el bono caduca con usos sin gastar, el importe es del organizador.
-- Si el organizador cancela el bono, bloquea al alumno, deja de dar servicio o se da de baja: se devuelve la parte
-  proporcional no usada.
-- Desistimiento del alumno, en 14 días naturales desde la compra: sin usar ninguna sesión, devolución del 100 %;
-  usado hasta el 15 % de las sesiones, parte proporcional no consumida. Después, o por encima del 15 %, no hay
-  devolución voluntaria.
-- No queda ningún bono anterior activo. Limpiar la base de pruebas y documentar la de producción antes de activar pagos.
+| Regla | Valor |
+|---|---|
+| Publicar | Pro activo y fiscal aprobado. Sesiones cerradas (no ilimitados). Duración: 30 días o sin caducidad |
+| Cambios | Un bono vendido no cambia de precio, sesiones ni duración |
+| Comprar | Cualquier alumno, por el TPV (tarjeta o Bizum). Comisión **0 %** (configurable) |
+| Reservar | Se canjea sin pasar por el TPV |
+| Dinero | A `disponible` **48 h después de la compra** |
+| Sesión usada | Las que ya han empezado y las canceladas tarde (menos de 2 h). Las reservas futuras se anulan al devolver y no cuentan |
+| Desistimiento | 14 días naturales. Sin usar: 100 %. Usando hasta el **25 %**: parte no usada. Después o por encima: nada |
+| Caducidad | Lo no usado queda para el organizador |
+| Organizador anula, bloquea, se da de baja o incumple | Se devuelve la parte no usada |
+| Cancelaciones reiteradas | 3 sesiones con alumnos de bono canceladas en 30 días: se retiene su saldo de bonos y se avisa; se decide en `/admin/alertas` |
+| Reclamación | Retiene ese cobro. «Devolver y cerrar» devuelve la parte no usada |
+| Borrar la cuenta | Imposible con usos pendientes vendidos. Antes: «Cancelar mis bonos y devolver lo no usado» y esperar las devoluciones |
 
-### Dudas abiertas (preguntadas, sin respuesta)
-1. Baja del organizador frente a la prohibición de borrar la cuenta.
-2. Cuántas cancelaciones son «reiteradas».
-3. Qué cuenta como sesión usada.
-4. Duraciones permitidas.
-5. Devolución de la suscripción.
-6. Fallo del cobro mensual.
-7. Exigir datos fiscales para contratar Pro.
-8. Qué hacer con los bonos que ya existen en producción (3, y 1 adquirido).
+**Por qué el 25 %:** el 15 % pedido al principio no dejaba usar ni una sesión en un bono de 4 o de 5. El 25 % es la
+cifra más baja que lo permite en los tamaños habituales: bono de 4 → 1 sesión; de 5 → 1; de 8 → 2; de 10 → 2. En bonos
+de 1 a 3 sesiones solo hay devolución voluntaria sin haber usado ninguna.
+
+Los valores (40 €, 0 %, 14 días, 25 %, 3 días de margen, 3 cancelaciones en 30 días) están en `config_pagos`.
+
+### Bonos anteriores
+Con pagos activos no se venden ni se reactivan. Pruebas: `sql/pruebas/limpiar_bonos_de_pruebas.sql`. Producción:
+`sql/107_pro_y_bonos_preactivacion.sql` los desactiva sin borrarlos y respeta los adquiridos (el 27/11/2026 había 3
+bonos y 1 adquirido).
+
+### Pendiente
+- Contratar con CaixaBank la tarjeta guardada y el cobro recurrente, y confirmar los parámetros (`lib/pagos/redsys.ts`).
+- Facturas de Ruleafit al organizador por Pro.
+- Revisión jurídica: textos de Pro y de bonos, desistimiento, aviso legal y condiciones.
+- El saldo de un bono está disponible a las 48 h y la devolución dura 14 días: las liquidaciones (sin implementar)
+  deberán tenerlo en cuenta; una devolución posterior puede dejar el saldo en negativo.

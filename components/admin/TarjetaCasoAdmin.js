@@ -25,7 +25,7 @@ export default function TarjetaCasoAdmin({ caso, onCambiar }) {
       setError('Para cerrar un caso hay que escribir una respuesta.')
       return
     }
-    const pregunta = `¿Devolver ${formatearEuros(caso.cobros.importe_centimos)} y cerrar el caso ${caso.numero}? Si la sesión no ha empezado, se cancela también la reserva. No se puede deshacer.`
+    const pregunta = `¿Devolver ${formatearEuros(caso.cobros.importe_centimos)} y cerrar el caso ${caso.numero}? Si la sesión no ha empezado, se cancela también la reserva. Si es un bono, se devuelve la parte no usada y se anula. No se puede deshacer.`
     if (window.confirm(pregunta)) enviar({ accion: 'devolver' })
   }
 

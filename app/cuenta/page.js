@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { History, User, ChartColumn, Lock, Bell, Share2 } from 'lucide-react'
+import EnlacePro from '../../components/cuenta/EnlacePro'
 import { supabase } from '../../lib/supabaseClient'
 import { calcularNivel, calcularRango } from '../../lib/niveles'
 import PerfilFiscal from '../../components/PerfilFiscal'
@@ -82,6 +83,8 @@ export default function CuentaPage() {
           <PrivacidadParticipante usuario={usuario} />
 
           <PerfilFiscal usuario={usuario} />
+
+          <EnlacePro />
 
         </BloqueDesplegable>
 

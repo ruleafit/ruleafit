@@ -978,3 +978,8 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - `sql/106`: trigger en `bonos_clientes` que impide altas mientras `pagos_activos`. La web oculta «Adquirir» y lo explica. Los bonos ya adquiridos siguen sirviendo. Cobro de bonos: pendiente.
 - **Aplicar antes de activar pagos en producción.**
 - Nueva regla del titular (27/11/2026): los bonos se venderán online (`docs/REGLAS_PAGOS_RULEAFIT.md`, apartado 12). Pendiente de sus respuestas; el bloqueo es temporal.
+
+## SQL 107 · Plan Pro y bonos online · EN RAMA (27 nov 2026), sin aplicar
+- Suscripción Pro (40 €/mes, cobro recurrente solo simulado), compra online de bonos (0 %, disponibles a 48 h), desistimiento 14 días / 25 %, devoluciones parciales, retención por cancelaciones reiteradas y borrado de cuenta protegido. Sustituye el bloqueo de sql/106.
+- Pantallas: `/pro`, perfil del organizador, Mis sesiones → Bonos, Mis reservas → Bonos, `/admin/alertas`. Reglas: `docs/REGLAS_PAGOS_RULEAFIT.md` apartado 12.
+- Producción, antes de activar pagos: 107, `107_pro_y_bonos_preactivacion.sql`; cron `107_pro_y_bonos_cron.sql` solo con Redsys recurrente probado.
