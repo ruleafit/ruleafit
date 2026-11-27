@@ -15,7 +15,17 @@ const MOTIVOS = [
   ['otro', 'Otro motivo'],
 ]
 
-// Denunciar una sesión (tipo "sesion") o a un usuario (tipo "usuario"). Lo
+const MOTIVOS_TITULACION = [
+  ['titulacion_falsa', 'Creo que la titulación es falsa'],
+  ['datos_incorrectos', 'Los datos no son correctos'],
+  ['suplantacion', 'El título es de otra persona'],
+  ['otro', 'Otro motivo'],
+]
+
+const TITULOS = { usuario: 'Denunciar usuario', sesion: 'Denunciar sesión', titulacion: 'Denunciar titulación' }
+
+// Denunciar una sesión (tipo "sesion"), a un usuario (tipo "usuario") o una
+// titulación (tipo "titulacion", sql/111: el informe es obligatorio). Lo
 // piden las tiendas de aplicaciones para el contenido generado por usuarios.
 // Las denuncias se guardan en public.denuncias (sql/068) y las revisa el
 // administrador desde el panel de Supabase.
@@ -28,7 +38,9 @@ export default function BotonDenunciar({
   className = '',
 }) {
   const [abierto, setAbierto] = useState(false)
-  const [motivo, setMotivo] = useState(MOTIVOS[0][0])
+  const esTitulacion = tipo === 'titulacion'
+  const motivos = esTitulacion ? MOTIVOS_TITULACION : MOTIVOS
+  const [motivo, setMotivo] = useState(motivos[0][0])
   const [comentario, setComentario] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [resultado, setResultado] = useState(null) // { ok: boolean, texto: string }
@@ -52,11 +64,15 @@ export default function BotonDenunciar({
     setAbierto(false)
     setResultado(null)
     setComentario('')
-    setMotivo(MOTIVOS[0][0])
+    setMotivo(motivos[0][0])
   }
 
   async function enviar(e) {
     e.preventDefault()
+    if (esTitulacion && comentario.trim().length < 10) {
+      setResultado({ ok: false, texto: 'Explica qué ocurre con esta titulación (al menos 10 caracteres).' })
+      return
+    }
     setEnviando(true)
     setResultado(null)
 
@@ -76,7 +92,10 @@ export default function BotonDenunciar({
     } else if (error.code === '23505') {
       setResultado({ ok: true, texto: 'Ya nos avisaste de esto. Lo estamos revisando.' })
     } else {
-      setResultado({ ok: false, texto: 'No se pudo enviar la denuncia. Inténtalo de nuevo más tarde.' })
+      setResultado({
+        ok: false,
+        texto: error.code === 'P0001' ? error.message : 'No se pudo enviar la denuncia. Inténtalo de nuevo más tarde.',
+      })
     }
   }
 
@@ -99,7 +118,7 @@ export default function BotonDenunciar({
             >
               <div className="mb-3 flex items-start justify-between gap-3">
                 <h2 className="text-lg font-extrabold text-[#1F2400]">
-                  {tipo === 'usuario' ? 'Denunciar usuario' : 'Denunciar sesión'}
+                  {TITULOS[tipo]}
                 </h2>
                 <button type="button" onClick={cerrar} aria-label="Cerrar ventana de denuncia" className="shrink-0 text-[#6B7355] hover:text-[#1F2400]">
                   <X className="h-5 w-5" strokeWidth={2} />
@@ -120,7 +139,9 @@ export default function BotonDenunciar({
               ) : (
                 <form onSubmit={enviar} className="flex flex-col gap-3">
                   <p className="text-sm text-[#6B7355]">
-                    Cuéntanos qué ocurre. Revisaremos la denuncia y actuaremos si incumple las normas.
+                    {esTitulacion
+                      ? 'Escribe tu informe. Lo revisaremos para comprobar la titulación; la persona denunciada no lo verá.'
+                      : 'Cuéntanos qué ocurre. Revisaremos la denuncia y actuaremos si incumple las normas.'}
                   </p>
                   <div>
                     <label htmlFor="motivo-denuncia" className="mb-1 block text-sm font-medium text-[#1F2400]">
@@ -132,14 +153,14 @@ export default function BotonDenunciar({
                       onChange={(e) => setMotivo(e.target.value)}
                       className="block w-full rounded-lg border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] focus:border-[#B5E600] focus:outline-none focus:ring-2 focus:ring-[#B5E600]"
                     >
-                      {MOTIVOS.map(([valor, texto]) => (
+                      {motivos.map(([valor, texto]) => (
                         <option key={valor} value={valor}>{texto}</option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label htmlFor="comentario-denuncia" className="mb-1 block text-sm font-medium text-[#1F2400]">
-                      Detalles (opcional)
+                      {esTitulacion ? 'Informe (obligatorio)' : 'Detalles (opcional)'}
                     </label>
                     <textarea
                       id="comentario-denuncia"

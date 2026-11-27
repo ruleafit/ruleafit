@@ -12,6 +12,8 @@ const MOTIVOS = {
   acoso: 'Acoso o comportamiento abusivo',
   peligro: 'Peligro para la seguridad',
   otro: 'Otro motivo',
+  titulacion_falsa: 'Titulación presuntamente falsa',
+  datos_incorrectos: 'Datos de la titulación incorrectos',
 }
 
 // Aviso por correo al administrador cuando se crea una denuncia. Lo llama el
@@ -34,7 +36,7 @@ export async function POST(request) {
 
   const { data: d, error } = await supabaseAdmin
     .from('denuncias')
-    .select('tipo, objetivo_id, usuario_denunciado_id, denunciante_id, motivo, comentario, created_at')
+    .select('*')
     .eq('id', denunciaId)
     .single()
 
@@ -49,6 +51,9 @@ export async function POST(request) {
   const nombre = (id) => (perfiles || []).find((p) => p.id === id)?.username
 
   let objetivo = `usuario @${nombre(d.usuario_denunciado_id) || d.objetivo_id}`
+  if (d.tipo === 'titulacion') {
+    objetivo = `titulación "${d.detalle}" de @${nombre(d.usuario_denunciado_id) || d.usuario_denunciado_id}`
+  }
   if (d.tipo === 'sesion') {
     const { data: clase } = await supabaseAdmin.from('clases').select('titulo, ciudad').eq('id', d.objetivo_id).maybeSingle()
     objetivo = `sesión "${clase?.titulo || d.objetivo_id}"${clase?.ciudad ? ` (${clase.ciudad})` : ''}`

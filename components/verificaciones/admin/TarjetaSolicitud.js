@@ -69,6 +69,14 @@ export default function TarjetaSolicitud({ tipo, solicitud, onResolver }) {
         {esIdentidad ? solicitud.tipo_documento : `${solicitud.nombre} — ${solicitud.entidad} (${solicitud.anio})`}
       </p>
 
+      {solicitud.denuncias > 0 && (
+        <p className="mt-1">
+          <Link href="/admin/denuncias" className="text-sm font-semibold text-red-700 underline">
+            Denuncias sin revisar: {solicitud.denuncias}
+          </Link>
+        </p>
+      )}
+
       {esIdentidad && (
         <p className="mt-1 text-sm text-[#6B7355]">
           {solicitud.tiene_fiscal ? `Nombre fiscal: ${solicitud.nombre_fiscal}` : 'Sin perfil fiscal.'}

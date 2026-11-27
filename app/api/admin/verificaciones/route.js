@@ -42,6 +42,16 @@ export async function GET(request) {
   const usernames = new Map((perfiles.data || []).map((p) => [p.id, p.username]))
   const fiscal = new Map((fiscales.data || []).map((f) => [f.usuario_id, f]))
 
+  // Denuncias sin revisar de cada titulación (sql/111).
+  const { data: denuncias } = await supabaseAdmin
+    .from('denuncias')
+    .select('objetivo_id')
+    .eq('tipo', 'titulacion')
+    .eq('estado', 'pendiente')
+    .limit(500)
+  const denunciadas = new Map()
+  for (const d of denuncias || []) denunciadas.set(d.objetivo_id, (denunciadas.get(d.objetivo_id) || 0) + 1)
+
   return NextResponse.json({
     identidades: identidades.data.map(({ ruta_reverso, ...v }) => ({
       ...v,
@@ -51,7 +61,11 @@ export async function GET(request) {
       nombre_fiscal: fiscal.get(v.usuario_id)?.nombre_fiscal || null,
       tiene_fiscal: fiscal.has(v.usuario_id),
     })),
-    titulaciones: titulaciones.data.map((t) => ({ ...t, username: usernames.get(t.usuario_id) || null })),
+    titulaciones: titulaciones.data.map((t) => ({
+      ...t,
+      username: usernames.get(t.usuario_id) || null,
+      denuncias: denunciadas.get(t.id) || 0,
+    })),
   })
 }
 
