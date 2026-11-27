@@ -1,15 +1,41 @@
 # Ruleafit — Progreso del proyecto
 
-Última actualización: 23 noviembre 2026
+Última actualización: 27 noviembre 2026
 
-## Verificaciones de perfil (27 noviembre 2026) — rama feat/verificaciones-perfil
+## Estado actual (27 noviembre 2026)
+Estado punto por punto del plan de mejoras: `docs/PLAN_MEJORAS_RULEAFIT.md`. Reglas de pagos: `docs/REGLAS_PAGOS_RULEAFIT.md`. Las secciones de abajo son historial: lo que digan de «sin aplicar» o «pendiente» puede estar superado por este bloque.
+
+| | `main` (producción) | `feat/pagos-mejoras` (Preview) |
+|---|---|---|
+| Código | Hasta verificaciones de perfil y `/admin` | Además: pagos, Plan Pro y bonos |
+| SQL comprobado | `095` y `110`–`112` aplicados; sin tablas de `096`–`109` (`097` aplicado según las reglas, no comprobado) | `096`–`107`, `109`–`112`; **falta `108`** |
+| Pagos | Apagados | Activos con TPV simulado |
+
+- Plan del 25/11: 15 publicadas, 5 hechas en Preview (31, 35–38), 4 parciales (12, 30, 32, 33), 35 pendientes.
+- `feat/redsys-devoluciones`, `fix/eliminar-cuenta-pagos`, `feat/verificaciones-perfil` y `prueba-avisos-zona` están integradas en `feat/pagos-mejoras` (la de eliminar cuenta, como commit repetido con el mismo contenido).
+- Comprobado el 27/11: `test:pagos` 81/81, `test:verificaciones` 14/14, resto 131/131 y build correcto.
+
+### Pendiente técnico
+- Liquidaciones (SEPA), autofacturas, facturas de Pro y contracargos.
+- Pago de sesión suelta: la web no envía el método y siempre se cobra con tarjeta, aunque la ficha ofrece Bizum.
+- Impedir en el servidor pagar una sesión suelta con un bono válido; estado de la devolución en Reclamaciones.
+- Aplicar `108` en pruebas; programar los crons de pagos; probar en Preview los casos sin cubrir.
+- Producción: la parte web de `095` solo está en la rama (con pagos apagados la ruta de datos fiscales responde).
+- Antes de activar pagos: `096`–`109` en orden y publicar la web (apartado 8 de las reglas).
+
+### Pendiente externo
+- Banco: TPV contratado, devoluciones REST, cobro recurrente, claves y pruebas, fichero de transferencias.
+- Asesor: cobro por cuenta de terceros, IVA, IRPF, autofacturas, modelo 238, zonas especiales.
+- Jurista: términos y condiciones, privacidad (incluidas verificaciones), edad 14/18, desistimiento.
+
+## Verificaciones de perfil (27 noviembre 2026) — publicado en `main`
 Hecho:
 - Insignias «Identidad verificada», «Centro verificado» y «Titulación declarada/acreditada» (sql/110-112), independientes de los pagos. Identidad y centro se comprueban automáticamente (lectura local, casos dudosos a mano); los documentos solo los ve el administrador. Cola en /admin/verificaciones y denuncias de titulaciones en /admin/denuncias.
 - RuleaFit usa exclusivamente Redsys: retiradas las menciones antiguas a otras pasarelas.
 
 Pendiente:
 - Probar la lectura automática con documentos reales en Preview.
-- Pegar sql/110, 111 y 112 en la base de pruebas (110 ya está) y en producción (en producción antes de publicar), y comprobar con el script de verificación.
+- sql/110, 111 y 112 aplicados en pruebas y en producción (comprobado el 27/11 por tablas, columnas y funciones; no consta ejecutado el script de verificación en producción).
 - Revisión jurídica del apartado de verificación de la política de privacidad.
 
 ## Fase 0 · Entorno base — completada

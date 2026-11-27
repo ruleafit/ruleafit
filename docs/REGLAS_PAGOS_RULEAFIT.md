@@ -18,7 +18,7 @@ pagos de `PROGRESS.md` (historial).
 ## 2. Reglas y estado de cada una
 | Regla | Valor | Estado |
 |---|---|---|
-| Medio de pago | Tarjeta o Bizum en el TPV virtual de CaixaBank (Redsys) | Preparado; probado solo con TPV simulado |
+| Medio de pago | Tarjeta o Bizum en el TPV virtual de CaixaBank (Redsys) | Preparado; probado solo con TPV simulado. En sesiones sueltas la web aún cobra siempre con tarjeta |
 | Quién fija el precio | El organizador; la base de datos calcula el importe | Hecho |
 | Comisión | 10 % del precio, a cargo del organizador. Mitades hacia arriba, al céntimo | Hecho |
 | Al confirmarse el pago | Reserva, plaza ocupada y neto a la bolsa `pendiente` | Hecho |
@@ -86,7 +86,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 | | Producción (`main`) | Preview (`feat/pagos-mejoras`) |
 |---|---|---|
 | Base de datos | proyecto «ruleafit» | proyecto de pruebas aparte |
-| SQL | hasta 095 y 097 | base y 095-108; 109 cuando se aplique |
+| SQL | hasta 095 y 097, y 110-112 | base, 095-107 y 109-112; **108 sin aplicar** (comprobado el 27/11/2026) |
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
@@ -113,6 +113,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 - [ ] Liquidaciones: días 15 y último, mínimo 10 €, descifrado del IBAN, fichero SEPA, excluir lo retenido y decidir qué hacer
       con bonos aún devolubles (14 días) y saldos negativos.
 - [ ] Autofacturas y facturas de Pro.
+- [ ] Dejar elegir Bizum al pagar una sesión suelta (`components/BotonReservar.js` no envía el método).
 - [ ] Impedir en el servidor pagar una sesión suelta si el alumno ya tiene un bono válido y activo para ese organizador
       (hoy solo lo impide la web).
 - [ ] Mostrar claramente al alumno el estado de su devolución en la pantalla de Reclamaciones tras resolverse con
