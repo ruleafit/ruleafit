@@ -5,6 +5,7 @@ Marketplace de clases sueltas de entrenamiento (sin gimnasio ni cuota), en toda 
 
 ## Stack
 Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (PostgreSQL con RLS + RPCs en `sql/`). Pagos: TPV virtual Redsys/CyberPack (CaixaBank), firma HMAC_SHA256_V1. Email: Resend. Push: web-push. Hosting: Vercel (https://www.ruleafit.com, deploy automático al hacer push a main). Node 24.x.
+- Pasarela de pago: RuleaFit usa EXCLUSIVAMENTE Redsys (TPV virtual de CaixaBank). No proponer, integrar ni mencionar otras pasarelas en código, SQL ni documentación.
 - Repo privado: github.com/ruleafit/ruleafit. Supabase: proyecto "ruleafit", Irlanda.
 - Claves en `.env.local` (ignorado por git; nunca leerlo ni imprimir valores).
 - SEPA / pain.001 / liquidaciones a entrenadores: NO implementado todavía.
@@ -70,6 +71,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - Centros (N15, sql/091): `/centros` + formulario público → `/api/centros/solicitud` → tabla PRIVADA `solicitudes_centros` (solo service_role vía `registrar_solicitud_centro`; se gestiona desde Supabase; estados nuevo/contactado/demo_pendiente/registrado/activo a mano, nunca automáticos). Aviso por Resend a `CENTROS_ADMIN_EMAIL` o `FEEDBACK_ADMIN_EMAIL` (guarda primero; si el correo falla, queda guardada). Conservación: criterio de 12 meses sin relación comercial (sujeto a revisión jurídica). Validación compartida en `lib/centros/validarSolicitud.js`. `/registro?tipo=organizador` solo guarda interés (sin rol nuevo); guía de 3 pasos en `components/home/GuiaOrganizador.js`.
 - Mi cuenta usa desplegables (`BloqueDesplegable`): Tu perfil, Estadísticas, Notificaciones, Avisos de zona, Últimas notificaciones, Mis últimos Rulos, Ruleros bloqueados; después Eliminar cuenta y Cerrar sesión.
 - Perfiles: `public.perfiles` (username único 3-20 caracteres), creado por trigger en auth.users.
+- Verificaciones de perfil (sql/110, independientes de los pagos; el perfil fiscal NO las concede): «Identidad verificada» y «Titulación acreditada». `perfiles.identidad_verificada`/`titulacion_acreditada` las calcula solo la BD. El usuario sube a buckets privados (`verificaciones-identidad`, `titulaciones`) y no puede leerlos; escribe solo por RPC; resuelve solo el servidor (`/admin/verificaciones`). Las imágenes de identidad se borran al aprobar, rechazar o retirar: ningún archivo se borra a mano, se encola en `archivos_verificacion_por_borrar` y lo elimina `lib/verificaciones/purga.js`. Los diplomas se ven solo con sesión y SOLO vía `/api/verificaciones/documento` (imagen con marca de agua generada en el servidor): nunca enviar al navegador el archivo original ni su URL de Storage. Límites en `lib/verificaciones/reglas.js` y en el SQL: cambiar ambos.
 - Pendientes legales: revisión jurídica de 3 puntos de la política de privacidad (datos de localización, transferencias internacionales, etiquetas de privacidad de iOS).
 - Detalle histórico de decisiones y fases: PROGRESS.md.
 

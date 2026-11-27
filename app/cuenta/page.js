@@ -18,6 +18,8 @@ import BloqueDesplegable from '../../components/cuenta/BloqueDesplegable'
 import PrivacidadParticipante from '../../components/cuenta/PrivacidadParticipante'
 import AvisosPlazas from '../../components/cuenta/AvisosPlazas'
 import CompartirYCrecer from '../../components/cuenta/CompartirYCrecer'
+import { BadgeCheck } from 'lucide-react'
+import BloqueVerificacion from '../../components/verificaciones/BloqueVerificacion'
 
 export default function CuentaPage() {
   const datos = useDatosCuenta()
@@ -86,6 +88,10 @@ export default function CuentaPage() {
 
           <EnlacePro />
 
+        </BloqueDesplegable>
+
+        <BloqueDesplegable id="verificacion" titulo="Verificación del perfil" icono={BadgeCheck}>
+          <BloqueVerificacion usuario={usuario} />
         </BloqueDesplegable>
 
         <BloqueDesplegable id="estadisticas" titulo="Estadísticas y valoraciones" icono={ChartColumn}>

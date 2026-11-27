@@ -18,7 +18,7 @@ export default function PoliticaPrivacidadPage() {
         <strong>Sitio web:</strong> https://www.ruleafit.com
       </p>
       <p className="mb-8 text-sm text-zinc-500">
-        <strong>Última actualización:</strong> 23 de noviembre de 2026
+        <strong>Última actualización:</strong> 27 de noviembre de 2026
       </p>
 
       <h2 className={h2Class}>I. POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS</h2>
@@ -76,8 +76,21 @@ export default function PoliticaPrivacidadPage() {
       </p>
       )}
       <p className={pClass}>
+        Además, solo si el Usuario solicita voluntariamente una verificación de perfil, se tratan: las imágenes de su DNI, NIE o pasaporte (verificación de identidad) y/o el nombre, entidad emisora, año y documento acreditativo de sus titulaciones deportivas.
+      </p>
+      <p className={pClass}>
         En ningún caso se tratan categorías especiales de datos personales en el sentido del artículo 9 del RGPD.
       </p>
+
+      <h3 className={h3Class}>Verificación de identidad y de titulaciones</h3>
+      <p className={pClass}>
+        La verificación es voluntaria, no es necesaria para usar Ruleafit y su base legal es el consentimiento, que se otorga al enviar cada solicitud y puede retirarse en cualquier momento desde Mi cuenta.
+      </p>
+      <ul className={ulClass}>
+        <li><strong>Documento de identidad:</strong> las imágenes se guardan en un almacenamiento privado, solo las ve el equipo de Ruleafit mediante enlaces temporales y se utilizan únicamente para comprobar que se trata de una persona real y, si tiene datos fiscales en la plataforma, que coinciden con ellos. Se eliminan al aprobar o rechazar la solicitud, al retirarla o al eliminar la cuenta. Se conservan el resultado, el tipo de documento, las fechas, el motivo del rechazo y quién la revisó, mientras la cuenta esté abierta o hasta que el Usuario retire la verificación. El número del documento no se guarda.</li>
+        <li><strong>Titulaciones deportivas:</strong> si se aprueban, el nombre del título, la entidad y el año se muestran públicamente en el perfil y en las sesiones del Usuario, y los usuarios con sesión iniciada pueden ver el documento dentro de la web, con una marca de agua que identifica a quien lo consulta (nombre de usuario, correo electrónico y fecha). Aunque se impide la descarga del archivo original, no es posible evitar que quien lo ve capture la pantalla. El Usuario debe tapar su número de documento y otros datos que no quiera mostrar antes de subirlo. El documento se elimina si se rechaza, si el Usuario borra la titulación o si elimina su cuenta.</li>
+        <li><strong>Visualización de documentos:</strong> al abrir un documento, el correo electrónico y el nombre de usuario de quien lo consulta se incrustan en la imagen que se le muestra, con la finalidad de disuadir de su difusión.</li>
+      </ul>
 
       <h3 className={h3Class}>Base legal para el tratamiento de los datos personales</h3>
       <p className={pClass}>
@@ -144,6 +157,9 @@ export default function PoliticaPrivacidadPage() {
         <li><strong>Vercel Inc.</strong>, con domicilio en 440 N Barranca Avenue #4133, Covina, CA 91723, Estados Unidos. Contacto: privacy@vercel.com. Finalidad: alojamiento del sitio web.</li>
         <li><strong>Supabase, Inc.</strong>, Estados Unidos. Contacto: privacy@supabase.com. Finalidad: alojamiento de la base de datos y gestión de la autenticación de usuarios. Los servidores de base de datos están ubicados en la Unión Europea (Irlanda).</li>
       </ol>
+      <p className={pClass}>
+        Cuando el Usuario envía una solicitud de verificación, el equipo de Ruleafit recibe un aviso por correo electrónico a través de Resend con su nombre de usuario y el tipo de solicitud, sin documentos adjuntos. Los documentos se almacenan en Supabase.
+      </p>
       <p className={pClass}>
         Los datos enviados mediante el formulario de centros se envían, además, por correo electrónico al equipo de Ruleafit a través de Resend (Resend, Inc., Estados Unidos), que actúa como encargado del tratamiento con la finalidad de enviar correo electrónico transaccional.
       </p>
