@@ -940,3 +940,8 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - Guía: `docs/pruebas-preview.md`; base de pruebas: `sql/pruebas/preparar_base_de_pruebas.sql`.
 - Pruebas: `npm run test:pagos` y prueba local de principio a fin (web compilada + Supabase simulado sobre PGlite). Sin probar en Vercel.
 - Pendiente: los Preview de Vercel de las ramas de pagos fallaban al compilar (probable: faltan variables de Supabase en Preview).
+
+## Aprobación automática de datos fiscales y bancarios · EN RAMA `feat/pagos-mejoras` (27 nov 2026), SQL 101 sin aplicar en producción
+- Al guardar, el servidor evalúa (`lib/pagos/evaluarPerfilFiscal.ts`): NIF/NIE/CIF con control y sin duplicar en otra cuenta, IBAN español (24 caracteres, módulo 97-10), nombre y apellidos (persona física) o razón social, titular de la cuenta, dirección, código postal 01-52 y provincia, correo, mayoría de edad y casillas.
+- Cumple: estado `activo` al instante (`sql/101`). No cumple: respuesta `rechazado` con motivos y NO se guarda nada (un perfil ya aprobado sigue como estaba). `bloqueado` sigue siendo manual.
+- No comprueba que el NIF o el IBAN sean de la persona: valorar una verificación antes del primer pago. Canarias, Ceuta, Melilla, Navarra y País Vasco se aprueban igual, aunque la pantalla sigue avisando de revisión antes de pagar (decidir).

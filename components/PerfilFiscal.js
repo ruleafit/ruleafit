@@ -11,8 +11,8 @@ const TIPOS = [
 ]
 
 const ESTADOS = {
-  pendiente_revision: 'Datos recibidos, pendientes de revisión',
-  activo: 'Datos verificados',
+  pendiente_revision: 'Vuelve a guardar tus datos para aprobarlos',
+  activo: 'Datos aprobados: ya puedes publicar sesiones de pago',
   bloqueado: 'Bloqueado: escríbenos desde Ayuda',
   incompleto: 'Incompleto',
 }
@@ -48,6 +48,7 @@ export default function PerfilFiscal({ usuario }) {
   const [f, setF] = useState(VACIO)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+  const [motivos, setMotivos] = useState([]) // evaluación automática: por qué se han rechazado los datos
   const [ok, setOk] = useState('')
 
   useEffect(() => {
@@ -98,6 +99,7 @@ export default function PerfilFiscal({ usuario }) {
   async function guardar(e) {
     e.preventDefault()
     setError('')
+    setMotivos([])
     setOk('')
     setGuardando(true)
     const { data: sesion } = await supabase.auth.getSession()
@@ -108,6 +110,10 @@ export default function PerfilFiscal({ usuario }) {
     }).catch(() => null)
     const datos = respuesta ? await respuesta.json().catch(() => ({})) : {}
     setGuardando(false)
+    if (datos.estado === 'rechazado' && Array.isArray(datos.motivos)) {
+      setMotivos(datos.motivos)
+      return
+    }
     if (!respuesta || !respuesta.ok) {
       setError(datos.error || 'No se han podido guardar los datos. Inténtalo de nuevo.')
       return
@@ -120,7 +126,7 @@ export default function PerfilFiscal({ usuario }) {
       responsableDatos: false,
       aceptaAutofactura: false,
     }))
-    setOk('Datos guardados.')
+    setOk(datos.estado === 'activo' ? 'Datos aprobados al instante.' : 'Datos guardados.')
     setAbierto(false)
   }
 
@@ -240,6 +246,16 @@ export default function PerfilFiscal({ usuario }) {
               y acepto las condiciones para entrenadores.
             </span>
           </label>
+          {motivos.length > 0 && (
+            <div role="alert" className="corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="font-bold">Datos rechazados. Corrige esto y vuelve a enviarlos:</p>
+              <ul className="mt-1 list-disc pl-5">
+                {motivos.map((m) => (
+                  <li key={m}>{m}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           {error && <p className="text-sm text-red-700">{error}</p>}
           <div className="flex flex-wrap gap-3">
             <button
@@ -254,6 +270,7 @@ export default function PerfilFiscal({ usuario }) {
               onClick={() => {
                 setAbierto(false)
                 setError('')
+                setMotivos([])
               }}
               disabled={guardando}
               className="inline-flex h-10 items-center justify-center corte-btn border border-[#E2E6CF] px-5 text-sm font-medium text-[#6B7355] hover:border-[#B5E600]"
