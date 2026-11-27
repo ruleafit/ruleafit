@@ -1,102 +1,72 @@
-# Auditoría de pagos · `feat/pagos-mejoras` (commit `ced2893`) · 27 de noviembre de 2026
+# Auditoría de pagos · `feat/pagos-mejoras` (commit `3605077`) · 27 de noviembre de 2026
 
-## 1. Resumen ejecutivo
+Reglas vigentes: `docs/REGLAS_PAGOS_RULEAFIT.md`.
 
-**El flujo de pagos funciona en el Preview con la base de pruebas y el TPV simulado. Todavía no está listo para
-producción**, sobre todo porque la web sigue mostrando textos de «pago directo» con el pago online activo (A3) y
-porque las devoluciones no se han probado contra Redsys.
+## 1. Resumen
+**El pago de sesiones sueltas, las devoluciones simuladas, la bolsa del organizador y las reclamaciones funcionan en
+el Preview con la base de pruebas.** No está listo para producción: faltan la venta online de bonos y su suscripción,
+las liquidaciones al IBAN, la prueba con Redsys y la revisión jurídica.
 
-| Métrica | Valor |
+| Métrica al terminar | Valor |
 |---|---|
-| Cuentas usadas | Organizador, alumno B, alumno C y administración (sesiones iniciadas por la persona dueña) |
-| Sesiones de prueba publicadas | 5 |
-| Cobros al terminar | 5 `pagado`, 6 `reembolsado`, 1 `fallido` |
-| Devoluciones | 6 completadas, 0 rechazadas, 0 dudosas |
-| Pagos de sesiones canceladas sin devolver | 0 |
-| Pagados sin reserva activa / bolsas descuadradas | 0 / 0 |
-| Crons fallidos en la base de pruebas | 0 |
-| Tests locales sobre `ced2893` | 64/64 de pagos y 131/131 del resto |
+| Cuentas usadas | Organizador, dos alumnos y administración (sesiones iniciadas por la persona dueña) |
+| Cobros | 4 `pagado`, 7 `reembolsado`, 1 `fallido` |
+| Devoluciones | 7 completadas, ninguna en curso ni fallida |
+| Bolsas frente a sus movimientos | Cuadran |
+| Crons fallidos (24 h, base de pruebas) | 0 |
+| Bonos adquiridos con pagos activos | 0 |
+| Tests locales | 73/73 de pagos y 131/131 del resto; build correcto |
 
-La base usada es `ixeuanoikjftpdgezfyz` (pruebas), comprobado en las peticiones del navegador. No se ha movido dinero.
-Las notificaciones quedan en la app; en pruebas no hay cron de envío push.
+Base usada: `ixeuanoikjftpdgezfyz` (pruebas). No se ha movido dinero y en producción no se ha ejecutado nada.
 
-## Actualización: correcciones posteriores a estas pruebas
-Corregidos en la rama **A3**, **B1** (`sql/104`) y las cuatro fricciones de UX, con tests y build en local. En el
-Preview (`39b2fff`) se comprobaron A3, las horas sin segundos, el aviso de devolución y los enlaces del TPV.
-**Pendiente: aplicar `sql/104` en pruebas (B1).** Lo descrito más abajo es lo observado en
-`ced2893`.
+## 2. Ronda del 27 de noviembre (textos, bonos, bolsa y saldo)
+| Caso | Resultado |
+|---|---|
+| Portada, aviso legal, ficha y publicar con pagos visibles | Textos de pago online; no aparecen los antiguos |
+| Fechas y horas en sesiones, Mis reservas, Mis sesiones y Rulos | Sin segundos |
+| Sesión cancelada por el organizador | El alumno ve «Devolución íntegra completada» |
+| Bono con pagos activos | Sin botón «Adquirir»; la base rechaza el alta (probado en una transacción que no guardó nada). Bono de prueba desactivado |
+| Sesión celebrada: paso a disponible | QA1 se liberó a las 02:45:00 UTC del 27/11, justo 48 h después de terminar; QA2 también está disponible. Sus fechas se habían adelantado en la base de pruebas |
+| Saldo del organizador en `/mis-ingresos` | Pendiente, disponible y liquidado coinciden con el historial |
+| Reclamación sobre un cobro pendiente y sobre otro ya disponible | Ambos «Retenido por reclamación»; salen de pendiente y disponible (12,15 € retenidos) |
+| «Devolver y cerrar» con respuesta | Caso resuelto, reserva cancelada, `requiere_reembolso` y «En devolución al alumno» |
+| Procesar devoluciones (banco simulado) | 1 completada; «Devuelto al alumno» |
+| «No procede» sobre el cobro disponible | Vuelve a disponible (12,15 €) |
+| 390 px: ingresos, portada, aviso legal, perfil, publicar, Mis sesiones y Mis reservas | Sin desplazamiento horizontal |
+| Consola | Sin errores de página en lo recorrido |
 
-Nuevo punto para el checklist:
-- El aviso legal (`app/aviso-legal/page.js:45`) afirma que no se realiza ningún cobro en la plataforma y que se paga
-  directamente al entrenador. Hay que cambiarlo (con revisión jurídica) antes de activar los pagos.
-- La web dice que la devolución «se ha tramitado automáticamente»: solo es cierto en producción con el cron
-  `103_blindaje_cobros_cron.sql` programado y las devoluciones probadas con Redsys.
+«Devolver y cerrar» sin escribir respuesta no se pulsó en esta ronda. Que un cobro con reclamación abierta no se
+libere al cumplir el plazo solo se ha probado en local.
 
-## 0. Pruebas ejecutadas en el Preview
-
+## 3. Pruebas anteriores en el Preview (commits `ced2893` y `39b2fff`)
 | Caso | Resultado |
 |---|---|
 | `mock-tpv` muestra «TPV SIMULADO» | Correcto |
 | APIs sin credenciales o con token falso; firma falsa en TPV y webhook | Rechazadas |
-| Publicar sesión de pago con perfil aprobado | Correcto |
-| Publicar de pago sin datos fiscales (aviso en pantalla) | Bloqueado. El bloqueo del servidor solo se ha probado en local |
-| Desglose antes de pagar | Muestra precio, 0,00 € de gestión, total y política |
-| Doble clic en «Confirmar y pagar» | Una sola petición |
-| «Atrás» desde el TPV | El botón queda activo y se reutiliza el mismo pedido |
-| Recarga en mitad del TPV y tras autorizar | Sin duplicados; el aviso repetido responde `ya_procesado` |
-| Pago autorizado / rechazado | `pagado` con reserva / `fallido` sin plaza, y se puede reintentar |
-| Aviso del banco repetido | `pagado` y después `ya_procesado` |
-| Dos pagan la última plaza | Uno `pagado`, otro `requiere_reembolso`; si falta el segundo pago, lo explica |
-| Pago sin plaza | Visible en Mis reservas y reclamable |
-| Reclamación: texto corto, doble clic, duplicada | Validada, un solo caso (RF-2026-000001), duplicada rechazada |
-| Panel `/admin/incidencias` | No cierra sin respuesta; al resolver, el alumno ve estado y respuesta |
-| `/admin` con cuenta de alumno | Sin acceso |
-| Cancelación del alumno con más de 2 h | Devuelta |
-| Cancelación del organizador (2 reservas) | Las dos devueltas |
-| Reprogramar: sin cambios, menos de 24 h | Rechazado con mensaje |
-| Reprogramar con 2 reservas | Aviso con antes y después; uno acepta, otro cancela sin coste y se le devuelve |
-| Parada segura desde `/admin/alertas` | «Pagos en pausa. No se te ha cobrado nada»; al reanudar se paga |
-| Alerta por firma no válida | Aparece y se puede resolver |
-| 390×844, sin sesión (13 páginas) y con sesión (8 pantallas, desglose y TPV) | Sin desplazamiento horizontal |
-| Consola | Sin errores en la fase sin sesión. Con sesión solo se revisó la ventana del organizador: intentos de acceso fallidos (400) y 3 rechazos de datos fiscales (422), ambos esperables |
+| Publicar de pago con perfil aprobado / sin datos fiscales | Correcto / bloqueado en pantalla |
+| Desglose antes de pagar; doble clic; «Atrás» desde el TPV; recarga | Sin duplicados; se reutiliza el pedido |
+| Pago autorizado / rechazado / aviso repetido | `pagado` / `fallido` y reintento / `ya_procesado` |
+| Dos pagan la última plaza | Uno `pagado`, otro `requiere_reembolso`, visible y reclamable |
+| Reclamación: texto corto, doble clic, duplicada, acceso sin permiso | Validado y rechazado |
+| Cancelación del alumno (más de 2 h) y del organizador | Devueltas |
+| Reprogramar | Reglas de 24 h; uno acepta, otro cancela sin coste y se le devuelve |
+| Parada segura y alerta por firma no válida | Correctas |
 
-### No probado en el Preview
-- Formulario fiscal por el asistente: no introduce NIF ni IBAN en esta web. Se observó en la ventana del organizador
-  que hubo 3 rechazos y después aprobación (cuenta terminada en 1332). Zonas especiales: solo en local.
-- Autocancelación por mínimo de plazas (requiere esperar a la hora límite): solo en local.
-- Borrado de cuenta (destructivo): solo en local.
-- Cambio de ubicación al reprogramar, bonos, push, correos y Redsys real.
+## 4. No probado en el Preview
+Formulario fiscal por el asistente (no introduce NIF ni IBAN), zonas especiales, autocancelación por mínimo, borrado
+de cuenta, cambio de ubicación al reprogramar, compra de bonos (no existe), push, correos y Redsys real.
 
-## Fallos abiertos hoy
+## 5. Abierto
+- **Bonos (apartado 12 de las reglas): sin implementar.** No hay suscripción, ni restricción al publicar, ni compra online.
+- Tras «Devolver y cerrar», la reserva desaparece de Mis reservas y la pestaña Reclamaciones muestra la respuesta pero
+  no el estado de la devolución.
+- Liquidaciones al IBAN, autofacturas e impuestos.
+- Aviso legal: el texto de pago online necesita revisión jurídica.
+- «Devolución tramitada automáticamente» solo es cierto en producción con el cron `103` y Redsys probado.
 
-### A3 · ALTO · Textos de pago directo con el pago online activo
-- Ficha de una sesión de pago: «Se paga directamente al entrenador» (`app/clases/[id]/page.js:204`).
-- Publicar: «Acuerda el precio con tus alumnos. A día de hoy, el 100% es para ti.», aunque hay comisión
-  (`components/publicar/BloquePlazasPrecio.js:18-19`).
-- Pasos: con `NEXT_PUBLIC_PAGOS_ACTIVOS=true`, abrir una sesión de pago o «Publicar sesión».
-
-### B1 · BAJO · Plazas ocupadas en una sesión cancelada
-- Tras cancelar el organizador, la sesión conserva 2 plazas ocupadas sin reservas activas.
-- Origen: `cancelar_clase()` (`sql/047`). Anterior a esta rama; no afecta a cobros.
-
-### Fricciones de UX
-- La hora se ve con segundos («10:00:00») en ficha, tarjetas, Mis reservas y Mis sesiones.
-- La tarjeta de sesión cancelada no dice nada de la devolución (`components/mis-reservas/TarjetaReservaCancelada.js`).
-- Al cancelar a tiempo una reserva pagada, el mensaje no menciona la devolución (`components/mis-reservas/useMisReservas.js`).
-- El TPV simulado no ofrece ir a `/pagos/ok` o `/pagos/ko`.
-
-## Checklist obligatorio antes de producción
-- [ ] Aplicar `sql/104` en pruebas y comprobar B1.
-- [ ] Actualizar el aviso legal sobre los cobros en la plataforma.
-- [ ] Probar cobro y devolución contra el entorno de pruebas de Redsys (devolución REST admitida por CaixaBank).
-- [ ] SQL 096 y 098 a 104 en producción, en orden, con sus verificaciones (095 y 097 ya están). No ejecutar nada de `sql/pruebas`.
-- [ ] Después de publicar: `099_alertas_operativas_cron.sql`; `103_blindaje_cobros_cron.sql` solo tras la prueba con Redsys.
-- [ ] En producción: sin `MOCK_TPV_ACTIVO`; `/api/payments/mock-tpv` responde 404.
-- [ ] Probar autocancelación por mínimo, zonas especiales y borrado de cuenta en pruebas.
-- [ ] Decidir cómo se avisa de las revisiones fiscales manuales y si se verifica la titularidad de NIF e IBAN.
-- [ ] Revisión jurídica y fiscal (aprobación automática, autofactura, privacidad, reclamaciones, plazos).
-- [ ] Revocar el enlace Share usado en estas pruebas.
-- [ ] `pagos_activos`, `PAGOS_ACTIVOS` y `NEXT_PUBLIC_PAGOS_ACTIVOS` en falso en producción hasta completar lo anterior.
+## 6. Antes de producción
+Seguir el apartado 8 de `docs/REGLAS_PAGOS_RULEAFIT.md`, revocar el enlace Share de estas pruebas y mantener
+`pagos_activos`, `PAGOS_ACTIVOS` y `NEXT_PUBLIC_PAGOS_ACTIVOS` en falso hasta completarlo.
 
 ---
 

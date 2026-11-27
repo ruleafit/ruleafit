@@ -977,3 +977,4 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - Fallo: `adquirir_bono` no cobra; con pagos activos daba un bono gratis para reservar sesiones de pago sin pagar.
 - `sql/106`: trigger en `bonos_clientes` que impide altas mientras `pagos_activos`. La web oculta «Adquirir» y lo explica. Los bonos ya adquiridos siguen sirviendo. Cobro de bonos: pendiente.
 - **Aplicar antes de activar pagos en producción.**
+- Nueva regla del titular (27/11/2026): los bonos se venderán online (`docs/REGLAS_PAGOS_RULEAFIT.md`, apartado 12). Pendiente de sus respuestas; el bloqueo es temporal.

@@ -1,5 +1,7 @@
 # Plan de la fase 1 de pagos (30 octubre 2026)
 
+> Documento histórico. Las reglas vigentes están en `docs/REGLAS_PAGOS_RULEAFIT.md`.
+
 Estado: PLAN, sin código todavía. Aprobado por el usuario: tocar pagos, usar TypeScript en este módulo y añadir `pdfkit` (la fase 2 lo usa). Valores confirmados: comisión 10 %, mínimo de liquidación 10 €, 48 h hasta que el dinero esté disponible, 15 días de aceptación tácita de cada autofactura.
 
 Todo queda detrás de un **interruptor apagado** (`PAGOS_ACTIVOS=false` y un campo en la base de datos): la beta actual no cambia.
