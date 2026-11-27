@@ -21,8 +21,9 @@ La base usada es `ixeuanoikjftpdgezfyz` (pruebas), comprobado en las peticiones 
 Las notificaciones quedan en la app; en pruebas no hay cron de envío push.
 
 ## Actualización: correcciones posteriores a estas pruebas
-Corregidos en la rama **A3**, **B1** (`sql/104`) y las cuatro fricciones de UX. Comprobado con tests y build en local;
-**pendiente de aplicar `sql/104` en pruebas y de verificar en pantalla**. Lo descrito más abajo es lo observado en
+Corregidos en la rama **A3**, **B1** (`sql/104`) y las cuatro fricciones de UX, con tests y build en local. En el
+Preview (`39b2fff`) se comprobaron A3, las horas sin segundos, el aviso de devolución y los enlaces del TPV.
+**Pendiente: aplicar `sql/104` en pruebas (B1).** Lo descrito más abajo es lo observado en
 `ced2893`.
 
 Nuevo punto para el checklist:
@@ -85,7 +86,7 @@ Nuevo punto para el checklist:
 - El TPV simulado no ofrece ir a `/pagos/ok` o `/pagos/ko`.
 
 ## Checklist obligatorio antes de producción
-- [ ] Verificar en pantalla A3, B1 y los ajustes de UX (corregidos en código).
+- [ ] Aplicar `sql/104` en pruebas y comprobar B1.
 - [ ] Actualizar el aviso legal sobre los cobros en la plataforma.
 - [ ] Probar cobro y devolución contra el entorno de pruebas de Redsys (devolución REST admitida por CaixaBank).
 - [ ] SQL 096 y 098 a 104 en producción, en orden, con sus verificaciones (095 y 097 ya están). No ejecutar nada de `sql/pruebas`.
