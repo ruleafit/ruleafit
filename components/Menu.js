@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, Menu as IconoMenu, X } from 'lucide-react'
+import { Home, Menu as IconoMenu, ShieldCheck, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { PAGOS_VISIBLES } from '../lib/pagosVisibles'
+import useEsAdmin from './admin/useEsAdmin'
 import CampanaNotificaciones from './CampanaNotificaciones'
 import AvisoActivarNotificaciones from './AvisoActivarNotificaciones'
 
@@ -16,6 +17,7 @@ export default function Menu() {
   const [conSombra, setConSombra] = useState(false)
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [disparadorAviso, setDisparadorAviso] = useState(0)
+  const esAdmin = useEsAdmin(usuario?.id)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -269,6 +271,17 @@ export default function Menu() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Solo cuentas de administración: lo decide el servidor. */}
+          {esAdmin && (
+            <Link
+              href="/admin"
+              aria-label="Administración"
+              title="Administración"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#B5E600] text-[#3D4A00] hover:bg-[#EDF5C9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black"
+            >
+              <ShieldCheck className="h-5 w-5" strokeWidth={2} />
+            </Link>
+          )}
           {usuario && <CampanaNotificaciones usuarioActual={usuario} />}
           <button
             type="button"
@@ -296,6 +309,7 @@ export default function Menu() {
         <div className={`border-t border-zinc-200 bg-white px-6 py-4 ${ancho.soloMovil}`}>
           <div className="flex flex-col gap-1">
             {enlaces.map(renderEnlaceMovil)}
+            {esAdmin && renderEnlaceMovil({ key: 'admin', href: '/admin', label: 'Administración', icon: ShieldCheck })}
 
             {usuario && (
               <button
