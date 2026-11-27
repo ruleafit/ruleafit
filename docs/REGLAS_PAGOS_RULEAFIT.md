@@ -84,20 +84,48 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
-## 8. Pasar a producción (en este orden)
-1. Revisión jurídica y fiscal: términos, condiciones de organizadores, aviso legal, privacidad.
-2. Contratar el TPV en CaixaBank y probar cobro y devolución en el entorno de pruebas de Redsys
-   (`docs/prueba-devoluciones.md`). Confirmar que admite devoluciones por REST.
-3. Con los pagos apagados: SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, cada uno con su
-   verificación. Nada de `sql/pruebas`.
-4. Publicar la web.
-5. Variables en Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL`
-   (y `REDSYS_REST_URL` si procede), `CRON_SECRET`, `ADMIN_EMAILS`, `ALERTAS_ADMIN_EMAIL`, `NEXT_PUBLIC_SITE_URL`.
-   Sin `MOCK_TPV_ACTIVO`.
-6. `099_alertas_operativas_cron.sql`; `103_blindaje_cobros_cron.sql` solo tras la prueba con Redsys; `107_pro_y_bonos_cron.sql` solo
-   con el cobro recurrente contratado y probado. Justo antes de activar: `107_pro_y_bonos_preactivacion.sql`.
-7. Tener resuelto cómo se paga a los organizadores antes del primer día 15.
-8. Solo entonces: `PAGOS_ACTIVOS`, `NEXT_PUBLIC_PAGOS_ACTIVOS` y `config_pagos.pagos_activos`.
+## 8. Checklist antes de activar pagos en Producción (en este orden)
+
+### A. Asesor legal y fiscal (puede cambiar el desarrollo)
+- [ ] Confirmar que Ruleafit puede cobrar y guardar dinero de organizadores (normativa de servicios de pago) o cómo hacerlo.
+- [ ] IVA: comisión del 10 %, si los 40 € de Pro lo incluyen y cuándo tributa un bono.
+- [ ] Facturas de Ruleafit por Pro; autofacturas a organizadores; IRPF; modelo 238 (DAC7); Canarias, Ceuta y Melilla.
+- [ ] Desistimiento de alumnos (sesiones con fecha y bonos) y de organizadores con Pro; 48 h desde el fin o desde la sesión.
+- [ ] Términos, condiciones de organizadores, aviso legal, privacidad (tarjeta guardada, datos fiscales) y renovación automática.
+- [ ] Verificar o no la titularidad de NIF e IBAN antes del primer pago.
+
+### B. CaixaBank / Redsys
+- [ ] Contratar el TPV virtual (CyberPack) con tarjeta y Bizum.
+- [ ] Pedir devoluciones por REST, totales y parciales.
+- [ ] Pedir tarjeta guardada (credencial almacenada) y cobro recurrente sin presencia del titular (MIT).
+- [ ] Recibir comercio (FUC), terminal y claves de pruebas y producción; confirmar la versión de firma.
+- [ ] Probar en su entorno de pruebas: cobro, rechazo, aviso, devolución total y parcial, alta de Pro y renovación; confirmar los
+      parámetros de `lib/pagos/redsys.ts`.
+- [ ] Formato del fichero de transferencias.
+
+### C. Desarrollo pendiente
+- [ ] Liquidaciones: días 15 y último, mínimo 10 €, descifrado del IBAN, fichero SEPA, excluir lo retenido y decidir qué hacer
+      con bonos aún devolubles (14 días) y saldos negativos.
+- [ ] Autofacturas y facturas de Pro.
+- [ ] Una sesión gratuita consume un uso del bono (`reservar_clase`): decidir y corregir.
+- [ ] Solo la web impide pagar una sesión teniendo bono; el servidor no.
+- [ ] Mostrar al alumno el estado de la devolución tras «Devolver y cerrar» sobre una sesión.
+- [ ] Probar en Preview: bloqueo, retención por cancelaciones, autocancelación, zonas especiales y borrado de cuenta.
+
+### D. Despliegue (con los pagos apagados)
+- [ ] Copia de seguridad de la base de producción.
+- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, en orden, cada uno con su
+      verificación. Nada de `sql/pruebas`.
+- [ ] Publicar la web justo después.
+- [ ] Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL` (y `REDSYS_REST_URL`),
+      `CRON_SECRET`, `ADMIN_EMAILS`, `ALERTAS_ADMIN_EMAIL`, `NEXT_PUBLIC_SITE_URL`. Sin `MOCK_TPV_ACTIVO`; el simulador debe dar 404.
+- [ ] Crons: `099`; `103` y `107` solo tras las pruebas con Redsys.
+
+### E. Activación
+- [ ] `107_pro_y_bonos_preactivacion.sql`.
+- [ ] `PAGOS_ACTIVOS`, `NEXT_PUBLIC_PAGOS_ACTIVOS` y `config_pagos.pagos_activos`.
+- [ ] Un cobro real pequeño y su devolución; revisar `/admin/alertas`.
+- [ ] Saber quién paga a los organizadores antes del primer día 15, y revocar el enlace Share de pruebas.
 
 ## 9. Para Redsys
 Datos que pedir al banco: número de comercio (FUC), terminal, clave de firma SHA-256 de pruebas y de producción,
@@ -171,3 +199,22 @@ bonos y 1 adquirido).
 - Revisión jurídica: textos de Pro y de bonos, desistimiento, aviso legal y condiciones.
 - El saldo de un bono está disponible a las 48 h y la devolución dura 14 días: las liquidaciones (sin implementar)
   deberán tenerlo en cuenta; una devolución posterior puede dejar el saldo en negativo.
+
+## 13. Cómo entra el dinero (mapa del código)
+| | Sesión suelta | Suscripción Pro | Bono online |
+|---|---|---|---|
+| Inicio | `/api/payments/crear` → `crear_cobro` | `/api/payments/pro` → `crear_pago_pro` | `/api/payments/crear` → `crear_cobro_bono` |
+| Se guarda en | `cobros` (`tipo = sesion`) | `pagos_pro` | `cobros` (`tipo = bono`) |
+| Confirmación (webhook) | `confirmar_cobro_pagado`: reserva y plaza | `confirmar_pago_pro`: activa o renueva | `confirmar_cobro_pagado`: crea `bonos_clientes` |
+| Comisión | 10 % de ese cobro | Los 40 € son de Ruleafit | 0 % |
+| Bolsa del organizador | Neto a `pendiente` | **No entra** | Importe a `pendiente` |
+| A `disponible` | 48 h después de terminar la sesión | No aplica | 48 h después de la compra |
+| Canjear / renovar | — | Cron `/api/payments/pro/renovar` | `reservar_clase`: ocupa plaza, sin cobro ni movimiento |
+
+Cada movimiento queda en `movimientos_bolsa`; la liberación es `liberar_pendientes`. **Ningún importe se calcula por
+sesión ni por plazas ocupadas**: la comisión se fija en cada cobro al crearlo.
+
+**Sesión mixta** (comprobada el 27/11/2026 en la base de pruebas con `sql/pruebas/prueba_sesion_mixta.sql`, que no guarda
+nada, y en el Preview): quien canjea bono y quien paga ocupan plaza; el canje no crea cobro ni mueve la bolsa; cada pago
+suelto lleva su 10 %; `/mis-ingresos` muestra un apunte por cobro; al cancelar, se devuelve a quien pagó y el bono
+recupera el uso.

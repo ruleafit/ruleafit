@@ -38,6 +38,26 @@ Base usada: `ixeuanoikjftpdgezfyz` (pruebas). No se ha movido dinero y en produc
 «Devolver y cerrar» sin escribir respuesta no se pulsó en esta ronda. Que un cobro con reclamación abierta no se
 libere al cumplir el plazo solo se ha probado en local.
 
+## 2 bis. Plan Pro, bonos y sesión mixta (commit `7b2f8ea`, SQL 107 aplicado en pruebas)
+| Caso | Resultado |
+|---|---|
+| Pro: contratar sin marcar la autorización | Botón desactivado |
+| Alta con TPV simulado; cancelar y reactivar la renovación | Correcto |
+| Renovación denegada y aprobada | «Impagada» con 3 días de margen; después cobrada |
+| Sin Pro o sin fiscal | Aviso y sin botón «Crear bono» |
+| Publicar bono (30 días o sin caducidad) y comprarlo con aviso repetido | Un solo bono; `ya_procesado` |
+| Sesión mixta en pantalla (Zumba) | Bono: «Total a pagar ahora: 0,00 €». Pago suelto: 6,00 €, 5,40 € netos. 2 plazas |
+| Liberación del bono (adelantando 48 h en el simulador) | A disponible |
+| Devolución con una reserva futura | 20,00 € íntegros; reserva anulada; bolsa cuadrada |
+| Reclamación sobre un bono y «Devolver y cerrar» | Retenido; devuelto |
+| Baja de Pro con devolución, minutos después del alta y con bonos vendidos | Proporcional (40,00 € redondeados); los bonos dejan de venderse |
+| 390 px: Pro, Mis sesiones, bonos comprados, ingresos y cuenta | Sin desplazamiento horizontal |
+| Base al terminar | 9 devoluciones completadas, bolsas cuadradas, sin alertas ni crons fallidos |
+
+Sin probar en el Preview (sí en local): bloqueo, retención por cancelaciones reiteradas, anular bonos desde el
+organizador, borrado de cuenta y `sql/108` (pendiente de aplicar en pruebas). Corregido tras la prueba: un bono anulado
+salía como «caducado» en Mis sesiones.
+
 ## 3. Pruebas anteriores en el Preview (commits `ced2893` y `39b2fff`)
 | Caso | Resultado |
 |---|---|
@@ -57,16 +77,8 @@ Formulario fiscal por el asistente (no introduce NIF ni IBAN), zonas especiales,
 de cuenta, cambio de ubicación al reprogramar, compra de bonos (no existe), push, correos y Redsys real.
 
 ## 5. Abierto
-- **Bonos (apartado 12 de las reglas): sin implementar.** No hay suscripción, ni restricción al publicar, ni compra online.
-- Tras «Devolver y cerrar», la reserva desaparece de Mis reservas y la pestaña Reclamaciones muestra la respuesta pero
-  no el estado de la devolución.
-- Liquidaciones al IBAN, autofacturas e impuestos.
-- Aviso legal: el texto de pago online necesita revisión jurídica.
-- «Devolución tramitada automáticamente» solo es cierto en producción con el cron `103` y Redsys probado.
-
-## 6. Antes de producción
-Seguir el apartado 8 de `docs/REGLAS_PAGOS_RULEAFIT.md`, revocar el enlace Share de estas pruebas y mantener
-`pagos_activos`, `PAGOS_ACTIVOS` y `NEXT_PUBLIC_PAGOS_ACTIVOS` en falso hasta completarlo.
+Ver el checklist del apartado 8 de `docs/REGLAS_PAGOS_RULEAFIT.md`. Lo más importante: una sesión gratuita consume un
+uso del bono, las liquidaciones no existen y falta todo lo de Redsys real, fiscal y legal.
 
 ---
 

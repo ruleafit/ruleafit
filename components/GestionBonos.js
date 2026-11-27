@@ -375,7 +375,11 @@ export default function GestionBonos({ usuario }) {
                               ? `${c.sesiones_usadas} sesiones usadas`
                               : `${c.sesiones_usadas} de ${bono.numero_sesiones} sesiones usadas`}
                             {' · '}
-                            {venta?.sin_caducidad ? 'sin caducidad' : `${caducado ? 'caducado el' : 'caduca el'} ${formatearFecha(c.fecha_fin)}`}
+                            {venta?.anulado
+                              ? `anulado el ${formatearFecha(c.fecha_fin)}`
+                              : venta?.sin_caducidad
+                                ? 'sin caducidad'
+                                : `${caducado ? 'caducado el' : 'caduca el'} ${formatearFecha(c.fecha_fin)}`}
                           </p>
                           {venta && (
                             <AccionComprador estado={{ ...venta, id: c.bono_cliente_id }} comprador={c.cliente_username} onHecho={cargarBonos} />
