@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../../lib/supabaseClient'
+import DenunciaTitulacion from '../../../components/verificaciones/admin/DenunciaTitulacion'
 
 const MOTIVOS = {
   contenido_inapropiado: 'Contenido inapropiado u ofensivo',
@@ -11,7 +12,11 @@ const MOTIVOS = {
   acoso: 'Acoso o comportamiento abusivo',
   peligro: 'Peligro para la seguridad',
   otro: 'Otro motivo',
+  titulacion_falsa: 'Titulación presuntamente falsa',
+  datos_incorrectos: 'Datos de la titulación incorrectos',
 }
+
+const TIPOS = { sesion: 'Sesión', usuario: 'Usuario', titulacion: 'Titulación de' }
 
 const COLOR_ESTADO = {
   pendiente: 'bg-[#FDECEA] text-red-800 border-red-200',
@@ -116,7 +121,7 @@ export default function DenunciasAdminPage() {
             </div>
 
             <p className="mt-2 text-sm text-[#1F2400]">
-              <strong>{d.tipo === 'sesion' ? 'Sesión' : 'Usuario'}:</strong>{' '}
+              <strong>{TIPOS[d.tipo]}:</strong>{' '}
               {d.tipo === 'sesion' ? (
                 d.sesion ? (
                   <Link href={`/clases/${d.objetivo_id}`} className="underline">
@@ -134,6 +139,7 @@ export default function DenunciasAdminPage() {
             {d.tipo === 'sesion' && d.denunciado_username && (
               <p className="text-sm text-[#6B7355]">Publicada por @{d.denunciado_username}</p>
             )}
+            {d.tipo === 'titulacion' && <DenunciaTitulacion denuncia={d} />}
             <p className="mt-1 text-sm text-[#1F2400]"><strong>Motivo:</strong> {MOTIVOS[d.motivo] || d.motivo}</p>
             <p className="text-sm text-[#6B7355]">
               Denunciante: {d.denunciante_username ? `@${d.denunciante_username}` : 'cuenta eliminada'}

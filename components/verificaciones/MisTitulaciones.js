@@ -60,8 +60,9 @@ export default function MisTitulaciones({ titulaciones, onEnviar, onRetirar }) {
     <div className="mt-8 border-t border-[#E2E6CF] pt-6">
       <h3 className="text-base font-bold text-[#1F2400]">Titulaciones deportivas</h3>
       <p className="mt-1 text-sm text-[#6B7355]">
-        Cuando las aprobemos, aparecerán en tu perfil y en tus sesiones, y los usuarios con sesión iniciada podrán ver el
-        documento con una marca de agua.
+        Al subirlas aparecen en tu perfil y en tus sesiones como «Titulación declarada», sin el documento. Cuando las
+        revisemos pasan a «Titulación acreditada» y los usuarios con sesión iniciada podrán ver el documento con una marca
+        de agua.
       </p>
 
       {titulaciones.length > 0 && (
@@ -70,7 +71,7 @@ export default function MisTitulaciones({ titulaciones, onEnviar, onRetirar }) {
             <li key={t.id} className="corte-card border border-[#E2E6CF] p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-[#1F2400]">{t.nombre}</p>
-                <span className={`corte-tag border px-2.5 py-0.5 text-xs font-bold ${COLOR_ESTADO[t.estado]}`}>{ESTADOS[t.estado]}</span>
+                <span className={`corte-tag border px-2.5 py-0.5 text-xs font-bold ${COLOR_ESTADO[t.estado]}`}>{t.estado === 'pendiente' ? 'Declarada · en revisión' : ESTADOS[t.estado]}</span>
               </div>
               <p className="text-xs text-[#6B7355]">{t.entidad} · {t.anio}</p>
               {t.motivo && <p className="mt-1 text-sm text-red-700">Motivo: {t.motivo}</p>}
@@ -106,8 +107,8 @@ export default function MisTitulaciones({ titulaciones, onEnviar, onRetirar }) {
           <label className="flex items-start gap-2 text-sm text-[#1F2400]">
             <input type="checkbox" checked={acepta} onChange={(e) => setAcepta(e.target.checked)} className="mt-1 accent-[#B5E600]" />
             <span>
-              Declaro que el documento es auténtico y mío, que he tapado mi número de DNI y consiento que se muestre a otros
-              usuarios, según la <Link href="/privacidad" className="font-semibold underline">política de privacidad</Link>.
+              Declaro que el documento es auténtico y mío y que he tapado mi número de DNI. Consiento que los datos del título
+              se muestren desde ahora como declarados y el documento a otros usuarios tras la revisión, según la <Link href="/privacidad" className="font-semibold underline">política de privacidad</Link>.
             </span>
           </label>
           <button type="submit" disabled={enviando} className={botonClass}>
