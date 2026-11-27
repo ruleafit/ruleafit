@@ -3,6 +3,7 @@ import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 import { normalizarHoras } from '../../lib/seriesSesiones'
 import { precioValido } from './precio'
 import { prepararUbicacionParaPublicar } from './ubicacionPublicar'
+import { confirmarBonosSinSesiones } from './avisoBonos'
 
 // Publicación de una serie de sesiones (C07). Comparte las comprobaciones del formulario con
 // publicarSesion (enviarSesion.js) y crea TODAS las sesiones en una sola operación del servidor
@@ -67,6 +68,8 @@ export async function publicarSerie(c, previa, setMensaje) {
     }
   }
 
+  if (Number(precio) > 0 && !(await confirmarBonosSinSesiones({ bonos: c.bonosAdmitidos }))) return
+
   setMensaje(`Publicando ${sesiones.length} ${sesiones.length === 1 ? 'sesión' : 'sesiones'}...`)
 
   const patronGuardado = {
@@ -98,6 +101,7 @@ export async function publicarSerie(c, previa, setMensaje) {
       lat,
       lng,
       patron: patronGuardado,
+      ...(Number(precio) > 0 && c.bonosAdmitidos ? { bonos_admitidos: c.bonosAdmitidos } : {}),
     },
     p_sesiones: sesiones,
   })

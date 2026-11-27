@@ -15,6 +15,7 @@ import DesglosePago from './reserva/DesglosePago'
 import { calcularDesglose, formatearEuros } from '../lib/pagos/dinero.ts'
 import { esReservaDeUltimaHora } from '../lib/ultimaHora'
 import { leerRetorno, borrarRetorno } from '../lib/retorno'
+import { sesionAdmiteBono } from '../lib/bonosSesion'
 
 const TAMANOS_BOTON = {
   normal: 'px-4 py-2 text-sm',
@@ -68,9 +69,12 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   // true solo cuando el servidor acaba de confirmar la reserva desde esta pantalla (para la pregunta del calendario).
   const [acabaDeReservar, setAcabaDeReservar] = useState(false)
   const [tieneBono, setTieneBono] = useState(null) // null = aún sin comprobar
+  const [bonoNoAdmitido, setBonoNoAdmitido] = useState(false) // tiene bono, pero esta sesión no lo admite
+  const [prefierePagar, setPrefierePagar] = useState(false) // tiene bono válido y elige pagar sin gastarlo
   const [pagando, setPagando] = useState(false)
   // Desglose del precio final: se muestra SIEMPRE antes de ir al banco.
   const [desgloseAbierto, setDesgloseAbierto] = useState(false)
+  const [metodoPago, setMetodoPago] = useState('tarjeta')
   // Con menos de 2 h para empezar, la reserva se podrá cancelar pero sin derecho a devolución: se pide una confirmación expresa.
   const [confirmandoTarde, setConfirmandoTarde] = useState(false)
   const [, setTic] = useState(0)
@@ -86,7 +90,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
   const [ultimaHoraAceptada, setUltimaHoraAceptada] = useState(false)
 
   const precioClase = Number(clase.precio)
-  const requierePago = PAGOS_VISIBLES && precioClase > 0 && tieneBono === false
+  const requierePago = PAGOS_VISIBLES && precioClase > 0 && (tieneBono === false || prefierePagar)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -183,19 +187,20 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
         return
       }
       const ahora = Date.now()
-      setTieneBono(
-        (data || []).some(
-          (b) =>
-            b.trainer_id === clase.trainer_id &&
-            new Date(b.fecha_fin).getTime() >= ahora &&
-            (b.numero_sesiones == null || Number(b.sesiones_usadas) < b.numero_sesiones)
-        )
+      const vigentes = (data || []).filter(
+        (b) =>
+          b.trainer_id === clase.trainer_id &&
+          new Date(b.fecha_fin).getTime() >= ahora &&
+          (b.numero_sesiones == null || Number(b.sesiones_usadas) < b.numero_sesiones)
       )
+      const sirve = vigentes.some((b) => sesionAdmiteBono(clase.bonos_admitidos, b.bono_id))
+      setTieneBono(sirve)
+      setBonoNoAdmitido(!sirve && vigentes.length > 0)
     })
     return () => {
       cancelado = true
     }
-  }, [usuario, esMiPropiaSesion, precioClase, clase.trainer_id])
+  }, [usuario, esMiPropiaSesion, precioClase, clase.trainer_id, clase.bonos_admitidos])
 
   // Pide al servidor el formulario firmado y lleva al alumno a la página de
   // pago del banco. La plaza se concede cuando el banco confirma el pago.
@@ -239,6 +244,13 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     setDesgloseAbierto(true)
   }
 
+  // Con bono válido, el alumno elige: gastar una sesión del bono o pagar esta (mismo desglose de siempre).
+  function elegirPagar() {
+    setPrefierePagar(true)
+    setConfirmandoTarde(false)
+    abrirDesglose()
+  }
+
   // Segundo paso, solo desde el desglose. El total que ha visto el alumno viaja al servidor, que lo compara con el suyo.
   async function handlePagar() {
     const desglose = calcularDesglose(clase.precio)
@@ -250,7 +262,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     const respuesta = await fetch('/api/payments/crear', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sesion.session?.access_token || ''}` },
-      body: JSON.stringify({ claseId: clase.id, totalCentimos: desglose.totalCentimos }),
+      body: JSON.stringify({ claseId: clase.id, metodo: metodoPago, totalCentimos: desglose.totalCentimos }),
     }).catch(() => null)
     const datos = respuesta ? await respuesta.json().catch(() => ({})) : {}
     if (!respuesta || !respuesta.ok || !datos.url || !datos.campos) {
@@ -419,6 +431,8 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
     </p>
   )
 
+  const conBono = PAGOS_VISIBLES && precioClase > 0 && tieneBono === true
+
   if (requierePago) {
     const desglose = calcularDesglose(clase.precio)
     if (!desglose) {
@@ -433,9 +447,12 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
             clase={clase}
             desglose={desglose}
             pagando={pagando}
+            metodo={metodoPago}
+            onMetodo={setMetodoPago}
             onConfirmar={handlePagar}
             onVolver={() => {
               setDesgloseAbierto(false)
+              setPrefierePagar(false)
               setConfirmandoTarde(false)
             }}
           />
@@ -445,6 +462,7 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
               {`Reservar por ${formatearEuros(desglose.totalCentimos)}`}
             </button>
             <p className="mt-1 text-xs text-[#6B7355]">Verás el desglose antes de pagar. Pago con tarjeta o Bizum.</p>
+            {bonoNoAdmitido && <p className="mt-1 text-xs font-medium text-[#3D4A00]">Esta sesión no admite tu bono.</p>}
             {mostrarPlazo && <AvisoPlazoCancelacion clase={clase} condicionesPago className="mt-1.5" />}
           </>
         )}
@@ -458,10 +476,15 @@ export default function BotonReservar({ clase, onReservado, tamaño = 'normal', 
       {avisoListo}
       {ventanaUltimaHora}
       <button type="button" onClick={handleReservar} disabled={reservando} className={botonReservarClass(tamaño)}>
-        {reservando ? 'Reservando...' : confirmandoTarde ? 'Entiendo, reservar' : 'Reservar'}
+        {reservando ? 'Reservando...' : confirmandoTarde ? 'Entiendo, reservar' : conBono ? 'Reservar con mi bono' : 'Reservar'}
       </button>
-      {PAGOS_VISIBLES && precioClase > 0 && tieneBono && (
-        <p className="mt-1 text-xs font-medium text-[#3D4A00]">Total a pagar ahora: 0,00 € (se descuenta 1 sesión de tu bono).</p>
+      {conBono && (
+        <>
+          <p className="mt-1 text-xs font-medium text-[#3D4A00]">Total a pagar ahora: 0,00 € (se descuenta 1 sesión de tu bono).</p>
+          <button type="button" onClick={elegirPagar} disabled={reservando} className="mt-2 block text-sm font-bold text-[#3D4A00] underline disabled:opacity-60">
+            {`Pagar ${formatearEuros(calcularDesglose(clase.precio)?.totalCentimos ?? 0)} y guardar mi bono`}
+          </button>
+        </>
       )}
       {mostrarPlazo && <AvisoPlazoCancelacion clase={clase} className="mt-1.5" />}
       {errorReserva && <p className="mt-2 text-sm text-red-600">{errorReserva}</p>}

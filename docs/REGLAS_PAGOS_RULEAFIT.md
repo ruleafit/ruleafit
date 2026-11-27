@@ -18,7 +18,7 @@ pagos de `PROGRESS.md` (historial).
 ## 2. Reglas y estado de cada una
 | Regla | Valor | Estado |
 |---|---|---|
-| Medio de pago | Tarjeta o Bizum en el TPV virtual de CaixaBank (Redsys) | Preparado; probado solo con TPV simulado. En sesiones sueltas la web aún cobra siempre con tarjeta |
+| Medio de pago | Tarjeta o Bizum en el TPV virtual de CaixaBank (Redsys) | Preparado; probado solo con TPV simulado. El alumno elige el método en sesiones sueltas y en bonos |
 | Quién fija el precio | El organizador; la base de datos calcula el importe | Hecho |
 | Comisión | 10 % del precio, a cargo del organizador. Mitades hacia arriba, al céntimo | Hecho |
 | Al confirmarse el pago | Reserva, plaza ocupada y neto a la bolsa `pendiente` | Hecho |
@@ -34,6 +34,9 @@ pagos de `PROGRESS.md` (historial).
 
 Los valores 10 %, 48 h, 10 € y 15 días están en `config_pagos`. La web repite el 10 % en
 `COMISION_BPS_PREVISTA` (`components/publicar/PrevisionIngreso.js`) solo como estimación: si cambia, cambiar ambos.
+
+Quien tiene un bono que vale para la sesión **elige**: reservar gastando una sesión del bono o pagarla y conservar el bono
+(decisión del titular, 27/11/2026; no se bloquea el pago).
 
 ## 3. Estados de un cobro
 ```
@@ -58,6 +61,8 @@ creado ──pago autorizado──▶ pagado ──cancelación con derecho─�
 | Pago sin plaza | Íntegra | No llegó a anotarse |
 | Reclamación aceptada («Devolver y cerrar») | Íntegra | Se anula o se descuenta |
 
+- El alumno ve en Mis reservas → Reclamaciones el estado de la devolución de cada caso: «en trámite» o «confirmada
+  por el banco», con el importe. Un rechazo del banco se le sigue mostrando como «en trámite».
 - La devolución la pide `/api/payments/devolver` (cron cada 10 min, **sin programar**). Solo la confirmación del banco
   marca `reembolsado` y ajusta la bolsa.
 - Rechazada: se reintenta hasta 5 veces. Sin respuesta: queda `en_curso` y se revisa a mano.
@@ -86,7 +91,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 | | Producción (`main`) | Preview (`feat/pagos-mejoras`) |
 |---|---|---|
 | Base de datos | proyecto «ruleafit» | proyecto de pruebas aparte |
-| SQL | hasta 095 y 097, y 110-112 | base, 095-107 y 109-112; **108 sin aplicar** (comprobado el 27/11/2026) |
+| SQL | hasta 095 y 097, y 110-112 | base y 095-112 (108 y 109 comprobados el 27/11/2026); **113 sin aplicar** |
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
@@ -113,16 +118,15 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 - [ ] Liquidaciones: días 15 y último, mínimo 10 €, descifrado del IBAN, fichero SEPA, excluir lo retenido y decidir qué hacer
       con bonos aún devolubles (14 días) y saldos negativos.
 - [ ] Autofacturas y facturas de Pro.
-- [ ] Dejar elegir Bizum al pagar una sesión suelta (`components/BotonReservar.js` no envía el método).
-- [ ] Impedir en el servidor pagar una sesión suelta si el alumno ya tiene un bono válido y activo para ese organizador
-      (hoy solo lo impide la web).
-- [ ] Mostrar claramente al alumno el estado de su devolución en la pantalla de Reclamaciones tras resolverse con
-      «Devolver y cerrar».
+- [x] Elegir tarjeta o Bizum al pagar una sesión suelta.
+- [x] El alumno con bono elige entre canjearlo o pagar; el organizador marca qué bonos admite cada sesión (`sql/113`).
+- [x] Estado de la devolución en Reclamaciones.
+- [ ] Probar los tres puntos anteriores en Preview (con `sql/113` aplicado).
 - [ ] Probar en Preview: bloqueo, retención por cancelaciones, autocancelación, zonas especiales y borrado de cuenta.
 
 ### D. Despliegue (con los pagos apagados)
 - [ ] Copia de seguridad de la base de producción.
-- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, `109`, en orden, cada uno con su
+- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, `109`, `113`, en orden, cada uno con su
       verificación. Nada de `sql/pruebas`.
 - [ ] Publicar la web justo después.
 - [ ] Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL` (y `REDSYS_REST_URL`),
@@ -154,7 +158,7 @@ Bizum activado, devoluciones por REST y formato del fichero de transferencias. L
 | Tablas y funciones base | `sql/071`, `sql/072` |
 | Devoluciones · reclamaciones · alertas | `sql/096` · `sql/098` · `sql/099` |
 | Reprogramaciones · fiscal · cancelaciones | `sql/100` · `sql/101` · `sql/102` |
-| Cobro en curso · permisos · ingresos · bonos | `sql/103` · `sql/104` · `sql/105` (versión vigente de la liberación) · `sql/106` |
+| Cobro en curso · permisos · ingresos · bonos | `sql/103` · `sql/104` · `sql/105` (versión vigente de la liberación) · `sql/106` · bonos por sesión `sql/113` (versión vigente de `reservar_clase`) |
 | Cobro, aviso del banco, devolución | `app/api/payments/` |
 | Pantalla del organizador | `app/mis-ingresos`, `components/ingresos` |
 | Borradores legales | `legal/borradores/` |
@@ -180,10 +184,12 @@ Implementado en `sql/107`. Cobros reales apagados; el cobro mensual solo se ha p
 | Publicar | Pro activo y fiscal aprobado. Sesiones cerradas (no ilimitados). Duración: 30 días o sin caducidad |
 | Cambios | Un bono vendido no cambia de precio, sesiones ni duración |
 | Comprar | Cualquier alumno, por el TPV (tarjeta o Bizum). Comisión **0 %** (configurable) |
-| Reservar | Se canjea sin pasar por el TPV |
+| Reservar | El alumno elige: canjearlo sin pasar por el TPV o pagar la sesión y conservarlo |
+| Sesiones que lo admiten | El organizador marca en cada sesión o serie si se puede reservar con bono y con cuáles. Por defecto, todos, también los que cree después. Cambiarlo no toca las reservas hechas (`sql/113`). Si el alumno tiene varios válidos, se gasta el que antes caduca |
 | Dinero | A `disponible` **48 h después de la compra** |
 | Sesión usada | Las que ya han empezado y las canceladas tarde (menos de 2 h). Las reservas futuras se anulan al devolver y no cuentan |
 | Desistimiento | 14 días naturales. Sin usar: 100 %. Usando hasta el **25 %**: parte no usada. Después o por encima: nada |
+| Bono sin sesiones | Si **todas** las sesiones de pago próximas del organizador excluyen un bono vendido: se avisa al organizador antes de guardar y al cliente después, que puede pedir gratis la devolución de lo no usado, sin límite de 14 días ni de uso. El derecho dura hasta que vuelva a haber una sesión próxima que lo admita. Si queda alguna válida, o no hay ninguna publicada y no se había excluido antes, no se aplica (`sql/113`) |
 | Caducidad | Lo no usado queda para el organizador |
 | Organizador anula, bloquea, se da de baja o incumple | Se devuelve la parte no usada |
 | Cancelaciones reiteradas | 3 sesiones con alumnos de bono canceladas en 30 días: se retiene su saldo de bonos y se avisa; se decide en `/admin/alertas` |
@@ -205,6 +211,7 @@ bonos y 1 adquirido).
 - Contratar con CaixaBank la tarjeta guardada y el cobro recurrente, y confirmar los parámetros (`lib/pagos/redsys.ts`).
 - Facturas de Ruleafit al organizador por Pro.
 - Revisión jurídica: textos de Pro y de bonos, desistimiento, aviso legal y condiciones.
+- Que el jurista confirme la protección del comprador cuando su bono se queda sin sesiones.
 - El saldo de un bono está disponible a las 48 h y la devolución dura 14 días: las liquidaciones (sin implementar)
   deberán tenerlo en cuenta; una devolución posterior puede dejar el saldo en negativo.
 

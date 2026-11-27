@@ -18,6 +18,7 @@ export default function BonosComprados({ onReclamar }) {
   const [error, setError] = useState('')
   const [estados, setEstados] = useState({}) // con pagos online (sql/107)
   const [recienPagado, setRecienPagado] = useState(false)
+  const [sinSesiones, setSinSesiones] = useState({}) // bonos sin ninguna sesión que los admita (sql/113)
 
   async function cargar() {
     const { data, error } = await supabase.rpc('mis_bonos_comprados')
@@ -29,6 +30,8 @@ export default function BonosComprados({ onReclamar }) {
     if (PAGOS_VISIBLES) {
       const { data: pagados } = await supabase.rpc('mis_bonos_estado')
       setEstados(pagados || {})
+      const { data: huerfanos } = await supabase.rpc('mis_bonos_sin_sesiones')
+      setSinSesiones(huerfanos || {})
     }
     setBonos(data || [])
     setCargando(false)
@@ -140,7 +143,13 @@ export default function BonosComprados({ onReclamar }) {
                   : `${caducado ? 'Caducó' : 'Caduca'} el ${formatearFecha(bono.fecha_fin)}`}
             </p>
             {PAGOS_VISIBLES && (
-              <EstadoBonoComprado id={bono.bono_cliente_id} estado={estado} onHecho={cargar} onReclamar={onReclamar} />
+              <EstadoBonoComprado
+                id={bono.bono_cliente_id}
+                estado={estado}
+                sinSesiones={sinSesiones[bono.bono_cliente_id]}
+                onHecho={cargar}
+                onReclamar={onReclamar}
+              />
             )}
           </div>
         )

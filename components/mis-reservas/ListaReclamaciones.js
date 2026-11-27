@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import { ESTADOS_INCIDENCIA, MAX_DESCRIPCION, TIPOS_INCIDENCIA, errorDeIncidencia } from '../../lib/pagos/incidencias.ts'
+import { estadoDevolucionCaso } from '../../lib/pagos/textoDevolucion.ts'
 import useReclamaciones from './useReclamaciones'
 
 const COLOR_ESTADO = {
@@ -13,6 +14,16 @@ const COLOR_ESTADO = {
 }
 
 const campo = 'w-full corte-tag border border-[#E2E6CF] bg-white px-3 py-2 text-sm text-[#1F2400] focus:border-[#B5E600] focus:outline-none'
+
+function EstadoDevolucion({ cobro }) {
+  const devolucion = estadoDevolucionCaso(cobro)
+  if (!devolucion) return null
+  return (
+    <p className={`mt-2 corte-tag border px-3 py-2 text-sm font-medium ${devolucion.hecha ? COLOR_ESTADO.resuelta : COLOR_ESTADO.abierta}`}>
+      {devolucion.texto}
+    </p>
+  )
+}
 
 // Reclamaciones económicas: formulario y casos con su número y estado.
 export default function ListaReclamaciones({ reservaInicial = '' }) {
@@ -132,6 +143,7 @@ export default function ListaReclamaciones({ reservaInicial = '' }) {
               {new Date(c.created_at).toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid' })}
             </p>
             <p className="mt-2 whitespace-pre-wrap text-sm text-[#6B7355]">{c.descripcion}</p>
+            <EstadoDevolucion cobro={c.cobro} />
             {c.respuesta && (
               <p className="mt-2 whitespace-pre-wrap corte-card border border-[#B5E600] bg-[#EDF5C9] p-3 text-sm text-[#1F2400]">
                 <strong>Respuesta de Ruleafit:</strong> {c.respuesta}

@@ -5,6 +5,7 @@ import { Tag } from 'lucide-react'
 import RevelarAlLlegar from '../RevelarAlLlegar'
 import TituloBloque from './TituloBloque'
 import PrevisionIngreso, { COMISION_BPS_PREVISTA } from './PrevisionIngreso'
+import SelectorBonos from './SelectorBonos'
 import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 import { inputClass, labelClass, ayudaClass, tarjetaClass } from './constantes'
 
@@ -47,6 +48,8 @@ export default function BloquePlazasPrecio({ c }) {
             <input type="number" value={c.plazasMax} onChange={(e) => c.setPlazasMax(e.target.value)} required className={inputClass} min="1" />
           </div>
         </div>
+
+        {Number(c.precio) > 0 && <SelectorBonos valor={c.bonosAdmitidos} onCambio={c.setBonosAdmitidos} />}
 
         <div>
           <label className={labelClass}>Plazas mínimas</label>

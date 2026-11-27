@@ -1,3 +1,5 @@
+import { formatearEuros } from './dinero.ts'
+
 // Qué se le dice al alumno sobre su dinero cuando una reserva se cancela. La devolución se pone en marcha sola
 // (el cobro pasa a 'requiere_reembolso'); no se afirma que el dinero ya haya llegado hasta que el banco confirma.
 
@@ -13,6 +15,24 @@ export function textoDevolucion(estadoCobro: string | null | undefined, usaBono 
   if (estadoCobro === 'reembolsado') return DEVOLUCION_COMPLETADA
   if (estadoCobro === 'reembolsado_parcial') return DEVOLUCION_PARCIAL
   return usaBono ? BONO_DEVUELTO : null
+}
+
+/**
+ * Estado de la devolución en un caso de Reclamaciones, según el cobro relacionado. Solo se afirma que está hecha
+ * cuando el banco la ha confirmado. Los importes son los guardados en el cobro: aquí no se calcula nada.
+ */
+export function estadoDevolucionCaso(cobro: {
+  estado?: string | null
+  importe_centimos?: number | null
+  importe_devolver_centimos?: number | null
+} | null | undefined): { hecha: boolean; texto: string } | null {
+  const estado = cobro?.estado
+  if (estado !== 'requiere_reembolso' && estado !== 'reembolsado' && estado !== 'reembolsado_parcial') return null
+  const centimos = cobro?.importe_devolver_centimos ?? cobro?.importe_centimos
+  const importe = typeof centimos === 'number' ? ` de ${formatearEuros(centimos)}` : ''
+  return estado === 'requiere_reembolso'
+    ? { hecha: false, texto: `Devolución${importe} en trámite. Te avisaremos aquí cuando el banco la confirme.` }
+    : { hecha: true, texto: `Devolución${importe} confirmada por el banco. Puede tardar unos días en verse en tu cuenta.` }
 }
 
 /** Mensaje tras cancelar el propio alumno (respuesta de cancelar_reserva). */

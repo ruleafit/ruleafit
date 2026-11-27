@@ -4,6 +4,7 @@ import { formatearFechaParaMostrar } from '../../lib/formatoFecha'
 import { PAGOS_VISIBLES } from '../../lib/pagosVisibles'
 import { precioValido } from './precio'
 import { prepararUbicacionParaPublicar } from './ubicacionPublicar'
+import { confirmarBonosSinSesiones } from './avisoBonos'
 
 // Validaciones y envío del formulario de publicar. `c` son los campos del
 // formulario (useFormularioPublicar); `setMensaje` muestra el resultado.
@@ -84,6 +85,8 @@ export async function publicarSesion(c, setMensaje) {
     }
   }
 
+  if (Number(precio) > 0 && !(await confirmarBonosSinSesiones({ bonos: c.bonosAdmitidos }))) return
+
   setMensaje('Publicando...')
 
   const { error } = await supabase.from('clases').insert({
@@ -108,6 +111,8 @@ export async function publicarSesion(c, setMensaje) {
     plazas_ocupadas: 0,
     lat,
     lng,
+    // Solo se envía si se ha restringido (sql/113); en una sesión gratuita no aplica.
+    ...(Number(precio) > 0 && c.bonosAdmitidos ? { bonos_admitidos: c.bonosAdmitidos } : {}),
   })
 
   if (error) {

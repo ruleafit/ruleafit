@@ -8,20 +8,19 @@ Estado punto por punto del plan de mejoras: `docs/PLAN_MEJORAS_RULEAFIT.md`. Reg
 | | `main` (producción) | `feat/pagos-mejoras` (Preview) |
 |---|---|---|
 | Código | Hasta verificaciones de perfil y `/admin` | Además: pagos, Plan Pro y bonos |
-| SQL comprobado | `095` y `110`–`112` aplicados; sin tablas de `096`–`109` (`097` aplicado según las reglas, no comprobado) | `096`–`107`, `109`–`112`; **falta `108`** |
+| SQL comprobado | `095` y `110`–`112` aplicados; sin tablas de `096`–`109` (`097` aplicado según las reglas, no comprobado) | `096`–`112`; **falta `113`** |
 | Pagos | Apagados | Activos con TPV simulado |
 
 - Plan del 25/11: 15 publicadas, 5 hechas en Preview (31, 35–38), 4 parciales (12, 30, 32, 33), 35 pendientes.
-- `feat/redsys-devoluciones`, `fix/eliminar-cuenta-pagos`, `feat/verificaciones-perfil` y `prueba-avisos-zona` están integradas en `feat/pagos-mejoras` (la de eliminar cuenta, como commit repetido con el mismo contenido).
+- `feat/verificaciones-perfil` y `prueba-avisos-zona` están integradas en `feat/pagos-mejoras`. `feat/redsys-devoluciones` (`520937e`) y `fix/eliminar-cuenta-pagos` (`8326321`) se borraron el 27/11: su contenido ya estaba en la rama de pagos.
 - Comprobado el 27/11: `test:pagos` 81/81, `test:verificaciones` 14/14, resto 131/131 y build correcto.
 
 ### Pendiente técnico
 - Liquidaciones (SEPA), autofacturas, facturas de Pro y contracargos.
-- Pago de sesión suelta: la web no envía el método y siempre se cobra con tarjeta, aunque la ficha ofrece Bizum.
-- Impedir en el servidor pagar una sesión suelta con un bono válido; estado de la devolución en Reclamaciones.
-- Aplicar `108` en pruebas; programar los crons de pagos; probar en Preview los casos sin cubrir.
+- Hecho en local, sin commit (27/11): elegir tarjeta o Bizum en sesiones sueltas, elección del alumno entre canjear su bono o pagar, bonos admitidos por sesión con protección del comprador (`sql/113`) y estado de la devolución en Reclamaciones.
+- Aplicar `113` en pruebas; programar los crons de pagos; probar en Preview los casos sin cubrir.
 - Producción: la parte web de `095` solo está en la rama (con pagos apagados la ruta de datos fiscales responde).
-- Antes de activar pagos: `096`–`109` en orden y publicar la web (apartado 8 de las reglas).
+- Antes de activar pagos: `096`–`109` y `113` en orden y publicar la web (apartado 8 de las reglas).
 
 ### Pendiente externo
 - Banco: TPV contratado, devoluciones REST, cobro recurrente, claves y pruebas, fichero de transferencias.

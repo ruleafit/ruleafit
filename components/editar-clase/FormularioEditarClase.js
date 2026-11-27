@@ -10,7 +10,18 @@ import BloqueNoEditable from './BloqueNoEditable'
 import BloqueUbicacionEditar from './BloqueUbicacionEditar'
 import { prepararUbicacionParaPublicar } from '../publicar/ubicacionPublicar'
 import BloqueSerieEditar from './BloqueSerieEditar'
-import { CATEGORIAS, NIVELES, botonPrimarioClass, botonSecundarioClass } from './constantes'
+import SelectorBonos from '../publicar/SelectorBonos'
+import { confirmarBonosSinSesiones } from '../publicar/avisoBonos'
+import { CATEGORIAS, NIVELES, botonPrimarioClass, botonSecundarioClass, tarjetaClass } from './constantes'
+
+// La tarjeta se oculta sola (empty:hidden) si no tiene bonos y el selector no pinta nada.
+function BonosDeLaSesion(props) {
+  return (
+    <div className={`${tarjetaClass} empty:hidden`}>
+      <SelectorBonos {...props} />
+    </div>
+  )
+}
 
 // Formulario de edición: se monta cuando la sesión (clase) ya está cargada.
 export default function FormularioEditarClase({ id, clase }) {
@@ -43,6 +54,7 @@ export default function FormularioEditarClase({ id, clase }) {
   const [alcance, setAlcance] = useState('solo_esta')
   const [precio, setPrecio] = useState(clase.precio != null ? String(clase.precio) : '')
   const [duracion, setDuracion] = useState(clase.duracion != null ? String(clase.duracion) : '')
+  const [bonosAdmitidos, setBonosAdmitidos] = useState(clase.bonos_admitidos ?? null)
   const [resultadoSerie, setResultadoSerie] = useState(null)
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState('')
@@ -59,7 +71,8 @@ export default function FormularioEditarClase({ id, clase }) {
   }, [esDeSerie])
 
   const sinMinimoDefinido = clase.plazas_min === 0
-  const formularioModificado =
+  const bonosModificados = JSON.stringify(bonosAdmitidos) !== JSON.stringify(clase.bonos_admitidos ?? null)
+  const otrosCambios =
     JSON.stringify({
       titulo,
       tipoActividad,
@@ -71,8 +84,9 @@ export default function FormularioEditarClase({ id, clase }) {
       plazasMin,
       plazasMax,
     }) !== valoresInicialesJSON ||
-    (esDeSerie && (precio !== (clase.precio != null ? String(clase.precio) : '') || duracion !== (clase.duracion != null ? String(clase.duracion) : '') || alcance !== 'solo_esta')) ||
+    (esDeSerie && (precio !== (clase.precio != null ? String(clase.precio) : '') || duracion !== (clase.duracion != null ? String(clase.duracion) : ''))) ||
     ubicacionModificada
+  const formularioModificado = otrosCambios || bonosModificados || (esDeSerie && alcance !== 'solo_esta')
 
   async function handleGuardar(e, { parcialConfirmado = false } = {}) {
     e?.preventDefault?.()
@@ -134,6 +148,29 @@ export default function FormularioEditarClase({ id, clase }) {
       }
     }
     setConfirmandoParcial(null)
+
+    // Bonos admitidos (sql/113): operación aparte, con el mismo alcance.
+    if (bonosModificados) {
+      const alcanceBonos = esDeSerie ? alcance : 'solo_esta'
+      if (!(await confirmarBonosSinSesiones({ claseId: id, alcance: alcanceBonos, bonos: bonosAdmitidos }))) {
+        setGuardando(false)
+        return
+      }
+      const { error: errorBonos } = await supabase.rpc('fijar_bonos_sesion', {
+        p_clase_id: id,
+        p_alcance: alcanceBonos,
+        p_bonos: bonosAdmitidos,
+      })
+      if (errorBonos) {
+        setMensaje(errorBonos.message)
+        setGuardando(false)
+        return
+      }
+      if (!otrosCambios) {
+        router.push('/mis-clases')
+        return
+      }
+    }
 
     if (esDeSerie || ubicacion) {
       // Mismas reglas que editar_clase para cada sesión; precio y duración solo en sesiones sin reservas.
@@ -238,6 +275,7 @@ export default function FormularioEditarClase({ id, clase }) {
         {esDeSerie && <BloqueSerieEditar f={f} />}
         <BloqueDatosEditables f={f} />
         <BloquePlazasEditar f={f} clase={clase} sinMinimoDefinido={sinMinimoDefinido} />
+        {Number(precio) > 0 && <BonosDeLaSesion valor={bonosAdmitidos} onCambio={setBonosAdmitidos} />}
         <BloqueUbicacionEditar
           id={id}
           clase={clase}

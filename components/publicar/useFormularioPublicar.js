@@ -19,6 +19,7 @@ export default function useFormularioPublicar(copiarId) {
   const [duracion, setDuracion] = useState('')
   const [nivel, setNivel] = useState(NIVELES[0])
   const [precio, setPrecio] = useState('')
+  const [bonosAdmitidos, setBonosAdmitidos] = useState(null) // null = todos (sql/113)
   const [plazasMax, setPlazasMax] = useState('')
   const [plazasMin, setPlazasMin] = useState('0')
   const [material, setMaterial] = useState('')
@@ -109,6 +110,9 @@ export default function useFormularioPublicar(copiarId) {
       setPlazasMin(data.plazas_min != null ? String(data.plazas_min) : '0')
       setMaterial(data.material || '')
       setObservaciones(data.observaciones || '')
+      // clase_para_copiar no devuelve los bonos admitidos; si no se puede leer, quedan todos.
+      const { data: origen } = await supabase.from('clases').select('bonos_admitidos').eq('id', copiarId).maybeSingle()
+      setBonosAdmitidos(origen?.bonos_admitidos ?? null)
     }
     cargarDatosCopia()
   }, [copiarId, gestor])
@@ -124,6 +128,7 @@ export default function useFormularioPublicar(copiarId) {
     setHora('')
     setDuracion('')
     setPrecio('')
+    setBonosAdmitidos(null)
     setPlazasMax('')
     setPlazasMin('0')
     setMaterial('')
@@ -148,6 +153,7 @@ export default function useFormularioPublicar(copiarId) {
     fecha, setFecha, hora, setHora, duracion, setDuracion, nivel, setNivel,
     precio, setPrecio, plazasMax, setPlazasMax, plazasMin, setPlazasMin,
     material, setMaterial, observaciones, setObservaciones,
+    bonosAdmitidos, setBonosAdmitidos,
     fechaPropuesta, setFechaPropuesta, reiniciarTrasPublicar,
   }
 }

@@ -3,6 +3,11 @@
 import { formatearEuros } from '../../lib/pagos/dinero.ts'
 import AvisoPlazoCancelacion from '../AvisoPlazoCancelacion'
 
+const METODOS = [
+  ['tarjeta', 'Tarjeta'],
+  ['bizum', 'Bizum'],
+]
+
 function Linea({ etiqueta, valor, fuerte = false }) {
   return (
     <div
@@ -16,7 +21,7 @@ function Linea({ etiqueta, valor, fuerte = false }) {
 
 // Desglose del precio final antes de pagar. desglose = calcularDesglose() (lib/pagos/dinero.ts), la misma función que
 // usa el servidor para comprobar el total. Aquí no se calcula nada.
-export default function DesglosePago({ clase, desglose, pagando, onConfirmar, onVolver }) {
+export default function DesglosePago({ clase, desglose, pagando, metodo, onMetodo, onConfirmar, onVolver }) {
   return (
     <div role="group" aria-label="Desglose del precio" className="w-full max-w-sm corte-card border border-[#B5E600] bg-white p-4 text-left shadow-sm">
       <p className="mb-2 text-sm font-bold text-[#1F2400]">Antes de pagar</p>
@@ -38,6 +43,21 @@ export default function DesglosePago({ clase, desglose, pagando, onConfirmar, on
           íntegra.
         </p>
       </div>
+      <fieldset disabled={pagando} className="mt-3 border-t border-[#E2E6CF] pt-2">
+        <legend className="sr-only">Forma de pago</legend>
+        <p aria-hidden="true" className="mb-1 text-xs font-semibold text-[#1F2400]">Forma de pago</p>
+        <div className="flex gap-2">
+          {METODOS.map(([valor, texto]) => (
+            <label
+              key={valor}
+              className={`flex flex-1 cursor-pointer items-center gap-2 corte-tag border px-3 py-2 text-sm font-semibold text-[#1F2400] ${metodo === valor ? 'border-[#B5E600] bg-[#EDF5C9]' : 'border-[#E2E6CF] bg-white'}`}
+            >
+              <input type="radio" name={`metodo-${clase.id}`} value={valor} checked={metodo === valor} onChange={() => onMetodo(valor)} className="accent-[#3D4A00]" />
+              {texto}
+            </label>
+          ))}
+        </div>
+      </fieldset>
       <div className="mt-3 flex flex-col gap-2">
         <button
           type="button"

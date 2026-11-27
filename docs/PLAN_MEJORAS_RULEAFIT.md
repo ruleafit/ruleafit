@@ -27,7 +27,7 @@ Reglas de pagos: [REGLAS_PAGOS_RULEAFIT.md](REGLAS_PAGOS_RULEAFIT.md).
 - Código leído y buscado en las dos ramas. `npm run test:pagos` 81/81, `test:verificaciones` 14/14, resto 131/131 y
   `npm run build` correcto.
 - Base de **producción** (solo lista de tablas y columnas): están `sql/095` y `110`–`112`; no hay tablas de `096`–`109`.
-- Base de **pruebas** (solo lectura): tablas de `096`–`107`, `110`–`112` y `109` aplicados; **`108` no está aplicado**.
+- Base de **pruebas** (solo lectura): tablas de `096`–`107`, `110`–`112` y `109` aplicados, igual que `108`; **`113` sin aplicar**.
 - No se ha probado nada con cuentas reales, con el banco ni en pantalla en esta revisión.
 
 ## 2. Mejoras realizadas del plan (✅ publicadas)
@@ -60,9 +60,9 @@ Prioridad original / complejidad entre paréntesis.
 |---|---|---|---|---|
 | 31 | Devoluciones por Redsys con conciliación (Imprescindible, 5/5) | 🧪 | Devolución por REST, estados, reintentos, devolución al cancelar o autocancelar (`sql/096`, `102`), parciales de bonos (`107`) | Prueba con Redsys, programar el cron (`103_…_cron.sql`); las respuestas dudosas se revisan a mano |
 | 32 | Liquidaciones, autofacturas y fiscalidad (Imprescindible, 5/5) | 🟡 | Datos fiscales validados e IBAN cifrado, comisión 10 %, bolsa, liberación a 48 h, `/mis-ingresos` | Liquidaciones (días 15 y último, mínimo 10 €), descifrar IBAN, fichero SEPA, autofacturas, facturas de Pro, IVA/IRPF, contracargos |
-| 33 | Pruebas de extremo a extremo y cierre de cuenta (Imprescindible, 4/5) | 🟡 | Simulador del TPV; pago, rechazo, aviso repetido, última plaza, devolución, bonos y reclamaciones probados en Preview; borrado de cuenta protegido | Redsys real. En Preview: bloqueo, retención por cancelaciones, anular bonos, autocancelación, zonas especiales, borrado de cuenta y `sql/108` |
+| 33 | Pruebas de extremo a extremo y cierre de cuenta (Imprescindible, 4/5) | 🟡 | Simulador del TPV; pago, rechazo, aviso repetido, última plaza, devolución, bonos y reclamaciones probados en Preview; borrado de cuenta protegido | Redsys real. En Preview: bloqueo, retención por cancelaciones, anular bonos, autocancelación, zonas especiales, borrado de cuenta y `sql/113` |
 | 34 | Coherencia legal (Imprescindible, 3/5) | ⬜ | Borradores en `legal/borradores/`; el aviso legal cambia el texto de pago según el interruptor | La privacidad sigue diciendo 14 años y el registro exige 18; publicar términos y condiciones; revisión jurídica |
-| 35 | Incidencias y reclamaciones económicas (Imprescindible, 3/5) | 🧪 | Número RF-AAAA-NNNNNN, estados, `/admin/incidencias`, retención del dinero y «Devolver y cerrar» (`sql/098`, `105`, `108`) | Enseñar al alumno el estado de su devolución en Reclamaciones; privacidad y plazo de conservación |
+| 35 | Incidencias y reclamaciones económicas (Imprescindible, 3/5) | 🧪 | Número RF-AAAA-NNNNNN, estados, `/admin/incidencias`, retención del dinero y «Devolver y cerrar» (`sql/098`, `105`, `108`); el alumno ve el estado de su devolución | Probarlo en Preview; privacidad y plazo de conservación |
 | 36 | Alertas operativas (Imprescindible, 3/5) | 🧪 | Alertas, correo al administrador, frenos de cobros y devoluciones, `/admin/alertas` (`sql/099`) | Programar el cron en pruebas y producción; vigilancia externa |
 | 37 | Desglose antes de pagar (Imprescindible, 2/5) | 🧪 | Mismo cálculo en navegador y servidor | Publicar; los impuestos no se desglosan aparte (confirmar con el gestor) |
 | 38 | Reprogramaciones con aceptación y salida (Muy favorable, 4/5) | 🧪 | Aceptar o cancelar sin coste (`sql/100`). Se ve también con pagos apagados | Aplicar el SQL **antes** de publicar la web |
@@ -74,7 +74,7 @@ Prioridad original / complejidad entre paréntesis.
 | 39 | Oferta de primera sesión (Muy favorable, 3/5) | ⬜ | |
 | 40 | Precio de última hora (Favorable, 4/5) | ⬜ | |
 | 41 | Tarjetas regalo y códigos (Favorable, 4/5) | ⬜ | |
-| 42 | Pago en un toque (Muy favorable, 3/5) | ⬜ | Sin Apple Pay ni Google Pay. Bizum solo se puede elegir al comprar bonos (ver apartado 5) |
+| 42 | Pago en un toque (Muy favorable, 3/5) | ⬜ | Sin Apple Pay ni Google Pay. Bizum se puede elegir en sesiones y bonos |
 | 43 | Apuntar a un acompañante (Muy favorable, 4/5) | ⬜ | |
 | 44 | «Apúntame todas las semanas» (Favorable, 4/5) | ⬜ | Las series ya existen (Hecho 02) |
 | 45 | Pagar cada uno su parte (Prescindible, 5/5) | ⬜ | |
@@ -116,15 +116,11 @@ Prioridad original / complejidad entre paréntesis.
 
 ## 5. Pendiente técnico detectado (además del catálogo)
 
-1. **El pago de una sesión suelta siempre va con tarjeta.** La ficha dice «tarjeta o Bizum», pero
-   `components/BotonReservar.js` no envía el método y el servidor usa tarjeta. En bonos sí se elige.
-2. El servidor no impide pagar una sesión suelta a quien ya tiene un bono válido de ese organizador (solo la web).
-3. En producción está `sql/095`, pero no su parte de web: el aviso al borrar la cuenta y el bloqueo que impide
+1. En producción está `sql/095`, pero no su parte de web: el aviso al borrar la cuenta y el bloqueo que impide
    guardar datos fiscales con los pagos apagados (la pantalla está oculta; la ruta sí responde). Está en Preview.
-4. Aplicar `sql/108` en la base de pruebas.
-5. Enseñar el estado de la devolución en Reclamaciones.
-6. Crons de pagos sin programar (alertas, devoluciones, renovación Pro).
-7. Publicación: en producción faltan `096`–`109`, en orden y con los pagos apagados (apartado 8 de las reglas).
+2. Aplicar `sql/113` en la base de pruebas y probar en Preview Bizum, la elección entre bono y pago, los bonos por sesión, la devolución de un bono sin sesiones y el estado de la devolución.
+3. Crons de pagos sin programar (alertas, devoluciones, renovación Pro).
+4. Publicación: en producción faltan `096`–`109` y `113`, en orden y con los pagos apagados (apartado 8 de las reglas).
    `main` tiene un commit de fusión que no está en la rama; la mezcla de prueba no da conflictos.
 
 ## 6. Pendiente externo
@@ -169,6 +165,5 @@ Prioridad original / complejidad entre paréntesis.
 |---|---|
 | `main` | Producción, con verificaciones (`110`–`112`) |
 | `feat/pagos-mejoras` | Preview: pagos, Pro y bonos (`095`–`109`) más las verificaciones |
-| `feat/redsys-devoluciones` | Integrada por completo en `feat/pagos-mejoras` |
-| `fix/eliminar-cuenta-pagos` | Su único commit está repetido en `feat/pagos-mejoras` con contenido idéntico |
+| `feat/redsys-devoluciones`, `fix/eliminar-cuenta-pagos` | Borradas el 27/11 (`520937e`, `8326321`); su contenido está en `feat/pagos-mejoras` |
 | `feat/verificaciones-perfil`, `prueba-avisos-zona` | Integradas en `main` y en `feat/pagos-mejoras` |

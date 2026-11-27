@@ -41,6 +41,7 @@ export default function CompraBono({ bono }) {
     <div className="w-full corte-card border border-[#B5E600] bg-[#FBFAF3] p-4 sm:basis-full">
       <p className="text-sm font-bold text-[#1F2400]">Total: {formatearEuros(centimos)}</p>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-[#6B7355]">
+        <li>Quien organiza indica en cada sesión si admite este bono. Si ninguna sesión próxima lo admite, puedes pedir gratis la devolución de lo no usado.</li>
         <li>Con el bono reservas sin volver a pagar. Las sesiones canceladas con menos de 2 horas cuentan como usadas.</li>
         <li>Puedes pedir la devolución en los 14 días desde la compra: íntegra sin usar ninguna sesión, o de la parte no usada si has usado como mucho el 25 %.</li>
         <li>Si quien organiza anula el bono, te bloquea o deja de dar el servicio, se te devuelve la parte no usada.</li>
