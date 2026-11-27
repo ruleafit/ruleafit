@@ -4,12 +4,12 @@
 
 ## Verificaciones de perfil (27 noviembre 2026) — rama feat/verificaciones-perfil
 Hecho:
-- Insignias «Identidad verificada» y «Titulación acreditada» (sql/110), independientes de los pagos: envío en Mi cuenta, cola en /admin/verificaciones, insignias en el perfil y en la ficha de sesión, visor de diplomas con marca de agua incrustada en el servidor y borrado automático de documentos.
-- «Titulación declarada» en gris desde que se sube y denuncias de titulaciones en /admin/denuncias (sql/111).
+- Insignias «Identidad verificada», «Centro verificado» y «Titulación declarada/acreditada» (sql/110-112), independientes de los pagos. Identidad y centro se comprueban automáticamente (lectura local, casos dudosos a mano); los documentos solo los ve el administrador. Cola en /admin/verificaciones y denuncias de titulaciones en /admin/denuncias.
 - RuleaFit usa exclusivamente Redsys: retiradas las menciones antiguas a otras pasarelas.
 
 Pendiente:
-- Pegar sql/110 y sql/111 en la base de pruebas (110 ya está) y en producción (en producción antes de publicar), y comprobar con el script de verificación.
+- Probar la lectura automática con documentos reales en Preview.
+- Pegar sql/110, 111 y 112 en la base de pruebas (110 ya está) y en producción (en producción antes de publicar), y comprobar con el script de verificación.
 - Revisión jurídica del apartado de verificación de la política de privacidad.
 
 ## Fase 0 · Entorno base — completada

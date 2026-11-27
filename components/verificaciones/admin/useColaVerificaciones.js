@@ -16,7 +16,7 @@ export async function peticionAdmin(url, opciones = {}) {
 
 export default function useColaVerificaciones() {
   const [estado, setEstado] = useState('cargando') // cargando | ok | sin-sesion | sin-acceso | error
-  const [cola, setCola] = useState({ identidades: [], titulaciones: [] })
+  const [cola, setCola] = useState({ identidades: [], titulaciones: [], centros: [] })
 
   const cargar = useCallback(async () => {
     const respuesta = await peticionAdmin('/api/admin/verificaciones')

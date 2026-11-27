@@ -1,38 +1,40 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { BadgeCheck, GraduationCap, Eye } from 'lucide-react'
+import { BadgeCheck, Building2, GraduationCap } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
-import { AVISO_LEGAL_TITULACIONES, AVISO_DECLARADA } from '../../lib/verificaciones/reglas'
+import { AVISO_LEGAL_TITULACIONES, AVISO_DECLARADA, AVISO_COMPROBACIONES } from '../../lib/verificaciones/reglas'
 import BotonDenunciar from '../BotonDenunciar'
-import VisorDocumento from './VisorDocumento'
 
 const insigniaClass =
   'inline-flex items-center gap-1.5 corte-tag border border-[#B5E600] bg-[#EDF5C9] px-3 py-1 text-xs font-bold text-[#3D4A00]'
 const declaradaClass =
   'inline-flex items-center gap-1.5 corte-tag border border-zinc-300 bg-zinc-100 px-3 py-1 text-xs font-bold text-zinc-600'
 
-// Insignias y titulaciones verificadas de un organizador (perfil y ficha de
-// sesión). Hace sus propias consultas: si fallan (por ejemplo, sql/110 todavía
-// sin aplicar) no pinta nada y la página sigue funcionando.
+// Insignias y titulaciones de un organizador (perfil y ficha de sesión). Los
+// documentos nunca se enseñan. Hace sus propias consultas: si fallan (SQL
+// todavía sin aplicar) no pinta nada y la página sigue funcionando.
 export default function VerificacionPublica({ usuarioId, usuarioActual, className = '' }) {
   const [datos, setDatos] = useState(null)
-  const [abierta, setAbierta] = useState(null)
 
   useEffect(() => {
     if (!usuarioId) return
     let cancelado = false
     async function cargar() {
-      const { data: perfil, error } = await supabase
-        .from('perfiles')
-        .select('identidad_verificada')
-        .eq('id', usuarioId)
-        .maybeSingle()
-      if (error || !perfil) return
-      // Declaradas (sin revisar) y acreditadas (sql/111).
-      const { data: titulos } = await supabase.rpc('titulaciones_visibles', { p_usuario: usuarioId })
-      if (!cancelado) setDatos({ usuarioId, ...perfil, titulos: titulos || [] })
+      const [perfil, titulos, centro] = await Promise.all([
+        supabase.from('perfiles').select('identidad_verificada').eq('id', usuarioId).maybeSingle(),
+        // Declaradas (sin revisar) y acreditadas (sql/111).
+        supabase.rpc('titulaciones_visibles', { p_usuario: usuarioId }),
+        // Centro verificado (sql/112).
+        supabase.rpc('centro_publico', { p_usuario: usuarioId }),
+      ])
+      if (cancelado) return
+      setDatos({
+        usuarioId,
+        identidad: !!perfil.data?.identidad_verificada,
+        titulos: titulos.data || [],
+        centro: centro.data?.[0]?.razon_social || '',
+      })
     }
     cargar()
     return () => {
@@ -41,17 +43,24 @@ export default function VerificacionPublica({ usuarioId, usuarioActual, classNam
   }, [usuarioId, usuarioActual?.id])
 
   if (!datos || datos.usuarioId !== usuarioId) return null
+  if (!datos.identidad && !datos.centro && !datos.titulos.length) return null
+
   const acreditada = datos.titulos.some((t) => t.estado === 'aprobada')
   const declarada = datos.titulos.some((t) => t.estado === 'pendiente')
-  if (!datos.identidad_verificada && !datos.titulos.length) return null
 
   return (
     <div className={className}>
       <div className="flex flex-wrap gap-2">
-        {datos.identidad_verificada && (
-          <span className={insigniaClass} title="RuleaFit ha revisado un documento de identidad de esta persona">
+        {datos.identidad && (
+          <span className={insigniaClass} title="RuleaFit ha comprobado un documento de identidad">
             <BadgeCheck className="h-4 w-4" strokeWidth={2} />
             Identidad verificada
+          </span>
+        )}
+        {datos.centro && (
+          <span className={insigniaClass} title="RuleaFit ha comprobado los datos fiscales del centro">
+            <Building2 className="h-4 w-4" strokeWidth={2} />
+            Centro verificado
           </span>
         )}
         {datos.titulos.length > 0 &&
@@ -68,6 +77,11 @@ export default function VerificacionPublica({ usuarioId, usuarioActual, classNam
           ))}
       </div>
 
+      {datos.centro && <p className="mt-2 text-sm font-semibold text-[#1F2400]">{datos.centro}</p>}
+      {(datos.identidad || datos.centro) && (
+        <p className="mt-1 text-xs leading-relaxed text-[#6B7355]">{AVISO_COMPROBACIONES}</p>
+      )}
+
       {datos.titulos.length > 0 && (
         <div className="mt-4 text-left">
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6B7355]">Titulaciones</h3>
@@ -83,23 +97,7 @@ export default function VerificacionPublica({ usuarioId, usuarioActual, classNam
                     </div>
                     <span className={revisada ? insigniaClass : declaradaClass}>{revisada ? 'Acreditada' : 'Declarada'}</span>
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                    {!revisada ? (
-                      <span className="text-xs text-[#6B7355]">Pendiente de revisión: documento no disponible.</span>
-                    ) : usuarioActual ? (
-                      <button
-                        type="button"
-                        onClick={() => setAbierta(t)}
-                        className="inline-flex items-center gap-1.5 corte-btn border border-[#E2E6CF] px-3 py-1.5 text-xs font-semibold text-[#3D4A00] hover:border-[#B5E600]"
-                      >
-                        <Eye className="h-4 w-4" strokeWidth={2} />
-                        Ver documento
-                      </button>
-                    ) : (
-                      <Link href="/login" className="text-xs font-semibold text-[#3D4A00] underline">
-                        Inicia sesión para ver el documento
-                      </Link>
-                    )}
+                  <div className="mt-2 flex justify-end">
                     <BotonDenunciar
                       tipo="titulacion"
                       objetivoId={t.id}
@@ -116,8 +114,6 @@ export default function VerificacionPublica({ usuarioId, usuarioActual, classNam
           {acreditada && <p className="mt-2 text-xs leading-relaxed text-[#6B7355]">{AVISO_LEGAL_TITULACIONES}</p>}
         </div>
       )}
-
-      {abierta && <VisorDocumento titulacion={abierta} onCerrar={() => setAbierta(null)} />}
     </div>
   )
 }
