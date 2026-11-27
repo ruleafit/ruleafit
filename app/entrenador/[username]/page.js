@@ -8,6 +8,7 @@ import CabeceraPerfil from '../../../components/entrenador/CabeceraPerfil'
 import ProximasSesionesPerfil from '../../../components/entrenador/ProximasSesionesPerfil'
 import BonosEntrenador from '../../../components/entrenador/BonosEntrenador'
 import ValoracionesEntrenador from '../../../components/entrenador/ValoracionesEntrenador'
+import VerificacionPublica from '../../../components/verificaciones/VerificacionPublica'
 
 const botonPrimarioClass =
   'inline-flex h-10 items-center justify-center corte-btn bg-[#B5E600] px-6 text-sm font-bold text-[#1F2400] transition hover:bg-[#a3d100]'
@@ -47,6 +48,8 @@ export default function PerfilEntrenadorPage() {
       />
 
       <div className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
+        <VerificacionPublica usuarioId={perfil.id} usuarioActual={usuarioActual} className="mb-8" />
+
         <ProximasSesionesPerfil
           perfil={perfil}
           clases={datos.clasesProximas}

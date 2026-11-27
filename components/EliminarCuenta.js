@@ -38,6 +38,9 @@ export default function EliminarCuenta({ usuario }) {
       return
     }
 
+    // Borra del almacenamiento los documentos de verificación que quedan en cola (sql/110).
+    await fetch('/api/verificaciones/limpiar', { method: 'POST' }).catch(() => {})
+
     await supabase.auth.signOut()
     window.location.assign('/')
   }

@@ -18,7 +18,7 @@ export default function PoliticaPrivacidadPage() {
         <strong>Sitio web:</strong> https://www.ruleafit.com
       </p>
       <p className="mb-8 text-sm text-zinc-500">
-        <strong>Última actualización:</strong> 23 de noviembre de 2026
+        <strong>Última actualización:</strong> 27 de noviembre de 2026
       </p>
 
       <h2 className={h2Class}>I. POLÍTICA DE PRIVACIDAD Y PROTECCIÓN DE DATOS</h2>
@@ -76,8 +76,22 @@ export default function PoliticaPrivacidadPage() {
       </p>
       )}
       <p className={pClass}>
+        Además, solo si el Usuario solicita voluntariamente una verificación de perfil, se tratan: las imágenes de su DNI, NIE o pasaporte (verificación de identidad), los datos y el documento de su centro y/o el nombre, entidad emisora, año y documento acreditativo de sus titulaciones deportivas.
+      </p>
+      <p className={pClass}>
         En ningún caso se tratan categorías especiales de datos personales en el sentido del artículo 9 del RGPD.
       </p>
+
+      <h3 className={h3Class}>Verificación de identidad y de titulaciones</h3>
+      <p className={pClass}>
+        La verificación es voluntaria, no es necesaria para usar Ruleafit y su base legal es el consentimiento, que se otorga al enviar cada solicitud y puede retirarse en cualquier momento desde Mi cuenta.
+      </p>
+      <ul className={ulClass}>
+        <li><strong>Documento de identidad:</strong> las imágenes se guardan en un almacenamiento privado y se utilizan únicamente para comprobar que se trata de una persona real. La comprobación puede ser automática: el sistema de Ruleafit lee el documento y compara su número, nombre, fechas y caducidad con los datos fiscales del Usuario o con los que indique al enviarlo (estos últimos no se guardan). Si todo coincide, se aprueba al momento; si no coincide o está caducado, se rechaza; en caso de duda lo revisa una persona. El Usuario puede pedir revisión manual desde el principio o tras un rechazo. Las imágenes se eliminan al aprobar o rechazar la solicitud, al retirarla o al eliminar la cuenta. Se conservan el resultado, el tipo de documento, las fechas, el motivo, quién o cómo se revisó y una huella cifrada e irreversible del número, que evita que un mismo documento verifique varias cuentas, mientras la cuenta esté abierta o hasta que el Usuario retire la verificación.</li>
+        <li><strong>Centros:</strong> la razón social, el CIF y el documento aportado se comprueban de la misma forma. Si se aprueba, se muestran públicamente la insignia y la razón social. El documento se elimina al resolverse la solicitud.</li>
+        <li><strong>Titulaciones deportivas:</strong> desde que se envían, el nombre del título, la entidad y el año se muestran públicamente en el perfil y en las sesiones del Usuario como «Titulación declarada»; tras la revisión de una persona pasan a «Titulación acreditada». El documento solo lo ve el equipo de Ruleafit y no se muestra a otros usuarios. Se elimina si se rechaza, si el Usuario borra la titulación o si elimina su cuenta.</li>
+        <li><strong>Denuncias de titulaciones:</strong> cualquier usuario con sesión iniciada puede enviar un informe sobre una titulación. Se guardan el informe, quién lo envía y los datos de la titulación denunciada para que el equipo de Ruleafit pueda comprobarla. La persona denunciada no tiene acceso a la denuncia ni a la identidad de quien la envía a través de la plataforma.</li>
+      </ul>
 
       <h3 className={h3Class}>Base legal para el tratamiento de los datos personales</h3>
       <p className={pClass}>
@@ -144,6 +158,9 @@ export default function PoliticaPrivacidadPage() {
         <li><strong>Vercel Inc.</strong>, con domicilio en 440 N Barranca Avenue #4133, Covina, CA 91723, Estados Unidos. Contacto: privacy@vercel.com. Finalidad: alojamiento del sitio web.</li>
         <li><strong>Supabase, Inc.</strong>, Estados Unidos. Contacto: privacy@supabase.com. Finalidad: alojamiento de la base de datos y gestión de la autenticación de usuarios. Los servidores de base de datos están ubicados en la Unión Europea (Irlanda).</li>
       </ol>
+      <p className={pClass}>
+        Cuando el Usuario envía una solicitud de verificación, el equipo de Ruleafit recibe un aviso por correo electrónico a través de Resend con su nombre de usuario y el tipo de solicitud, sin documentos adjuntos. Los documentos se almacenan en Supabase.
+      </p>
       <p className={pClass}>
         Los datos enviados mediante el formulario de centros se envían, además, por correo electrónico al equipo de Ruleafit a través de Resend (Resend, Inc., Estados Unidos), que actúa como encargado del tratamiento con la finalidad de enviar correo electrónico transaccional.
       </p>

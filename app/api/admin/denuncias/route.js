@@ -14,7 +14,7 @@ export async function GET(request) {
 
   const { data: denuncias, error } = await supabaseAdmin
     .from('denuncias')
-    .select('id, denunciante_id, tipo, objetivo_id, usuario_denunciado_id, motivo, comentario, estado, created_at')
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -27,17 +27,24 @@ export async function GET(request) {
   ]
   const idsSesiones = [...new Set(denuncias.filter((d) => d.tipo === 'sesion').map((d) => d.objetivo_id))]
 
-  const [{ data: perfiles }, { data: clases }] = await Promise.all([
+  const idsTitulos = [...new Set(denuncias.filter((d) => d.tipo === 'titulacion').map((d) => d.objetivo_id))]
+
+  const [{ data: perfiles }, { data: clases }, { data: titulos }] = await Promise.all([
     idsUsuarios.length
       ? supabaseAdmin.from('perfiles').select('id, username').in('id', idsUsuarios)
       : { data: [] },
     idsSesiones.length
       ? supabaseAdmin.from('clases').select('id, titulo, ciudad, fecha').in('id', idsSesiones)
       : { data: [] },
+    idsTitulos.length
+      ? supabaseAdmin.from('titulaciones').select('id, nombre, entidad, anio, estado').in('id', idsTitulos)
+      : { data: [] },
   ])
 
   const usernames = new Map((perfiles || []).map((p) => [p.id, p.username]))
   const sesiones = new Map((clases || []).map((c) => [c.id, c]))
+
+  const titulaciones = new Map((titulos || []).map((t) => [t.id, t]))
 
   return NextResponse.json({
     denuncias: denuncias.map((d) => ({
@@ -45,6 +52,7 @@ export async function GET(request) {
       denunciante_username: usernames.get(d.denunciante_id) || null,
       denunciado_username: usernames.get(d.usuario_denunciado_id) || null,
       sesion: d.tipo === 'sesion' ? sesiones.get(d.objetivo_id) || null : null,
+      titulacion: d.tipo === 'titulacion' ? titulaciones.get(d.objetivo_id) || null : null,
     })),
   })
 }

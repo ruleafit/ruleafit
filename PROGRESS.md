@@ -2,6 +2,16 @@
 
 Última actualización: 23 noviembre 2026
 
+## Verificaciones de perfil (27 noviembre 2026) — rama feat/verificaciones-perfil
+Hecho:
+- Insignias «Identidad verificada», «Centro verificado» y «Titulación declarada/acreditada» (sql/110-112), independientes de los pagos. Identidad y centro se comprueban automáticamente (lectura local, casos dudosos a mano); los documentos solo los ve el administrador. Cola en /admin/verificaciones y denuncias de titulaciones en /admin/denuncias.
+- RuleaFit usa exclusivamente Redsys: retiradas las menciones antiguas a otras pasarelas.
+
+Pendiente:
+- Probar la lectura automática con documentos reales en Preview.
+- Pegar sql/110, 111 y 112 en la base de pruebas (110 ya está) y en producción (en producción antes de publicar), y comprobar con el script de verificación.
+- Revisión jurídica del apartado de verificación de la política de privacidad.
+
 ## Fase 0 · Entorno base — completada
 - Node, VS Code y Git instalados.
 - Proyecto Next.js creado y subido a GitHub.
@@ -105,7 +115,7 @@ Hecho:
 - Campo "modalidad" renombrado a "tipo_actividad" y cambiado de significado: antes era "presencial/online", ahora es texto libre para el tipo de actividad (zumba, boxeo, running...). Tocó código (publicar, editar, ficha de detalle y tarjetas usan tipo_actividad con la etiqueta "Tipo de actividad") y base de datos: sql/017 renombró la columna, sql/018 recreó editar_clase con el parámetro p_tipo_actividad (hizo falta DROP FUNCTION + CREATE porque Postgres no permite renombrar un parámetro con CREATE OR REPLACE, restaurando después el grant execute a authenticated), y sql/016 actualizado para reflejar la columna renombrada. CLAUDE.md también actualizado.
 - Flujo completo probado de punta a punta en producción (registro como entrenador y como cliente, publicar clase, buscar y filtrar, reservar, cancelar) antes de repartir la beta.
 - Retirada la frase "al aire libre" del subtítulo de /clases (coherente con el giro de mensajes hacia gimnasios e individual/pareja).
-- Portada de entrenador: el tercer punto "Cobras directo, sin intermediarios" cambiado a "Cobros y reservas automáticos" (el anterior dejaría de ser cierto al introducir comisión con Stripe).
+- Portada de entrenador: el tercer punto "Cobras directo, sin intermediarios" cambiado a "Cobros y reservas automáticos" (el anterior dejaría de ser cierto al introducir comisión en los pagos).
 - /clases: las clases cuya fecha+hora de inicio ya pasó dejan de mostrarse en el listado y el mapa. Antes el filtro comparaba solo la fecha (no la hora) y no usaba zona horaria de Madrid; ahora usa claseYaPaso() de lib/. Las clases no se borran, solo se ocultan.
 - /mis-reservas rediseñada: reservas próximas arriba (en color), historial de pasadas abajo (en gris atenuado) bajo el título "Historial", y bloque de canceladas por el entrenador movido justo debajo de las próximas y recoloreado en rojo suave. Las canceladas se ocultan pasada 1h de su hora de inicio (horasHastaClase). Eliminadas copias locales duplicadas de claseYaPaso.
 - /mis-clases (entrenador): mismo tratamiento de historial (próximas arriba, pasadas abajo atenuadas bajo "Historial"). La tarjeta se extrajo a renderTarjeta(clase, indice, atenuada); la gestión de asistencia sigue funcionando en las clases pasadas del historial.
@@ -346,14 +356,14 @@ Falta:
 - Rediseño de Open ligado al precio: no regalar los 5 Open de asistencia en clases gratis o muy baratas; conceder Open solo por encima de un umbral de precio X, aún por decidir.
 - Al integrar el proveedor de pagos, quitar/ajustar el texto "se paga directamente al entrenador" que aparece junto al precio en el detalle de sesión (app/clases/[id]), igual que en su día se cambió "Cobras directo, sin intermediarios" -> "Cobros y reservas automáticos".
 
-Nota (investigación del modelo de cobros, 7 agosto 2026) — SUPERADA el 30 octubre 2026 por el modelo acordado de la sección "Pagos: modelo acordado y plan": Stripe Connect "puro" no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
+Nota (investigación del modelo de cobros, 7 agosto 2026) — SUPERADA el 30 octubre 2026 por el modelo acordado de la sección "Pagos: modelo acordado y plan": un reparto directo del proveedor de pagos no encaja, porque el dinero recargado por el cliente queda a la espera sin saber todavía a qué entrenador (receptor) irá. El modelo correcto técnicamente, y coherente con el sistema Open ya existente, es una cartera propia: el cliente recarga dinero, lo convierte en Open, gasta Open entre usuarios dentro de la app, y el entrenador que los recibe los retira convirtiéndolos de vuelta en euros. Problema pendiente: este modelo implica custodiar saldo de terceros y emitir Open (posible "dinero electrónico" a efectos legales), lo que puede requerir licencia propia o apoyarse en un proveedor que ya la tenga. Conclusión: antes de implementar pagos reales hace falta consultar con un asesor especializado en fintech/pagos; se preparó un documento de consulta con términos genéricos para llevarle a esa consulta.
 
 ## Análisis de competencia (21 julio 2026)
 
 Competidor directo detectado: Trainity (trainityapp.com), lanzado en julio de 2026. Misma propuesta que Openfit: entrenamientos en grupo al aire libre en Sevilla, sin cuotas mensuales, precios desde 3 €.
 
 Sus ventajas sobre Openfit:
-- Pagos reales con Stripe (tarjeta, Apple Pay, Google Pay). Cobran al cliente, abonan al entrenador y se quedan una comisión de intermediación.
+- Pagos reales online (tarjeta, Apple Pay, Google Pay). Cobran al cliente, abonan al entrenador y se quedan una comisión de intermediación.
 - Documentación legal completa: aviso legal, condiciones de contratación, condiciones para entrenadores, privacidad, cookies, consentimiento informado de riesgo, titular identificado con NIF.
 - SEO trabajado, con páginas específicas por búsqueda (entrenador personal en Sevilla, entrenamiento al aire libre, funcional, en grupo, para perder peso).
 - Sistema de valoraciones y reseñas, limitado a quienes reservaron por la plataforma.
@@ -371,7 +381,7 @@ Sus debilidades frente a Openfit:
 Conclusiones para la hoja de ruta:
 - La ventaja diferencial de Openfit es el panel del entrenador (publicar, ver alumnos, marcar asistencia, cancelar clase). Conviene reforzarla para captar entrenadores.
 - Subir la prioridad de los pagos reales (Fase 6): dejan de ser un extra posterior al lanzamiento para ser la diferencia entre producto y demostración.
-- Valorar añadir a la hoja de ruta perfiles públicos de entrenador y valoraciones tras la clase. No dependen de Stripe y son clave para la confianza en un marketplace.
+- Valorar añadir a la hoja de ruta perfiles públicos de entrenador y valoraciones tras la clase. No dependen de los pagos y son clave para la confianza en un marketplace.
 - Antes de cobrar dinero habrá que preparar la documentación legal correspondiente, con asesoramiento profesional.
 
 ## Campana de notificaciones: solo no leídas (28 agosto 2026)
