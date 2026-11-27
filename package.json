@@ -9,13 +9,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:verificaciones": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"lib/verificaciones/*.test.js\"",
     "test:pagos": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test \"lib/pagos/*.test.ts\""
   },
   "dependencies": {
+    "@napi-rs/canvas": "^1.2.1",
     "@supabase/supabase-js": "^2.110.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.45.0",
     "next": "16.4.6",
+    "pdfjs-dist": "^6.5.438",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-leaflet": "^5.0.0",

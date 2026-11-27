@@ -18,6 +18,7 @@ import BotonDenunciar from '../../../components/BotonDenunciar'
 import RevelarAlLlegar from '../../../components/RevelarAlLlegar'
 import ParticipantesSesion from '../../../components/clases/ParticipantesSesion'
 import AvisosRecibidos from '../../../components/clases/AvisosRecibidos'
+import VerificacionPublica from '../../../components/verificaciones/VerificacionPublica'
 
 const MapaVista = dynamic(() => import('../../../components/MapaVista'), {
   ssr: false,
@@ -183,6 +184,8 @@ function DetalleClaseContenido() {
             </Link>
           </p>
         )}
+
+        <VerificacionPublica usuarioId={clase.trainer_id} usuarioActual={usuario} className="mb-6" />
 
         <div className="flex flex-col gap-6">
           <RevelarAlLlegar className={tarjetaClass}>
