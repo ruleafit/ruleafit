@@ -957,3 +957,9 @@ Preparación del lanzamiento: `docs/lanzamiento-avisos-zona.md` (qué falta en m
 - M1: con pagos activos no se crea ni se pone precio a una sesión sin perfil fiscal `activo`. M2: un cobro en curso por alumno y sesión (se reutiliza el pedido). M3: `creado` caduca a los 30 min (`caducado`, cron cada 5 min); si el banco confirma tarde se da plaza o se marca devolución.
 - A2: los pagos sin plaza se ven en Mis reservas y se reclaman (`abrir_incidencia_cobro`).
 - `BotonReservar` desbloquea el botón al volver del TPV.
+
+## SQL 104 · Permisos explícitos y error real al guardar datos fiscales · EN RAMA (27 nov 2026)
+- Causa del fallo en Preview: el proyecto Supabase de pruebas (nuevo) no concede permisos por defecto sobre las tablas (`permission denied for table ...`, también en clases, reservas, etc.). Arreglo en pruebas: `sql/pruebas/permisos_base_de_pruebas.sql`.
+- `sql/104`: concede a `service_role` las tablas de 095-100. Aplicar en producción junto al resto.
+- Toda tabla nueva necesita sus `grant` explícitos.
+- `/api/payments/perfil-fiscal` indica el paso y el error (el detalle, solo fuera de producción).

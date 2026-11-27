@@ -116,7 +116,13 @@ export default function PerfilFiscal({ usuario }) {
       return
     }
     if (!respuesta || !respuesta.ok) {
-      setError(datos.error || 'No se han podido guardar los datos. Inténtalo de nuevo.')
+      // Se muestra lo que diga el servidor; si no ha respondido con un mensaje, el motivo técnico.
+      setError(
+        datos.error ||
+          (respuesta
+            ? `No se han podido guardar los datos: el servidor ha respondido con un error ${respuesta.status} sin explicación.`
+            : 'No se han podido guardar los datos: no hay conexión con el servidor.')
+      )
       return
     }
     setGuardado({ estado: datos.estado, ibanUltimos4: datos.ibanUltimos4 })

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '../../../../lib/supabaseAdmin'
 import { MOTIVO_NIF_DUPLICADO, evaluarPerfilFiscal } from '../../../../lib/pagos/evaluarPerfilFiscal.ts'
+import { mensajeErrorGuardado } from '../../../../lib/pagos/errorGuardado.ts'
 
 // Versiones de los textos que el entrenador acepta. Son borradores hasta que el
 // asesor revise los documentos (legal/borradores); cuando cambien, se sube la versión.
@@ -9,6 +10,12 @@ const VERSION_AUTOFACTURA = 'borrador-2026-10'
 
 function error(mensaje, status = 400) {
   return NextResponse.json({ error: mensaje }, { status })
+}
+
+// Fallo del servidor o de la base de datos: se registra y se explica en qué paso ha sido.
+function fallo(paso, causa) {
+  console.error(`perfil-fiscal, fallo al ${paso}:`, causa?.code, causa?.message)
+  return error(mensajeErrorGuardado(paso, causa, process.env.VERCEL_ENV), 500)
 }
 
 // Datos que no superan la evaluación: NO se guarda nada (si había un perfil aprobado, sigue como estaba) y se
@@ -34,7 +41,11 @@ export async function POST(request) {
 
   const { data: sesion, error: errorSesion } = await supabaseAdmin.auth.getUser(token)
   const usuario = sesion?.user
-  if (errorSesion || !usuario) return error('Sesión no válida.', 401)
+  if (errorSesion || !usuario) {
+    console.error('perfil-fiscal, sesión no válida:', errorSesion?.code, errorSesion?.message)
+    const detalle = process.env.VERCEL_ENV !== 'production' && errorSesion?.message ? ` (${errorSesion.message})` : ''
+    return error(`Sesión no válida${detalle}. Cierra sesión y vuelve a entrar.`, 401)
+  }
 
   let d
   try {
@@ -48,7 +59,7 @@ export async function POST(request) {
     .select('estado, iban_ultimos4')
     .eq('usuario_id', usuario.id)
     .maybeSingle()
-  if (errorActual) return error('No se han podido guardar los datos.', 500)
+  if (errorActual) return fallo('leer tus datos actuales', errorActual)
   if (actual?.estado === 'bloqueado') return error('Tus datos fiscales están bloqueados. Escríbenos desde Ayuda.', 403)
 
   const evaluacion = evaluarPerfilFiscal(d, { hayIbanGuardado: !!actual?.iban_ultimos4 })
@@ -62,7 +73,7 @@ export async function POST(request) {
     .eq('nif', p.nif)
     .neq('usuario_id', usuario.id)
     .limit(1)
-  if (errorDuplicado) return error('No se han podido comprobar los datos. Inténtalo de nuevo.', 500)
+  if (errorDuplicado) return fallo('comprobar el documento', errorDuplicado)
   if (otros.length > 0) return rechazado([MOTIVO_NIF_DUPLICADO])
 
   const ip = (request.headers.get('x-forwarded-for') || '').split(',')[0].trim() || null
@@ -93,8 +104,7 @@ export async function POST(request) {
   if (errorRpc) {
     // P0001: motivo escrito para la persona (p. ej. documento registrado a la vez en otra cuenta).
     if (errorRpc.code === 'P0001') return rechazado([errorRpc.message])
-    console.error('guardar_perfil_fiscal falló:', errorRpc.code)
-    return error('No se han podido guardar los datos.', 500)
+    return fallo('guardar', errorRpc)
   }
 
   return NextResponse.json({ ok: true, estado: data?.estado, ibanUltimos4: data?.iban_ultimos4 })
