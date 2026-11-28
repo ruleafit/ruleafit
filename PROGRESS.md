@@ -105,6 +105,10 @@ Guía: PDF del plan del 27/11 (`docs/RuleaFit_Plan_Mejoras_Pagos_Agrupados_27-11
 5. Facturas en borrador. **Hecho en local** (28/11) con el **modelo B** (intermediario en nombre ajeno): Ruleafit solo
    factura comisión y Pro (`sql/116`, `/admin/facturas`, Mis ingresos). Sin autofacturas. Falta aplicar el SQL, subir,
    probar, rectificativas y la validación del asesor (apartado 6 quater de las reglas).
+Pasos 3 a 5 subidos (`217da75`) y probados en Preview el 28/11: cierre de corte, descarga del fichero, marcado en
+bloque, aviso y «Mis ingresos», borradores de comisión y Pro. Para repetirlo:
+`sql/pruebas/preparar_liquidacion_de_prueba.sql`. Sin probar en pantalla: anular, descartar fichero, cierre automático
+y emisión (bloqueada hasta el asesor).
 6. Textos legales.
 7. Alertas y contracargos (programar crons; vigilancia externa).
 

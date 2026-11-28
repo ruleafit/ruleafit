@@ -252,7 +252,7 @@ begin
   else
     begin
       perform public.generar_notificacion(v_l.entrenador_id, 'liquidacion', 'Transferencia enviada',
-        'Te hemos enviado ' || to_char(v_l.importe_centimos / 100.0, 'FM999999990D00') || ' € a tu cuenta.', '/mis-ingresos');
+        'Te hemos enviado ' || replace(to_char(v_l.importe_centimos / 100.0, 'FM999999990D00'), '.', ',') || ' € a tu cuenta.', '/mis-ingresos');
     exception when others then null; end;
   end if;
   update public.liquidaciones l

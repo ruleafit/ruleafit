@@ -153,8 +153,8 @@ de Ruleafit es su comisión y Pro. **Nunca emitir autofacturas ni facturas por e
 - [ ] Formato del fichero de transferencias.
 
 ### C. Desarrollo pendiente
-- [x] Liquidaciones y fichero SEPA (`sql/114`, `115`). Falta aplicarlos, probarlos en Preview y validar el fichero con
-      el banco.
+- [x] Liquidaciones y fichero SEPA (`sql/114`, `115`), probados en Preview el 28/11. Falta validar el fichero con el
+      banco.
 - [ ] Facturas de comisión y de Pro: borradores hechos (`sql/116`); falta la validación del asesor, las
       rectificativas y probarlos en Preview.
 - [x] Elegir tarjeta o Bizum al pagar una sesión suelta.
