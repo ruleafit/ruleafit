@@ -160,6 +160,13 @@ function LoginFormulario() {
           >
             Continuar con Google
           </button>
+          <p className="mt-2 text-center text-xs text-[#6B7355]">
+            Si es tu primera vez, se crea tu cuenta: al continuar declaras ser mayor de 18 años y aceptas el{' '}
+            <a href="/aviso-legal" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#3D4A00] underline">
+              aviso legal
+            </a>
+            .
+          </p>
 
           {mensaje && (
             <div className="mt-4 flex items-start gap-2 corte-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

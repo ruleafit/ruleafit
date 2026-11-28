@@ -179,6 +179,8 @@ de Ruleafit es su comisión y Pro. **Nunca emitir autofacturas ni facturas por e
 - [ ] Un cobro real pequeño y su devolución; revisar `/admin/alertas`.
 - [ ] Saber quién paga a los organizadores antes del primer día 15, y revocar el enlace Share de pruebas.
 
+Las preguntas para el asesor están reunidas en `legal/borradores/preguntas-asesor.md`.
+
 ## 9. Para Redsys
 Datos que pedir al banco: número de comercio (FUC), terminal, clave de firma SHA-256 de pruebas y de producción,
 Bizum activado, devoluciones por REST y formato del fichero de transferencias. La web envía el aviso de pago a

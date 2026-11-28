@@ -187,7 +187,7 @@ export default function PerfilFiscal({ usuario }) {
           </div>
           {!esSociedad && (
             <div>
-              <label className={etiqueta} htmlFor="pf-nac">Fecha de nacimiento</label>
+              <label className={etiqueta} htmlFor="pf-nac">Fecha de nacimiento (18 años o más)</label>
               <input id="pf-nac" type="date" className={input} value={f.fechaNacimiento} onChange={cambia('fechaNacimiento')} required />
             </div>
           )}

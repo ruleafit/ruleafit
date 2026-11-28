@@ -1,6 +1,6 @@
  Aplicado (28/11) | Aplicado (28/11) | Aplicado (28/11) |# Ruleafit — Estado actual
 
-Última actualización: 27 noviembre 2026
+Última actualización: 28 noviembre 2026
 
 Este archivo es solo el estado actual: qué está hecho, qué falta, ramas y SQL. El historial completo (decisiones,
 pruebas e incidencias, fase a fase) está íntegro en `docs/historial/PROGRESS_HISTORIAL.md`: **no hace falta leerlo**
@@ -44,9 +44,9 @@ trabajo se actualiza este archivo (corto) y, si hay detalle que conservar, se a�
 | `109` | Sesión gratuita no gasta bono | Falta | Aplicado |
 | `110`–`112` | Verificaciones de perfil y centros | Aplicado (sin constancia del script de verificación) | Aplicado |
 | `113` | Bonos admitidos por sesión y protección del comprador | Falta | Aplicado y verificado (27/11) |
-| `114` | Liquidaciones | Falta | Falta |
-| `115` | Fichero SEPA y marcado en bloque | Falta | Falta |
-| `116` | Facturas en borrador | Falta | Falta |
+| `114` | Liquidaciones | Falta | Aplicado (28/11) |
+| `115` | Fichero SEPA y marcado en bloque | Falta | Aplicado (28/11) |
+| `116` | Facturas en borrador | Falta | Aplicado (28/11) |
 
 Antes de reejecutar un SQL antiguo, mirar su cabecera y `CLAUDE.md`: varios envuelven o sustituyen funciones de otros
 (no reejecutar `096`/`103`/`105` después de `107`; `110` después de `112`; `088`/`109` sin volver a ejecutar `113`).
@@ -109,7 +109,8 @@ Pasos 3 a 5 subidos (`217da75`) y probados en Preview el 28/11: cierre de corte,
 bloque, aviso y «Mis ingresos», borradores de comisión y Pro. Para repetirlo:
 `sql/pruebas/preparar_liquidacion_de_prueba.sql`. Sin probar en pantalla: anular, descartar fichero, cierre automático
 y emisión (bloqueada hasta el asesor).
-6. Textos legales.
+6. Textos legales. **Borradores actualizados** (28/11) en `legal/borradores/`, sin publicar, con 24 preguntas en
+   `preguntas-asesor.md`. Falta la revisión del gestor y del jurista.
 7. Alertas y contracargos (programar crons; vigilancia externa).
 
 Lo que dependa del asesor (IVA, IRPF, formato de facturas) se deja configurable y marcado.
@@ -133,7 +134,8 @@ SQL `096`, `098`–`109` y `113` con los pagos apagados, publicar la web, variab
 - IVA de la comisión y de Pro, cuándo tributa un bono, justificante al alumno, modelo 238 (DAC7), Canarias, Ceuta y Melilla.
 - Desistimiento (sesiones con fecha, bonos y Pro) y la protección del comprador de un bono sin sesiones.
 - Términos, condiciones de organizadores, cookies y aviso legal (borradores en `legal/borradores/`, sin publicar).
-- Privacidad: contradicción de edad 14/18 publicada; localización de la zona habitual, transferencias internacionales y
+- Edad: unificada a 18 en la rama (28/11, `legal/borradores/analisis-edades.md`); **producción sigue mostrando los 14**. Sin control
+  de edad más allá de la declaración para quien publica gratis. Privacidad: localización de la zona habitual, transferencias internacionales y
   etiquetas de iOS; verificaciones de perfil; reclamaciones y plazos de conservación; centros (12 meses) y Resend.
 - Verificar o no la titularidad de NIF e IBAN antes del primer pago; retener pagos a un organizador sospechoso (no hay
   botón); saldos negativos de quien deja la plataforma.
@@ -163,8 +165,8 @@ SQL `096`, `098`–`109` y `113` con los pagos apagados, publicar la web, variab
 - Limpieza de comentarios de cabecera antiguos en `sql/` (cambio de nombre).
 
 ## 5. Pruebas
-- `npm run test:pagos` (obligatorio antes de un commit que toque pagos; 84 correctas el 27/11).
-- `npm run test:verificaciones` (14 correctas el 27/11). Resto: `node --test` sobre `lib/*.test.js` y
+- `npm run test:pagos` (obligatorio antes de un commit que toque pagos; 94 correctas el 28/11).
+- `npm run test:verificaciones` (14 correctas el 28/11). Resto: `node --test` sobre `lib/*.test.js` y
   `components/**/*.test.js`.
 - `npm run build` antes de proponer un commit con cambios de código.
 - SQL: se prueba en local con PGlite desde archivos temporales; en pruebas, `sql/pruebas/` (nada de ahí en producción).

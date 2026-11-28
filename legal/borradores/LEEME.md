@@ -1,6 +1,6 @@
 # Borradores de documentos legales (NO PUBLICADOS)
 
-Estado: borradores redactados el 30 de octubre de 2026 como punto de partida. **No son asesoramiento legal.** Antes del lanzamiento deben revisarlos el gestor y el asesor jurídico de Ruleafit.
+Estado: borradores redactados el 30 de octubre de 2026 y actualizados el 28 de noviembre de 2026 (bonos, Pro, liquidaciones, facturas, reclamaciones y modelo de intermediario). **No son asesoramiento legal.** Antes del lanzamiento deben revisarlos el gestor y el asesor jurídico de Ruleafit.
 
 Estos textos **no están enlazados en la web** y no sustituyen todavía al aviso legal ni a la política de privacidad vigentes (`legal/aviso-legal.md` y `legal/politica-privacidad.md`), que describen la versión actual sin cobros. Se publicarán cuando se activen los pagos.
 
@@ -10,6 +10,8 @@ Estos textos **no están enlazados en la web** y no sustituyen todavía al aviso
 | `condiciones-entrenadores.md` | Entrenadores que publican y cobran | Borrador |
 | `politica-cookies.md` | Todos | Borrador |
 | `cambios-privacidad-y-aviso-legal.md` | Lista de cambios a hacer en los textos actuales | Borrador |
+| `analisis-edades.md` | Gestor y jurista | Edades mínimas: criterio provisional de 18 años |
+| `preguntas-asesor.md` | Gestor y jurista | Preguntas abiertas, con lo que hace hoy la app |
 | `privacidad-avisos-zona.md` | Cambios de privacidad por los avisos de sesiones en mi zona | Borrador (21 nov 2026 en adelante) |
 
 Convenciones:

@@ -20,7 +20,7 @@ export default function AvisoLegalPage() {
         <strong>Sitio web:</strong> https://www.ruleafit.com
       </p>
       <p className="mb-8 text-sm text-zinc-500">
-        <strong>Última actualización:</strong> 27 de julio de 2026
+        <strong>Última actualización:</strong> 28 de noviembre de 2026
       </p>
 
       <h2 className={h2Class}>I. INFORMACIÓN GENERAL</h2>
@@ -103,7 +103,7 @@ export default function AvisoLegalPage() {
         El mero acceso a este Sitio Web no supone entablar ningún tipo de relación de carácter comercial entre Ruleafit y el Usuario.
       </p>
       <p className={pClass}>
-        El Usuario declara ser mayor de edad y disponer de la capacidad jurídica suficiente para vincularse por las presentes Condiciones. Por lo tanto, este Sitio Web de Ruleafit no se dirige a menores de edad. Ruleafit declina cualquier responsabilidad por el incumplimiento de este requisito.
+        El Usuario declara ser mayor de 18 años y disponer de la capacidad jurídica suficiente para vincularse por las presentes Condiciones. Por lo tanto, este Sitio Web de Ruleafit no se dirige a menores de edad: las personas menores de 18 años no pueden crear una cuenta propia ni contratar o pagar a través de Ruleafit. Ruleafit declina cualquier responsabilidad por el incumplimiento de este requisito.
       </p>
       <p className={pClass}>
         El Sitio Web está dirigido principalmente a Usuarios residentes en España. Ruleafit no asegura que el Sitio Web cumpla con legislaciones de otros países, ya sea total o parcialmente. Si el Usuario reside o tiene su domicilio en otro lugar y decide acceder y/o navegar en el Sitio Web lo hará bajo su propia responsabilidad, deberá asegurarse de que tal acceso y navegación cumple con la legislación local que le es aplicable, no asumiendo Ruleafit responsabilidad alguna que se pueda derivar de dicho acceso.

@@ -65,7 +65,7 @@ export default function RegistroPage() {
     setErrorUsername('')
 
     if (!aceptaMayoria) {
-      setErrorMayoria('Marca la casilla para confirmar que eres mayor de edad y aceptar el aviso legal.')
+      setErrorMayoria('Marca la casilla para confirmar que eres mayor de 18 años y aceptar el aviso legal.')
       return
     }
     setErrorMayoria('')
@@ -119,7 +119,7 @@ export default function RegistroPage() {
 
   async function entrarConGoogle() {
     if (!aceptaMayoria) {
-      setErrorMayoria('Marca la casilla para confirmar que eres mayor de edad y aceptar el aviso legal.')
+      setErrorMayoria('Marca la casilla para confirmar que eres mayor de 18 años y aceptar el aviso legal.')
       return
     }
     setErrorMayoria('')
