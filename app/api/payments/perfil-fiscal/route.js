@@ -6,7 +6,9 @@ import { mensajeErrorGuardado } from '../../../../lib/pagos/errorGuardado.ts'
 // Versiones de los textos que el entrenador acepta. Son borradores hasta que el
 // asesor revise los documentos (legal/borradores); cuando cambien, se sube la versión.
 const VERSION_TERMINOS = 'borrador-2026-10'
-const VERSION_AUTOFACTURA = 'borrador-2026-10'
+// Mandato de cobro en nombre del organizador (modelo de intermediario). La columna acepta_autofactura_version conserva
+// su nombre antiguo; la versión indica qué texto se aceptó.
+const VERSION_AUTOFACTURA = 'mandato-borrador-2026-11'
 
 function error(mensaje, status = 400) {
   return NextResponse.json({ error: mensaje }, { status })
@@ -25,7 +27,7 @@ function rechazado(motivos) {
 }
 
 // Guarda los datos fiscales del entrenador (los necesita Ruleafit para emitir
-// las autofacturas y pagarle). El navegador no escribe en la tabla: este
+// facturarle la comisión y pagarle). El navegador no escribe en la tabla: este
 // servidor los evalúa (lib/pagos/evaluarPerfilFiscal.ts) y, si cumplen, llama a
 // guardar_perfil_fiscal() con la clave de servicio, que cifra el IBAN y los deja
 // aprobados al instante (sql/101). No hay revisión manual previa.

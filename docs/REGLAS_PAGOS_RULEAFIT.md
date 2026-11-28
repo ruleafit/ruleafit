@@ -11,7 +11,7 @@ pagos del historial (`docs/historial/PROGRESS_HISTORIAL.md`).
 | **Cobro** | Un intento de pago de un alumno por una plaza (`cobros`) |
 | **Bolsa** | Registro de lo que Ruleafit debe a cada organizador (`bolsas`): `pendiente` y `disponible`. No es una cuenta bancaria |
 | **Movimiento** | Anotación de cada cambio de la bolsa (`movimientos_bolsa`), solo se añade |
-| **Liquidación** | Transferencia del saldo disponible al IBAN del organizador. **Sin implementar** |
+| **Liquidación** | Transferencia del saldo disponible al IBAN del organizador (apartado 6 ter) |
 | **Bono** | Paquete de sesiones de un organizador. No es la bolsa. Con pagos activos se compra online (apartado 12) |
 | **Rulos** | Puntos de fidelización. No son dinero |
 
@@ -25,10 +25,11 @@ pagos del historial (`docs/historial/PROGRESS_HISTORIAL.md`).
 | Paso a `disponible` | 48 h después de **terminar** la sesión (sin duración cuenta 60 min). Cada 15 min | Hecho |
 | Retención | Con reclamación abierta o en revisión no se libera | Hecho (`sql/105`) |
 | Pantalla del saldo | `/mis-ingresos` (menú, solo con pagos visibles) | Hecho |
-| Liquidación | Días 15 y último de mes (siguiente hábil), mínimo 10 €, el resto se acumula | **Falta** |
-| Fichero bancario | SEPA XML (pain.001) o el formato que dé CaixaBank | **Falta** (tampoco se descifra aún el IBAN para pagar) |
-| Autofacturas | Una por liquidación, serie `AF-AAAA-NNNNNN`, aceptación tácita a los 15 días | **Falta** (pendiente del gestor) |
-| IVA e IRPF | IVA 21 % general; IRPF 15 % (7 % reducido) a personas físicas; foral y zonas especiales aparte | **Falta**, a confirmar |
+| Liquidación | Días 15 y último de mes (siguiente hábil), mínimo 10 €, el resto se acumula | Hecho (`sql/114`); las transferencias van en un fichero que se firma en el banco |
+| Fichero bancario | SEPA XML (pain.001) o el formato que dé CaixaBank | Hecho en pain.001.001.03 (`sql/115`); **sin validar con el banco** |
+| Modelo | **Intermediario en nombre ajeno** (titular y gestor, 28/11/2026): se cobra por cuenta del organizador | Decidido; custodia y justificante al alumno por confirmar |
+| Facturas de Ruleafit | Solo la comisión (por quincena) y Pro. Sin autofacturas | Solo borradores (`sql/116`) |
+| IVA e IRPF | Comisión y Pro con IVA del 21 % incluido; sin retenciones (intermediario). Foral y zonas especiales aparte. El perfil fiscal aún pregunta por el IRPF reducido: revisar si sobra | A confirmar |
 | Contracargos | Se descuentan de la bolsa | **Falta** el proceso |
 | Bonos con pago online y Plan Pro | Apartado 12 | Hecho en la rama (`sql/107`); solo probado con simulador |
 
@@ -87,11 +88,47 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 - **Reservar** una sesión gratuita **nunca gasta un uso de bono** y no pasa por el TPV (`sql/109`). Si una sesión pasa a
   ser gratuita, sus reservas activas recuperan el uso. `109` devuelve además los usos ya gastados en sesiones gratuitas.
 
+## 6 ter. Liquidaciones (`sql/114`, panel `/admin/liquidaciones`)
+- Se cierra el último corte (15 o fin de mes). La fecha de pago salta sábados y domingos; **festivos por confirmar**.
+- Sale de «disponible» una línea por organizador con datos fiscales `activo`, IBAN y al menos 10 €. No envía dinero:
+  el administrador hace la transferencia y la marca «transferida», o la «anula» y el importe vuelve al saldo.
+- No se paga: reclamación abierta, retención de bonos, devolución pendiente, lo liberado después del corte y los bonos
+  que el alumno aún puede devolver por desistimiento (**por confirmar con el asesor**;
+  `config_pagos.liquidar_bonos_en_plazo`). Una reclamación o devolución sobre algo ya pagado retiene dinero nuevo.
+- Saldo negativo: se compensa con ingresos futuros (**por decidir** qué hacer si el organizador no vuelve).
+- El IBAN solo se descifra al pulsar «Ver datos de la transferencia», para el administrador.
+- Cerrar es repetible: solo añade a quien no esté en ese corte.
+
+### Fichero para el banco (`sql/115`)
+- Cada 15 días: la web cierra el corte los días 1 y 16 y avisa por correo (`115_fichero_sepa_cron.sql`, **sin
+  programar**); el administrador pulsa «Descargar fichero para el banco», lo sube a la banca de empresa, **firma una
+  vez** y pulsa «Marcar todas como enviadas». Una transferencia rechazada se anula suelta.
+- Cada transferencia entra en un solo fichero. «Descargar de nuevo» repite el mismo identificador. «Descartar» solo si
+  no se ha subido al banco. Si el IBAN cambió desde el cierre, no se incluye.
+- Variables de la web: `SEPA_ORDENANTE_NOMBRE`, `SEPA_ORDENANTE_ID`, `SEPA_ORDENANTE_IBAN` y, opcional,
+  `SEPA_ORDENANTE_BIC`. El fichero se genera al momento: no se guarda ningún IBAN en claro.
+- **Por confirmar con CaixaBank:** versión del formato, identificador de ordenante, BIC, comisiones y si existe envío
+  directo desde la aplicación.
+
+## 6 quater. Facturas (`sql/116`, panel `/admin/facturas`) · POR CONFIRMAR CON EL ASESOR
+**Modelo B, intermediario en nombre ajeno** (decidido el 28/11/2026): lo cobrado al alumno es del organizador; el ingreso
+de Ruleafit es su comisión y Pro. **Nunca emitir autofacturas ni facturas por el total cobrado.**
+- Factura de comisión: una por organizador y quincena terminada, con los cobros que pasaron a «disponible» en ella
+  (estén o no transferidos). Serie `COM-AAAA-NNNNNN`. Los bonos no tienen comisión.
+- Factura de Pro por cada mes cobrado, serie `PRO-AAAA-NNNNNN`.
+- Comisión y Pro con **IVA incluido** al 21 % (`factura_iva_bps`). Datos de Ruleafit en `factura_ruleafit`. Canarias,
+  Ceuta y Melilla bloqueadas.
+- Mientras `facturas_validadas` sea `false` solo hay borradores (sin número; el organizador no los ve). Al activarlo,
+  «Emitir» numera sin saltos y la factura queda inmutable.
+- Una devolución posterior a la factura se señala en el panel: **la rectificativa está sin hacer**.
+- Sin hacer, depende del asesor: justificante o factura al alumno en nombre del organizador; **custodia de dinero de
+  terceros** (normativa de servicios de pago); modelo 238; IGIC e IPSI; requisitos de facturación electrónica.
+
 ## 7. Entornos
 | | Producción (`main`) | Preview (`feat/pagos-mejoras`) |
 |---|---|---|
 | Base de datos | proyecto «ruleafit» | proyecto de pruebas aparte |
-| SQL | hasta 095 y 097, y 110-112 | base y 095-113 (comprobado el 27/11/2026) |
+| SQL | hasta 095 y 097, y 110-112 | base y 095-113 (comprobado el 27/11/2026); 114-116 aplicados (comprobado el 28/11/2026) |
 | Pagos | apagados | activos con TPV simulado |
 | Crons de pagos | ninguno de alertas ni devoluciones | caducidad y liberación; sin alertas ni devoluciones |
 
@@ -100,7 +137,8 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 ### A. Asesor legal y fiscal (puede cambiar el desarrollo)
 - [ ] Confirmar que Ruleafit puede cobrar y guardar dinero de organizadores (normativa de servicios de pago) o cómo hacerlo.
 - [ ] IVA: comisión del 10 %, si los 40 € de Pro lo incluyen y cuándo tributa un bono.
-- [ ] Facturas de Ruleafit por Pro; autofacturas a organizadores; IRPF; modelo 238 (DAC7); Canarias, Ceuta y Melilla.
+- [ ] Facturas de comisión y de Pro; justificante al alumno en nombre del organizador; modelo 238 (DAC7); Canarias,
+      Ceuta y Melilla.
 - [ ] Desistimiento de alumnos (sesiones con fecha y bonos) y de organizadores con Pro; 48 h desde el fin o desde la sesión.
 - [ ] Términos, condiciones de organizadores, aviso legal, privacidad (tarjeta guardada, datos fiscales) y renovación automática.
 - [ ] Verificar o no la titularidad de NIF e IBAN antes del primer pago.
@@ -115,9 +153,10 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 - [ ] Formato del fichero de transferencias.
 
 ### C. Desarrollo pendiente
-- [ ] Liquidaciones: días 15 y último, mínimo 10 €, descifrado del IBAN, fichero SEPA, excluir lo retenido y decidir qué hacer
-      con bonos aún devolubles (14 días) y saldos negativos.
-- [ ] Autofacturas y facturas de Pro.
+- [x] Liquidaciones y fichero SEPA (`sql/114`, `115`). Falta aplicarlos, probarlos en Preview y validar el fichero con
+      el banco.
+- [ ] Facturas de comisión y de Pro: borradores hechos (`sql/116`); falta la validación del asesor, las
+      rectificativas y probarlos en Preview.
 - [x] Elegir tarjeta o Bizum al pagar una sesión suelta.
 - [x] El alumno con bono elige entre canjearlo o pagar; el organizador marca qué bonos admite cada sesión (`sql/113`).
 - [x] Estado de la devolución en Reclamaciones.
@@ -127,7 +166,7 @@ IBAN se guarda cifrado. No se comprueba que el NIF o el IBAN sean de la persona.
 
 ### D. Despliegue (con los pagos apagados)
 - [ ] Copia de seguridad de la base de producción.
-- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, `109`, `113`, en orden, cada uno con su
+- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, `109`, `113`, `114`, `115`, `116`, en orden, cada uno con su
       verificación. Nada de `sql/pruebas`.
 - [ ] Publicar la web justo después.
 - [ ] Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL` (y `REDSYS_REST_URL`),

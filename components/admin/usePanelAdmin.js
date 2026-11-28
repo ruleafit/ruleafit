@@ -47,5 +47,5 @@ export default function usePanelAdmin(url) {
     return ''
   }
 
-  return { estadoCarga, datos, cambiar }
+  return { estadoCarga, datos, cambiar, cargar }
 }

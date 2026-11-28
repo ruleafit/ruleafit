@@ -1,4 +1,4 @@
-# Ruleafit — Estado actual
+ Aplicado (28/11) | Aplicado (28/11) | Aplicado (28/11) |# Ruleafit — Estado actual
 
 Última actualización: 27 noviembre 2026
 
@@ -26,7 +26,7 @@ trabajo se actualiza este archivo (corto) y, si hay detalle que conservar, se a�
 - `feat/redsys-devoluciones` (`520937e`) y `fix/eliminar-cuenta-pagos` (`8326321`) se borraron el 27/11: su contenido
   está en `feat/pagos-mejoras`.
 - `main` tiene un commit de fusión que no está en la rama; la mezcla de prueba no daba conflictos (27/11).
-- Último SQL del repositorio: **113**. El titular pega los SQL a mano en el SQL Editor.
+- Último SQL del repositorio: **116**. El titular pega los SQL a mano en el SQL Editor.
 - Reglas firmes: no activar cobros reales; solo Redsys (CaixaBank); commit y push solo cuando se pidan.
 
 ## 2. SQL por entorno
@@ -44,6 +44,9 @@ trabajo se actualiza este archivo (corto) y, si hay detalle que conservar, se a�
 | `109` | Sesión gratuita no gasta bono | Falta | Aplicado |
 | `110`–`112` | Verificaciones de perfil y centros | Aplicado (sin constancia del script de verificación) | Aplicado |
 | `113` | Bonos admitidos por sesión y protección del comprador | Falta | Aplicado y verificado (27/11) |
+| `114` | Liquidaciones | Falta | Falta |
+| `115` | Fichero SEPA y marcado en bloque | Falta | Falta |
+| `116` | Facturas en borrador | Falta | Falta |
 
 Antes de reejecutar un SQL antiguo, mirar su cabecera y `CLAUDE.md`: varios envuelven o sustituyen funciones de otros
 (no reejecutar `096`/`103`/`105` después de `107`; `110` después de `112`; `088`/`109` sin volver a ejecutar `113`).
@@ -94,10 +97,14 @@ Guía: PDF del plan del 27/11 (`docs/RuleaFit_Plan_Mejoras_Pagos_Agrupados_27-11
    organizador y devolución. El aviso «Ninguna sesión próxima admite este bono» se muestra también
    dentro de los 14 días (cambiado el 28/11, sin volver a ver en pantalla). Sin ver en pantalla: bloqueo, retención, anular bonos, autocancelación, zonas especiales y
    borrado de cuenta (comprobados solo en la base).
-3. Liquidaciones: días 15 y último (siguiente hábil), mínimo 10 €, descifrado del IBAN, excluir lo retenido y decidir
-   qué hacer con bonos aún devolubles y saldos negativos.
-4. Fichero SEPA (pain.001) o el formato que dé CaixaBank.
-5. Autofacturas en borrador (`AF-AAAA-NNNNNN`, aceptación tácita a 15 días) y facturas de Pro.
+3. Liquidaciones. **Hecho en local** (28/11): `sql/114` y `/admin/liquidaciones`. Falta aplicar el SQL en pruebas,
+   subir y probar en Preview. Por decidir: bonos aún devolubles (hoy no se pagan), saldos negativos y festivos.
+4. Fichero SEPA. **Hecho en local** (28/11): `sql/115`, descarga, marcado en bloque y cierre automático con correo
+   (cron sin programar). Falta aplicar 114 y 115, variables `SEPA_ORDENANTE_*` en Preview, subir, probar y validar el
+   formato con CaixaBank.
+5. Facturas en borrador. **Hecho en local** (28/11) con el **modelo B** (intermediario en nombre ajeno): Ruleafit solo
+   factura comisión y Pro (`sql/116`, `/admin/facturas`, Mis ingresos). Sin autofacturas. Falta aplicar el SQL, subir,
+   probar, rectificativas y la validación del asesor (apartado 6 quater de las reglas).
 6. Textos legales.
 7. Alertas y contracargos (programar crons; vigilancia externa).
 
@@ -119,7 +126,7 @@ SQL `096`, `098`–`109` y `113` con los pagos apagados, publicar la web, variab
 
 ### Asesor y jurista
 - Si Ruleafit puede cobrar y guardar dinero de organizadores (servicios de pago).
-- IVA de la comisión y de Pro, cuándo tributa un bono, autofacturas, IRPF, modelo 238 (DAC7), Canarias, Ceuta y Melilla.
+- IVA de la comisión y de Pro, cuándo tributa un bono, justificante al alumno, modelo 238 (DAC7), Canarias, Ceuta y Melilla.
 - Desistimiento (sesiones con fecha, bonos y Pro) y la protección del comprador de un bono sin sesiones.
 - Términos, condiciones de organizadores, cookies y aviso legal (borradores en `legal/borradores/`, sin publicar).
 - Privacidad: contradicción de edad 14/18 publicada; localización de la zona habitual, transferencias internacionales y

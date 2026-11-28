@@ -4,6 +4,7 @@ import useMisIngresos from './useMisIngresos'
 import TarjetasSaldo from './TarjetasSaldo'
 import ListaIngresos from './ListaIngresos'
 import ListaLiquidaciones from './ListaLiquidaciones'
+import ListaFacturas from './ListaFacturas'
 
 export default function PantallaIngresos() {
   const { datos, error, cargando } = useMisIngresos()
@@ -24,6 +25,7 @@ export default function PantallaIngresos() {
           <TarjetasSaldo datos={datos} />
           <ListaIngresos cobros={datos.cobros} total={datos.total_cobros} />
           <ListaLiquidaciones liquidaciones={datos.liquidaciones} />
+          <ListaFacturas />
         </>
       )}
     </div>

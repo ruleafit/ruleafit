@@ -41,7 +41,7 @@ const VACIO = {
 }
 
 // Datos fiscales del entrenador: Ruleafit los necesita para emitir las
-// autofacturas y pagarle. El IBAN completo no se vuelve a mostrar nunca.
+// facturarle la comisión y pagarle. El IBAN completo no se vuelve a mostrar nunca.
 export default function PerfilFiscal({ usuario }) {
   const [abierto, setAbierto] = useState(false)
   const [cargado, setCargado] = useState(false)
@@ -147,7 +147,7 @@ export default function PerfilFiscal({ usuario }) {
     <div className="mb-8 border-t border-[#E2E6CF] pt-6">
       <h3 className="mb-2 text-base font-bold text-[#1F2400]">Datos fiscales y cobros</h3>
       <p className="mb-4 text-sm text-[#6B7355]">
-        Si organizas sesiones de pago necesitamos estos datos para emitir las autofacturas en tu nombre y transferirte
+        Si organizas sesiones de pago necesitamos estos datos para facturarte nuestra comisión y transferirte
         tus ingresos. Para publicar sesiones gratuitas no necesitas rellenar nada de esto.
       </p>
 
@@ -255,7 +255,7 @@ export default function PerfilFiscal({ usuario }) {
           <label className="flex items-start gap-2 text-sm text-[#1F2400]">
             <input type="checkbox" checked={f.aceptaAutofactura} onChange={cambia('aceptaAutofactura')} required className="mt-1" />
             <span>
-              Autorizo a Ruleafit a emitir en mi nombre y por mi cuenta las facturas por mis servicios (autofacturación)
+              Autorizo a Ruleafit a cobrar a mis alumnos en mi nombre y por mi cuenta, y a descontar su comisión
               y acepto las condiciones para entrenadores.
             </span>
           </label>

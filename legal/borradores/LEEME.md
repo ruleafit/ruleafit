@@ -16,6 +16,6 @@ Convenciones:
 - `[CORCHETES]`: dato que falta o decisión pendiente.
 - `[REVISAR: ...]`: punto que debe confirmar el gestor o el asesor.
 
-Decisiones que ya están acordadas y que estos textos recogen: Ruleafit es intermediaria; el alumno paga con tarjeta o Bizum en el TPV virtual de CaixaBank; comisión del 10 %; liquidaciones los días 15 y último de mes; Ruleafit emite las autofacturas a los entrenadores; cada entrenador responde de sus datos y de declarar sus ingresos.
+Decisiones que ya están acordadas y que estos textos recogen: Ruleafit es intermediaria; el alumno paga con tarjeta o Bizum en el TPV virtual de CaixaBank; comisión del 10 %; liquidaciones los días 15 y último de mes; Ruleafit cobra en nombre del entrenador y solo le factura su comisión y la suscripción Pro; cada entrenador responde de sus datos y de declarar sus ingresos.
 
-Pendiente antes de publicar: datos fiscales de Ruleafit (ver `[TITULAR]`), formato de la autofactura, reglas de Canarias, Ceuta y Melilla, y revisión del asesor.
+Pendiente antes de publicar: datos fiscales de Ruleafit (ver `[TITULAR]`), formato de las facturas, justificante al alumno, custodia de fondos, reglas de Canarias, Ceuta y Melilla, y revisión del asesor.

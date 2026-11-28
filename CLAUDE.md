@@ -8,7 +8,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - Pasarela de pago: RuleaFit usa EXCLUSIVAMENTE Redsys (TPV virtual de CaixaBank). No proponer, integrar ni mencionar otras pasarelas en código, SQL ni documentación.
 - Repo privado: github.com/ruleafit/ruleafit. Supabase: proyecto "ruleafit", Irlanda.
 - Claves en `.env.local` (ignorado por git; nunca leerlo ni imprimir valores).
-- SEPA / pain.001 / liquidaciones a entrenadores: NO implementado todavía.
+- Liquidaciones a organizadores y fichero SEPA (pain.001): hechos en `feat/pagos-mejoras` (sql/114-116), sin validar con el banco; no están en producción.
 
 ## Mapa de carpetas críticas
 - `lib/pagos/dinero.ts` — comisión (bps) y reparto (`calcularReparto`). Única fuente TS de lógica financiera.
@@ -29,7 +29,7 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 
 ## Ramas y entornos (27/11/2026)
 - `main` = producción: pagos apagados; SQL de pagos solo hasta `095`/`097`; verificaciones `110`–`112` aplicadas. No tiene el código de `096`–`109` ni la parte web de `095`.
-- `feat/pagos-mejoras` = Preview con base de pruebas aparte («RuleaFit-Pruebas»): `096`–`113` aplicados.
+- `feat/pagos-mejoras` = Preview con base de pruebas aparte («RuleaFit-Pruebas»): `096`–`116` aplicados.
 
 ## Reglas estrictas
 - Prohibido duplicar lógica financiera (comisión, reparto, importes) fuera de `lib/pagos/dinero.ts` y `sql/072_pagos_funciones.sql`. Si cambia una, verificar que la otra coincide.
@@ -67,6 +67,10 @@ Next.js 16.4 (App Router) + React 19 + Tailwind 4 + lucide-react. Supabase (Post
 - Cobros (sql/103): `crear_cobro` y `confirmar_cobro_pagado` envuelven a las de sql/072 (`*_base`, que guardan la lógica de importes): un solo cobro en curso por alumno y sesión; `creado` caduca a los 30 min (`caducado`) y una confirmación tardía se sigue procesando. Con pagos activos no se publica de pago sin perfil `activo`.
 - Ingresos del organizador (sql/105): `/mis-ingresos` (solo con pagos visibles) lee `mis_ingresos()`; no recalcula importes. Con reclamación abierta o en revisión el cobro no se libera. La `liberar_pendientes()` vigente es la de sql/105 (072 + retención): cambiar ambas a la vez. Dar la razón al alumno solo con `devolver_y_cerrar_incidencia` (cerrar sin más libera el dinero).
 - Bonos por sesión (sql/113): `clases.bonos_admitidos` (null = todos; `{}` = ninguno; lista = solo esos). Lo aplica `reservar_clase` (versión vigente: 113, no reejecutar 088/109 sin volver a ejecutarla) y lo refleja `lib/bonosSesion.js`: cambiar ambos. Se edita solo con `fijar_bonos_sesion`; al publicar viaja en el insert o en `publicar_serie` (envuelve a `publicar_serie_088`). El alumno con bono elige entre canjearlo o pagar: no bloquear el pago. Protección del comprador: bono vendido excluido de TODAS las sesiones de pago próximas → aviso al organizador antes de guardar (`previsualizar_bonos_sesion`), aviso al cliente y devolución de lo no usado (`devolver_bono_sin_sesiones`, marca `bonos_clientes.sin_sesiones_desde`, trigger diferido y blindado en `clases`).
+- Liquidaciones (sql/114): cuentas SOLO en SQL (`liquidacion_cobros`/`liquidacion_calcular`); panel `/admin/liquidaciones`; no envían dinero. El IBAN solo se descifra en `datos_transferencia` (admin). `cobros.liquidacion_id` marca lo ya pagado.
+- Fichero SEPA (sql/115, `lib/pagos/sepa.ts`): cada línea entra en un solo fichero (`ficheros_sepa`); marcado en bloque con `cerrar_fichero_sepa`. El XML se genera al momento y no se guarda. Ordenante por variables `SEPA_ORDENANTE_*`. Cierre automático: `/api/payments/liquidaciones/cierre` (cron sin programar).
+- Modelo fiscal: Ruleafit es intermediario en nombre y por cuenta del organizador (decidido 28/11/2026). Solo factura su comisión y Pro; nunca autofacturas ni facturas por el total cobrado. La columna `acepta_autofactura_version` guarda hoy la aceptación del mandato de cobro.
+- Facturas (sql/116): SOLO borradores hasta `config_pagos.facturas_validadas` (no activarlo sin el asesor). Cuentas en SQL; `lib/pagos/facturas.ts` solo da formato. Emitidas inmutables, numeración sin saltos (`facturas_contadores`).
 - Reglas vigentes de pagos, bolsas y bonos: `docs/REGLAS_PAGOS_RULEAFIT.md` (fuente única; actualizarla con cada cambio).
 - Sesiones gratuitas: publicar a 0 € nunca exige datos fiscales; reservarlas nunca gasta bono (sql/109, versión vigente de `reservar_clase`). `clases.precio` no admite nulos: vacío = 0.
 - Plan Pro y bonos (sql/107-108, reglas en el apartado 12 del documento): suscripción 40 €/mes por Redsys (COF, sin contratar), bonos online sin comisión y disponibles a las 48 h de la compra. Cuentas e importes SOLO en SQL (`devolver_bono`, `cotizar_*`); la web los enseña. 107 envuelve `confirmar_cobro_pagado`, `reclamar_devolucion`, `completar_devolucion`, `devolver_y_cerrar_incidencia`, `eliminar_mi_cuenta` y redefine `liberar_pendientes`, `cobro_retenido`, `mis_ingresos`, `abrir_incidencia_cobro`: no reejecutar 096/103/105 después.

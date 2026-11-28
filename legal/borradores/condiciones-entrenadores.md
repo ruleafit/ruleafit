@@ -1,4 +1,4 @@
-# CONDICIONES PARA ENTRENADORES, COBROS Y AUTOFACTURACIÓN — BORRADOR
+# CONDICIONES PARA ENTRENADORES, COBROS Y FACTURACIÓN — BORRADOR
 
 **Versión:** borrador 0.1 · **Fecha:** [FECHA]
 
@@ -17,6 +17,7 @@ El entrenador es un profesional **independiente**. No existe relación laboral, 
 - El entrenador autoriza a Ruleafit a cobrar a los alumnos el precio de sus sesiones.
 - Ruleafit retiene una **comisión del 10 %** del precio cobrado [REVISAR: si es sobre el precio con IVA o sin IVA, y si la comisión lleva IVA adicional].
 - En los reembolsos totales al alumno no se cobra comisión.
+- Lo cobrado a los alumnos es dinero del entrenador: Ruleafit lo recibe en su nombre y se lo entrega descontada la comisión. [REVISAR: custodia de fondos de terceros y normativa de servicios de pago].
 
 ## 4. Bolsa virtual y liquidaciones
 
@@ -29,18 +30,18 @@ El entrenador es un profesional **independiente**. No existe relación laboral, 
 
 Si hay que devolver dinero a un alumno (cancelación, contracargo bancario, reclamación), el importe se descuenta de la bolsa del entrenador, incluso después de una liquidación, restándolo de las siguientes. Si el entrenador deja de usar la plataforma y queda un importe pendiente, se compromete a abonarlo.
 
-## 6. Autofacturación (acuerdo previo y expreso)
+## 6. Facturación
 
-1. El entrenador acuerda que **Ruleafit emita, en su nombre y por su cuenta, las facturas** correspondientes a cada liquidación, para dejar constancia del pago, con los datos fiscales que el entrenador ha facilitado.
-2. Cada factura incluirá la mención de facturación por el destinatario, base imponible, IVA y, si corresponde, retención de IRPF, y se numerará en una serie correlativa de Ruleafit (formato `AF-AAAA-NNNNNN`).
-3. Cada factura se pondrá a disposición del entrenador en su cuenta. **Se considerará aceptada** si no la rechaza por escrito en [15 días naturales]. [REVISAR: texto de aceptación tácita].
-4. El entrenador debe comunicar de inmediato cualquier cambio en sus datos fiscales. Ruleafit emite las facturas con los datos que consten en ese momento.
+1. **Ruleafit factura al entrenador solo su comisión** (una factura por quincena, serie `COM-AAAA-NNNNNN`) y, si la tiene, la suscripción Pro (serie `PRO-AAAA-NNNNNN`), con el IVA que corresponda. [REVISAR: IVA incluido en la comisión].
+2. **La factura o justificante al alumno por la sesión corresponde al entrenador**, que es quien presta el servicio; Ruleafit solo cobra en su nombre. [REVISAR: si Ruleafit debe o puede emitir un justificante en nombre del entrenador].
+3. Las facturas de Ruleafit se ponen a disposición del entrenador en su cuenta. Las devoluciones posteriores se corrigen con factura rectificativa.
+4. El entrenador debe comunicar de inmediato cualquier cambio en sus datos fiscales.
 
 ## 7. Obligaciones fiscales y responsabilidad por los datos
 
 - El entrenador **declara y se compromete a declarar ante la Hacienda Pública** los ingresos que obtenga a través de la plataforma, ya sea como autónomo, sociedad o persona física, y a cumplir sus obligaciones de alta, impuestos y Seguridad Social. Ruleafit no asume esas obligaciones.
 - El entrenador **se hace responsable de la exactitud y veracidad de los datos** que facilita (identidad, NIF, domicilio fiscal, IBAN, tipo de actividad). Ruleafit no verifica su autenticidad frente a la Administración.
-- Cuando la normativa lo exija, Ruleafit **practicará la retención de IRPF** e ingresará la retención por cuenta del entrenador. El entrenador indicará si se encuentra en el supuesto de retención reducida. [REVISAR: porcentajes y supuestos].
+- Las retenciones o ingresos a cuenta que correspondan por las sesiones son responsabilidad del entrenador y de quien le pague como cliente. [REVISAR: confirmar que Ruleafit, como intermediaria, no retiene].
 - Ruleafit podrá comunicar a la Administración tributaria la información que le exija la ley (por ejemplo, el informe anual de operadores de plataformas digitales). [REVISAR: modelo 238 y datos a recabar].
 
 ## 8. Datos que se solicitan

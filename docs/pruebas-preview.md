@@ -46,6 +46,7 @@ valor) y crea otra solo para Preview. Puedes limitarlas a la rama `feat/pagos-me
 | `REDSYS_TERMINAL` | `1` |
 | `REDSYS_SECRET_KEY` | clave aleatoria propia (comando abajo) |
 | `CRON_SECRET` | otro valor aleatorio, distinto del de producción |
+| `SEPA_ORDENANTE_NOMBRE`, `SEPA_ORDENANTE_ID`, `SEPA_ORDENANTE_IBAN` | inventados para probar el fichero: `Ruleafit Pruebas`, `B00000000000`, `ES9121000418450200051332` |
 | `ADMIN_EMAILS` | tu correo de la cuenta de pruebas (paneles `/admin/...`) |
 
 ```powershell

@@ -32,8 +32,8 @@ export default function DesglosePago({ clase, desglose, pagando, metodo, onMetod
         <Linea etiqueta="Total a pagar" valor={formatearEuros(desglose.totalCentimos)} fuerte />
       </dl>
       <p className="mt-2 text-[11px] leading-snug text-[#6B7355]">
-        El precio lo fija quien organiza la sesión e incluye los impuestos que correspondan. La comisión de Ruleafit sale
-        de su parte: no se te suma nada.
+        El precio lo fija quien organiza la sesión e incluye los impuestos que correspondan. Ruleafit cobra en su nombre y su
+        comisión sale de esa parte: no se te suma nada.
       </p>
       <div className="mt-3 border-t border-[#E2E6CF] pt-2">
         <p className="mb-1 text-xs font-semibold text-[#1F2400]">Política de cancelación</p>

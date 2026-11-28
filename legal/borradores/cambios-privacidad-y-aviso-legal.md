@@ -12,7 +12,7 @@ Lista de lo que habrá que actualizar en `legal/aviso-legal.md` / `app/aviso-leg
 
 ## Política de privacidad
 1. **Nuevas categorías de datos** de los entrenadores: NIF/DNI/NIE/CIF, domicilio fiscal, IBAN y titular, país de residencia fiscal, fecha de nacimiento, tipo de actividad.
-2. **Finalidades y base legal:** ejecutar el contrato de cobro y liquidación; emitir autofacturas y cumplir obligaciones fiscales (obligación legal); informe anual de operadores de plataformas digitales; prevención del fraude (interés legítimo).
+2. **Finalidades y base legal:** ejecutar el contrato de cobro y liquidación; facturar la comisión y la suscripción y cumplir obligaciones fiscales (obligación legal); informe anual de operadores de plataformas digitales; prevención del fraude (interés legítimo).
 3. **Destinatarios y encargados:** CaixaBank y Redsys (pagos), Supabase (base de datos), Vercel (alojamiento), Resend (correo), Google (inicio de sesión) y la Administración tributaria cuando lo exija la ley.
 4. **Conservación:** datos de facturación y fiscales el tiempo que exija la normativa tributaria y mercantil. [REVISAR plazo: suele ser entre 4 y 6 años]. El resto, mientras la cuenta esté activa y el plazo de prescripción de responsabilidades.
 5. **Transferencias fuera del Espacio Económico Europeo** (proveedores con sede en EE. UU.): indicar las garantías. [REVISAR]

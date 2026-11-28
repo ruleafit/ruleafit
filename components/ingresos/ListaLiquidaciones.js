@@ -9,7 +9,7 @@ export default function ListaLiquidaciones({ liquidaciones }) {
       </h2>
       {liquidaciones.length === 0 ? (
         <p className="text-sm text-[#6B7355]">
-          Las transferencias todavía no están disponibles en la plataforma. Cuando se hagan, aparecerán aquí.
+          Todavía no hay transferencias. Se preparan los días 15 y último de cada mes y aparecerán aquí.
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -18,7 +18,7 @@ export default function ListaLiquidaciones({ liquidaciones }) {
               <span>
                 {formatearFechaParaMostrar(l.fecha)}
                 {l.iban_ultimos4 ? ` · cuenta terminada en ${l.iban_ultimos4}` : ''}
-                {l.estado === 'pagada' ? '' : ' · pendiente'}
+                {l.estado === 'pagada' ? '' : l.estado === 'anulada' ? ' · anulada, vuelve a tu saldo' : ' · pendiente'}
               </span>
               <strong>{formatearEuros(l.importe_centimos)}</strong>
             </li>
