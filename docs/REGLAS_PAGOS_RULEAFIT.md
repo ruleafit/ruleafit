@@ -30,7 +30,7 @@ pagos del historial (`docs/historial/PROGRESS_HISTORIAL.md`).
 | Modelo | **Intermediario en nombre ajeno** (titular y gestor, 28/11/2026): se cobra por cuenta del organizador | Decidido; custodia y justificante al alumno por confirmar |
 | Facturas de Ruleafit | Solo la comisión (por quincena) y Pro. Sin autofacturas | Solo borradores (`sql/116`) |
 | IVA e IRPF | Comisión y Pro con IVA del 21 % incluido; sin retenciones (intermediario). Foral y zonas especiales aparte. El perfil fiscal aún pregunta por el IRPF reducido: revisar si sobra | A confirmar |
-| Contracargos | Se descuentan de la bolsa | **Falta** el proceso |
+| Contracargos | Retenidos mientras están abiertos; si se pierden, se descuentan de la bolsa (apartado 5 bis) | Hecho (`sql/117`, `/admin/contracargos`); sin probar con el banco |
 | Bonos con pago online y Plan Pro | Apartado 12 | Hecho en la rama (`sql/107`); solo probado con simulador |
 
 Los valores 10 %, 48 h, 10 € y 15 días están en `config_pagos`. La web repite el 10 % en
@@ -76,6 +76,18 @@ creado ──pago autorizado──▶ pagado ──cancelación con derecho─�
 - Alertas en `/admin/alertas` y por correo. Frenos `parada_cobros` y `parada_devoluciones`: se activan ante fallos
   críticos y se quitan a mano. **Nunca usar `pagos_activos` como freno**: apagado, las sesiones de pago se reservan
   sin pagar.
+
+## 5 bis. Contracargos y vigilancia (`sql/117`)
+- El banco comunica el contracargo (no llega solo a la web): se anota en `/admin/contracargos` con el número de pedido.
+- **Abierto:** el cobro no se libera, no se liquida ni se pide otra devolución al banco. Alerta crítica y aviso 3 días
+  antes de la fecha límite.
+- **Ganado** o **anotado por error:** se quita la retención.
+- **Perdido:** se descuenta al organizador lo que aún tuviera de ese cobro (parte proporcional si es parcial); el saldo
+  puede quedar negativo. Ruleafit pierde su comisión. Si es por todo el cobro se cancela la reserva futura o el bono.
+- No cubre los contracargos de la cuota Pro (gestionarlos a mano) ni las comisiones que cobre el banco.
+- Por confirmar con el asesor y el banco: repercutir al organizador, plazos y documentación para disputar.
+- Vigilancia externa (por contratar, p. ej. un monitor gratuito): `/api/health` (web y base) y
+  `/api/health/procesos` (responde 503 si el cron de alertas lleva más de 20 minutos sin revisar).
 
 ## 6. Datos fiscales del organizador
 Mi cuenta → Datos fiscales y cobros. Se validan NIF/NIE/CIF, IBAN español, dirección y casillas; se aprueban solos,
@@ -166,12 +178,13 @@ de Ruleafit es su comisión y Pro. **Nunca emitir autofacturas ni facturas por e
 
 ### D. Despliegue (con los pagos apagados)
 - [ ] Copia de seguridad de la base de producción.
-- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, `109`, `113`, `114`, `115`, `116`, en orden, cada uno con su
+- [ ] SQL `096`, `098`, `099`, `100`, `101`, `102`, `103`, `104`, `105`, `106`, `107`, `108`, `109`, `113`, `114`, `115`, `116`, `117`, en orden, cada uno con su
       verificación. Nada de `sql/pruebas`.
 - [ ] Publicar la web justo después.
 - [ ] Vercel (Production): `REDSYS_MERCHANT_CODE`, `REDSYS_TERMINAL`, `REDSYS_SECRET_KEY`, `REDSYS_URL` (y `REDSYS_REST_URL`),
       `CRON_SECRET`, `ADMIN_EMAILS`, `ALERTAS_ADMIN_EMAIL`, `NEXT_PUBLIC_SITE_URL`. Sin `MOCK_TPV_ACTIVO`; el simulador debe dar 404.
-- [ ] Crons: `099`; `103` y `107` solo tras las pruebas con Redsys.
+- [ ] Crons: `099`; `103` y `107` solo tras las pruebas con Redsys; `115` (cierre de corte) cuando haya ordenante SEPA.
+- [ ] Monitor externo sobre `/api/health` y `/api/health/procesos`, con aviso al correo.
 
 ### E. Activación
 - [ ] `107_pro_y_bonos_preactivacion.sql`.

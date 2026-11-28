@@ -13,6 +13,9 @@ export async function POST(request) {
 
   const { data: salud, error: errorSalud } = await supabaseAdmin.rpc('revisar_salud_pagos')
   if (errorSalud) console.error('revisar_salud_pagos falló:', errorSalud.code)
+  // Contracargos, transferencias y latido del cron (sql/117). Sin esa migración se sigue con lo demás.
+  const { error: errorVigilancia } = await supabaseAdmin.rpc('revisar_vigilancia')
+  if (errorVigilancia) console.error('revisar_vigilancia falló:', errorVigilancia.code)
 
   const { data: alertas, error } = await supabaseAdmin.rpc('alertas_por_avisar')
   if (error) {

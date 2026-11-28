@@ -26,7 +26,7 @@ trabajo se actualiza este archivo (corto) y, si hay detalle que conservar, se a�
 - `feat/redsys-devoluciones` (`520937e`) y `fix/eliminar-cuenta-pagos` (`8326321`) se borraron el 27/11: su contenido
   está en `feat/pagos-mejoras`.
 - `main` tiene un commit de fusión que no está en la rama; la mezcla de prueba no daba conflictos (27/11).
-- Último SQL del repositorio: **116**. El titular pega los SQL a mano en el SQL Editor.
+- Último SQL del repositorio: **117**. El titular pega los SQL a mano en el SQL Editor.
 - Reglas firmes: no activar cobros reales; solo Redsys (CaixaBank); commit y push solo cuando se pidan.
 
 ## 2. SQL por entorno
@@ -47,6 +47,7 @@ trabajo se actualiza este archivo (corto) y, si hay detalle que conservar, se a�
 | `114` | Liquidaciones | Falta | Aplicado (28/11) |
 | `115` | Fichero SEPA y marcado en bloque | Falta | Aplicado (28/11) |
 | `116` | Facturas en borrador | Falta | Aplicado (28/11) |
+| `117` | Contracargos y vigilancia | Falta | Aplicado (28/11) |
 
 Antes de reejecutar un SQL antiguo, mirar su cabecera y `CLAUDE.md`: varios envuelven o sustituyen funciones de otros
 (no reejecutar `096`/`103`/`105` después de `107`; `110` después de `112`; `088`/`109` sin volver a ejecutar `113`).
@@ -97,7 +98,7 @@ Guía: PDF del plan del 27/11 (`docs/RuleaFit_Plan_Mejoras_Pagos_Agrupados_27-11
    organizador y devolución. El aviso «Ninguna sesión próxima admite este bono» se muestra también
    dentro de los 14 días (cambiado el 28/11, sin volver a ver en pantalla). Sin ver en pantalla: bloqueo, retención, anular bonos, autocancelación, zonas especiales y
    borrado de cuenta (comprobados solo en la base).
-3. Liquidaciones. **Hecho en local** (28/11): `sql/114` y `/admin/liquidaciones`. Falta aplicar el SQL en pruebas,
+3. Liquidaciones. **Hecho en local** (28/11): `sql/114` y `/admin/liquidaciones`. Falta
    subir y probar en Preview. Por decidir: bonos aún devolubles (hoy no se pagan), saldos negativos y festivos.
 4. Fichero SEPA. **Hecho en local** (28/11): `sql/115`, descarga, marcado en bloque y cierre automático con correo
    (cron sin programar). Falta aplicar 114 y 115, variables `SEPA_ORDENANTE_*` en Preview, subir, probar y validar el
@@ -111,7 +112,9 @@ bloque, aviso y «Mis ingresos», borradores de comisión y Pro. Para repetirlo:
 y emisión (bloqueada hasta el asesor).
 6. Textos legales. **Borradores actualizados** (28/11) en `legal/borradores/`, sin publicar, con 24 preguntas en
    `preguntas-asesor.md`. Falta la revisión del gestor y del jurista.
-7. Alertas y contracargos (programar crons; vigilancia externa).
+7. Alertas y contracargos. **Hecho** (28/11): `sql/117`, `/admin/contracargos` y
+   `/api/health/procesos`. SQL aplicado en pruebas; falta probar en Preview. Los crons de producción y el
+   monitor externo se activan al desplegar (checklist de las reglas).
 
 Lo que dependa del asesor (IVA, IRPF, formato de facturas) se deja configurable y marcado.
 
